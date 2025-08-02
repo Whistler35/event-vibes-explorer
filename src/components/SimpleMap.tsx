@@ -83,31 +83,43 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
   return (
     <div 
       style={{ height }} 
-      className="w-full rounded-lg overflow-hidden border border-evendle-gray relative bg-gray-200 cursor-pointer"
+      className="w-full rounded-lg overflow-hidden border border-evendle-gray relative bg-gray-100 cursor-pointer"
       onClick={handleMapClick}
     >
-      {/* Map Background - lighter for better visibility */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-300 to-gray-400">
-        {/* Street pattern to simulate map */}
-        <div className="absolute inset-0">
-          {/* Horizontal streets */}
-          <div className="absolute w-full h-0.5 bg-gray-600 top-1/4"></div>
-          <div className="absolute w-full h-0.5 bg-gray-600 top-1/2"></div>
-          <div className="absolute w-full h-0.5 bg-gray-600 top-3/4"></div>
-          {/* Vertical streets */}
-          <div className="absolute h-full w-0.5 bg-gray-600 left-1/4"></div>
-          <div className="absolute h-full w-0.5 bg-gray-600 left-1/2"></div>
-          <div className="absolute h-full w-0.5 bg-gray-600 left-3/4"></div>
-          
-          {/* Grid pattern */}
-          <div className="h-full w-full opacity-30" style={{
-            backgroundImage: `
-              linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px)
-            `,
-            backgroundSize: '40px 40px'
-          }}></div>
-        </div>
+      {/* Map Background - realistic city layout */}
+      <div className="absolute inset-0 bg-gradient-to-br from-green-100 to-blue-50">
+        
+        {/* River Spree */}
+        <div className="absolute top-1/3 left-0 w-full h-8 bg-blue-300 transform rotate-12 opacity-60"></div>
+        <div className="absolute top-1/2 left-1/4 w-3/4 h-6 bg-blue-300 transform -rotate-6 opacity-60"></div>
+        
+        {/* Parks (green areas) */}
+        <div className="absolute top-1/4 left-1/4 w-20 h-16 bg-green-300 rounded-lg opacity-40"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-24 h-20 bg-green-300 rounded-lg opacity-40"></div>
+        <div className="absolute top-3/4 left-1/6 w-16 h-12 bg-green-300 rounded-lg opacity-40"></div>
+        
+        {/* Main streets (thick) */}
+        <div className="absolute w-full h-1 bg-gray-600 top-1/4"></div>
+        <div className="absolute w-full h-1 bg-gray-600 top-1/2"></div>
+        <div className="absolute w-full h-1 bg-gray-600 top-3/4"></div>
+        <div className="absolute h-full w-1 bg-gray-600 left-1/4"></div>
+        <div className="absolute h-full w-1 bg-gray-600 left-1/2"></div>
+        <div className="absolute h-full w-1 bg-gray-600 left-3/4"></div>
+        
+        {/* Smaller streets */}
+        <div className="absolute w-full h-px bg-gray-500 top-1/8"></div>
+        <div className="absolute w-full h-px bg-gray-500 top-3/8"></div>
+        <div className="absolute w-full h-px bg-gray-500 top-5/8"></div>
+        <div className="absolute w-full h-px bg-gray-500 top-7/8"></div>
+        <div className="absolute h-full w-px bg-gray-500 left-1/8"></div>
+        <div className="absolute h-full w-px bg-gray-500 left-3/8"></div>
+        <div className="absolute h-full w-px bg-gray-500 left-5/8"></div>
+        <div className="absolute h-full w-px bg-gray-500 left-7/8"></div>
+        
+        {/* Neighborhoods/Buildings */}
+        <div className="absolute top-10 left-10 w-12 h-8 bg-gray-200 opacity-60 text-xs text-gray-600 flex items-center justify-center font-bold">Mitte</div>
+        <div className="absolute top-16 right-16 w-16 h-6 bg-gray-200 opacity-60 text-xs text-gray-600 flex items-center justify-center font-bold">Kreuzberg</div>
+        <div className="absolute bottom-20 left-20 w-14 h-6 bg-gray-200 opacity-60 text-xs text-gray-600 flex items-center justify-center font-bold">Neukölln</div>
         
         {/* Berlin label */}
         <div className="absolute top-4 left-4 text-white font-bold text-lg bg-evendle-orange px-3 py-1 rounded shadow-lg">
