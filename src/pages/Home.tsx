@@ -60,21 +60,7 @@ const Home = () => {
 
         {/* Hero Section */}
         <div className="text-center space-y-6">
-          <div className="space-y-2">
-            <h1 className="text-white text-4xl font-bold">your city</h1>
-            <h2 className="text-white text-4xl font-bold">your events</h2>
-          </div>
-
-          {/* Hero Image */}
-          <div className="relative mx-auto max-w-sm">
-            <img 
-              src="/lovable-uploads/f4be3766-dd26-4f5d-b31a-0fc8dc6465d1.png" 
-              alt="Friends at event"
-              className="w-full rounded-2xl"
-            />
-          </div>
-
-          {/* City Search */}
+          {/* City Search moved to top */}
           <div className="relative">
             <div className="bg-evendle-search-bg rounded-full px-6 py-4 flex items-center justify-between">
               <span className="text-white text-lg">{selectedCity}</span>
@@ -93,6 +79,17 @@ const Home = () => {
                 </button>
               ))}
             </div>
+          </div>
+
+          <h2 className="text-white text-4xl font-bold">your events</h2>
+
+          {/* Hero Image */}
+          <div className="relative mx-auto max-w-sm">
+            <img 
+              src="/lovable-uploads/f4be3766-dd26-4f5d-b31a-0fc8dc6465d1.png" 
+              alt="Friends at event"
+              className="w-full rounded-2xl"
+            />
           </div>
         </div>
       </div>
