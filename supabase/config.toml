@@ -1,1 +1,4 @@
 project_id = "wrqckgrnshklyaiilprz"
+
+[functions.mapbox-token]
+verify_jwt = false
