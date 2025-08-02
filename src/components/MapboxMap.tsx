@@ -59,7 +59,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     const initMap = async () => {
       try {
         // Fetch Mapbox token from Supabase Edge Function
-        const response = await fetch('/api/mapbox-token');
+        const response = await fetch('https://19807b48-40c0-4e94-9e68-b82e61ddb804.supabase.co/functions/v1/mapbox-token');
         const data = await response.json();
         
         if (!data.token) {
