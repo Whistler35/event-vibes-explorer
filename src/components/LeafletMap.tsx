@@ -1,7 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
-import { LatLngExpression, Icon, divIcon } from 'leaflet';
+import { LatLngExpression, divIcon } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+
+// Fix Leaflet's default icon path issues
+import L from 'leaflet';
+
+// Fix for Leaflet default markers
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
 
 // Custom orange marker using divIcon to avoid import issues
 const EventIcon = divIcon({
