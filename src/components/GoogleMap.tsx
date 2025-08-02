@@ -57,11 +57,16 @@ const GoogleMapComponent: React.FC<GoogleMapProps> = ({
   useEffect(() => {
     const initMap = async () => {
       try {
-        // For now, using a demo key - replace with Supabase secret
-        const apiKey = 'YOUR_API_KEY_HERE'; // This will be replaced with Supabase secret
+        // Fetch API key from Supabase Edge Function
+        const response = await fetch('/api/google-maps-key');
+        const data = await response.json();
+        
+        if (!data.apiKey) {
+          throw new Error('Google Maps API Key nicht gefunden in Supabase Secrets');
+        }
         
         const loader = new Loader({
-          apiKey: apiKey,
+          apiKey: data.apiKey,
           version: 'weekly',
           libraries: ['places']
         });
