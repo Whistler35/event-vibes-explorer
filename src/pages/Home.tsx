@@ -80,7 +80,12 @@ const Home = () => {
           {/* City Selection */}
           <div className="max-w-md mx-auto">
             <div className="relative">
-              <Select value={selectedCity} onValueChange={setSelectedCity}>
+              <Select value={selectedCity} onValueChange={(value) => {
+                setSelectedCity(value);
+                if (value) {
+                  navigate(`/city/${value}`);
+                }
+              }}>
                 <SelectTrigger className="bg-evendle-light-gray/30 border-none rounded-full h-14 text-white text-center text-lg">
                   <SelectValue placeholder="your city" className="text-white/70" />
                 </SelectTrigger>

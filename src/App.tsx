@@ -11,6 +11,7 @@ import Nearby from "./pages/Nearby";
 import Messenger from "./pages/Messenger";
 import Chat from "./pages/Chat";
 import Profile from "./pages/Profile";
+import CityEvents from "./pages/CityEvents";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/events" element={<Events />} />
+          <Route path="/city/:city" element={<CityEvents />} />
           <Route path="/event/:id" element={<EventDetail />} />
           <Route path="/event/:id/hangouts" element={<EventHangouts />} />
           <Route path="/nearby" element={<Nearby />} />
