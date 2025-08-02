@@ -1,34 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
-import { LatLngExpression, Icon } from 'leaflet';
+import { LatLngExpression, Icon, divIcon } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// Fix for default markers in React-Leaflet
-import iconUrl from 'leaflet/dist/images/marker-icon.png';
-import iconShadowUrl from 'leaflet/dist/images/marker-shadow.png';
-import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
-
-const DefaultIcon = new Icon({
-  iconUrl,
-  iconRetinaUrl,
-  shadowUrl: iconShadowUrl,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-});
-
-// Custom orange marker for events
-const EventIcon = new Icon({
-  iconUrl: 'data:image/svg+xml;base64,' + btoa(`
-    <svg width="25" height="41" viewBox="0 0 25 41" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12.5 0C5.6 0 0 5.6 0 12.5C0 19.9 12.5 41 12.5 41S25 19.9 25 12.5C25 5.6 19.4 0 12.5 0Z" fill="#ff5722"/>
-      <circle cx="12.5" cy="12.5" r="6" fill="white"/>
-    </svg>
-  `),
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
+// Custom orange marker using divIcon to avoid import issues
+const EventIcon = divIcon({
+  className: 'custom-marker',
+  html: `<div style="
+    background-color: #ff5722;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  "></div>`,
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
 });
 
 interface MapEvent {
@@ -121,7 +108,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
-        {onCreateEvent && <MapEventHandler onCreateEvent={handleCreateEvent} />}
+        {onCreateEvent ? <MapEventHandler onCreateEvent={handleCreateEvent} /> : null}
         
         {allEvents.map((event) => (
           <Marker
