@@ -65,14 +65,19 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
   };
 
   const getMarkerPosition = (eventPos: [number, number]) => {
-    // Convert lat/lng to pixel positions (mock implementation)
+    // Convert lat/lng to pixel positions - simplified but visible
     const centerLat = center[0];
     const centerLng = center[1];
     
-    const x = 50 + ((eventPos[1] - centerLng) * 10000) + '%';
-    const y = 50 + ((centerLat - eventPos[0]) * 10000) + '%';
+    // Scale the differences to fit within the map (much smaller multiplier)
+    const xOffset = (eventPos[1] - centerLng) * 2000; // Reduced from 10000
+    const yOffset = (centerLat - eventPos[0]) * 2000; // Reduced from 10000
     
-    return { left: x, top: y };
+    // Clamp to stay within map bounds
+    const x = Math.min(Math.max(50 + xOffset, 10), 90);
+    const y = Math.min(Math.max(50 + yOffset, 10), 90);
+    
+    return { left: x + '%', top: y + '%' };
   };
 
   return (
