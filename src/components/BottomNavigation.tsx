@@ -6,8 +6,8 @@ const BottomNavigation = () => {
   const location = useLocation();
 
   const navItems = [
+    { id: "events", label: "Events", icon: Calendar, path: "/" },
     { id: "nearby", label: "near by", icon: MapPin, path: "/nearby" },
-    { id: "events", label: "Events", icon: Calendar, path: "/events" },
     { id: "home", label: "", icon: Plus, path: "/", isHome: true },
     { id: "messenger", label: "messenger", icon: MessageCircle, path: "/messenger" },
     { id: "profile", label: "profile", icon: User, path: "/profile" },
@@ -17,7 +17,7 @@ const BottomNavigation = () => {
     <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
       <div className="flex justify-around items-center py-3">
         {navItems.map((item) => {
-          const isActive = location.pathname === item.path || (item.path === "/events" && location.pathname === "/");
+          const isActive = location.pathname === item.path;
           const Icon = item.icon;
           
           return (

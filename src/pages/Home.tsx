@@ -95,45 +95,7 @@ const Home = () => {
             </div>
           </div>
         </div>
-
-        {/* Top Events Section */}
-        <div className="space-y-4">
-          <h3 className="text-white text-2xl font-bold">top events this week</h3>
-          
-          {/* Horizontal Scrollable Cards */}
-          <div className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide">
-            {topEvents.map((event) => (
-              <div key={event.id} className="flex-shrink-0 w-72">
-                <EventCard
-                  title={event.title}
-                  image={event.image}
-                  date={event.date}
-                  time={event.time}
-                  location={event.location}
-                  category={event.category}
-                  onClick={() => handleEventClick(event.id)}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
-
-      <style>{`
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        .line-clamp-2 {
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-      `}</style>
     </Layout>
   );
 };
