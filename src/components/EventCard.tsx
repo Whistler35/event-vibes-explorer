@@ -17,7 +17,7 @@ const EventCard = ({ title, image, date, time, location, category, description, 
     >
       <div className="aspect-video bg-gradient-to-br from-evendle-orange/20 to-evendle-dark-card overflow-hidden">
         <img 
-          src={image} 
+          src="https://images.unsplash.com/photo-1500375592092-40eb2168fd21" 
           alt={title}
           className="w-full h-full object-cover"
         />
