@@ -78,35 +78,45 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
   return (
     <div 
       style={{ height }} 
-      className="w-full rounded-lg overflow-hidden border border-evendle-gray relative bg-gradient-to-br from-evendle-dark-card to-evendle-gray cursor-pointer"
+      className="w-full rounded-lg overflow-hidden border border-evendle-gray relative bg-gray-200 cursor-pointer"
       onClick={handleMapClick}
     >
-      {/* Map Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900">
-        {/* Grid pattern to simulate map */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="h-full w-full" style={{
+      {/* Map Background - lighter for better visibility */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-300 to-gray-400">
+        {/* Street pattern to simulate map */}
+        <div className="absolute inset-0">
+          {/* Horizontal streets */}
+          <div className="absolute w-full h-0.5 bg-gray-600 top-1/4"></div>
+          <div className="absolute w-full h-0.5 bg-gray-600 top-1/2"></div>
+          <div className="absolute w-full h-0.5 bg-gray-600 top-3/4"></div>
+          {/* Vertical streets */}
+          <div className="absolute h-full w-0.5 bg-gray-600 left-1/4"></div>
+          <div className="absolute h-full w-0.5 bg-gray-600 left-1/2"></div>
+          <div className="absolute h-full w-0.5 bg-gray-600 left-3/4"></div>
+          
+          {/* Grid pattern */}
+          <div className="h-full w-full opacity-30" style={{
             backgroundImage: `
-              linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+              linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px)
             `,
-            backgroundSize: '20px 20px'
+            backgroundSize: '40px 40px'
           }}></div>
         </div>
         
         {/* Berlin label */}
-        <div className="absolute top-4 left-4 text-white font-bold text-lg bg-black/50 px-3 py-1 rounded">
-          Berlin
+        <div className="absolute top-4 left-4 text-white font-bold text-lg bg-evendle-orange px-3 py-1 rounded shadow-lg">
+          📍 Berlin
         </div>
         
         {/* Zoom controls */}
         {showControls && (
           <div className="absolute top-4 right-4 flex flex-col space-y-2">
-            <button className="bg-white/20 text-white w-8 h-8 rounded flex items-center justify-center font-bold hover:bg-white/30">
+            <button className="bg-evendle-orange text-white w-10 h-10 rounded-lg flex items-center justify-center font-bold hover:bg-evendle-orange-hover shadow-lg text-lg">
               +
             </button>
-            <button className="bg-white/20 text-white w-8 h-8 rounded flex items-center justify-center font-bold hover:bg-white/30">
-              -
+            <button className="bg-evendle-orange text-white w-10 h-10 rounded-lg flex items-center justify-center font-bold hover:bg-evendle-orange-hover shadow-lg text-lg">
+              −
             </button>
           </div>
         )}
@@ -121,18 +131,21 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
             className="absolute transform -translate-x-1/2 -translate-y-1/2 z-10"
             style={position}
           >
-            {/* Event Marker */}
+            {/* Event Marker - much more visible */}
             <div className="relative group">
-              <div className="w-6 h-6 bg-evendle-orange rounded-full border-2 border-white shadow-lg cursor-pointer hover:scale-110 transition-transform">
-                <div className="w-full h-full rounded-full bg-evendle-orange animate-pulse"></div>
+              <div className="w-8 h-8 bg-evendle-orange rounded-full border-3 border-white shadow-xl cursor-pointer hover:scale-125 transition-all duration-200 flex items-center justify-center">
+                <div className="w-4 h-4 bg-white rounded-full"></div>
               </div>
               
+              {/* Pulsing effect */}
+              <div className="absolute inset-0 w-8 h-8 bg-evendle-orange rounded-full animate-ping opacity-75"></div>
+              
               {/* Tooltip */}
-              <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-20">
+              <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-evendle-dark-card text-white text-sm px-3 py-2 rounded-lg whitespace-nowrap z-20 shadow-xl border border-evendle-gray">
                 <div className="font-bold">{event.title}</div>
-                <div className="text-gray-300">{event.category}</div>
+                <div className="text-evendle-light-gray">{event.category}</div>
                 {/* Arrow */}
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-black/80"></div>
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-evendle-dark-card"></div>
               </div>
             </div>
           </div>
@@ -140,7 +153,7 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
       })}
 
       {/* Instructions */}
-      <div className="absolute bottom-4 left-4 text-white/70 text-sm bg-black/50 px-3 py-2 rounded">
+      <div className="absolute bottom-4 left-4 text-evendle-dark-card text-sm bg-white/90 px-3 py-2 rounded-lg shadow-lg border">
         🗺️ Klicken Sie auf die Karte, um ein Event zu erstellen
       </div>
     </div>
