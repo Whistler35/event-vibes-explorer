@@ -3,10 +3,11 @@ import { Search, ChevronRight } from "lucide-react";
 import Layout from "@/components/Layout";
 import EventCard from "@/components/EventCard";
 import { useNavigate } from "react-router-dom";
+import { Input } from "@/components/ui/input";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 const Home = () => {
-  const [selectedCity, setSelectedCity] = useState("your city");
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
-  const cities = ["Vienna", "Berlin"];
   const topEvents = [{
     id: 1,
     title: "NAMASTE FOR ALL",
@@ -40,26 +41,47 @@ const Home = () => {
   };
   return <Layout>
       <div className="p-4 space-y-6">
-        {/* Header */}
-        
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <Input
+            type="text"
+            placeholder="Your City"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 bg-card border-input rounded-2xl h-12"
+          />
+        </div>
 
         {/* Hero Section */}
         <div className="text-center space-y-6">
-          {/* City Search moved to top */}
-          <div className="relative">
-            
-            
-            {/* City Selection Dropdown */}
-            <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-2xl shadow-card z-10">
-              {cities.map(city => {})}
-            </div>
-          </div>
-
-          
-
-          {/* Hero Image */}
+          {/* Main Hero Image */}
           <div className="relative mx-auto max-w-sm">
             <img src="/lovable-uploads/f4be3766-dd26-4f5d-b31a-0fc8dc6465d1.png" alt="Friends at event" className="w-full rounded-2xl" />
+          </div>
+
+          {/* Top Events Carousel */}
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold text-foreground">Top Events</h2>
+            <Carousel className="w-full max-w-sm mx-auto">
+              <CarouselContent>
+                {topEvents.map((event) => (
+                  <CarouselItem key={event.id}>
+                    <EventCard
+                      title={event.title}
+                      image={event.image}
+                      date={event.date}
+                      time={event.time}
+                      location={event.location}
+                      category={event.category}
+                      onClick={() => handleEventClick(event.id)}
+                    />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
           </div>
         </div>
       </div>
