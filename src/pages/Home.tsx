@@ -44,46 +44,11 @@ const Home = () => {
         {/* Search Bar */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input
-            type="text"
-            placeholder="Your City"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-card border-input rounded-2xl h-12"
-          />
+          <Input type="text" placeholder="Your City" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 bg-card border-input rounded-2xl h-12" />
         </div>
 
         {/* Hero Section */}
-        <div className="text-center space-y-6">
-          {/* Main Hero Image */}
-          <div className="relative mx-auto max-w-sm">
-            <img src="/lovable-uploads/f4be3766-dd26-4f5d-b31a-0fc8dc6465d1.png" alt="Friends at event" className="w-full rounded-2xl" />
-          </div>
-
-          {/* Top Events Carousel */}
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-foreground">Top Events</h2>
-            <Carousel className="w-full max-w-sm mx-auto">
-              <CarouselContent>
-                {topEvents.map((event) => (
-                  <CarouselItem key={event.id}>
-                    <EventCard
-                      title={event.title}
-                      image={event.image}
-                      date={event.date}
-                      time={event.time}
-                      location={event.location}
-                      category={event.category}
-                      onClick={() => handleEventClick(event.id)}
-                    />
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <CarouselPrevious />
-              <CarouselNext />
-            </Carousel>
-          </div>
-        </div>
+        
       </div>
     </Layout>;
 };
