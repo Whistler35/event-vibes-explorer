@@ -1,0 +1,45 @@
+import { useNavigate, useLocation } from "react-router-dom";
+import { MapPin, Calendar, MessageCircle, User } from "lucide-react";
+
+const BottomNavigation = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const navItems = [
+    { id: "nearby", label: "near by", icon: MapPin, path: "/nearby" },
+    { id: "events", label: "Events", icon: Calendar, path: "/events" },
+    { id: "messenger", label: "messenger", icon: MessageCircle, path: "/messenger" },
+    { id: "profile", label: "profile", icon: User, path: "/profile" },
+  ];
+
+  return (
+    <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
+      <div className="flex justify-around items-center py-3">
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.path || (item.path === "/events" && location.pathname === "/");
+          const Icon = item.icon;
+          
+          return (
+            <button
+              key={item.id}
+              onClick={() => navigate(item.path)}
+              className="flex flex-col items-center space-y-1 transition-colors duration-200"
+            >
+              <div className={`p-3 rounded-full ${isActive ? 'bg-evendle-orange' : 'bg-transparent'}`}>
+                <Icon 
+                  size={24} 
+                  className={isActive ? 'text-white' : 'text-evendle-gray'} 
+                />
+              </div>
+              <span className={`text-xs ${isActive ? 'text-evendle-orange' : 'text-evendle-gray'}`}>
+                {item.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+export default BottomNavigation;
