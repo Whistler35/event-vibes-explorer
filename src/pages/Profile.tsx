@@ -36,7 +36,7 @@ const Profile = () => {
           {/* Avatar */}
           <div className="w-40 h-40 mx-auto rounded-full overflow-hidden bg-gradient-to-br from-evendle-orange/20 to-evendle-dark-card">
             <img 
-              src={user.avatar} 
+              src="https://images.unsplash.com/photo-1494790108755-2616b9b36f21?w=400&h=400&fit=crop&crop=face" 
               alt={user.name}
               className="w-full h-full object-cover"
             />
