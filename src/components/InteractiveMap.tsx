@@ -1,14 +1,13 @@
 import React from 'react';
-import { LatLngExpression } from 'leaflet';
-import LeafletMap from './LeafletMap';
+import SimpleMap from './SimpleMap';
 
 interface InteractiveMapProps {
-  onCreateEvent?: (position: LatLngExpression) => void;
+  onCreateEvent?: (position: [number, number]) => void;
 }
 
 const InteractiveMap: React.FC<InteractiveMapProps> = ({ onCreateEvent }) => {
   return (
-    <LeafletMap
+    <SimpleMap
       center={[52.520008, 13.404954]} // Berlin
       zoom={13}
       height="500px"
