@@ -66,7 +66,16 @@ const Home = () => {
             </h2>
           </div>
 
-          {/* Hero Image - Removed */}
+          {/* Hero Image */}
+          <div className="flex justify-center">
+            <div className="w-80 h-96 rounded-3xl overflow-hidden">
+              <img 
+                src="/lovable-uploads/e8a01b75-41cf-4188-95f0-b5c0bc64ebab.png" 
+                alt="Friends at event"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
 
           {/* Search Bar */}
           <div className="max-w-md mx-auto">
