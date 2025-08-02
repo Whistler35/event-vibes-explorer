@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { MapPin, Calendar, MessageCircle, User } from "lucide-react";
+import { MapPin, Calendar, MessageCircle, User, Plus } from "lucide-react";
 
 const BottomNavigation = () => {
   const navigate = useNavigate();
@@ -8,6 +8,7 @@ const BottomNavigation = () => {
   const navItems = [
     { id: "nearby", label: "near by", icon: MapPin, path: "/nearby" },
     { id: "events", label: "Events", icon: Calendar, path: "/events" },
+    { id: "home", label: "", icon: Plus, path: "/", isHome: true },
     { id: "messenger", label: "messenger", icon: MessageCircle, path: "/messenger" },
     { id: "profile", label: "profile", icon: User, path: "/profile" },
   ];
@@ -25,10 +26,22 @@ const BottomNavigation = () => {
               onClick={() => navigate(item.path)}
               className="flex flex-col items-center space-y-1 transition-colors duration-200"
             >
-              <div className={`p-3 rounded-full ${isActive ? 'bg-evendle-orange' : 'bg-transparent'}`}>
+              <div className={`p-3 rounded-full ${
+                item.isHome 
+                  ? 'bg-evendle-orange' 
+                  : isActive 
+                    ? 'bg-evendle-orange' 
+                    : 'bg-transparent'
+              }`}>
                 <Icon 
                   size={24} 
-                  className={isActive ? 'text-white' : 'text-evendle-gray'} 
+                  className={
+                    item.isHome 
+                      ? 'text-white' 
+                      : isActive 
+                        ? 'text-white' 
+                        : 'text-evendle-gray'
+                  } 
                 />
               </div>
               <span className={`text-xs ${isActive ? 'text-evendle-orange' : 'text-evendle-gray'}`}>
