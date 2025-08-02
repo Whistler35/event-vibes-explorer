@@ -129,10 +129,22 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
         {/* Zoom controls */}
         {showControls && (
           <div className="absolute top-4 right-4 flex flex-col space-y-2">
-            <button className="bg-evendle-orange text-white w-10 h-10 rounded-lg flex items-center justify-center font-bold hover:bg-evendle-orange-hover shadow-lg text-lg">
+            <button 
+              className="bg-evendle-orange text-white w-10 h-10 rounded-lg flex items-center justify-center font-bold hover:bg-evendle-orange-hover shadow-lg text-lg"
+              onClick={(e) => {
+                e.stopPropagation();
+                console.log('Zoom in');
+              }}
+            >
               +
             </button>
-            <button className="bg-evendle-orange text-white w-10 h-10 rounded-lg flex items-center justify-center font-bold hover:bg-evendle-orange-hover shadow-lg text-lg">
+            <button 
+              className="bg-evendle-orange text-white w-10 h-10 rounded-lg flex items-center justify-center font-bold hover:bg-evendle-orange-hover shadow-lg text-lg"
+              onClick={(e) => {
+                e.stopPropagation();
+                console.log('Zoom out');
+              }}
+            >
               −
             </button>
           </div>
