@@ -25,6 +25,7 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
   showControls = true
 }) => {
   const [mapEvents, setMapEvents] = useState<MapEvent[]>(events);
+  const [zoomLevel, setZoomLevel] = useState(zoom || 13);
 
   // Sample events for Berlin
   const defaultEvents: MapEvent[] = [
@@ -80,14 +81,29 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
     return { left: x + '%', top: y + '%' };
   };
 
+  const handleZoomIn = () => {
+    setZoomLevel(prev => Math.min(prev + 1, 18)); // Max zoom 18
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel(prev => Math.max(prev - 1, 8)); // Min zoom 8
+  };
+
+  // Calculate scale based on zoom level
+  const scale = Math.pow(1.2, zoomLevel - 13); // 13 is base zoom
+  const markerSize = Math.max(6, Math.min(12, 8 * (zoomLevel / 13))); // Dynamic marker size
+
   return (
     <div 
       style={{ height }} 
       className="w-full rounded-lg overflow-hidden border border-evendle-gray relative bg-gray-100 cursor-pointer"
       onClick={handleMapClick}
     >
-      {/* Map Background - realistic city layout */}
-      <div className="absolute inset-0 bg-gradient-to-br from-green-100 to-blue-50">
+      {/* Map Background - realistic city layout with zoom */}
+      <div 
+        className="absolute inset-0 bg-gradient-to-br from-green-100 to-blue-50 transition-transform duration-300 origin-center"
+        style={{ transform: `scale(${scale})` }}
+      >
         
         {/* River Spree */}
         <div className="absolute top-1/3 left-0 w-full h-8 bg-blue-300 transform rotate-12 opacity-60"></div>
@@ -98,58 +114,68 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
         <div className="absolute bottom-1/4 right-1/4 w-24 h-20 bg-green-300 rounded-lg opacity-40"></div>
         <div className="absolute top-3/4 left-1/6 w-16 h-12 bg-green-300 rounded-lg opacity-40"></div>
         
-        {/* Main streets (thick) */}
-        <div className="absolute w-full h-1 bg-gray-600 top-1/4"></div>
-        <div className="absolute w-full h-1 bg-gray-600 top-1/2"></div>
-        <div className="absolute w-full h-1 bg-gray-600 top-3/4"></div>
-        <div className="absolute h-full w-1 bg-gray-600 left-1/4"></div>
-        <div className="absolute h-full w-1 bg-gray-600 left-1/2"></div>
-        <div className="absolute h-full w-1 bg-gray-600 left-3/4"></div>
+        {/* Main streets (thickness based on zoom) */}
+        <div className="absolute w-full bg-gray-600 top-1/4 transition-all duration-300" style={{ height: `${Math.max(1, zoomLevel / 8)}px` }}></div>
+        <div className="absolute w-full bg-gray-600 top-1/2 transition-all duration-300" style={{ height: `${Math.max(1, zoomLevel / 8)}px` }}></div>
+        <div className="absolute w-full bg-gray-600 top-3/4 transition-all duration-300" style={{ height: `${Math.max(1, zoomLevel / 8)}px` }}></div>
+        <div className="absolute h-full bg-gray-600 left-1/4 transition-all duration-300" style={{ width: `${Math.max(1, zoomLevel / 8)}px` }}></div>
+        <div className="absolute h-full bg-gray-600 left-1/2 transition-all duration-300" style={{ width: `${Math.max(1, zoomLevel / 8)}px` }}></div>
+        <div className="absolute h-full bg-gray-600 left-3/4 transition-all duration-300" style={{ width: `${Math.max(1, zoomLevel / 8)}px` }}></div>
         
-        {/* Smaller streets */}
-        <div className="absolute w-full h-px bg-gray-500 top-1/8"></div>
-        <div className="absolute w-full h-px bg-gray-500 top-3/8"></div>
-        <div className="absolute w-full h-px bg-gray-500 top-5/8"></div>
-        <div className="absolute w-full h-px bg-gray-500 top-7/8"></div>
-        <div className="absolute h-full w-px bg-gray-500 left-1/8"></div>
-        <div className="absolute h-full w-px bg-gray-500 left-3/8"></div>
-        <div className="absolute h-full w-px bg-gray-500 left-5/8"></div>
-        <div className="absolute h-full w-px bg-gray-500 left-7/8"></div>
-        
-        {/* Neighborhoods/Buildings */}
-        <div className="absolute top-10 left-10 w-12 h-8 bg-gray-200 opacity-60 text-xs text-gray-600 flex items-center justify-center font-bold">Mitte</div>
-        <div className="absolute top-16 right-16 w-16 h-6 bg-gray-200 opacity-60 text-xs text-gray-600 flex items-center justify-center font-bold">Kreuzberg</div>
-        <div className="absolute bottom-20 left-20 w-14 h-6 bg-gray-200 opacity-60 text-xs text-gray-600 flex items-center justify-center font-bold">Neukölln</div>
-        
-        {/* Berlin label */}
-        <div className="absolute top-4 left-4 text-white font-bold text-lg bg-evendle-orange px-3 py-1 rounded shadow-lg">
-          📍 Berlin
-        </div>
-        
-        {/* Zoom controls */}
-        {showControls && (
-          <div className="absolute top-4 right-4 flex flex-col space-y-2">
-            <button 
-              className="bg-evendle-orange text-white w-10 h-10 rounded-lg flex items-center justify-center font-bold hover:bg-evendle-orange-hover shadow-lg text-lg"
-              onClick={(e) => {
-                e.stopPropagation();
-                console.log('Zoom in');
-              }}
-            >
-              +
-            </button>
-            <button 
-              className="bg-evendle-orange text-white w-10 h-10 rounded-lg flex items-center justify-center font-bold hover:bg-evendle-orange-hover shadow-lg text-lg"
-              onClick={(e) => {
-                e.stopPropagation();
-                console.log('Zoom out');
-              }}
-            >
-              −
-            </button>
-          </div>
+        {/* Smaller streets - only visible at higher zoom */}
+        {zoomLevel > 11 && (
+          <>
+            <div className="absolute w-full h-px bg-gray-500 top-1/8 opacity-60"></div>
+            <div className="absolute w-full h-px bg-gray-500 top-3/8 opacity-60"></div>
+            <div className="absolute w-full h-px bg-gray-500 top-5/8 opacity-60"></div>
+            <div className="absolute w-full h-px bg-gray-500 top-7/8 opacity-60"></div>
+            <div className="absolute h-full w-px bg-gray-500 left-1/8 opacity-60"></div>
+            <div className="absolute h-full w-px bg-gray-500 left-3/8 opacity-60"></div>
+            <div className="absolute h-full w-px bg-gray-500 left-5/8 opacity-60"></div>
+            <div className="absolute h-full w-px bg-gray-500 left-7/8 opacity-60"></div>
+          </>
         )}
+        
+        {/* Neighborhoods/Buildings - only visible at higher zoom */}
+        {zoomLevel > 12 && (
+          <>
+            <div className="absolute top-10 left-10 w-12 h-8 bg-gray-200 opacity-60 text-xs text-gray-600 flex items-center justify-center font-bold">Mitte</div>
+            <div className="absolute top-16 right-16 w-16 h-6 bg-gray-200 opacity-60 text-xs text-gray-600 flex items-center justify-center font-bold">Kreuzberg</div>
+            <div className="absolute bottom-20 left-20 w-14 h-6 bg-gray-200 opacity-60 text-xs text-gray-600 flex items-center justify-center font-bold">Neukölln</div>
+          </>
+        )}
+        
+        {/* Berlin label with zoom level indicator */}
+        <div className="absolute top-4 left-4 text-white font-bold text-lg bg-evendle-orange px-3 py-1 rounded shadow-lg">
+          📍 Berlin (Zoom: {zoomLevel})
+        </div>
       </div>
+        
+      {/* Zoom controls */}
+      {showControls && (
+        <div className="absolute top-4 right-4 flex flex-col space-y-2">
+          <button 
+            className="bg-evendle-orange text-white w-10 h-10 rounded-lg flex items-center justify-center font-bold hover:bg-evendle-orange-hover shadow-lg text-lg disabled:opacity-50"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleZoomIn();
+            }}
+            disabled={zoomLevel >= 18}
+          >
+            +
+          </button>
+          <button 
+            className="bg-evendle-orange text-white w-10 h-10 rounded-lg flex items-center justify-center font-bold hover:bg-evendle-orange-hover shadow-lg text-lg disabled:opacity-50"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleZoomOut();
+            }}
+            disabled={zoomLevel <= 8}
+          >
+            −
+          </button>
+        </div>
+      )}
 
       {/* Event Markers */}
       {allEvents.map((event) => {
@@ -160,22 +186,42 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
             className="absolute transform -translate-x-1/2 -translate-y-1/2 z-10"
             style={position}
           >
-            {/* Event Marker - much more visible */}
+            {/* Event Marker - size based on zoom */}
             <div className="relative group">
-              <div className="w-8 h-8 bg-evendle-orange rounded-full border-3 border-white shadow-xl cursor-pointer hover:scale-125 transition-all duration-200 flex items-center justify-center">
-                <div className="w-4 h-4 bg-white rounded-full"></div>
+              <div 
+                className="bg-evendle-orange rounded-full border-3 border-white shadow-xl cursor-pointer hover:scale-125 transition-all duration-200 flex items-center justify-center"
+                style={{ 
+                  width: `${markerSize}px`, 
+                  height: `${markerSize}px` 
+                }}
+              >
+                <div 
+                  className="bg-white rounded-full"
+                  style={{ 
+                    width: `${markerSize / 2}px`, 
+                    height: `${markerSize / 2}px` 
+                  }}
+                ></div>
               </div>
               
-              {/* Pulsing effect */}
-              <div className="absolute inset-0 w-8 h-8 bg-evendle-orange rounded-full animate-ping opacity-75"></div>
+              {/* Pulsing effect - size based on zoom */}
+              <div 
+                className="absolute inset-0 bg-evendle-orange rounded-full animate-ping opacity-75"
+                style={{ 
+                  width: `${markerSize}px`, 
+                  height: `${markerSize}px` 
+                }}
+              ></div>
               
-              {/* Tooltip */}
-              <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-evendle-dark-card text-white text-sm px-3 py-2 rounded-lg whitespace-nowrap z-20 shadow-xl border border-evendle-gray">
-                <div className="font-bold">{event.title}</div>
-                <div className="text-evendle-light-gray">{event.category}</div>
-                {/* Arrow */}
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-evendle-dark-card"></div>
-              </div>
+              {/* Tooltip - only show at higher zoom */}
+              {zoomLevel > 10 && (
+                <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-evendle-dark-card text-white text-sm px-3 py-2 rounded-lg whitespace-nowrap z-20 shadow-xl border border-evendle-gray">
+                  <div className="font-bold">{event.title}</div>
+                  <div className="text-evendle-light-gray">{event.category}</div>
+                  {/* Arrow */}
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-evendle-dark-card"></div>
+                </div>
+              )}
             </div>
           </div>
         );
