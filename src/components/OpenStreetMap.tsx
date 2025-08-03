@@ -107,6 +107,8 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
         maxParticipants: event.max_participants
       })) || [];
 
+      console.log('Loaded events from database:', userEventsFromDb);
+      console.log('Events with images:', userEventsFromDb.filter(e => e.image));
       setUserEvents(userEventsFromDb);
     } catch (error) {
       console.error('Error loading events:', error);
