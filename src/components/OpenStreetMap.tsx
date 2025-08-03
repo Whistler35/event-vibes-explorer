@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import CreateEventDialog from './CreateEventDialog';
 
 // Fix for default markers in Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -9,6 +10,16 @@ L.Icon.Default.mergeOptions({
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
+
+interface UserEvent {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  position: [number, number];
+  image?: string;
+}
 
 interface Place {
   id: string;
@@ -33,6 +44,10 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const [places, setPlaces] = useState<Place[]>([]);
+  const [userEvents, setUserEvents] = useState<UserEvent[]>([]);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedPosition, setSelectedPosition] = useState<[number, number] | null>(null);
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -45,13 +60,30 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
       attribution: '© OpenStreetMap contributors'
     }).addTo(map.current);
 
-    // Add click handler for creating events
-    if (onCreateEvent) {
-      map.current.on('click', (e) => {
+    // Add long press handlers for creating events
+    map.current.on('mousedown', (e) => {
+      const timer = setTimeout(() => {
         const { lat, lng } = e.latlng;
-        onCreateEvent([lat, lng]);
-      });
-    }
+        setSelectedPosition([lat, lng]);
+        setDialogOpen(true);
+      }, 1000); // 1 second long press
+      
+      setLongPressTimer(timer);
+    });
+
+    map.current.on('mouseup', () => {
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        setLongPressTimer(null);
+      }
+    });
+
+    map.current.on('mousemove', () => {
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        setLongPressTimer(null);
+      }
+    });
 
     // Fetch places from Overpass API (OpenStreetMap data)
     const fetchPlaces = async () => {
@@ -136,6 +168,60 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
     });
   }, [places]);
 
+  // Add markers for user events
+  useEffect(() => {
+    if (!map.current || userEvents.length === 0) return;
+
+    userEvents.forEach((event) => {
+      const icon = L.divIcon({
+        html: `
+          <div class="flex items-center justify-center w-12 h-12 bg-blue-500 rounded-full border-2 border-white shadow-lg">
+            ${event.image ? 
+              `<img src="${event.image}" class="w-10 h-10 rounded-full object-cover" />` :
+              `<div class="w-6 h-6 bg-white rounded-full flex items-center justify-center">
+                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+              </div>`
+            }
+          </div>
+        `,
+        className: 'custom-event-marker',
+        iconSize: [48, 48],
+        iconAnchor: [24, 48]
+      });
+
+      const marker = L.marker(event.position, { icon })
+        .addTo(map.current!)
+        .bindPopup(`
+          <div class="text-center min-w-[200px]">
+            ${event.image ? `<img src="${event.image}" class="w-full h-20 object-cover rounded mb-2" />` : ''}
+            <h3 class="font-bold text-sm mb-1">${event.title}</h3>
+            <p class="text-xs text-gray-600 mb-1">${event.description}</p>
+            <p class="text-xs text-blue-600">${event.date} um ${event.time}</p>
+          </div>
+        `);
+    });
+  }, [userEvents]);
+
+  const handleCreateEvent = (eventData: {
+    position: [number, number];
+    title: string;
+    description: string;
+    date: string;
+    time: string;
+    image?: string;
+  }) => {
+    const newEvent: UserEvent = {
+      id: Date.now().toString(),
+      ...eventData
+    };
+    
+    setUserEvents(prev => [...prev, newEvent]);
+    
+    if (onCreateEvent) {
+      onCreateEvent(eventData.position);
+    }
+  };
+
   return (
     <div className="relative w-full" style={{ height }}>
       <div ref={mapContainer} className="w-full h-full rounded-lg" />
@@ -154,9 +240,17 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
       {/* Instructions */}
       <div className="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg z-[1000]">
         <p className="text-sm text-center">
-          Tippe auf die Karte, um ein Event zu erstellen
+          Halte 1 Sekunde gedrückt, um ein Evendle zu erstellen
         </p>
       </div>
+
+      {/* Create Event Dialog */}
+      <CreateEventDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        position={selectedPosition}
+        onCreateEvent={handleCreateEvent}
+      />
     </div>
   );
 };
