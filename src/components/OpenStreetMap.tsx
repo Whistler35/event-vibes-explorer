@@ -71,6 +71,8 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showResults, setShowResults] = useState(false);
+  const [eventFilter, setEventFilter] = useState<'all' | 'today' | 'specific'>('all');
+  const [specificDate, setSpecificDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const { toast } = useToast();
 
   // Load events from database
@@ -362,13 +364,36 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
   //   ...
   // }, [places]);
 
-  // Add event markers - always round image markers
+  // Add event markers - always round image markers with filtering
   useEffect(() => {
     if (!map.current || userEvents.length === 0) return;
 
     const markers: L.Marker[] = [];
+    
+    // Filter events based on selected filter
+    const filteredEvents = userEvents.filter(event => {
+      if (eventFilter === 'all') return true;
+      
+      const eventDateObj = new Date(event.date.split('.').reverse().join('-')); // Convert DD.MM.YYYY to YYYY-MM-DD
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      if (eventFilter === 'today') {
+        eventDateObj.setHours(0, 0, 0, 0);
+        return eventDateObj.getTime() === today.getTime();
+      }
+      
+      if (eventFilter === 'specific') {
+        const selectedDateObj = new Date(specificDate);
+        selectedDateObj.setHours(0, 0, 0, 0);
+        eventDateObj.setHours(0, 0, 0, 0);
+        return eventDateObj.getTime() === selectedDateObj.getTime();
+      }
+      
+      return true;
+    });
 
-    userEvents.forEach((event) => {
+    filteredEvents.forEach((event) => {
       console.log('Processing event:', event.title, 'Image:', event.image);
       
       // Immer nur runde Bild-Marker
@@ -422,7 +447,7 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
     return () => {
       markers.forEach(marker => marker.remove());
     };
-  }, [userEvents]);
+  }, [userEvents, eventFilter, specificDate]);
 
   // Add user location marker
   useEffect(() => {
@@ -524,6 +549,51 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
       {/* Legend - updated without orange points */}
       <div className="absolute top-4 right-4 bg-gray-500/90 backdrop-blur-sm rounded-lg p-3 shadow-lg z-[1000]">
         <h4 className="font-bold text-sm mb-2 text-white">Hold to create evendle</h4>
+        
+        {/* Event Filter Buttons */}
+        <div className="space-y-2 mb-3">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setEventFilter('all')}
+              className={`px-2 py-1 text-xs rounded ${
+                eventFilter === 'all' 
+                  ? 'bg-evendle-orange text-white' 
+                  : 'bg-white/20 text-white hover:bg-white/30'
+              }`}
+            >
+              Alle Events
+            </button>
+            <button
+              onClick={() => setEventFilter('today')}
+              className={`px-2 py-1 text-xs rounded ${
+                eventFilter === 'today' 
+                  ? 'bg-evendle-orange text-white' 
+                  : 'bg-white/20 text-white hover:bg-white/30'
+              }`}
+            >
+              Heute
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="date"
+              value={specificDate}
+              onChange={(e) => setSpecificDate(e.target.value)}
+              className="text-xs px-2 py-1 rounded bg-white/90 text-black"
+            />
+            <button
+              onClick={() => setEventFilter('specific')}
+              className={`px-2 py-1 text-xs rounded ${
+                eventFilter === 'specific' 
+                  ? 'bg-evendle-orange text-white' 
+                  : 'bg-white/20 text-white hover:bg-white/30'
+              }`}
+            >
+              Filter
+            </button>
+          </div>
+        </div>
+        
         <div className="space-y-1 text-xs">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
