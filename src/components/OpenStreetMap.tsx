@@ -187,99 +187,63 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
   //   ...
   // }, [places]);
 
-  // Add event cards for user events with responsive sizing
+  // Add event markers - always round image markers
   useEffect(() => {
     if (!map.current || userEvents.length === 0) return;
 
     const markers: L.Marker[] = [];
 
-    const createEventMarkers = (zoomLevel: number) => {
-      // Clear existing markers
-      markers.forEach(marker => marker.remove());
-      markers.length = 0;
+    userEvents.forEach((event) => {
+      // Immer nur runde Bild-Marker
+      const iconHtml = `
+        <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-lg cursor-pointer hover:scale-110 transition-transform">
+          ${event.image ? 
+            `<img src="${event.image}" class="w-full h-full object-cover" />` :
+            `<div class="w-full h-full bg-gradient-to-br from-evendle-orange/60 to-evendle-orange flex items-center justify-center">
+              <div class="text-white text-lg">📅</div>
+            </div>`
+          }
+        </div>
+      `;
 
-      // Stufenweise Größenanpassung basierend auf Zoom-Level
-      let cardWidth, cardHeight, imageHeight, fontSize, padding, showDescription, showText;
-      
-      if (zoomLevel >= 18) {
-        // Nur bei allerextremstem Reinzoomen - Details
-        cardWidth = 200; cardHeight = 120; imageHeight = 'h-16'; fontSize = 'text-sm'; padding = 'p-3'; showDescription = true; showText = true;
-      } else {
-        // Standard für fast alle Zoom-Level - runde Bild-Marker
-        cardWidth = 50; cardHeight = 50; imageHeight = 'h-12'; fontSize = 'text-xs'; padding = 'p-0'; showDescription = false; showText = false;
-      }
+      const icon = L.divIcon({
+        html: iconHtml,
+        className: 'custom-event-marker',
+        iconSize: [48, 48],
+        iconAnchor: [24, 48]
+      });
 
-      userEvents.forEach((event) => {
-        let iconHtml;
-        
-        if (showText) {
-          // Normale Karten-Ansicht
-          iconHtml = `
-            <div class="bg-black/90 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 ${padding}" style="min-width: ${cardWidth}px; max-width: ${cardWidth + 50}px;">
-              ${event.image ? 
-                `<div class="w-full ${imageHeight} mb-2 rounded-lg overflow-hidden">
-                  <img src="${event.image}" class="w-full h-full object-cover" />
-                </div>` :
-                `<div class="w-full ${imageHeight} mb-2 rounded-lg bg-gradient-to-br from-evendle-orange/30 to-evendle-orange/60 flex items-center justify-center">
-                  <div class="text-white ${zoomLevel >= 11 ? 'text-2xl' : 'text-lg'}">📅</div>
-                </div>`
-              }
-              <h3 class="text-white font-bold ${fontSize} mb-1 line-clamp-1">${event.title}</h3>
-              <p class="text-evendle-orange text-xs mb-1">${event.date} ${event.time}</p>
-              ${showDescription ? `<p class="text-white/80 text-xs line-clamp-2 mb-2">${event.description}</p>` : ''}
-              <div class="flex items-center justify-between">
-                <span class="text-white/60 text-xs">${event.participants.length} dabei</span>
+      const marker = L.marker(event.position, { icon })
+        .addTo(map.current!)
+        .bindPopup(`
+          <div class="min-w-[250px] p-1">
+            ${event.image ? `<img src="${event.image}" class="w-full h-24 object-cover rounded-lg mb-3" />` : ''}
+            <h3 class="text-lg font-bold mb-2">${event.title}</h3>
+            <div class="space-y-2">
+              <p class="text-evendle-orange font-medium">${event.date} um ${event.time}</p>
+              <p class="text-gray-700 text-sm leading-relaxed">${event.description}</p>
+              <div class="flex items-center justify-between pt-2">
+                <span class="text-gray-500 text-sm">${event.participants.length} dabei</span>
                 <button 
                   onclick="joinEvent('${event.id}')" 
-                  class="bg-evendle-orange text-white px-2 py-1 rounded text-xs hover:bg-evendle-orange-hover transition-colors"
+                  class="bg-evendle-orange text-white px-4 py-2 rounded-lg hover:bg-evendle-orange-hover transition-colors font-medium"
                 >
-                  Join
+                  Ich bin dabei! 🙋‍♂️
                 </button>
               </div>
             </div>
-          `;
-        } else {
-          // Nur Bild-Ansicht (runder Marker)
-          iconHtml = `
-            <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-lg">
-              ${event.image ? 
-                `<img src="${event.image}" class="w-full h-full object-cover" />` :
-                `<div class="w-full h-full bg-gradient-to-br from-evendle-orange/60 to-evendle-orange flex items-center justify-center">
-                  <div class="text-white text-lg">📅</div>
-                </div>`
-              }
-            </div>
-          `;
-        }
-
-        const icon = L.divIcon({
-          html: iconHtml,
-          className: 'custom-event-card',
-          iconSize: [cardWidth, cardHeight],
-          iconAnchor: [cardWidth / 2, cardHeight]
+          </div>
+        `, {
+          maxWidth: 280,
+          className: 'event-popup'
         });
 
-        const marker = L.marker(event.position, { icon }).addTo(map.current!);
-        markers.push(marker);
-      });
-    };
-
-    // Initial creation
-    createEventMarkers(map.current.getZoom());
-
-    // Listen for zoom changes
-    const handleZoom = () => {
-      createEventMarkers(map.current!.getZoom());
-    };
-
-    map.current.on('zoomend', handleZoom);
+      markers.push(marker);
+    });
 
     // Cleanup
     return () => {
       markers.forEach(marker => marker.remove());
-      if (map.current) {
-        map.current.off('zoomend', handleZoom);
-      }
     };
   }, [userEvents]);
 
