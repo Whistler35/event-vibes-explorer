@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import CreateEventDialog from './CreateEventDialog';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
 
 // Fix for default markers in Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -10,6 +12,21 @@ L.Icon.Default.mergeOptions({
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
+
+interface DatabaseEvent {
+  id: string;
+  title: string;
+  description?: string;
+  event_date: string;
+  latitude: number;
+  longitude: number;
+  image_url?: string;
+  location_name: string;
+  max_participants?: number;
+  current_participants: number;
+  created_by: string;
+  created_at: string;
+}
 
 interface UserEvent {
   id: string;
@@ -54,6 +71,171 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showResults, setShowResults] = useState(false);
+  const { toast } = useToast();
+
+  // Load events from database
+  const loadEvents = async () => {
+    try {
+      const { data: events, error } = await supabase
+        .from('events')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading events:', error);
+        toast({
+          title: "Fehler",
+          description: "Events konnten nicht geladen werden",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Convert database events to UserEvent format
+      const userEventsFromDb: UserEvent[] = events?.map((event: DatabaseEvent) => ({
+        id: event.id,
+        title: event.title,
+        description: event.description || '',
+        date: new Date(event.event_date).toLocaleDateString('de-DE'),
+        time: new Date(event.event_date).toLocaleTimeString('de-DE', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+        position: [event.latitude, event.longitude] as [number, number],
+        image: event.image_url,
+        participants: [], // TODO: Implement participants system
+        maxParticipants: event.max_participants
+      })) || [];
+
+      setUserEvents(userEventsFromDb);
+    } catch (error) {
+      console.error('Error loading events:', error);
+    }
+  };
+
+  // Upload image to Supabase storage
+  const uploadEventImage = async (file: File): Promise<string | null> => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `events/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('event-images')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        return null;
+      }
+
+      const { data } = supabase.storage
+        .from('event-images')
+        .getPublicUrl(filePath);
+
+      return data.publicUrl;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      return null;
+    }
+  };
+
+  // Save event to database
+  const saveEventToDatabase = async (eventData: {
+    position: [number, number];
+    title: string;
+    description: string;
+    date: string;
+    time: string;
+    image?: string;
+  }) => {
+    try {
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        toast({
+          title: "Anmeldung erforderlich",
+          description: "Du musst angemeldet sein, um Events zu erstellen",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Handle image upload if present
+      let imageUrl = eventData.image;
+      if (eventData.image && eventData.image.startsWith('data:')) {
+        // Convert base64 to blob and upload
+        const response = await fetch(eventData.image);
+        const blob = await response.blob();
+        const file = new File([blob], 'event-image.jpg', { type: 'image/jpeg' });
+        imageUrl = await uploadEventImage(file);
+      }
+
+      // Combine date and time
+      const eventDateTime = new Date(`${eventData.date}T${eventData.time}`);
+
+      // Get location name from reverse geocoding
+      let locationName = 'Unbekannter Ort';
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${eventData.position[0]}&lon=${eventData.position[1]}`
+        );
+        const locationData = await response.json();
+        locationName = locationData.display_name?.split(',')[0] || locationName;
+      } catch (error) {
+        console.log('Could not get location name:', error);
+      }
+
+      const { data: newEvent, error } = await supabase
+        .from('events')
+        .insert({
+          title: eventData.title,
+          description: eventData.description,
+          event_date: eventDateTime.toISOString(),
+          latitude: eventData.position[0],
+          longitude: eventData.position[1],
+          image_url: imageUrl,
+          location_name: locationName,
+          max_participants: 10,
+          current_participants: 0,
+          created_by: user.id
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error saving event:', error);
+        toast({
+          title: "Fehler",
+          description: "Event konnte nicht gespeichert werden",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Event erstellt!",
+        description: "Dein Event wurde erfolgreich gespeichert",
+      });
+
+      // Reload events from database
+      loadEvents();
+
+    } catch (error) {
+      console.error('Error saving event:', error);
+      toast({
+        title: "Fehler",
+        description: "Event konnte nicht gespeichert werden",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Load events on component mount
+  useEffect(() => {
+    loadEvents();
+  }, []);
 
   // Make joinEvent function globally available for popup buttons
   useEffect(() => {
@@ -327,7 +509,7 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
     setShowResults(false);
   };
 
-  const handleCreateEvent = (eventData: {
+  const handleCreateEvent = async (eventData: {
     position: [number, number];
     title: string;
     description: string;
@@ -335,14 +517,8 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
     time: string;
     image?: string;
   }) => {
-    const newEvent: UserEvent = {
-      id: Date.now().toString(),
-      participants: [], // Initialize empty participants
-      maxParticipants: 10, // Default max participants
-      ...eventData
-    };
-    
-    setUserEvents(prev => [...prev, newEvent]);
+    // Save to database instead of local state
+    await saveEventToDatabase(eventData);
     
     if (onCreateEvent) {
       onCreateEvent(eventData.position);
