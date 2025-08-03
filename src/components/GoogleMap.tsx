@@ -57,9 +57,17 @@ const GoogleMapComponent: React.FC<GoogleMapProps> = ({
   useEffect(() => {
     const initMap = async () => {
       try {
+        console.log('Trying to fetch Google Maps API key...');
         // Fetch API key from Supabase Edge Function
         const response = await fetch('https://wrqckgrnshklyaiilprz.supabase.co/functions/v1/google-maps-key');
+        console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
+        console.log('Response data:', data);
         
         if (!data.apiKey) {
           throw new Error('Google Maps API Key nicht gefunden in Supabase Secrets');
