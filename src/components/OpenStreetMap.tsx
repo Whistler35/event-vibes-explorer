@@ -19,6 +19,8 @@ interface UserEvent {
   time: string;
   position: [number, number];
   image?: string;
+  participants: string[]; // User IDs who joined
+  maxParticipants?: number;
 }
 
 interface Place {
@@ -48,6 +50,33 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<[number, number] | null>(null);
   const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
+
+  // Make joinEvent function globally available for popup buttons
+  useEffect(() => {
+    (window as any).joinEvent = (eventId: string) => {
+      setUserEvents(prev => prev.map(event => {
+        if (event.id === eventId) {
+          const currentUserId = 'user-' + Date.now(); // Simulate current user ID
+          if (!event.participants.includes(currentUserId)) {
+            return {
+              ...event,
+              participants: [...event.participants, currentUserId]
+            };
+          }
+        }
+        return event;
+      }));
+      
+      // Close any open popups and reopen to show updated participant count
+      if (map.current) {
+        map.current.closePopup();
+      }
+    };
+
+    return () => {
+      delete (window as any).joinEvent;
+    };
+  }, []);
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -199,11 +228,18 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
       const marker = L.marker(event.position, { icon })
         .addTo(map.current!)
         .bindPopup(`
-          <div class="text-center min-w-[200px]">
+          <div class="text-center min-w-[220px] p-2">
             ${event.image ? `<img src="${event.image}" class="w-full h-20 object-cover rounded mb-2" />` : ''}
             <h3 class="font-bold text-sm mb-1">${event.title}</h3>
-            <p class="text-xs text-gray-600 mb-1">${event.description}</p>
-            <p class="text-xs text-blue-600">${event.date} um ${event.time}</p>
+            <p class="text-xs text-gray-600 mb-2">${event.description}</p>
+            <p class="text-xs text-blue-600 mb-2">${event.date} um ${event.time}</p>
+            <p class="text-xs text-gray-500 mb-2">${event.participants.length}/${event.maxParticipants || 'unbegrenzt'} Teilnehmer</p>
+            <button 
+              onclick="joinEvent('${event.id}')" 
+              class="bg-evendle-orange text-white px-3 py-1 rounded text-xs hover:bg-orange-600 transition-colors"
+            >
+              Ich bin dabei! 🙋‍♂️
+            </button>
           </div>
         `);
     });
@@ -219,6 +255,8 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
   }) => {
     const newEvent: UserEvent = {
       id: Date.now().toString(),
+      participants: [], // Initialize empty participants
+      maxParticipants: 10, // Default max participants
       ...eventData
     };
     
