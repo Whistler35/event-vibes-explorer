@@ -45,13 +45,17 @@ const SimpleGoogleMap: React.FC<SimpleGoogleMapProps> = ({
     };
 
     const initializeMap = () => {
-      if (!mapRef.current) {
-        console.error('Map container not found');
-        return;
-      }
+      // Kleine Verzögerung, um sicherzustellen, dass der Container bereit ist
+      setTimeout(() => {
+        if (!mapRef.current) {
+          console.error('Map container not found, retrying...');
+          // Erneut versuchen nach weiterer Verzögerung
+          setTimeout(initializeMap, 100);
+          return;
+        }
 
-      try {
-        console.log('Initializing map...');
+        try {
+          console.log('Initializing map...');
         
         const map = new google.maps.Map(mapRef.current, {
           center: center,
@@ -136,10 +140,11 @@ const SimpleGoogleMap: React.FC<SimpleGoogleMapProps> = ({
         setIsLoaded(true);
         console.log('Map initialized successfully');
         
-      } catch (error) {
-        console.error('Error initializing map:', error);
-        setError('Fehler beim Initialisieren der Karte');
-      }
+        } catch (error) {
+          console.error('Error initializing map:', error);
+          setError('Fehler beim Initialisieren der Karte');
+        }
+      }, 50); // 50ms Verzögerung
     };
 
     loadGoogleMaps();
