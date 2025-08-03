@@ -150,18 +150,6 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
     image?: string;
   }) => {
     try {
-      // Get current user
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
-      if (userError || !user) {
-        toast({
-          title: "Anmeldung erforderlich",
-          description: "Du musst angemeldet sein, um Events zu erstellen",
-          variant: "destructive",
-        });
-        return;
-      }
-
       // Handle image upload if present
       let imageUrl = eventData.image;
       if (eventData.image && eventData.image.startsWith('data:')) {
@@ -199,7 +187,7 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
           location_name: locationName,
           max_participants: 10,
           current_participants: 0,
-          created_by: user.id
+          created_by: '00000000-0000-0000-0000-000000000000' // Dummy UUID für öffentliche Events
         })
         .select()
         .single();
