@@ -162,44 +162,43 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
   //   ...
   // }, [places]);
 
-  // Add markers for user events
+  // Add event cards for user events
   useEffect(() => {
     if (!map.current || userEvents.length === 0) return;
 
     userEvents.forEach((event) => {
       const icon = L.divIcon({
         html: `
-          <div class="flex items-center justify-center w-12 h-12 bg-blue-500 rounded-full border-2 border-white shadow-lg">
+          <div class="bg-black/90 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-3 min-w-[200px] max-w-[250px]">
             ${event.image ? 
-              `<img src="${event.image}" class="w-10 h-10 rounded-full object-cover" />` :
-              `<div class="w-6 h-6 bg-white rounded-full flex items-center justify-center">
-                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+              `<div class="w-full h-20 mb-2 rounded-lg overflow-hidden">
+                <img src="${event.image}" class="w-full h-full object-cover" />
+              </div>` :
+              `<div class="w-full h-20 mb-2 rounded-lg bg-gradient-to-br from-evendle-orange/30 to-evendle-orange/60 flex items-center justify-center">
+                <div class="text-white text-2xl">📅</div>
               </div>`
             }
+            <h3 class="text-white font-bold text-sm mb-1 line-clamp-1">${event.title}</h3>
+            <p class="text-evendle-orange text-xs mb-1">${event.date} ${event.time}</p>
+            <p class="text-white/80 text-xs line-clamp-2 mb-2">${event.description}</p>
+            <div class="flex items-center justify-between">
+              <span class="text-white/60 text-xs">${event.participants.length} dabei</span>
+              <button 
+                onclick="joinEvent('${event.id}')" 
+                class="bg-evendle-orange text-white px-2 py-1 rounded text-xs hover:bg-evendle-orange-hover transition-colors"
+              >
+                Join
+              </button>
+            </div>
           </div>
         `,
-        className: 'custom-event-marker',
-        iconSize: [48, 48],
-        iconAnchor: [24, 48]
+        className: 'custom-event-card',
+        iconSize: [200, 120],
+        iconAnchor: [100, 120]
       });
 
       const marker = L.marker(event.position, { icon })
-        .addTo(map.current!)
-        .bindPopup(`
-          <div class="text-center min-w-[220px] p-2">
-            ${event.image ? `<img src="${event.image}" class="w-full h-20 object-cover rounded mb-2" />` : ''}
-            <h3 class="font-bold text-sm mb-1">${event.title}</h3>
-            <p class="text-xs text-gray-600 mb-2">${event.description}</p>
-            <p class="text-xs text-blue-600 mb-2">${event.date} um ${event.time}</p>
-            <p class="text-xs text-gray-500 mb-2">${event.participants.length}/${event.maxParticipants || 'unbegrenzt'} Teilnehmer</p>
-            <button 
-              onclick="joinEvent('${event.id}')" 
-              class="bg-evendle-orange text-white px-3 py-1 rounded text-xs hover:bg-orange-600 transition-colors"
-            >
-              Ich bin dabei! 🙋‍♂️
-            </button>
-          </div>
-        `);
+        .addTo(map.current!);
     });
   }, [userEvents]);
 
