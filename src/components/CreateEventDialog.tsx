@@ -44,8 +44,18 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
   };
 
   const handleSubmit = () => {
-    if (!position || !title || !date || !time) return;
+    console.log('Submit button clicked');
+    console.log('Position:', position);
+    console.log('Title:', title);
+    console.log('Date:', date);
+    console.log('Time:', time);
+    
+    if (!position || !title || !date || !time) {
+      console.log('Validation failed - missing required fields');
+      return;
+    }
 
+    console.log('Creating event...');
     onCreateEvent({
       position,
       title,
@@ -55,6 +65,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
       image: image || undefined
     });
 
+    console.log('Event created, resetting form...');
     // Reset form
     setTitle('');
     setDescription('');
