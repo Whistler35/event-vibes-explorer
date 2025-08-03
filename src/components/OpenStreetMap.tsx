@@ -145,53 +145,8 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
       }
     });
 
-    // Fetch places from Overpass API (OpenStreetMap data)
-    const fetchPlaces = async () => {
-      try {
-        const [lat, lng] = center;
-        const bbox = `${lat - 0.01},${lng - 0.01},${lat + 0.01},${lng + 0.01}`;
-        
-        const query = `
-          [out:json];
-          (
-            node["amenity"~"restaurant|cafe|bar|pub|fast_food"]["name"](${bbox});
-            node["shop"~"convenience|supermarket|bakery"]["name"](${bbox});
-          );
-          out;
-        `;
-
-        const response = await fetch('https://overpass-api.de/api/interpreter', {
-          method: 'POST',
-          body: query,
-          headers: {
-            'Content-Type': 'text/plain'
-          }
-        });
-
-        const data = await response.json();
-        
-        const fetchedPlaces: Place[] = data.elements.map((element: any) => ({
-          id: element.id.toString(),
-          name: element.tags.name || 'Unbekannt',
-          type: element.tags.amenity || element.tags.shop || 'place',
-          position: [element.lat, element.lon]
-        }));
-
-        setPlaces(fetchedPlaces);
-      } catch (error) {
-        console.error('Error fetching places:', error);
-        // Fallback places for Berlin
-        setPlaces([
-          { id: '1', name: 'Café Einstein', type: 'cafe', position: [52.5075, 13.3903] },
-          { id: '2', name: 'Restaurant Maximilians', type: 'restaurant', position: [52.5142, 13.4067] },
-          { id: '3', name: 'Prater Garten', type: 'bar', position: [52.5403, 13.4102] },
-          { id: '4', name: 'Mustafa\'s Gemüse Kebap', type: 'fast_food', position: [52.4936, 13.3890] },
-          { id: '5', name: 'Hackescher Hof', type: 'restaurant', position: [52.5225, 13.4015] },
-        ]);
-      }
-    };
-
-    fetchPlaces();
+    // Removed automatic place fetching - user requested to remove orange points
+    // fetchPlaces();
 
     // Cleanup
     return () => {
@@ -201,32 +156,11 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
     };
   }, [center, zoom, onCreateEvent]);
 
-  // Add markers for places
-  useEffect(() => {
-    if (!map.current || places.length === 0) return;
-
-    places.forEach((place) => {
-      const icon = L.divIcon({
-        html: `
-          <div class="flex items-center justify-center w-8 h-8 bg-evendle-orange rounded-full border-2 border-white shadow-lg">
-            <div class="w-2 h-2 bg-white rounded-full"></div>
-          </div>
-        `,
-        className: 'custom-marker',
-        iconSize: [32, 32],
-        iconAnchor: [16, 32]
-      });
-
-      const marker = L.marker(place.position, { icon })
-        .addTo(map.current!)
-        .bindPopup(`
-          <div class="text-center">
-            <h3 class="font-bold text-sm">${place.name}</h3>
-            <p class="text-xs text-gray-600">${place.type}</p>
-          </div>
-        `);
-    });
-  }, [places]);
+  // Removed markers for places - user requested to remove orange points
+  // useEffect(() => {
+  //   if (!map.current || places.length === 0) return;
+  //   ...
+  // }, [places]);
 
   // Add markers for user events
   useEffect(() => {
@@ -295,13 +229,13 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
     <div className="relative w-full" style={{ height }}>
       <div ref={mapContainer} className="w-full h-full rounded-lg" />
       
-      {/* Legend */}
+      {/* Legend - updated without orange points */}
       <div className="absolute top-4 right-4 bg-gray-500/90 backdrop-blur-sm rounded-lg p-3 shadow-lg z-[1000]">
         <h4 className="font-bold text-sm mb-2 text-white">Hold to create evendle</h4>
         <div className="space-y-1 text-xs">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-evendle-orange rounded-full"></div>
-            <span className="text-white">Restaurants & Cafés</span>
+            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+            <span className="text-white">User Events</span>
           </div>
         </div>
       </div>
