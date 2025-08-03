@@ -15,7 +15,10 @@ serve(async (req) => {
     // Get the Google Maps API key from Supabase secrets
     const googleMapsApiKey = Deno.env.get('GOOGLE_MAPS_API_KEY')
     
+    console.log('Looking for GOOGLE_MAPS_API_KEY...', googleMapsApiKey ? 'Found' : 'Not found')
+    
     if (!googleMapsApiKey) {
+      console.error('GOOGLE_MAPS_API_KEY not found in environment')
       return new Response(
         JSON.stringify({ 
           error: 'Google Maps API Key not found in Supabase secrets. Please add GOOGLE_MAPS_API_KEY to your project secrets.' 
@@ -27,6 +30,7 @@ serve(async (req) => {
       )
     }
 
+    console.log('Returning API key successfully')
     return new Response(
       JSON.stringify({ apiKey: googleMapsApiKey }),
       { 
