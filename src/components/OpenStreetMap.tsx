@@ -60,28 +60,35 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
       attribution: '© OpenStreetMap contributors'
     }).addTo(map.current);
 
-    // Add long press handlers for creating events
-    map.current.on('mousedown', (e) => {
-      const timer = setTimeout(() => {
+    // Add long press handlers for creating events - using proper Leaflet events
+    let pressTimer: NodeJS.Timeout | null = null;
+    let isLongPress = false;
+
+    map.current.on('mousedown touchstart', (e: any) => {
+      isLongPress = false;
+      pressTimer = setTimeout(() => {
+        isLongPress = true;
         const { lat, lng } = e.latlng;
         setSelectedPosition([lat, lng]);
         setDialogOpen(true);
+        
+        // Add visual feedback
+        console.log('Long press detected at:', lat, lng);
       }, 1000); // 1 second long press
-      
-      setLongPressTimer(timer);
     });
 
-    map.current.on('mouseup', () => {
-      if (longPressTimer) {
-        clearTimeout(longPressTimer);
-        setLongPressTimer(null);
+    map.current.on('mouseup touchend mousemove touchmove', () => {
+      if (pressTimer) {
+        clearTimeout(pressTimer);
+        pressTimer = null;
       }
     });
 
-    map.current.on('mousemove', () => {
-      if (longPressTimer) {
-        clearTimeout(longPressTimer);
-        setLongPressTimer(null);
+    // Prevent click event if it was a long press
+    map.current.on('click', (e: any) => {
+      if (isLongPress) {
+        L.DomEvent.stop(e);
+        return false;
       }
     });
 
