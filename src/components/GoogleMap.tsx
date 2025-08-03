@@ -155,7 +155,9 @@ const GoogleMapComponent: React.FC<GoogleMapProps> = ({
       }
     };
 
-    initMap();
+    if (mapRef.current) {
+      initMap();
+    }
   }, [center, zoom, showControls, onCreateEvent]);
 
   if (error) {
