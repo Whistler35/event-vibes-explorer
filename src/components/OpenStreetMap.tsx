@@ -93,31 +93,55 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
     let pressTimer: NodeJS.Timeout | null = null;
     let isLongPress = false;
 
-    map.current.on('mousedown touchstart', (e: any) => {
+    // Debug: Test if events are being registered
+    console.log('Setting up map event listeners...');
+
+    map.current.on('mousedown', (e: any) => {
+      console.log('Mouse down detected');
       isLongPress = false;
       pressTimer = setTimeout(() => {
+        console.log('Long press triggered!');
         isLongPress = true;
         const { lat, lng } = e.latlng;
         setSelectedPosition([lat, lng]);
         setDialogOpen(true);
-        
-        // Add visual feedback
-        console.log('Long press detected at:', lat, lng);
-      }, 1000); // 1 second long press
+      }, 1000);
     });
 
-    map.current.on('mouseup touchend mousemove touchmove', () => {
+    map.current.on('mouseup', () => {
+      console.log('Mouse up detected');
       if (pressTimer) {
         clearTimeout(pressTimer);
         pressTimer = null;
       }
     });
 
-    // Prevent click event if it was a long press
-    map.current.on('click', (e: any) => {
-      if (isLongPress) {
-        L.DomEvent.stop(e);
-        return false;
+    map.current.on('mousemove', () => {
+      if (pressTimer) {
+        console.log('Mouse moved - canceling long press');
+        clearTimeout(pressTimer);
+        pressTimer = null;
+      }
+    });
+
+    // Also handle touch events for mobile
+    map.current.on('touchstart', (e: any) => {
+      console.log('Touch start detected');
+      isLongPress = false;
+      pressTimer = setTimeout(() => {
+        console.log('Long press triggered via touch!');
+        isLongPress = true;
+        const { lat, lng } = e.latlng;
+        setSelectedPosition([lat, lng]);
+        setDialogOpen(true);
+      }, 1000);
+    });
+
+    map.current.on('touchend touchcancel', () => {
+      console.log('Touch ended');
+      if (pressTimer) {
+        clearTimeout(pressTimer);
+        pressTimer = null;
       }
     });
 
