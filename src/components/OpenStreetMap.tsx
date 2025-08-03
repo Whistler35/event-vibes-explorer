@@ -178,25 +178,21 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
 
       // Determine size based on zoom level
       const isZoomedOut = zoomLevel < 14;
-      const cardWidth = isZoomedOut ? 120 : 200;
-      const imageHeight = isZoomedOut ? 40 : 80;
-      const fontSize = isZoomedOut ? 'text-xs' : 'text-sm';
-      const padding = isZoomedOut ? 'p-2' : 'p-3';
 
       userEvents.forEach((event) => {
         const icon = L.divIcon({
           html: `
-            <div class="bg-black/90 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 ${padding} min-w-[${cardWidth}px] max-w-[${cardWidth + 50}px]">
+            <div class="bg-black/90 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 ${isZoomedOut ? 'p-2' : 'p-3'}" style="min-width: ${isZoomedOut ? '120px' : '200px'}; max-width: ${isZoomedOut ? '170px' : '250px'};">
               ${event.image ? 
-                `<div class="w-full h-[${imageHeight}px] mb-2 rounded-lg overflow-hidden">
+                `<div class="w-full ${isZoomedOut ? 'h-10' : 'h-20'} mb-2 rounded-lg overflow-hidden">
                   <img src="${event.image}" class="w-full h-full object-cover" />
                 </div>` :
-                `<div class="w-full h-[${imageHeight}px] mb-2 rounded-lg bg-gradient-to-br from-evendle-orange/30 to-evendle-orange/60 flex items-center justify-center">
+                `<div class="w-full ${isZoomedOut ? 'h-10' : 'h-20'} mb-2 rounded-lg bg-gradient-to-br from-evendle-orange/30 to-evendle-orange/60 flex items-center justify-center">
                   <div class="text-white ${isZoomedOut ? 'text-lg' : 'text-2xl'}">📅</div>
                 </div>`
               }
-              <h3 class="text-white font-bold ${fontSize} mb-1 line-clamp-1">${event.title}</h3>
-              <p class="text-evendle-orange ${isZoomedOut ? 'text-xs' : 'text-xs'} mb-1">${event.date} ${event.time}</p>
+              <h3 class="text-white font-bold ${isZoomedOut ? 'text-xs' : 'text-sm'} mb-1 line-clamp-1">${event.title}</h3>
+              <p class="text-evendle-orange text-xs mb-1">${event.date} ${event.time}</p>
               ${isZoomedOut ? '' : `<p class="text-white/80 text-xs line-clamp-2 mb-2">${event.description}</p>`}
               <div class="flex items-center justify-between">
                 <span class="text-white/60 text-xs">${event.participants.length} dabei</span>
@@ -210,8 +206,8 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
             </div>
           `,
           className: 'custom-event-card',
-          iconSize: [cardWidth, isZoomedOut ? 80 : 120],
-          iconAnchor: [cardWidth / 2, isZoomedOut ? 80 : 120]
+          iconSize: [isZoomedOut ? 120 : 200, isZoomedOut ? 80 : 120],
+          iconAnchor: [isZoomedOut ? 60 : 100, isZoomedOut ? 80 : 120]
         });
 
         const marker = L.marker(event.position, { icon }).addTo(map.current!);
