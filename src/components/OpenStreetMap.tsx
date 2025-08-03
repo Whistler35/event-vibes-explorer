@@ -51,6 +51,9 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
   const [selectedPosition, setSelectedPosition] = useState<[number, number] | null>(null);
   const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showResults, setShowResults] = useState(false);
 
   // Make joinEvent function globally available for popup buttons
   useEffect(() => {
@@ -276,6 +279,54 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
     };
   }, [userLocation]);
 
+  // Search for places using Nominatim API
+  const searchPlaces = async (query: string) => {
+    if (query.length < 3) {
+      setSearchResults([]);
+      setShowResults(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&countrycodes=de&addressdetails=1`
+      );
+      const results = await response.json();
+      setSearchResults(results);
+      setShowResults(true);
+    } catch (error) {
+      console.error('Search error:', error);
+      setSearchResults([]);
+    }
+  };
+
+  // Handle search input change with debounce
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchQuery) {
+        searchPlaces(searchQuery);
+      } else {
+        setSearchResults([]);
+        setShowResults(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  // Handle place selection
+  const handlePlaceSelect = (place: any) => {
+    const lat = parseFloat(place.lat);
+    const lon = parseFloat(place.lon);
+    
+    if (map.current) {
+      map.current.setView([lat, lon], 15);
+    }
+    
+    setSearchQuery(place.display_name.split(',')[0]);
+    setShowResults(false);
+  };
+
   const handleCreateEvent = (eventData: {
     position: [number, number];
     title: string;
@@ -317,11 +368,43 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
         </div>
       </div>
 
-      {/* Instructions */}
-      <div className="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg z-[1000]">
-        <p className="text-sm text-center">
-          Halte 1 Sekunde gedrückt, um ein Evendle zu erstellen
-        </p>
+      {/* Search Bar */}
+      <div className="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg z-[1000]">
+        <div className="relative">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Suche nach Orten, Straßen, Sehenswürdigkeiten..."
+            className="w-full p-3 pr-10 text-sm border-none rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-evendle-orange/50"
+          />
+          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+        </div>
+        
+        {/* Search Results */}
+        {showResults && searchResults.length > 0 && (
+          <div className="mt-2 max-h-40 overflow-y-auto bg-white rounded-lg border border-gray-200 shadow-lg">
+            {searchResults.map((place, index) => (
+              <div
+                key={index}
+                onClick={() => handlePlaceSelect(place)}
+                className="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+              >
+                <div className="font-medium text-sm text-gray-900">{place.display_name.split(',')[0]}</div>
+                <div className="text-xs text-gray-500 mt-1">{place.display_name}</div>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        {/* Hint text */}
+        <div className="text-xs text-gray-500 text-center mt-2">
+          Halte 1s gedrückt für Event • Suche nach Orten
+        </div>
       </div>
 
       {/* Create Event Dialog */}
