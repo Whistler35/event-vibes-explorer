@@ -376,7 +376,7 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Suche nach Orten, Straßen, Sehenswürdigkeiten..."
-            className="w-full p-3 pr-10 text-sm border-none rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-evendle-orange/50"
+            className="w-full p-3 pr-10 text-sm text-black border-none rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-evendle-orange/50 placeholder-gray-500"
           />
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
             <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
