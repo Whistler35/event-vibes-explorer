@@ -50,6 +50,7 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<[number, number] | null>(null);
   const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
 
   // Make joinEvent function globally available for popup buttons
   useEffect(() => {
@@ -76,6 +77,27 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
     return () => {
       delete (window as any).joinEvent;
     };
+  }, []);
+
+  // Get user's current location
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const userPos: [number, number] = [position.coords.latitude, position.coords.longitude];
+          setUserLocation(userPos);
+          console.log('User location found:', userPos);
+        },
+        (error) => {
+          console.log('Geolocation error:', error.message);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 60000
+        }
+      );
+    }
   }, []);
 
   useEffect(() => {
@@ -261,6 +283,35 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
     };
   }, [userEvents]);
 
+  // Add user location marker
+  useEffect(() => {
+    if (!map.current || !userLocation) return;
+
+    const userLocationIcon = L.divIcon({
+      html: `
+        <div class="w-5 h-5 bg-blue-500 rounded-full border-2 border-white shadow-lg relative">
+          <div class="absolute inset-0 bg-blue-500/30 rounded-full animate-pulse scale-150"></div>
+        </div>
+      `,
+      className: 'user-location-marker',
+      iconSize: [20, 20],
+      iconAnchor: [10, 10]
+    });
+
+    const userMarker = L.marker(userLocation, { icon: userLocationIcon })
+      .addTo(map.current)
+      .bindPopup(`
+        <div class="text-center">
+          <h3 class="font-bold text-sm text-blue-600">📍 Mein Standort</h3>
+          <p class="text-xs text-gray-600">Du bist hier</p>
+        </div>
+      `);
+
+    return () => {
+      userMarker.remove();
+    };
+  }, [userLocation]);
+
   const handleCreateEvent = (eventData: {
     position: [number, number];
     title: string;
@@ -294,6 +345,10 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
             <span className="text-white">User Events</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+            <span className="text-white">Mein Standort</span>
           </div>
         </div>
       </div>
