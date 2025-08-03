@@ -1,5 +1,5 @@
 import React from 'react';
-import GoogleMap from './GoogleMap';
+import SimpleGoogleMap from './SimpleGoogleMap';
 
 interface InteractiveMapProps {
   onCreateEvent?: (position: [number, number]) => void;
@@ -13,7 +13,7 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({ onCreateEvent }) => {
   };
 
   return (
-    <GoogleMap
+    <SimpleGoogleMap
       center={{ lat: 52.520008, lng: 13.404954 }} // Berlin
       zoom={13}
       height="100vh"
