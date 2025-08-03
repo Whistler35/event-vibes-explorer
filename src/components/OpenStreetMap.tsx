@@ -177,28 +177,34 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
       markers.length = 0;
 
       // Stufenweise Größenanpassung basierend auf Zoom-Level
-      let cardWidth, cardHeight, imageHeight, fontSize, padding, showDescription;
+      let cardWidth, cardHeight, imageHeight, fontSize, padding, showDescription, showText;
       
       if (zoomLevel >= 15) {
         // Sehr nah - große Karten mit allen Details
-        cardWidth = 220; cardHeight = 140; imageHeight = 'h-20'; fontSize = 'text-sm'; padding = 'p-3'; showDescription = true;
+        cardWidth = 220; cardHeight = 140; imageHeight = 'h-20'; fontSize = 'text-sm'; padding = 'p-3'; showDescription = true; showText = true;
       } else if (zoomLevel >= 13) {
         // Mittel - normale Karten
-        cardWidth = 180; cardHeight = 120; imageHeight = 'h-16'; fontSize = 'text-sm'; padding = 'p-3'; showDescription = true;
+        cardWidth = 180; cardHeight = 120; imageHeight = 'h-16'; fontSize = 'text-sm'; padding = 'p-3'; showDescription = true; showText = true;
       } else if (zoomLevel >= 11) {
         // Weiter weg - kompakte Karten
-        cardWidth = 140; cardHeight = 90; imageHeight = 'h-12'; fontSize = 'text-xs'; padding = 'p-2'; showDescription = false;
+        cardWidth = 140; cardHeight = 90; imageHeight = 'h-12'; fontSize = 'text-xs'; padding = 'p-2'; showDescription = false; showText = true;
       } else if (zoomLevel >= 9) {
         // Weit weg - kleine Karten
-        cardWidth = 100; cardHeight = 70; imageHeight = 'h-8'; fontSize = 'text-xs'; padding = 'p-2'; showDescription = false;
-      } else {
+        cardWidth = 100; cardHeight = 70; imageHeight = 'h-8'; fontSize = 'text-xs'; padding = 'p-2'; showDescription = false; showText = true;
+      } else if (zoomLevel >= 7) {
         // Sehr weit weg - mini Karten
-        cardWidth = 80; cardHeight = 50; imageHeight = 'h-6'; fontSize = 'text-xs'; padding = 'p-1'; showDescription = false;
+        cardWidth = 80; cardHeight = 50; imageHeight = 'h-6'; fontSize = 'text-xs'; padding = 'p-1'; showDescription = false; showText = true;
+      } else {
+        // Extrem weit weg - nur Bilder als runde Marker
+        cardWidth = 50; cardHeight = 50; imageHeight = 'h-12'; fontSize = 'text-xs'; padding = 'p-0'; showDescription = false; showText = false;
       }
 
       userEvents.forEach((event) => {
-        const icon = L.divIcon({
-          html: `
+        let iconHtml;
+        
+        if (showText) {
+          // Normale Karten-Ansicht
+          iconHtml = `
             <div class="bg-black/90 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 ${padding}" style="min-width: ${cardWidth}px; max-width: ${cardWidth + 50}px;">
               ${event.image ? 
                 `<div class="w-full ${imageHeight} mb-2 rounded-lg overflow-hidden">
@@ -221,7 +227,23 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
                 </button>
               </div>
             </div>
-          `,
+          `;
+        } else {
+          // Nur Bild-Ansicht (runder Marker)
+          iconHtml = `
+            <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-lg">
+              ${event.image ? 
+                `<img src="${event.image}" class="w-full h-full object-cover" />` :
+                `<div class="w-full h-full bg-gradient-to-br from-evendle-orange/60 to-evendle-orange flex items-center justify-center">
+                  <div class="text-white text-lg">📅</div>
+                </div>`
+              }
+            </div>
+          `;
+        }
+
+        const icon = L.divIcon({
+          html: iconHtml,
           className: 'custom-event-card',
           iconSize: [cardWidth, cardHeight],
           iconAnchor: [cardWidth / 2, cardHeight]
