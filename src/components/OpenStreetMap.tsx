@@ -103,8 +103,11 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
         console.log('Long press triggered!');
         isLongPress = true;
         const { lat, lng } = e.latlng;
+        console.log('Setting position to:', [lat, lng]);
         setSelectedPosition([lat, lng]);
+        console.log('Setting dialog open to true');
         setDialogOpen(true);
+        console.log('Dialog state should now be:', true);
       }, 1000);
     });
 
