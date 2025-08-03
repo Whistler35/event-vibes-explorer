@@ -179,7 +179,7 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
       // Stufenweise Größenanpassung basierend auf Zoom-Level
       let cardWidth, cardHeight, imageHeight, fontSize, padding, showDescription, showText;
       
-      if (zoomLevel >= 19) {
+      if (zoomLevel >= 18) {
         // Nur bei allerextremstem Reinzoomen - Details
         cardWidth = 200; cardHeight = 120; imageHeight = 'h-16'; fontSize = 'text-sm'; padding = 'p-3'; showDescription = true; showText = true;
       } else {
