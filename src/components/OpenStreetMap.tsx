@@ -596,10 +596,6 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
         
         <div className="space-y-1 text-xs">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-            <span className="text-white">User Events</span>
-          </div>
-          <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
             <span className="text-white">Mein Standort</span>
           </div>
