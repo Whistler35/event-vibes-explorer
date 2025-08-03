@@ -179,14 +179,11 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
       // Stufenweise Größenanpassung basierend auf Zoom-Level
       let cardWidth, cardHeight, imageHeight, fontSize, padding, showDescription, showText;
       
-      if (zoomLevel >= 17) {
-        // Extrem nah - große Karten mit allen Details
-        cardWidth = 220; cardHeight = 140; imageHeight = 'h-20'; fontSize = 'text-sm'; padding = 'p-3'; showDescription = true; showText = true;
-      } else if (zoomLevel >= 15) {
-        // Sehr nah - kompakte Karten mit Grundinfos
-        cardWidth = 160; cardHeight = 100; imageHeight = 'h-12'; fontSize = 'text-xs'; padding = 'p-2'; showDescription = false; showText = true;
+      if (zoomLevel >= 19) {
+        // Nur bei allerextremstem Reinzoomen - Details
+        cardWidth = 200; cardHeight = 120; imageHeight = 'h-16'; fontSize = 'text-sm'; padding = 'p-3'; showDescription = true; showText = true;
       } else {
-        // Standard - runde Bild-Marker für alle anderen Zoom-Level
+        // Standard für fast alle Zoom-Level - runde Bild-Marker
         cardWidth = 50; cardHeight = 50; imageHeight = 'h-12'; fontSize = 'text-xs'; padding = 'p-0'; showDescription = false; showText = false;
       }
 
