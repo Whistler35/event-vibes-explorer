@@ -19,7 +19,7 @@ const Nearby = () => {
 
   return (
     <Layout>
-      <div className="relative h-screen">
+      <div className="relative h-[calc(100vh-80px)]">
         {/* Header */}
         <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between">
           <div className="flex items-center space-x-2">
