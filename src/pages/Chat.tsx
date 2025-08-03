@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Send } from "lucide-react";
 import Layout from "@/components/Layout";
+import yogaEventImage from "@/assets/yoga-event-new.jpg";
 
 const Chat = () => {
   const { id } = useParams();
@@ -70,7 +71,7 @@ const Chat = () => {
         <div className="p-4 border-b border-border">
           <div className="bg-card rounded-2xl overflow-hidden">
             <img 
-              src={chat.avatar} 
+              src={yogaEventImage} 
               alt={chat.name}
               className="w-full h-32 object-cover"
             />
