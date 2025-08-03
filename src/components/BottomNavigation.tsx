@@ -8,7 +8,6 @@ const BottomNavigation = () => {
   const navItems = [
     { id: "events", label: "Events", icon: Calendar, path: "/" },
     { id: "nearby", label: "near by", icon: MapPin, path: "/nearby" },
-    { id: "home", label: "", icon: Plus, path: "/", isHome: true },
     { id: "messenger", label: "messenger", icon: MessageCircle, path: "/messenger" },
     { id: "profile", label: "profile", icon: User, path: "/profile" },
   ];
@@ -27,20 +26,16 @@ const BottomNavigation = () => {
               className="flex flex-col items-center space-y-1 transition-colors duration-200"
             >
               <div className={`p-3 rounded-full ${
-                item.isHome 
+                isActive 
                   ? 'bg-evendle-orange' 
-                  : isActive 
-                    ? 'bg-evendle-orange' 
-                    : 'bg-transparent'
+                  : 'bg-transparent'
               }`}>
                 <Icon 
                   size={24} 
                   className={
-                    item.isHome 
+                    isActive 
                       ? 'text-white' 
-                      : isActive 
-                        ? 'text-white' 
-                        : 'text-evendle-gray'
+                      : 'text-evendle-gray'
                   } 
                 />
               </div>
