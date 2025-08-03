@@ -175,13 +175,6 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
             </div>
           </div>
 
-          {/* Location Info */}
-          {position && (
-            <div className="text-sm text-gray-500">
-              Position: {position[0].toFixed(4)}, {position[1].toFixed(4)}
-            </div>
-          )}
-
           {/* Buttons */}
           <div className="flex gap-2 pt-4">
             <Button variant="outline" onClick={handleClose} className="flex-1">
