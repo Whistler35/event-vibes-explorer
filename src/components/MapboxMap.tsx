@@ -60,8 +60,12 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
       try {
         // Fetch Mapbox token from Supabase Edge Function
         console.log('Fetching Mapbox token from edge function...');
-        const response = await fetch('/functions/v1/mapbox-token');
+        const response = await fetch('https://wrqckgrnshklyaiilprz.supabase.co/functions/v1/mapbox-token');
         console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         
         const data = await response.json();
         console.log('Response data:', data);
