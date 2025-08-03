@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Loader } from '@googlemaps/js-api-loader';
 
 interface SimpleGoogleMapProps {
@@ -17,16 +17,23 @@ const SimpleGoogleMap: React.FC<SimpleGoogleMapProps> = ({
   const mapRef = useRef<HTMLDivElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [containerReady, setContainerReady] = useState(false);
+
+  // Prüfe ob Container bereit ist
+  useLayoutEffect(() => {
+    if (mapRef.current) {
+      console.log('Container is ready!');
+      setContainerReady(true);
+    }
+  }, []);
 
   useEffect(() => {
-    const initMap = async () => {
-      if (!mapRef.current) {
-        console.log('Map container not available yet, waiting...');
-        // Warten bis Container verfügbar ist
-        setTimeout(initMap, 100);
-        return;
-      }
+    if (!containerReady) {
+      console.log('Container not ready yet...');
+      return;
+    }
 
+    const initMap = async () => {
       try {
         console.log('Starting Google Maps initialization...');
         
@@ -41,7 +48,7 @@ const SimpleGoogleMap: React.FC<SimpleGoogleMapProps> = ({
         console.log('Google Maps API loaded successfully');
         
         console.log('Creating map instance...');
-        const map = new google.maps.Map(mapRef.current, {
+        const map = new google.maps.Map(mapRef.current!, {
           center: center,
           zoom: zoom,
           styles: [
@@ -132,9 +139,8 @@ const SimpleGoogleMap: React.FC<SimpleGoogleMapProps> = ({
       }
     };
 
-    // Kurz warten bevor wir starten
-    setTimeout(initMap, 100);
-  }, [center, zoom, onCreateEvent]);
+    initMap();
+  }, [containerReady, center, zoom, onCreateEvent]);
 
   if (error) {
     return (
