@@ -188,14 +188,8 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
       } else if (zoomLevel >= 11) {
         // Weiter weg - kompakte Karten
         cardWidth = 140; cardHeight = 90; imageHeight = 'h-12'; fontSize = 'text-xs'; padding = 'p-2'; showDescription = false; showText = true;
-      } else if (zoomLevel >= 9) {
-        // Weit weg - kleine Karten
-        cardWidth = 100; cardHeight = 70; imageHeight = 'h-8'; fontSize = 'text-xs'; padding = 'p-2'; showDescription = false; showText = true;
-      } else if (zoomLevel >= 7) {
-        // Sehr weit weg - mini Karten
-        cardWidth = 80; cardHeight = 50; imageHeight = 'h-6'; fontSize = 'text-xs'; padding = 'p-1'; showDescription = false; showText = true;
       } else {
-        // Extrem weit weg - nur Bilder als runde Marker
+        // Schon bei wenig Rauszoomen - nur runde Bild-Marker
         cardWidth = 50; cardHeight = 50; imageHeight = 'h-12'; fontSize = 'text-xs'; padding = 'p-0'; showDescription = false; showText = false;
       }
 
