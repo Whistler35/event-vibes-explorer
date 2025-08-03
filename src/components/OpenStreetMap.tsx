@@ -141,12 +141,12 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
       <div ref={mapContainer} className="w-full h-full rounded-lg" />
       
       {/* Legend */}
-      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg z-[1000]">
-        <h4 className="font-bold text-sm mb-2">Lokale</h4>
+      <div className="absolute top-4 right-4 bg-gray-500/90 backdrop-blur-sm rounded-lg p-3 shadow-lg z-[1000]">
+        <h4 className="font-bold text-sm mb-2 text-white">Hold to create evendle</h4>
         <div className="space-y-1 text-xs">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-evendle-orange rounded-full"></div>
-            <span>Restaurants & Cafés</span>
+            <span className="text-white">Restaurants & Cafés</span>
           </div>
         </div>
       </div>
