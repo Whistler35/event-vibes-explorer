@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Loader } from '@googlemaps/js-api-loader';
 
 interface SimpleGoogleMapProps {
   center?: { lat: number; lng: number };
@@ -18,45 +19,28 @@ const SimpleGoogleMap: React.FC<SimpleGoogleMapProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadGoogleMaps = () => {
-      // Prüfen ob Google Maps bereits geladen ist
-      if (window.google && window.google.maps) {
-        initializeMap();
+    const initMap = async () => {
+      if (!mapRef.current) {
+        console.log('Map container not available yet, waiting...');
+        // Warten bis Container verfügbar ist
+        setTimeout(initMap, 100);
         return;
       }
 
-      // Google Maps Script laden
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyCVgYgfLVAOZcbdyEm2Hac2zuBr_c1zgjc&libraries=places`;
-      script.async = true;
-      script.defer = true;
-      
-      script.onload = () => {
-        console.log('Google Maps script loaded');
-        initializeMap();
-      };
-      
-      script.onerror = () => {
-        console.error('Failed to load Google Maps script');
-        setError('Fehler beim Laden der Google Maps');
-      };
-
-      document.head.appendChild(script);
-    };
-
-    const initializeMap = () => {
-      // Kleine Verzögerung, um sicherzustellen, dass der Container bereit ist
-      setTimeout(() => {
-        if (!mapRef.current) {
-          console.error('Map container not found, retrying...');
-          // Erneut versuchen nach weiterer Verzögerung
-          setTimeout(initializeMap, 100);
-          return;
-        }
-
-        try {
-          console.log('Initializing map...');
+      try {
+        console.log('Starting Google Maps initialization...');
         
+        const loader = new Loader({
+          apiKey: 'AIzaSyCVgYgfLVAOZcbdyEm2Hac2zuBr_c1zgjc',
+          version: 'weekly',
+          libraries: ['places']
+        });
+
+        console.log('Loading Google Maps API...');
+        await loader.load();
+        console.log('Google Maps API loaded successfully');
+        
+        console.log('Creating map instance...');
         const map = new google.maps.Map(mapRef.current, {
           center: center,
           zoom: zoom,
@@ -73,6 +57,8 @@ const SimpleGoogleMap: React.FC<SimpleGoogleMapProps> = ({
             }
           ]
         });
+
+        console.log('Map instance created successfully');
 
         // Event Marker hinzufügen
         const events = [
@@ -137,17 +123,17 @@ const SimpleGoogleMap: React.FC<SimpleGoogleMapProps> = ({
           });
         }
 
+        console.log('Setting isLoaded to true');
         setIsLoaded(true);
-        console.log('Map initialized successfully');
         
-        } catch (error) {
-          console.error('Error initializing map:', error);
-          setError('Fehler beim Initialisieren der Karte');
-        }
-      }, 50); // 50ms Verzögerung
+      } catch (error) {
+        console.error('Error loading Google Maps:', error);
+        setError('Fehler beim Laden der Google Maps: ' + (error as Error).message);
+      }
     };
 
-    loadGoogleMaps();
+    // Kurz warten bevor wir starten
+    setTimeout(initMap, 100);
   }, [center, zoom, onCreateEvent]);
 
   if (error) {
