@@ -57,8 +57,11 @@ const GoogleMapComponent: React.FC<GoogleMapProps> = ({
   useEffect(() => {
     const initMap = async () => {
       try {
+        console.log('Starting Google Maps initialization...');
+        
         // Temporäre Lösung: API-Key direkt verwenden
         const apiKey = 'AIzaSyCVgYgfLVAOZcbdyEm2Hac2zuBr_c1zgjc';
+        console.log('Using API key:', apiKey);
         
         const loader = new Loader({
           apiKey: apiKey,
@@ -66,9 +69,12 @@ const GoogleMapComponent: React.FC<GoogleMapProps> = ({
           libraries: ['places']
         });
 
+        console.log('Loading Google Maps API...');
         const google = await loader.load();
+        console.log('Google Maps API loaded successfully');
         
         if (mapRef.current) {
+          console.log('Creating map instance...');
           const mapInstance = new google.maps.Map(mapRef.current, {
             center: center,
             zoom: zoom,
@@ -93,11 +99,14 @@ const GoogleMapComponent: React.FC<GoogleMapProps> = ({
             fullscreenControl: showControls
           });
 
+          console.log('Map instance created, setting state...');
           setMap(mapInstance);
           setIsLoaded(true);
+          console.log('Map initialization complete!');
 
           // Add event markers
           allEvents.forEach((event) => {
+            console.log('Adding marker for event:', event.title);
             const marker = new google.maps.Marker({
               position: event.position,
               map: mapInstance,
@@ -132,14 +141,17 @@ const GoogleMapComponent: React.FC<GoogleMapProps> = ({
               if (e.latLng) {
                 const lat = e.latLng.lat();
                 const lng = e.latLng.lng();
+                console.log('Map clicked at:', lat, lng);
                 onCreateEvent({ lat, lng });
               }
             });
           }
+        } else {
+          console.error('Map container ref is null');
         }
       } catch (error) {
         console.error('Error loading Google Maps:', error);
-        setError('Fehler beim Laden der Google Maps. Bitte überprüfen Sie den API-Key.');
+        setError('Fehler beim Laden der Google Maps: ' + error.message);
       }
     };
 
