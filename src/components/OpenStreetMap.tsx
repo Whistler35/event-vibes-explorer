@@ -176,24 +176,41 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
       markers.forEach(marker => marker.remove());
       markers.length = 0;
 
-      // Determine size based on zoom level
-      const isZoomedOut = zoomLevel < 14;
+      // Stufenweise Größenanpassung basierend auf Zoom-Level
+      let cardWidth, cardHeight, imageHeight, fontSize, padding, showDescription;
+      
+      if (zoomLevel >= 15) {
+        // Sehr nah - große Karten mit allen Details
+        cardWidth = 220; cardHeight = 140; imageHeight = 'h-20'; fontSize = 'text-sm'; padding = 'p-3'; showDescription = true;
+      } else if (zoomLevel >= 13) {
+        // Mittel - normale Karten
+        cardWidth = 180; cardHeight = 120; imageHeight = 'h-16'; fontSize = 'text-sm'; padding = 'p-3'; showDescription = true;
+      } else if (zoomLevel >= 11) {
+        // Weiter weg - kompakte Karten
+        cardWidth = 140; cardHeight = 90; imageHeight = 'h-12'; fontSize = 'text-xs'; padding = 'p-2'; showDescription = false;
+      } else if (zoomLevel >= 9) {
+        // Weit weg - kleine Karten
+        cardWidth = 100; cardHeight = 70; imageHeight = 'h-8'; fontSize = 'text-xs'; padding = 'p-2'; showDescription = false;
+      } else {
+        // Sehr weit weg - mini Karten
+        cardWidth = 80; cardHeight = 50; imageHeight = 'h-6'; fontSize = 'text-xs'; padding = 'p-1'; showDescription = false;
+      }
 
       userEvents.forEach((event) => {
         const icon = L.divIcon({
           html: `
-            <div class="bg-black/90 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 ${isZoomedOut ? 'p-2' : 'p-3'}" style="min-width: ${isZoomedOut ? '120px' : '200px'}; max-width: ${isZoomedOut ? '170px' : '250px'};">
+            <div class="bg-black/90 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 ${padding}" style="min-width: ${cardWidth}px; max-width: ${cardWidth + 50}px;">
               ${event.image ? 
-                `<div class="w-full ${isZoomedOut ? 'h-10' : 'h-20'} mb-2 rounded-lg overflow-hidden">
+                `<div class="w-full ${imageHeight} mb-2 rounded-lg overflow-hidden">
                   <img src="${event.image}" class="w-full h-full object-cover" />
                 </div>` :
-                `<div class="w-full ${isZoomedOut ? 'h-10' : 'h-20'} mb-2 rounded-lg bg-gradient-to-br from-evendle-orange/30 to-evendle-orange/60 flex items-center justify-center">
-                  <div class="text-white ${isZoomedOut ? 'text-lg' : 'text-2xl'}">📅</div>
+                `<div class="w-full ${imageHeight} mb-2 rounded-lg bg-gradient-to-br from-evendle-orange/30 to-evendle-orange/60 flex items-center justify-center">
+                  <div class="text-white ${zoomLevel >= 11 ? 'text-2xl' : 'text-lg'}">📅</div>
                 </div>`
               }
-              <h3 class="text-white font-bold ${isZoomedOut ? 'text-xs' : 'text-sm'} mb-1 line-clamp-1">${event.title}</h3>
+              <h3 class="text-white font-bold ${fontSize} mb-1 line-clamp-1">${event.title}</h3>
               <p class="text-evendle-orange text-xs mb-1">${event.date} ${event.time}</p>
-              ${isZoomedOut ? '' : `<p class="text-white/80 text-xs line-clamp-2 mb-2">${event.description}</p>`}
+              ${showDescription ? `<p class="text-white/80 text-xs line-clamp-2 mb-2">${event.description}</p>` : ''}
               <div class="flex items-center justify-between">
                 <span class="text-white/60 text-xs">${event.participants.length} dabei</span>
                 <button 
@@ -206,8 +223,8 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
             </div>
           `,
           className: 'custom-event-card',
-          iconSize: [isZoomedOut ? 120 : 200, isZoomedOut ? 80 : 120],
-          iconAnchor: [isZoomedOut ? 60 : 100, isZoomedOut ? 80 : 120]
+          iconSize: [cardWidth, cardHeight],
+          iconAnchor: [cardWidth / 2, cardHeight]
         });
 
         const marker = L.marker(event.position, { icon }).addTo(map.current!);
