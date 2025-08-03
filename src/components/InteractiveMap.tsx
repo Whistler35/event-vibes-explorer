@@ -1,5 +1,5 @@
 import React from 'react';
-import MapboxMap from './MapboxMap';
+import SimpleMap from './SimpleMap';
 
 interface InteractiveMapProps {
   onCreateEvent?: (position: [number, number]) => void;
@@ -7,12 +7,11 @@ interface InteractiveMapProps {
 
 const InteractiveMap: React.FC<InteractiveMapProps> = ({ onCreateEvent }) => {
   return (
-    <MapboxMap
+    <SimpleMap
       center={[52.520008, 13.404954]} // Berlin
       zoom={13}
       height="500px"
       onCreateEvent={onCreateEvent}
-      showControls={true}
     />
   );
 };
