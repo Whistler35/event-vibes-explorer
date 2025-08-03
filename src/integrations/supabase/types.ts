@@ -14,7 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      events: {
+        Row: {
+          created_at: string
+          created_by: string
+          current_participants: number | null
+          description: string | null
+          end_time: string | null
+          event_date: string
+          id: string
+          image_url: string | null
+          latitude: number | null
+          location_name: string
+          longitude: number | null
+          max_participants: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          current_participants?: number | null
+          description?: string | null
+          end_time?: string | null
+          event_date: string
+          id?: string
+          image_url?: string | null
+          latitude?: number | null
+          location_name: string
+          longitude?: number | null
+          max_participants?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          current_participants?: number | null
+          description?: string | null
+          end_time?: string | null
+          event_date?: string
+          id?: string
+          image_url?: string | null
+          latitude?: number | null
+          location_name?: string
+          longitude?: number | null
+          max_participants?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
