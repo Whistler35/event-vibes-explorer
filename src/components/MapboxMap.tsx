@@ -59,12 +59,19 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     const initMap = async () => {
       try {
         // Fetch Mapbox token from Supabase Edge Function
+        console.log('Fetching Mapbox token from edge function...');
         const response = await fetch('/functions/v1/mapbox-token');
+        console.log('Response status:', response.status);
+        
         const data = await response.json();
+        console.log('Response data:', data);
         
         if (!data.token) {
+          console.error('No token in response:', data);
           throw new Error('Mapbox Token nicht gefunden in Supabase Secrets');
         }
+
+        console.log('Setting Mapbox token:', data.token.substring(0, 10) + '...');
 
         if (!mapContainer.current) return;
 
