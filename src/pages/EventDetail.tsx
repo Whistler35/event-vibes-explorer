@@ -116,6 +116,7 @@ const EventDetail = () => {
   };
 
   const handleJoinEvent = async () => {
+    console.log('handleJoinEvent called', { user, event, isParticipant });
     if (!user || !event) return;
 
     setJoinLoading(true);

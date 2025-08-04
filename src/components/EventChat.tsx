@@ -70,6 +70,7 @@ const EventChat = ({ eventId, eventTitle }: EventChatProps) => {
   };
 
   const fetchChat = async () => {
+    console.log('fetchChat called for eventId:', eventId);
     try {
       // Get or create chat for this event
       const { data: chatData, error: chatError } = await supabase
