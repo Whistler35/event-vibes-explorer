@@ -134,13 +134,16 @@ const EventDetail = () => {
         setIsParticipant(false);
       } else {
         // Join event
-        const { error } = await supabase
+        console.log('Attempting to join event:', { eventId: event.id, userId: user.id });
+        const { data, error } = await supabase
           .from('event_participants')
           .insert({
             event_id: event.id,
             user_id: user.id
-          });
+          })
+          .select();
 
+        console.log('Insert result:', { data, error });
         if (error) throw error;
         toast.success('Du bist dem Event beigetreten! Chat wurde erstellt.');
         setIsParticipant(true);
