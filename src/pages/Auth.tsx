@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -6,23 +6,65 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Camera } from 'lucide-react';
+import { Camera, Upload } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
   const [country, setCountry] = useState('');
   const [bio, setBio] = useState('');
   const [funFact, setFunFact] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast.error('Bild ist zu groß. Maximal 5MB erlaubt.');
+        return;
+      }
+      if (!file.type.startsWith('image/')) {
+        toast.error('Bitte wähle eine Bilddatei aus.');
+        return;
+      }
+      setAvatarFile(file);
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setAvatarUrl(previewUrl);
+    }
+  };
+
+  const uploadAvatar = async (file: File, userId: string): Promise<string> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${userId}-${Date.now()}.${fileExt}`;
+    const filePath = `avatars/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    const { data } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,27 +80,66 @@ const Auth = () => {
           navigate('/');
         }
       } else {
+        // Validation for registration
         if (!name || !age || !country) {
           toast.error('Bitte fülle alle Pflichtfelder aus');
           setLoading(false);
           return;
         }
 
-        const metadata = {
-          name,
-          age: parseInt(age),
-          country,
-          bio,
-          fun_fact: funFact,
-          avatar_url: avatarUrl
-        };
-
-        const { error } = await signUp(email, password, metadata);
-        if (error) {
-          toast.error(error.message);
-        } else {
-          toast.success('Registrierung erfolgreich! Bitte bestätige deine E-Mail.');
+        if (password !== confirmPassword) {
+          toast.error('Passwörter stimmen nicht überein');
+          setLoading(false);
+          return;
         }
+
+        if (password.length < 6) {
+          toast.error('Passwort muss mindestens 6 Zeichen lang sein');
+          setLoading(false);
+          return;
+        }
+
+        // Sign up user first
+        const { error: signUpError, data } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+            data: {
+              name,
+              age: parseInt(age),
+              country,
+              bio,
+              fun_fact: funFact
+            }
+          }
+        });
+
+        if (signUpError) {
+          toast.error(signUpError.message);
+          setLoading(false);
+          return;
+        }
+
+        // Upload avatar if file is selected
+        let finalAvatarUrl = avatarUrl;
+        if (avatarFile && data.user) {
+          try {
+            finalAvatarUrl = await uploadAvatar(avatarFile, data.user.id);
+            
+            // Update profile with avatar URL
+            await supabase
+              .from('profiles')
+              .update({ avatar_url: finalAvatarUrl })
+              .eq('user_id', data.user.id);
+              
+          } catch (uploadError) {
+            console.error('Error uploading avatar:', uploadError);
+            toast.error('Profilbild konnte nicht hochgeladen werden, aber Registrierung war erfolgreich');
+          }
+        }
+
+        toast.success('Registrierung erfolgreich! Bitte bestätige deine E-Mail.');
       }
     } catch (error: any) {
       toast.error('Ein Fehler ist aufgetreten');
@@ -86,23 +167,34 @@ const Auth = () => {
           {!isLogin && (
             <div className="flex flex-col items-center space-y-4">
               <div className="relative">
-                <Avatar className="w-24 h-24">
+                <Avatar className="w-24 h-24 cursor-pointer" onClick={() => fileInputRef.current?.click()}>
                   <AvatarImage src={avatarUrl} />
                   <AvatarFallback className="bg-evendle-dark-card text-evendle-light-gray">
                     {name ? name[0].toUpperCase() : <Camera className="w-8 h-8" />}
                   </AvatarFallback>
                 </Avatar>
+                <div className="absolute bottom-0 right-0 bg-evendle-orange rounded-full p-1">
+                  <Upload className="w-4 h-4 text-white" />
+                </div>
               </div>
               <div className="w-full space-y-2">
-                <Label htmlFor="avatar" className="text-white">Profilbild URL (optional)</Label>
-                <Input
-                  id="avatar"
-                  type="url"
-                  value={avatarUrl}
-                  onChange={(e) => setAvatarUrl(e.target.value)}
-                  placeholder="https://example.com/avatar.jpg"
-                  className="bg-evendle-dark-card border-evendle-gray text-white"
+                <Label htmlFor="avatar-file" className="text-white">Profilbild hochladen (optional)</Label>
+                <input
+                  ref={fileInputRef}
+                  id="avatar-file"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  className="hidden"
                 />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full border-evendle-gray text-evendle-light-gray hover:bg-evendle-orange hover:text-white"
+                >
+                  {avatarFile ? avatarFile.name : 'Foto auswählen'}
+                </Button>
               </div>
             </div>
           )}
@@ -136,6 +228,17 @@ const Auth = () => {
             {/* Additional fields for Register */}
             {!isLogin && (
               <>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword" className="text-white">Passwort bestätigen *</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    className="bg-evendle-dark-card border-evendle-gray text-white"
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-white">Name *</Label>
                   <Input
