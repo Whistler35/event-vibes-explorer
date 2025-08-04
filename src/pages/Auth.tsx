@@ -48,8 +48,8 @@ const Auth = () => {
 
   const uploadAvatar = async (file: File, userId: string): Promise<string> => {
     const fileExt = file.name.split('.').pop();
-    const fileName = `${userId}-${Date.now()}.${fileExt}`;
-    const filePath = `avatars/${fileName}`;
+    const fileName = `${Date.now()}.${fileExt}`;
+    const filePath = `${userId}/${fileName}`;
 
     const { error: uploadError } = await supabase.storage
       .from('avatars')
