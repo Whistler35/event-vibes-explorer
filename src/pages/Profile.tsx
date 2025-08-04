@@ -1,24 +1,77 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { LogOut } from "lucide-react";
 
 const Profile = () => {
-  const user = {
-    name: "James Cook",
-    age: 34,
-    country: "USA",
-    avatar: "/lovable-uploads/c5cfa817-d10d-4311-808f-e2d1cb7de838.png",
-    bio: "Outgoing urban explorer and travel lover 🌍 📸",
-    funFact: "I've backpacked across three continents.",
-    instagram: {
-      username: "jamescook",
-      followers: "2.1k followers",
-      photos: [
-        "/lovable-uploads/b5f1b986-aaa0-4148-933c-cabcd3bb5e00.png",
-        "/lovable-uploads/69da9fd1-98bf-4322-8993-cc5e88b359a7.png", 
-        "/lovable-uploads/0a476701-1f3e-4c0f-b23d-e9d052c0b188.png"
-      ]
+  const { user, signOut, loading } = useAuth();
+  const navigate = useNavigate();
+  const [profile, setProfile] = useState<any>(null);
+  const [profileLoading, setProfileLoading] = useState(true);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/auth');
+      return;
+    }
+
+    if (user) {
+      fetchProfile();
+    }
+  }, [user, loading, navigate]);
+
+  const fetchProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user?.id)
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Error fetching profile:', error);
+      } else {
+        setProfile(data);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setProfileLoading(false);
     }
   };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/auth');
+  };
+
+  if (loading || profileLoading) {
+    return (
+      <Layout>
+        <div className="p-4 flex items-center justify-center min-h-[50vh]">
+          <div className="text-white">Lädt...</div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!user || !profile) {
+    return (
+      <Layout>
+        <div className="p-4 flex items-center justify-center min-h-[50vh]">
+          <div className="text-center space-y-4">
+            <div className="text-white">Profil nicht gefunden</div>
+            <Button onClick={() => navigate('/auth')}>
+              Zur Anmeldung
+            </Button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -29,6 +82,14 @@ const Profile = () => {
             <div className="text-evendle-orange text-2xl font-bold">+</div>
             <span className="text-white text-xl font-bold">evendle</span>
           </div>
+          <Button
+            onClick={handleSignOut}
+            variant="ghost"
+            size="icon"
+            className="text-evendle-light-gray hover:text-white"
+          >
+            <LogOut className="w-5 h-5" />
+          </Button>
         </div>
 
         {/* Profile Info */}
@@ -36,8 +97,8 @@ const Profile = () => {
           {/* Avatar */}
           <div className="w-40 h-40 mx-auto rounded-full overflow-hidden bg-gradient-to-br from-evendle-orange/20 to-evendle-dark-card">
             <img 
-              src="https://images.unsplash.com/photo-1494790108755-2616b9b36f21?w=400&h=400&fit=crop&crop=face" 
-              alt={user.name}
+              src={profile.avatar_url || "https://images.unsplash.com/photo-1494790108755-2616b9b36f21?w=400&h=400&fit=crop&crop=face"} 
+              alt={profile.name}
               className="w-full h-full object-cover"
             />
           </div>
@@ -45,62 +106,55 @@ const Profile = () => {
           {/* User Info */}
           <div className="space-y-2">
             <h1 className="text-white text-2xl font-bold">
-              {user.name} {user.age} {user.country}
+              {profile.name} {profile.age} {profile.country}
             </h1>
           </div>
 
           {/* About Me */}
           <div className="text-left space-y-4">
-            <div>
-              <h3 className="text-white font-bold text-lg mb-2">About me:</h3>
-              <p className="text-evendle-light-gray">{user.bio}</p>
-            </div>
+            {profile.bio && (
+              <div>
+                <h3 className="text-white font-bold text-lg mb-2">About me:</h3>
+                <p className="text-evendle-light-gray">{profile.bio}</p>
+              </div>
+            )}
 
-            <div>
-              <h3 className="text-white font-bold text-lg mb-2">Fun fact:</h3>
-              <p className="text-evendle-light-gray">{user.funFact}</p>
-            </div>
+            {profile.fun_fact && (
+              <div>
+                <h3 className="text-white font-bold text-lg mb-2">Fun fact:</h3>
+                <p className="text-evendle-light-gray">{profile.fun_fact}</p>
+              </div>
+            )}
           </div>
 
           {/* Instagram Section */}
-          <div className="space-y-4">
-            <h3 className="text-white font-bold text-lg text-left">Instagram</h3>
-            
-            <div className="flex items-center justify-between bg-card rounded-2xl p-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 rounded-full overflow-hidden">
-                  <img 
-                    src={user.avatar} 
-                    alt={user.name}
-                    className="w-full h-full object-cover"
-                  />
+          {profile.instagram_username && (
+            <div className="space-y-4">
+              <h3 className="text-white font-bold text-lg text-left">Instagram</h3>
+              
+              <div className="flex items-center justify-between bg-card rounded-2xl p-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 rounded-full overflow-hidden">
+                    <img 
+                      src={profile.avatar_url || "https://images.unsplash.com/photo-1494790108755-2616b9b36f21?w=400&h=400&fit=crop&crop=face"} 
+                      alt={profile.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-white font-semibold">{profile.instagram_username}</p>
+                    <p className="text-evendle-gray text-sm">{profile.instagram_followers || "0 followers"}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-white font-semibold">{user.instagram.username}</p>
-                  <p className="text-evendle-gray text-sm">{user.instagram.followers}</p>
-                </div>
+                <Button 
+                  variant="outline" 
+                  className="border-evendle-orange text-evendle-orange hover:bg-evendle-orange hover:text-white"
+                >
+                  View Profile
+                </Button>
               </div>
-              <Button 
-                variant="outline" 
-                className="border-evendle-orange text-evendle-orange hover:bg-evendle-orange hover:text-white"
-              >
-                View Profile
-              </Button>
             </div>
-
-            {/* Instagram Photos */}
-            <div className="grid grid-cols-3 gap-2">
-              {user.instagram.photos.map((photo, index) => (
-                <div key={index} className="aspect-square rounded-xl overflow-hidden">
-                  <img 
-                    src={photo} 
-                    alt={`Instagram photo ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </Layout>

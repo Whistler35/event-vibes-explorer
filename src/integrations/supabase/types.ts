@@ -65,6 +65,51 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          age: number | null
+          avatar_url: string | null
+          bio: string | null
+          country: string | null
+          created_at: string
+          fun_fact: string | null
+          id: string
+          instagram_followers: string | null
+          instagram_username: string | null
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          age?: number | null
+          avatar_url?: string | null
+          bio?: string | null
+          country?: string | null
+          created_at?: string
+          fun_fact?: string | null
+          id?: string
+          instagram_followers?: string | null
+          instagram_username?: string | null
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          age?: number | null
+          avatar_url?: string | null
+          bio?: string | null
+          country?: string | null
+          created_at?: string
+          fun_fact?: string | null
+          id?: string
+          instagram_followers?: string | null
+          instagram_username?: string | null
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -1,14 +1,88 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import Layout from "@/components/Layout";
 import EventCard from "@/components/EventCard";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 const Home = () => {
   const [selectedCity, setSelectedCity] = useState("");
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
+
+  // Show auth buttons if user is not logged in, don't redirect
+  if (loading) {
+    return (
+      <Layout>
+        <div className="p-4 flex items-center justify-center min-h-[50vh]">
+          <div className="text-white">Lädt...</div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Layout>
+        <div className="min-h-screen bg-background flex flex-col">
+          {/* Header with Logo */}
+          <div className="p-4 pt-8">
+            <div className="flex items-center space-x-2">
+              <span className="text-evendle-orange text-2xl font-bold">+</span>
+              <span className="text-white text-xl font-bold">evendle</span>
+            </div>
+          </div>
+
+          {/* Hero Section */}
+          <div className="flex-1 flex flex-col justify-center px-4 space-y-8">
+            {/* Hero Text */}
+            <div className="text-center space-y-2">
+              <h1 className="text-white text-5xl font-bold leading-tight">
+                your city
+              </h1>
+              <h2 className="text-white text-5xl font-bold leading-tight">
+                your events
+              </h2>
+              <p className="text-evendle-light-gray text-lg mt-4">
+                Melde dich an, um Events in deiner Stadt zu entdecken
+              </p>
+            </div>
+
+            {/* Hero Image */}
+            <div className="flex justify-center">
+              <div className="w-80 h-96 rounded-3xl overflow-hidden">
+                <img 
+                  src="/lovable-uploads/e8a01b75-41cf-4188-95f0-b5c0bc64ebab.png" 
+                  alt="Friends at event"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+
+            {/* Auth Buttons */}
+            <div className="max-w-md mx-auto w-full space-y-4">
+              <Button
+                onClick={() => navigate('/auth')}
+                className="w-full h-14 text-lg rounded-full"
+              >
+                Anmelden
+              </Button>
+              <Button
+                onClick={() => navigate('/auth')}
+                variant="outline"
+                className="w-full h-14 text-lg rounded-full border-evendle-orange text-evendle-orange hover:bg-evendle-orange hover:text-white"
+              >
+                Registrieren
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
   
   const topEvents = [{
     id: 1,
