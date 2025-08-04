@@ -117,7 +117,18 @@ const EventDetail = () => {
 
   const handleJoinEvent = async () => {
     console.log('handleJoinEvent called', { user, event, isParticipant });
-    if (!user || !event) return;
+    
+    if (!user) {
+      console.log('No user found - redirecting to auth');
+      toast.error('Du musst eingeloggt sein um Events beizutreten');
+      navigate('/auth');
+      return;
+    }
+    
+    if (!event) {
+      console.log('No event found');
+      return;
+    }
 
     setJoinLoading(true);
     try {
