@@ -14,7 +14,7 @@ import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import CityEvents from "./pages/CityEvents";
 import NotFound from "./pages/NotFound";
-
+import ProtectedRoute from "./components/ProtectedRoute";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -29,8 +29,8 @@ const App = () => (
           <Route path="/city/:city" element={<CityEvents />} />
           <Route path="/event/:id" element={<EventDetail />} />
           <Route path="/event/:id/hangouts" element={<EventHangouts />} />
-          <Route path="/nearby" element={<Nearby />} />
-          <Route path="/messenger" element={<Messenger />} />
+          <Route path="/nearby" element={<ProtectedRoute><Nearby /></ProtectedRoute>} />
+          <Route path="/messenger" element={<ProtectedRoute><Messenger /></ProtectedRoute>} />
           <Route path="/chat/:id" element={<Chat />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/auth" element={<Auth />} />
