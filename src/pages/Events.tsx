@@ -23,7 +23,7 @@ const Events = () => {
 
   const events = [
     {
-      id: 1,
+      id: "8e2ebc17-c1b6-4a3d-8aae-2f49edcdcb0b",
       title: "NAMASTE FOR ALL",
       subtitle: "YOGA-KURS",
       image: "/lovable-uploads/f4be3766-dd26-4f5d-b31a-0fc8dc6465d1.png",
@@ -34,7 +34,7 @@ const Events = () => {
       description: "Sunset Yoga in the Park – Berlin Edition"
     },
     {
-      id: 2,
+      id: "5d16e0d4-2b00-4fda-961a-5385cf4ab5f7",
       title: "CLOSING",
       subtitle: "VIERNES 27 JUNIO",
       image: "/lovable-uploads/a0af2c47-46da-41a8-8282-d3ba5998ab1a.png",
@@ -45,7 +45,7 @@ const Events = () => {
       description: "Party Closing : Last dance event"
     },
     {
-      id: 3,
+      id: "7e1eb947-0d14-4051-9a91-e668161dc830",
       title: "SUMMER FESTIVAL",
       subtitle: "ELECTRONIC MUSIC",
       image: "/lovable-uploads/cd408aae-af95-4d17-a1f0-20dae1b117d4.png",
@@ -57,7 +57,7 @@ const Events = () => {
     },
   ];
 
-  const handleEventClick = (eventId: number) => {
+  const handleEventClick = (eventId: string) => {
     navigate(`/event/${eventId}`);
   };
 

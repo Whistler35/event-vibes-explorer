@@ -15,7 +15,7 @@ const CityEvents = () => {
   // Mock events data - in real app this would come from API
   const allEvents = [
     {
-      id: 1,
+      id: "8e2ebc17-c1b6-4a3d-8aae-2f49edcdcb0b",
       title: "NAMASTE FOR ALL",
       subtitle: "YOGA-KURS",
       image: "/lovable-uploads/f4be3766-dd26-4f5d-b31a-0fc8dc6465d1.png",
@@ -26,7 +26,7 @@ const CityEvents = () => {
       city: "berlin"
     },
     {
-      id: 2,
+      id: "5d16e0d4-2b00-4fda-961a-5385cf4ab5f7",
       title: "CLOSING PARTY",
       subtitle: "VIERNES 27 JUNIO",
       image: "/lovable-uploads/a0af2c47-46da-41a8-8282-d3ba5998ab1a.png",
@@ -37,7 +37,7 @@ const CityEvents = () => {
       city: "berlin"
     },
     {
-      id: 3,
+      id: "7e1eb947-0d14-4051-9a91-e668161dc830",
       title: "SUMMER BEATS",
       subtitle: "ELECTRONIC MUSIC",
       image: "/lovable-uploads/cd408aae-af95-4d17-a1f0-20dae1b117d4.png",
@@ -48,7 +48,7 @@ const CityEvents = () => {
       city: "berlin"
     },
     {
-      id: 4,
+      id: "bd090423-1235-4612-aebb-6eb98ac9e93b",
       title: "VIENNA CLASSICAL NIGHT",
       subtitle: "KONZERT",
       image: "/lovable-uploads/b5f1b986-aaa0-4148-933c-cabcd3bb5e00.png",
@@ -59,7 +59,7 @@ const CityEvents = () => {
       city: "vienna"
     },
     {
-      id: 5,
+      id: "ecd82074-8a1e-4809-9a60-0d735b38ebb9",
       title: "KUNST & KULTUR",
       subtitle: "GALLERY OPENING",
       image: "/lovable-uploads/c5cfa817-d10d-4311-808f-e2d1cb7de838.png",
@@ -82,7 +82,7 @@ const CityEvents = () => {
   const categories = ["all", "Outdoor", "Party", "Music", "Art"];
   const dates = ["all", ...Array.from(new Set(allEvents.map(event => event.date)))];
 
-  const handleEventClick = (eventId: number) => {
+  const handleEventClick = (eventId: string) => {
     navigate(`/event/${eventId}`);
   };
 
