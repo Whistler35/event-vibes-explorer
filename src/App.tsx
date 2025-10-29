@@ -30,7 +30,7 @@ const App = () => (
           <Route path="/event/:id" element={<EventDetail />} />
           <Route path="/event/:id/hangouts" element={<EventHangouts />} />
           <Route path="/nearby" element={<Nearby />} />
-          <Route path="/messenger" element={<ProtectedRoute><Messenger /></ProtectedRoute>} />
+          <Route path="/messenger" element={<Messenger />} />
           <Route path="/chat/:id" element={<Chat />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/auth" element={<Auth />} />
