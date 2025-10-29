@@ -29,7 +29,7 @@ const App = () => (
           <Route path="/city/:city" element={<CityEvents />} />
           <Route path="/event/:id" element={<EventDetail />} />
           <Route path="/event/:id/hangouts" element={<EventHangouts />} />
-          <Route path="/nearby" element={<ProtectedRoute><Nearby /></ProtectedRoute>} />
+          <Route path="/nearby" element={<Nearby />} />
           <Route path="/messenger" element={<ProtectedRoute><Messenger /></ProtectedRoute>} />
           <Route path="/chat/:id" element={<Chat />} />
           <Route path="/profile" element={<Profile />} />
