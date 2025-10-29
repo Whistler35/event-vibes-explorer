@@ -1,17 +1,24 @@
 import React from 'react';
-import OpenStreetMap from './OpenStreetMap';
+import GoogleMap from './GoogleMap';
 
 interface InteractiveMapProps {
   onCreateEvent?: (position: [number, number]) => void;
 }
 
 const InteractiveMap: React.FC<InteractiveMapProps> = ({ onCreateEvent }) => {
+  // Convert callback format from [lat, lng] to {lat, lng} for Google Maps
+  const handleCreateEvent = (position: { lat: number; lng: number }) => {
+    if (onCreateEvent) {
+      onCreateEvent([position.lat, position.lng]);
+    }
+  };
+
   return (
-    <OpenStreetMap
-      center={[52.520008, 13.404954]} // Berlin
+    <GoogleMap
+      center={{ lat: 52.520008, lng: 13.404954 }} // Berlin
       zoom={13}
       height="100%"
-      onCreateEvent={onCreateEvent}
+      onCreateEvent={handleCreateEvent}
     />
   );
 };
