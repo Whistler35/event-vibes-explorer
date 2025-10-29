@@ -393,7 +393,16 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
       return true;
     });
 
-    filteredEvents.forEach((event) => {
+    // Filter out events with invalid positions (null coordinates)
+    const validEvents = filteredEvents.filter(event => 
+      event.position && 
+      event.position[0] !== null && 
+      event.position[1] !== null &&
+      !isNaN(event.position[0]) &&
+      !isNaN(event.position[1])
+    );
+
+    validEvents.forEach((event) => {
       console.log('Processing event:', event.title, 'Image:', event.image);
       
       // Immer nur runde Bild-Marker
