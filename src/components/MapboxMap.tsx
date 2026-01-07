@@ -58,28 +58,12 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   useEffect(() => {
     const initMap = async () => {
       try {
-        // Fetch Mapbox token from Supabase Edge Function
-        console.log('Fetching Mapbox token from edge function...');
-        const response = await fetch('https://wrqckgrnshklyaiilprz.supabase.co/functions/v1/mapbox-token');
-        console.log('Response status:', response.status);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        console.log('Response data:', data);
-        
-        if (!data.token) {
-          console.error('No token in response:', data);
-          throw new Error('Mapbox Token nicht gefunden in Supabase Secrets');
-        }
-
-        console.log('Setting Mapbox token:', data.token.substring(0, 10) + '...');
+        // Use the public Mapbox token directly (public tokens are safe to use in frontend)
+        const mapboxToken = 'pk.eyJ1IjoiZXZlbmRsZSIsImEiOiJjbWs0aHc2eWQwN2hqM2RyMjI4ZTY0N2F6In0.gMPP_wAbSR4Esz7WlB4Z4Q';
 
         if (!mapContainer.current) return;
 
-        mapboxgl.accessToken = data.token;
+        mapboxgl.accessToken = mapboxToken;
         
         map.current = new mapboxgl.Map({
           container: mapContainer.current,
