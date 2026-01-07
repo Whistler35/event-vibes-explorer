@@ -41,6 +41,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   const [longPressProgress, setLongPressProgress] = useState(0);
   const [longPressPosition, setLongPressPosition] = useState<{ x: number; y: number } | null>(null);
   const progressInterval = useRef<NodeJS.Timeout | null>(null);
+  const pendingCreateRef = useRef<[number, number] | null>(null);
 
   // Keep callback ref updated
   onCreateEventRef.current = onCreateEvent;
@@ -50,7 +51,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
 
   const allEvents = events.length > 0 ? events : defaultEvents;
 
-  const clearLongPress = useCallback(() => {
+  const clearLongPress = useCallback((triggerCreate = false) => {
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
@@ -59,6 +60,14 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
       clearInterval(progressInterval.current);
       progressInterval.current = null;
     }
+
+    // If the long-press completed successfully, trigger creation on release
+    if (triggerCreate && pendingCreateRef.current && onCreateEventRef.current) {
+      console.log('[MapboxMap] Trigger create on release:', pendingCreateRef.current);
+      onCreateEventRef.current(pendingCreateRef.current);
+    }
+    pendingCreateRef.current = null;
+
     setLongPressProgress(0);
     setLongPressPosition(null);
     pressStartPos.current = null;
@@ -97,16 +106,16 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
           description: `Aktueller Zoom: ${currentZoom.toFixed(1)} - Benötigt: ${minZoomForCreate}`,
           duration: 4000
         });
-        clearLongPress();
+        clearLongPress(false);
         return;
       }
-      
-      // Use stored coordinates
-      if (onCreateEventRef.current) {
-        onCreateEventRef.current([lngLat.lat, lngLat.lng]);
-      }
-      
-      clearLongPress();
+
+      // IMPORTANT: Don't open the dialog while the user is still pressing.
+      // On mobile, the following touchend/mouseup can immediately close the dialog.
+      // So we store the coordinates now and trigger creation on release.
+      pendingCreateRef.current = [lngLat.lat, lngLat.lng];
+      console.log('[MapboxMap] Long-press complete, will create on release:', pendingCreateRef.current);
+      setLongPressProgress(100);
     }, 3000);
   }, [minZoomForCreate, clearLongPress]);
 
@@ -205,12 +214,12 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
       // Long press handlers for mouse
       map.current.on('mousedown', handleLongPressStart);
       map.current.on('mousemove', handleMove);
-      map.current.on('mouseup', clearLongPress);
+      map.current.on('mouseup', () => clearLongPress(true));
       
       // Long press handlers for touch
       map.current.on('touchstart', handleLongPressStart);
       map.current.on('touchmove', handleMove);
-      map.current.on('touchend', clearLongPress);
+      map.current.on('touchend', () => clearLongPress(true));
 
       map.current.on('error', (e) => {
         console.error('Mapbox error:', e);
