@@ -67,6 +67,9 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   const handleLongPressStart = useCallback((e: mapboxgl.MapMouseEvent | mapboxgl.MapTouchEvent) => {
     if (!map.current) return;
     
+    // Store lngLat immediately as the event object may not be valid later
+    const lngLat = { lat: e.lngLat.lat, lng: e.lngLat.lng };
+    
     const point = 'touches' in e.originalEvent 
       ? { x: (e.originalEvent as TouchEvent).touches[0].clientX, y: (e.originalEvent as TouchEvent).touches[0].clientY }
       : { x: (e.originalEvent as MouseEvent).clientX, y: (e.originalEvent as MouseEvent).clientY };
@@ -98,8 +101,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         return;
       }
       
-      // Get coordinates from the long press position
-      const lngLat = e.lngLat;
+      // Use stored coordinates
       if (onCreateEventRef.current) {
         onCreateEventRef.current([lngLat.lat, lngLat.lng]);
       }
@@ -198,16 +200,17 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
           });
         });
 
-        // Long press handlers for mouse
-        map.current!.on('mousedown', handleLongPressStart);
-        map.current!.on('mousemove', handleMove);
-        map.current!.on('mouseup', clearLongPress);
-        
-        // Long press handlers for touch
-        map.current!.on('touchstart', handleLongPressStart);
-        map.current!.on('touchmove', handleMove);
-        map.current!.on('touchend', clearLongPress);
       });
+      
+      // Long press handlers for mouse
+      map.current.on('mousedown', handleLongPressStart);
+      map.current.on('mousemove', handleMove);
+      map.current.on('mouseup', clearLongPress);
+      
+      // Long press handlers for touch
+      map.current.on('touchstart', handleLongPressStart);
+      map.current.on('touchmove', handleMove);
+      map.current.on('touchend', clearLongPress);
 
       map.current.on('error', (e) => {
         console.error('Mapbox error:', e);
