@@ -10,11 +10,9 @@ import EventHangouts from "./pages/EventHangouts";
 import Nearby from "./pages/Nearby";
 import Messenger from "./pages/Messenger";
 import Chat from "./pages/Chat";
-import Profile from "./pages/Profile";
-import Auth from "./pages/Auth";
 import CityEvents from "./pages/CityEvents";
 import NotFound from "./pages/NotFound";
-import ProtectedRoute from "./components/ProtectedRoute";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -32,7 +30,6 @@ const App = () => (
           <Route path="/nearby" element={<Nearby />} />
           <Route path="/messenger" element={<Messenger />} />
           <Route path="/chat/:id" element={<Chat />} />
-          <Route path="/profile" element={<Profile />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
