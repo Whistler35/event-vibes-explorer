@@ -19,7 +19,7 @@ interface MapboxMapProps {
 }
 
 const MapboxMap: React.FC<MapboxMapProps> = ({
-  center = [52.520008, 13.404954], // Berlin default
+  center = [47.2692, 11.4041], // Innsbruck default
   zoom = 13,
   height = "500px",
   events = [],
@@ -35,27 +35,8 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   // Keep callback ref updated
   onCreateEventRef.current = onCreateEvent;
 
-  // Sample events for Berlin
-  const defaultEvents: MapEvent[] = [
-    {
-      id: 1,
-      title: "NAMASTE FOR ALL - YOGA-KURS",
-      position: [52.515, 13.405],
-      category: "Outdoor"
-    },
-    {
-      id: 2,
-      title: "CLOSING PARTY",
-      position: [52.525, 13.395],
-      category: "Party"
-    },
-    {
-      id: 3,
-      title: "SUMMER BEATS",
-      position: [52.510, 13.415],
-      category: "Music"
-    }
-  ];
+  // No default events - will be loaded from database
+  const defaultEvents: MapEvent[] = [];
 
   const allEvents = events.length > 0 ? events : defaultEvents;
 
