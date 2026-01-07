@@ -63,8 +63,12 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
 
     // If the long-press completed successfully, trigger creation on release
     if (triggerCreate && pendingCreateRef.current && onCreateEventRef.current) {
-      console.log('[MapboxMap] Trigger create on release:', pendingCreateRef.current);
-      onCreateEventRef.current(pendingCreateRef.current);
+      const coords = pendingCreateRef.current;
+      console.log('[MapboxMap] Trigger create on release:', coords);
+      // Small delay to ensure touch/mouse events are fully processed
+      setTimeout(() => {
+        onCreateEventRef.current?.(coords);
+      }, 100);
     }
     pendingCreateRef.current = null;
 

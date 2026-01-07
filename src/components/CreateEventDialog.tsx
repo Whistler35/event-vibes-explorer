@@ -84,7 +84,11 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
         if (!nextOpen) handleClose();
       }}
     >
-      <DialogContent className="sm:max-w-[400px] bg-evendle-dark border-evendle-gray p-0 gap-0">
+      <DialogContent 
+        className="sm:max-w-[400px] bg-evendle-dark border-evendle-gray p-0 gap-0"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-4 pb-2">
           <div className="flex items-center gap-2">
