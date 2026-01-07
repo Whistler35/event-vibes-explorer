@@ -33,15 +33,6 @@ const Nearby = () => {
           <InteractiveMap onCreateEvent={handleCreateEvent} />
         </div>
 
-        {/* Create Evendle Button */}
-        <div className="absolute bottom-32 left-4 right-4 z-10">
-          <Button 
-            className="w-full bg-evendle-orange hover:bg-evendle-orange-hover text-white py-4 rounded-2xl font-medium text-lg"
-            onClick={() => handleCreateEvent()}
-          >
-            create evendle
-          </Button>
-        </div>
       </div>
     </Layout>
   );
