@@ -76,7 +76,14 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        // Radix calls onOpenChange(true) when opening.
+        // Only run our close/reset logic when the dialog is closing.
+        if (!nextOpen) handleClose();
+      }}
+    >
       <DialogContent className="sm:max-w-[400px] bg-evendle-dark border-evendle-gray p-0 gap-0">
         {/* Header */}
         <div className="flex items-center justify-between p-4 pb-2">
