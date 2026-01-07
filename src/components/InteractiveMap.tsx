@@ -8,10 +8,11 @@ interface InteractiveMapProps {
 const InteractiveMap: React.FC<InteractiveMapProps> = ({ onCreateEvent }) => {
   return (
     <MapboxMap
-      center={[52.520008, 13.404954]} // Berlin
+      center={[47.2692, 11.4041]} // Innsbruck
       zoom={13}
       height="100%"
       onCreateEvent={onCreateEvent}
+      minZoomForCreate={14}
     />
   );
 };

@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { toast } from 'sonner';
 
 interface MapEvent {
   id: number;
@@ -16,6 +17,7 @@ interface MapboxMapProps {
   events?: MapEvent[];
   onCreateEvent?: (position: [number, number]) => void;
   showControls?: boolean;
+  minZoomForCreate?: number;
 }
 
 const MapboxMap: React.FC<MapboxMapProps> = ({
@@ -24,13 +26,21 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   height = "500px",
   events = [],
   onCreateEvent,
-  showControls = true
+  showControls = true,
+  minZoomForCreate = 14
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const onCreateEventRef = useRef(onCreateEvent);
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Long press state
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const pressStartPos = useRef<{ x: number; y: number } | null>(null);
+  const [longPressProgress, setLongPressProgress] = useState(0);
+  const [longPressPosition, setLongPressPosition] = useState<{ x: number; y: number } | null>(null);
+  const progressInterval = useRef<NodeJS.Timeout | null>(null);
 
   // Keep callback ref updated
   onCreateEventRef.current = onCreateEvent;
@@ -39,6 +49,80 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   const defaultEvents: MapEvent[] = [];
 
   const allEvents = events.length > 0 ? events : defaultEvents;
+
+  const clearLongPress = useCallback(() => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+    if (progressInterval.current) {
+      clearInterval(progressInterval.current);
+      progressInterval.current = null;
+    }
+    setLongPressProgress(0);
+    setLongPressPosition(null);
+    pressStartPos.current = null;
+  }, []);
+
+  const handleLongPressStart = useCallback((e: mapboxgl.MapMouseEvent | mapboxgl.MapTouchEvent) => {
+    if (!map.current) return;
+    
+    const point = 'touches' in e.originalEvent 
+      ? { x: (e.originalEvent as TouchEvent).touches[0].clientX, y: (e.originalEvent as TouchEvent).touches[0].clientY }
+      : { x: (e.originalEvent as MouseEvent).clientX, y: (e.originalEvent as MouseEvent).clientY };
+    
+    pressStartPos.current = point;
+    setLongPressPosition(point);
+    
+    // Start progress animation
+    const startTime = Date.now();
+    const duration = 3000; // 3 seconds
+    
+    progressInterval.current = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min((elapsed / duration) * 100, 100);
+      setLongPressProgress(progress);
+    }, 50);
+    
+    longPressTimer.current = setTimeout(() => {
+      if (!map.current) return;
+      
+      const currentZoom = map.current.getZoom();
+      
+      if (currentZoom < minZoomForCreate) {
+        toast.error('Bitte zoome weiter rein, um ein Event zu erstellen', {
+          description: `Aktueller Zoom: ${currentZoom.toFixed(1)} - Benötigt: ${minZoomForCreate}`,
+          duration: 4000
+        });
+        clearLongPress();
+        return;
+      }
+      
+      // Get coordinates from the long press position
+      const lngLat = e.lngLat;
+      if (onCreateEventRef.current) {
+        onCreateEventRef.current([lngLat.lat, lngLat.lng]);
+      }
+      
+      clearLongPress();
+    }, 3000);
+  }, [minZoomForCreate, clearLongPress]);
+
+  const handleMove = useCallback((e: mapboxgl.MapMouseEvent | mapboxgl.MapTouchEvent) => {
+    if (!pressStartPos.current) return;
+    
+    const point = 'touches' in e.originalEvent 
+      ? { x: (e.originalEvent as TouchEvent).touches[0].clientX, y: (e.originalEvent as TouchEvent).touches[0].clientY }
+      : { x: (e.originalEvent as MouseEvent).clientX, y: (e.originalEvent as MouseEvent).clientY };
+    
+    const dx = Math.abs(point.x - pressStartPos.current.x);
+    const dy = Math.abs(point.y - pressStartPos.current.y);
+    
+    // If moved more than 10 pixels, cancel long press
+    if (dx > 10 || dy > 10) {
+      clearLongPress();
+    }
+  }, [clearLongPress]);
 
   useEffect(() => {
     // Prevent re-initialization
@@ -114,12 +198,15 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
           });
         });
 
-        // Add click listener for creating events
-        map.current!.on('click', (e) => {
-          if (onCreateEventRef.current) {
-            onCreateEventRef.current([e.lngLat.lat, e.lngLat.lng]);
-          }
-        });
+        // Long press handlers for mouse
+        map.current!.on('mousedown', handleLongPressStart);
+        map.current!.on('mousemove', handleMove);
+        map.current!.on('mouseup', clearLongPress);
+        
+        // Long press handlers for touch
+        map.current!.on('touchstart', handleLongPressStart);
+        map.current!.on('touchmove', handleMove);
+        map.current!.on('touchend', clearLongPress);
       });
 
       map.current.on('error', (e) => {
@@ -133,10 +220,11 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     }
 
     return () => {
+      clearLongPress();
       map.current?.remove();
       map.current = null;
     };
-  }, [center, zoom, showControls, allEvents]);
+  }, [center, zoom, showControls, allEvents, handleLongPressStart, handleMove, clearLongPress]);
 
   if (error) {
     return (
@@ -170,6 +258,46 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
           </div>
         </div>
       )}
+      
+      {/* Long Press Progress Indicator */}
+      {longPressPosition && longPressProgress > 0 && (
+        <div 
+          className="fixed z-50 pointer-events-none"
+          style={{
+            left: longPressPosition.x - 30,
+            top: longPressPosition.y - 30,
+          }}
+        >
+          <svg width="60" height="60" viewBox="0 0 60 60">
+            <circle
+              cx="30"
+              cy="30"
+              r="26"
+              fill="none"
+              stroke="rgba(0,0,0,0.3)"
+              strokeWidth="4"
+            />
+            <circle
+              cx="30"
+              cy="30"
+              r="26"
+              fill="none"
+              stroke="#ff5722"
+              strokeWidth="4"
+              strokeLinecap="round"
+              strokeDasharray={`${(longPressProgress / 100) * 163.36} 163.36`}
+              transform="rotate(-90 30 30)"
+            />
+            <circle
+              cx="30"
+              cy="30"
+              r="8"
+              fill="#ff5722"
+            />
+          </svg>
+        </div>
+      )}
+      
       <style dangerouslySetInnerHTML={{
         __html: `
           @keyframes pulse {
