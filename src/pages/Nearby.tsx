@@ -1,20 +1,31 @@
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import Layout from "@/components/Layout";
-import { Button } from "@/components/ui/button";
 import InteractiveMap from "@/components/InteractiveMap";
+import CreateEventDialog from "@/components/CreateEventDialog";
+import { toast } from "sonner";
 
 const Nearby = () => {
-  const navigate = useNavigate();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedPosition, setSelectedPosition] = useState<[number, number] | null>(null);
 
-  const handleCreateEvent = (coordinates?: [number, number]) => {
-    // TODO: Open create event dialog with coordinates
-    if (coordinates) {
-      console.log('Create event at coordinates:', coordinates);
-      alert(`Event erstellen bei: ${coordinates[1].toFixed(4)}, ${coordinates[0].toFixed(4)}`);
-    } else {
-      // Default location for button click
-      alert('Event erstellen - wählen Sie einen Ort auf der Karte');
-    }
+  const handleCreateEvent = (coordinates: [number, number]) => {
+    setSelectedPosition(coordinates);
+    setDialogOpen(true);
+  };
+
+  const handleEventCreate = (event: {
+    position: [number, number];
+    title: string;
+    description: string;
+    date: string;
+    time: string;
+    image?: string;
+  }) => {
+    console.log('Event created:', event);
+    toast.success('Event erstellt!', {
+      description: event.title
+    });
+    // TODO: Save event to database
   };
 
   return (
@@ -33,6 +44,13 @@ const Nearby = () => {
           <InteractiveMap onCreateEvent={handleCreateEvent} />
         </div>
 
+        {/* Create Event Dialog */}
+        <CreateEventDialog
+          open={dialogOpen}
+          onClose={() => setDialogOpen(false)}
+          position={selectedPosition}
+          onCreateEvent={handleEventCreate}
+        />
       </div>
     </Layout>
   );
