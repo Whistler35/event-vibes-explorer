@@ -6,9 +6,11 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  console.log('Mapbox token function called');
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
