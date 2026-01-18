@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { toast } from 'sonner';
+import { Plus, X, MapPin } from 'lucide-react';
 
 interface MapEvent {
   id: number;
@@ -35,13 +35,10 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Long press state
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
-  const pressStartPos = useRef<{ x: number; y: number } | null>(null);
-  const [longPressProgress, setLongPressProgress] = useState(0);
-  const [longPressPosition, setLongPressPosition] = useState<{ x: number; y: number } | null>(null);
-  const progressInterval = useRef<NodeJS.Timeout | null>(null);
-  const pendingCreateRef = useRef<[number, number] | null>(null);
+  // Drag-to-place state
+  const [isPlaceMode, setIsPlaceMode] = useState(false);
+  const [markerPosition, setMarkerPosition] = useState<{ x: number; y: number } | null>(null);
+  const markerRef = useRef<mapboxgl.Marker | null>(null);
 
   // Keep callback ref updated
   onCreateEventRef.current = onCreateEvent;
@@ -51,93 +48,84 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
 
   const allEvents = events.length > 0 ? events : defaultEvents;
 
-  const clearLongPress = useCallback((triggerCreate = false) => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
+  // Handle entering place mode
+  const enterPlaceMode = useCallback(() => {
+    setIsPlaceMode(true);
+    // Place marker in center of map
+    if (map.current && mapContainer.current) {
+      const rect = mapContainer.current.getBoundingClientRect();
+      setMarkerPosition({ x: rect.width / 2, y: rect.height / 2 });
     }
-    if (progressInterval.current) {
-      clearInterval(progressInterval.current);
-      progressInterval.current = null;
-    }
-
-    // If the long-press completed successfully, trigger creation on release
-    if (triggerCreate && pendingCreateRef.current && onCreateEventRef.current) {
-      const coords = pendingCreateRef.current;
-      console.log('[MapboxMap] Trigger create on release:', coords);
-      // Small delay to ensure touch/mouse events are fully processed
-      setTimeout(() => {
-        onCreateEventRef.current?.(coords);
-      }, 100);
-    }
-    pendingCreateRef.current = null;
-
-    setLongPressProgress(0);
-    setLongPressPosition(null);
-    pressStartPos.current = null;
   }, []);
 
-  const handleLongPressStart = useCallback((e: mapboxgl.MapMouseEvent | mapboxgl.MapTouchEvent) => {
-    if (!map.current) return;
-    
-    // Store lngLat immediately as the event object may not be valid later
-    const lngLat = { lat: e.lngLat.lat, lng: e.lngLat.lng };
-    
-    const point = 'touches' in e.originalEvent 
-      ? { x: (e.originalEvent as TouchEvent).touches[0].clientX, y: (e.originalEvent as TouchEvent).touches[0].clientY }
-      : { x: (e.originalEvent as MouseEvent).clientX, y: (e.originalEvent as MouseEvent).clientY };
-    
-    pressStartPos.current = point;
-    setLongPressPosition(point);
-    
-    // Start progress animation
-    const startTime = Date.now();
-    const duration = 3000; // 3 seconds
-    
-    progressInterval.current = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min((elapsed / duration) * 100, 100);
-      setLongPressProgress(progress);
-    }, 50);
-    
-    longPressTimer.current = setTimeout(() => {
-      if (!map.current) return;
-      
-      const currentZoom = map.current.getZoom();
-      
-      if (currentZoom < minZoomForCreate) {
-        toast.error('Bitte zoome weiter rein, um ein Event zu erstellen', {
-          description: `Aktueller Zoom: ${currentZoom.toFixed(1)} - Benötigt: ${minZoomForCreate}`,
-          duration: 4000
-        });
-        clearLongPress(false);
-        return;
-      }
-
-      // IMPORTANT: Don't open the dialog while the user is still pressing.
-      // On mobile, the following touchend/mouseup can immediately close the dialog.
-      // So we store the coordinates now and trigger creation on release.
-      pendingCreateRef.current = [lngLat.lat, lngLat.lng];
-      console.log('[MapboxMap] Long-press complete, will create on release:', pendingCreateRef.current);
-      setLongPressProgress(100);
-    }, 3000);
-  }, [minZoomForCreate, clearLongPress]);
-
-  const handleMove = useCallback((e: mapboxgl.MapMouseEvent | mapboxgl.MapTouchEvent) => {
-    if (!pressStartPos.current) return;
-    
-    const point = 'touches' in e.originalEvent 
-      ? { x: (e.originalEvent as TouchEvent).touches[0].clientX, y: (e.originalEvent as TouchEvent).touches[0].clientY }
-      : { x: (e.originalEvent as MouseEvent).clientX, y: (e.originalEvent as MouseEvent).clientY };
-    
-    const dx = Math.abs(point.x - pressStartPos.current.x);
-    const dy = Math.abs(point.y - pressStartPos.current.y);
-    
-    // If moved more than 10 pixels, cancel long press
-    if (dx > 10 || dy > 10) {
-      clearLongPress();
+  // Handle canceling place mode
+  const cancelPlaceMode = useCallback(() => {
+    setIsPlaceMode(false);
+    setMarkerPosition(null);
+    if (markerRef.current) {
+      markerRef.current.remove();
+      markerRef.current = null;
     }
-  }, [clearLongPress]);
+  }, []);
+
+  // Handle confirming the placement
+  const confirmPlacement = useCallback(() => {
+    if (!map.current || !markerPosition || !mapContainer.current) return;
+    
+    // Convert screen position to map coordinates
+    const rect = mapContainer.current.getBoundingClientRect();
+    const point = map.current.unproject([markerPosition.x, markerPosition.y]);
+    
+    console.log('[MapboxMap] Confirm placement at:', point.lat, point.lng);
+    
+    if (onCreateEventRef.current) {
+      onCreateEventRef.current([point.lat, point.lng]);
+    }
+    
+    cancelPlaceMode();
+  }, [markerPosition, cancelPlaceMode]);
+
+  // Handle dragging the marker
+  const handleMarkerDrag = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    if (!isPlaceMode || !mapContainer.current) return;
+    
+    e.preventDefault();
+    
+    const rect = mapContainer.current.getBoundingClientRect();
+    
+    const getPosition = (event: MouseEvent | TouchEvent) => {
+      if ('touches' in event) {
+        return {
+          x: event.touches[0].clientX - rect.left,
+          y: event.touches[0].clientY - rect.top
+        };
+      }
+      return {
+        x: (event as MouseEvent).clientX - rect.left,
+        y: (event as MouseEvent).clientY - rect.top
+      };
+    };
+
+    const handleMove = (event: MouseEvent | TouchEvent) => {
+      const pos = getPosition(event);
+      // Clamp within bounds
+      pos.x = Math.max(0, Math.min(rect.width, pos.x));
+      pos.y = Math.max(0, Math.min(rect.height, pos.y));
+      setMarkerPosition(pos);
+    };
+
+    const handleEnd = () => {
+      document.removeEventListener('mousemove', handleMove);
+      document.removeEventListener('mouseup', handleEnd);
+      document.removeEventListener('touchmove', handleMove);
+      document.removeEventListener('touchend', handleEnd);
+    };
+
+    document.addEventListener('mousemove', handleMove);
+    document.addEventListener('mouseup', handleEnd);
+    document.addEventListener('touchmove', handleMove, { passive: false });
+    document.addEventListener('touchend', handleEnd);
+  }, [isPlaceMode]);
 
   useEffect(() => {
     // Prevent re-initialization
@@ -215,16 +203,6 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
 
       });
       
-      // Long press handlers for mouse
-      map.current.on('mousedown', handleLongPressStart);
-      map.current.on('mousemove', handleMove);
-      map.current.on('mouseup', () => clearLongPress(true));
-      
-      // Long press handlers for touch
-      map.current.on('touchstart', handleLongPressStart);
-      map.current.on('touchmove', handleMove);
-      map.current.on('touchend', () => clearLongPress(true));
-
       map.current.on('error', (e) => {
         console.error('Mapbox error:', e);
         setError('Fehler beim Laden der Mapbox-Karte');
@@ -236,11 +214,11 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     }
 
     return () => {
-      clearLongPress();
+      cancelPlaceMode();
       map.current?.remove();
       map.current = null;
     };
-  }, [center, zoom, showControls, allEvents, handleLongPressStart, handleMove, clearLongPress]);
+  }, [center, zoom, showControls, allEvents, cancelPlaceMode]);
 
   if (error) {
     return (
@@ -275,43 +253,71 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         </div>
       )}
       
-      {/* Long Press Progress Indicator */}
-      {longPressPosition && longPressProgress > 0 && (
-        <div 
-          className="fixed z-50 pointer-events-none"
-          style={{
-            left: longPressPosition.x - 30,
-            top: longPressPosition.y - 30,
-          }}
+      {/* Add Event Button */}
+      {!isPlaceMode && isLoaded && (
+        <button
+          onClick={enterPlaceMode}
+          className="absolute bottom-6 right-6 z-20 w-14 h-14 bg-evendle-orange rounded-full flex items-center justify-center shadow-lg hover:bg-orange-600 transition-colors"
+          aria-label="Event erstellen"
         >
-          <svg width="60" height="60" viewBox="0 0 60 60">
-            <circle
-              cx="30"
-              cy="30"
-              r="26"
-              fill="none"
-              stroke="rgba(0,0,0,0.3)"
-              strokeWidth="4"
-            />
-            <circle
-              cx="30"
-              cy="30"
-              r="26"
-              fill="none"
-              stroke="#ff5722"
-              strokeWidth="4"
-              strokeLinecap="round"
-              strokeDasharray={`${(longPressProgress / 100) * 163.36} 163.36`}
-              transform="rotate(-90 30 30)"
-            />
-            <circle
-              cx="30"
-              cy="30"
-              r="8"
-              fill="#ff5722"
-            />
-          </svg>
-        </div>
+          <Plus className="w-8 h-8 text-white" />
+        </button>
+      )}
+
+      {/* Place Mode UI */}
+      {isPlaceMode && markerPosition && (
+        <>
+          {/* Draggable Marker */}
+          <div
+            className="absolute z-30 cursor-grab active:cursor-grabbing touch-none"
+            style={{
+              left: markerPosition.x - 24,
+              top: markerPosition.y - 48,
+            }}
+            onMouseDown={handleMarkerDrag}
+            onTouchStart={handleMarkerDrag}
+          >
+            <MapPin className="w-12 h-12 text-evendle-orange drop-shadow-lg" fill="#ff5722" />
+          </div>
+
+          {/* Crosshair at marker position */}
+          <div
+            className="absolute z-20 pointer-events-none"
+            style={{
+              left: markerPosition.x - 16,
+              top: markerPosition.y - 16,
+            }}
+          >
+            <svg width="32" height="32" viewBox="0 0 32 32">
+              <line x1="16" y1="0" x2="16" y2="32" stroke="white" strokeWidth="2" opacity="0.8" />
+              <line x1="0" y1="16" x2="32" y2="16" stroke="white" strokeWidth="2" opacity="0.8" />
+              <circle cx="16" cy="16" r="4" fill="none" stroke="white" strokeWidth="2" opacity="0.8" />
+            </svg>
+          </div>
+
+          {/* Place Mode Controls */}
+          <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-30 flex gap-4">
+            <button
+              onClick={cancelPlaceMode}
+              className="px-6 py-3 bg-evendle-dark-card border border-evendle-gray rounded-full flex items-center gap-2 text-white hover:bg-evendle-gray transition-colors"
+            >
+              <X className="w-5 h-5" />
+              <span>Abbrechen</span>
+            </button>
+            <button
+              onClick={confirmPlacement}
+              className="px-6 py-3 bg-evendle-orange rounded-full flex items-center gap-2 text-white hover:bg-orange-600 transition-colors"
+            >
+              <MapPin className="w-5 h-5" />
+              <span>Hier platzieren</span>
+            </button>
+          </div>
+
+          {/* Instruction Banner */}
+          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30 px-4 py-2 bg-evendle-dark-card/90 border border-evendle-gray rounded-full">
+            <p className="text-white text-sm">Ziehe den Pin an die gewünschte Stelle</p>
+          </div>
+        </>
       )}
       
       <style dangerouslySetInnerHTML={{
