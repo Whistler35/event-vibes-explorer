@@ -223,19 +223,6 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         imageElement.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff5722" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>';
       }
 
-      // Create pulse effect
-      const pulseElement = document.createElement('div');
-      pulseElement.style.position = 'absolute';
-      pulseElement.style.top = '0';
-      pulseElement.style.left = '0';
-      pulseElement.style.width = '50px';
-      pulseElement.style.height = '50px';
-      pulseElement.style.borderRadius = '50%';
-      pulseElement.style.border = '2px solid #ff5722';
-      pulseElement.style.animation = 'pulse 2s infinite';
-      pulseElement.style.pointerEvents = 'none';
-
-      imageWrapper.appendChild(pulseElement);
       imageWrapper.appendChild(imageElement);
 
       // Create title label
