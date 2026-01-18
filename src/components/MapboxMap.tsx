@@ -214,11 +214,11 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     }
 
     return () => {
-      cancelPlaceMode();
       map.current?.remove();
       map.current = null;
     };
-  }, [center, zoom, showControls, allEvents, cancelPlaceMode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (error) {
     return (
