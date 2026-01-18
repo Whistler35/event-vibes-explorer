@@ -44,10 +44,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   // Keep callback ref updated
   onCreateEventRef.current = onCreateEvent;
 
-  // No default events - will be loaded from database
-  const defaultEvents: MapEvent[] = [];
-
-  const allEvents = events.length > 0 ? events : defaultEvents;
+  const allEvents = events;
 
   // Handle entering place mode
   const enterPlaceMode = useCallback(() => {
@@ -330,6 +327,11 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
           </div>
         </div>
       )}
+
+      {/* Debug badge (temporary) */}
+      <div className="absolute top-4 right-4 z-20 rounded-full border border-evendle-gray bg-evendle-dark-card/80 px-3 py-1 text-xs text-white">
+        Events: {allEvents.length} • Loaded: {String(isLoaded)}
+      </div>
       
       {/* Add Event Button */}
       {!isPlaceMode && isLoaded && (
