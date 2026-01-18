@@ -59,7 +59,7 @@ const Nearby = () => {
       <div className="relative h-[calc(100vh-80px)]">
         {/* Header */}
         <div className="absolute top-4 left-4 z-10">
-          <span className="text-white text-2xl font-bold drop-shadow-lg">evendle</span>
+          <span className="text-black text-2xl font-bold drop-shadow-lg">evendle</span>
         </div>
 
         {/* Interactive Map */}
