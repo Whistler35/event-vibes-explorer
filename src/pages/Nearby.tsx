@@ -32,15 +32,12 @@ const Nearby = () => {
     <Layout>
       <div className="relative h-[calc(100vh-80px)]">
         {/* Header */}
-        <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="text-evendle-orange text-2xl font-bold">+</div>
-            <span className="text-white text-2xl font-bold drop-shadow-lg">evendle</span>
-          </div>
+        <div className="absolute top-4 left-4 z-10">
+          <span className="text-white text-2xl font-bold drop-shadow-lg">evendle</span>
         </div>
 
         {/* Interactive Map */}
-        <div className="absolute top-16 bottom-0 left-0 right-0">
+        <div className="absolute top-0 bottom-0 left-0 right-0">
           <InteractiveMap onCreateEvent={handleCreateEvent} />
         </div>
 
