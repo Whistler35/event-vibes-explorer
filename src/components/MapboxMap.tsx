@@ -4,10 +4,11 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { Plus, X, MapPin } from 'lucide-react';
 
 interface MapEvent {
-  id: number;
+  id: number | string;
   title: string;
   position: [number, number]; // [lat, lng]
-  category: string;
+  category?: string;
+  image?: string;
 }
 
 interface MapboxMapProps {
@@ -156,51 +157,6 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
 
       map.current.on('load', () => {
         setIsLoaded(true);
-
-        // Add event markers
-        allEvents.forEach((event) => {
-          const markerElement = document.createElement('div');
-          markerElement.className = 'custom-marker';
-          markerElement.style.width = '20px';
-          markerElement.style.height = '20px';
-          markerElement.style.borderRadius = '50%';
-          markerElement.style.backgroundColor = '#ff5722';
-          markerElement.style.border = '3px solid white';
-          markerElement.style.cursor = 'pointer';
-          markerElement.style.boxShadow = '0 2px 10px rgba(0,0,0,0.3)';
-
-          const pulseElement = document.createElement('div');
-          pulseElement.style.position = 'absolute';
-          pulseElement.style.top = '0';
-          pulseElement.style.left = '0';
-          pulseElement.style.width = '20px';
-          pulseElement.style.height = '20px';
-          pulseElement.style.borderRadius = '50%';
-          pulseElement.style.backgroundColor = '#ff5722';
-          pulseElement.style.opacity = '0.6';
-          pulseElement.style.animation = 'pulse 2s infinite';
-          markerElement.appendChild(pulseElement);
-
-          new mapboxgl.Marker(markerElement)
-            .setLngLat([event.position[1], event.position[0]])
-            .addTo(map.current!);
-
-          const popup = new mapboxgl.Popup({
-            offset: 25,
-            closeButton: false,
-            className: 'custom-popup'
-          }).setHTML(`
-            <div style="color: black; padding: 8px;">
-              <h3 style="margin: 0; font-size: 14px; font-weight: bold;">${event.title}</h3>
-              <p style="margin: 4px 0 0 0; font-size: 12px; color: #666;">${event.category}</p>
-            </div>
-          `);
-
-          markerElement.addEventListener('click', () => {
-            popup.setLngLat([event.position[1], event.position[0]]).addTo(map.current!);
-          });
-        });
-
       });
       
       map.current.on('error', (e) => {
@@ -219,6 +175,128 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Ref to track existing markers
+  const markersRef = useRef<Map<string | number, mapboxgl.Marker>>(new Map());
+
+  // Effect to add/update event markers
+  useEffect(() => {
+    if (!map.current || !isLoaded) return;
+
+    // Add new markers
+    allEvents.forEach((event) => {
+      // Skip if marker already exists
+      if (markersRef.current.has(event.id)) return;
+
+      // Create marker container
+      const markerContainer = document.createElement('div');
+      markerContainer.className = 'event-marker-container';
+      markerContainer.style.display = 'flex';
+      markerContainer.style.flexDirection = 'column';
+      markerContainer.style.alignItems = 'center';
+      markerContainer.style.cursor = 'pointer';
+
+      // Create image wrapper with pulse effect
+      const imageWrapper = document.createElement('div');
+      imageWrapper.style.position = 'relative';
+      imageWrapper.style.width = '50px';
+      imageWrapper.style.height = '50px';
+
+      // Create round image or placeholder
+      const imageElement = document.createElement('div');
+      imageElement.style.width = '50px';
+      imageElement.style.height = '50px';
+      imageElement.style.borderRadius = '50%';
+      imageElement.style.border = '3px solid #ff5722';
+      imageElement.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
+      imageElement.style.overflow = 'hidden';
+      imageElement.style.backgroundColor = '#1a1a2e';
+
+      if (event.image) {
+        const img = document.createElement('img');
+        img.src = event.image;
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'cover';
+        imageElement.appendChild(img);
+      } else {
+        imageElement.style.display = 'flex';
+        imageElement.style.alignItems = 'center';
+        imageElement.style.justifyContent = 'center';
+        imageElement.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff5722" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>';
+      }
+
+      // Create pulse effect
+      const pulseElement = document.createElement('div');
+      pulseElement.style.position = 'absolute';
+      pulseElement.style.top = '0';
+      pulseElement.style.left = '0';
+      pulseElement.style.width = '50px';
+      pulseElement.style.height = '50px';
+      pulseElement.style.borderRadius = '50%';
+      pulseElement.style.border = '2px solid #ff5722';
+      pulseElement.style.animation = 'pulse 2s infinite';
+      pulseElement.style.pointerEvents = 'none';
+
+      imageWrapper.appendChild(pulseElement);
+      imageWrapper.appendChild(imageElement);
+
+      // Create title label
+      const titleLabel = document.createElement('div');
+      titleLabel.textContent = event.title;
+      titleLabel.style.marginTop = '4px';
+      titleLabel.style.padding = '2px 8px';
+      titleLabel.style.backgroundColor = 'rgba(26, 26, 46, 0.9)';
+      titleLabel.style.color = 'white';
+      titleLabel.style.fontSize = '11px';
+      titleLabel.style.fontWeight = 'bold';
+      titleLabel.style.borderRadius = '10px';
+      titleLabel.style.whiteSpace = 'nowrap';
+      titleLabel.style.maxWidth = '100px';
+      titleLabel.style.overflow = 'hidden';
+      titleLabel.style.textOverflow = 'ellipsis';
+      titleLabel.style.textAlign = 'center';
+
+      markerContainer.appendChild(imageWrapper);
+      markerContainer.appendChild(titleLabel);
+
+      // Create and add marker
+      const marker = new mapboxgl.Marker({
+        element: markerContainer,
+        anchor: 'bottom'
+      })
+        .setLngLat([event.position[1], event.position[0]])
+        .addTo(map.current!);
+
+      // Store marker reference
+      markersRef.current.set(event.id, marker);
+
+      // Add popup on click
+      const popup = new mapboxgl.Popup({
+        offset: 60,
+        closeButton: true,
+        className: 'custom-popup'
+      }).setHTML(`
+        <div style="color: black; padding: 8px; max-width: 200px;">
+          ${event.image ? `<img src="${event.image}" style="width: 100%; height: 80px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;" />` : ''}
+          <h3 style="margin: 0; font-size: 14px; font-weight: bold;">${event.title}</h3>
+          ${event.category ? `<p style="margin: 4px 0 0 0; font-size: 12px; color: #666;">${event.category}</p>` : ''}
+        </div>
+      `);
+
+      markerContainer.addEventListener('click', () => {
+        popup.setLngLat([event.position[1], event.position[0]]).addTo(map.current!);
+      });
+    });
+
+    // Cleanup removed events
+    markersRef.current.forEach((marker, id) => {
+      if (!allEvents.find(e => e.id === id)) {
+        marker.remove();
+        markersRef.current.delete(id);
+      }
+    });
+  }, [allEvents, isLoaded]);
 
   if (error) {
     return (
