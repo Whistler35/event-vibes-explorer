@@ -11,30 +11,35 @@ import Nearby from "./pages/Nearby";
 import Messenger from "./pages/Messenger";
 import Chat from "./pages/Chat";
 import CityEvents from "./pages/CityEvents";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import { AuthProvider } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/events" element={<Events />} />
-          <Route path="/city/:city" element={<CityEvents />} />
-          <Route path="/event/:id" element={<EventDetail />} />
-          <Route path="/event/:id/hangouts" element={<EventHangouts />} />
-          <Route path="/nearby" element={<Nearby />} />
-          <Route path="/messenger" element={<Messenger />} />
-          <Route path="/chat/:id" element={<Chat />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/city/:city" element={<CityEvents />} />
+            <Route path="/event/:id" element={<EventDetail />} />
+            <Route path="/event/:id/hangouts" element={<EventHangouts />} />
+            <Route path="/nearby" element={<Nearby />} />
+            <Route path="/messenger" element={<Messenger />} />
+            <Route path="/chat/:id" element={<Chat />} />
+            <Route path="/profile" element={<Profile />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
