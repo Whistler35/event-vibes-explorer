@@ -12,6 +12,7 @@ import Messenger from "./pages/Messenger";
 import Chat from "./pages/Chat";
 import CityEvents from "./pages/CityEvents";
 import Profile from "./pages/Profile";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/AuthContext";
 
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/messenger" element={<Messenger />} />
             <Route path="/chat/:id" element={<Chat />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/auth" element={<Auth />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
