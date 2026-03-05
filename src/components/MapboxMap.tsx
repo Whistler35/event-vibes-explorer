@@ -328,13 +328,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
       {/* Add Event Button */}
       {!isPlaceMode && isLoaded && (
         <button
-          onClick={() => {
-            if (isAdmin) {
-              enterPlaceMode();
-            } else {
-              toast.info('Nur Admins können Events erstellen.');
-            }
-          }}
+          onClick={() => enterPlaceMode()}
           className="absolute bottom-6 right-6 z-20 w-14 h-14 bg-evendle-orange rounded-full flex items-center justify-center shadow-lg hover:bg-orange-600 transition-colors"
           aria-label="Event erstellen"
         >

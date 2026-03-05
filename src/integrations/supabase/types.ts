@@ -109,6 +109,7 @@ export type Database = {
       }
       events: {
         Row: {
+          approval_status: Database["public"]["Enums"]["approval_status"]
           category: Database["public"]["Enums"]["event_category"] | null
           created_at: string
           created_by: string | null
@@ -129,6 +130,7 @@ export type Database = {
           visibility: Database["public"]["Enums"]["event_visibility"] | null
         }
         Insert: {
+          approval_status?: Database["public"]["Enums"]["approval_status"]
           category?: Database["public"]["Enums"]["event_category"] | null
           created_at?: string
           created_by?: string | null
@@ -149,6 +151,7 @@ export type Database = {
           visibility?: Database["public"]["Enums"]["event_visibility"] | null
         }
         Update: {
+          approval_status?: Database["public"]["Enums"]["approval_status"]
           category?: Database["public"]["Enums"]["event_category"] | null
           created_at?: string
           created_by?: string | null
@@ -651,6 +654,7 @@ export type Database = {
       search_events_bbox: {
         Args: { ne_lat: number; ne_lng: number; sw_lat: number; sw_lng: number }
         Returns: {
+          approval_status: Database["public"]["Enums"]["approval_status"]
           category: Database["public"]["Enums"]["event_category"] | null
           created_at: string
           created_by: string | null
@@ -680,6 +684,7 @@ export type Database = {
       search_events_radius: {
         Args: { center_lat: number; center_lng: number; radius_meters: number }
         Returns: {
+          approval_status: Database["public"]["Enums"]["approval_status"]
           category: Database["public"]["Enums"]["event_category"] | null
           created_at: string
           created_by: string | null
@@ -1301,6 +1306,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      approval_status: "pending" | "approved" | "rejected"
       event_category:
         | "music"
         | "sports"
@@ -1450,6 +1456,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      approval_status: ["pending", "approved", "rejected"],
       event_category: [
         "music",
         "sports",
