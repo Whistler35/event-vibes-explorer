@@ -1,9 +1,14 @@
-import React from 'react';
-import { Music, Dribbble, Palette, UtensilsCrossed, PartyPopper, TreePine, Users, Wrench, LayoutGrid } from 'lucide-react';
+import React, { useState } from 'react';
+import { Music, Dribbble, Palette, UtensilsCrossed, PartyPopper, TreePine, Users, Wrench, SlidersHorizontal, Calendar } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { de } from 'date-fns/locale';
 import type { EventCategory } from '@/hooks/useSearchEvents';
 
 const CATEGORIES: { id: EventCategory | ''; label: string; icon: React.ElementType }[] = [
-  { id: '', label: 'Alle', icon: LayoutGrid },
+  { id: '', label: 'Alle', icon: SlidersHorizontal },
   { id: 'music', label: 'Musik', icon: Music },
   { id: 'sports', label: 'Sport', icon: Dribbble },
   { id: 'culture', label: 'Kultur', icon: Palette },
@@ -17,33 +22,95 @@ const CATEGORIES: { id: EventCategory | ''; label: string; icon: React.ElementTy
 interface CategoryFilterProps {
   selected: EventCategory | '';
   onChange: (category: EventCategory | '') => void;
+  selectedDate?: Date;
+  onDateChange?: (date: Date | undefined) => void;
 }
 
-const CategoryFilter: React.FC<CategoryFilterProps> = ({ selected, onChange }) => {
+const CategoryFilter: React.FC<CategoryFilterProps> = ({ selected, onChange, selectedDate, onDateChange }) => {
+  const [open, setOpen] = useState(false);
+
+  const activeCategory = CATEGORIES.find(c => c.id === selected);
+  const hasActiveFilter = selected !== '' || !!selectedDate;
+
+  const filterLabel = (() => {
+    const parts: string[] = [];
+    if (selected && activeCategory) parts.push(activeCategory.label);
+    if (selectedDate) parts.push(format(selectedDate, 'dd.MM.', { locale: de }));
+    return parts.length > 0 ? parts.join(' · ') : 'Filter';
+  })();
+
   return (
-    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-      {CATEGORIES.map(({ id, label, icon: Icon }) => {
-        const isActive = selected === id;
-        return (
-          <button
-            key={id}
-            onClick={() => onChange(id)}
-            className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-              isActive
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted text-muted-foreground hover:bg-muted/80'
-            }`}
-          >
-            <Icon className="w-3.5 h-3.5" />
-            {label}
-          </button>
-        );
-      })}
-      <style>{`
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-      `}</style>
-    </div>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          className={cn(
+            'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors',
+            hasActiveFilter
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-muted text-muted-foreground hover:bg-muted/80'
+          )}
+        >
+          <SlidersHorizontal className="w-3.5 h-3.5" />
+          {filterLabel}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-72 p-3 bg-card border-border" align="start" sideOffset={8}>
+        {/* Categories */}
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Kategorie</p>
+          <div className="flex flex-wrap gap-1.5">
+            {CATEGORIES.map(({ id, label, icon: Icon }) => {
+              const isActive = selected === id;
+              return (
+                <button
+                  key={id}
+                  onClick={() => {
+                    onChange(id);
+                    if (!onDateChange) setOpen(false);
+                  }}
+                  className={cn(
+                    'flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition-colors',
+                    isActive
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                  )}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Date picker */}
+        {onDateChange && (
+          <div className="mt-3 pt-3 border-t border-border space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                <Calendar className="w-3 h-3" />
+                Datum
+              </p>
+              {selectedDate && (
+                <button
+                  onClick={() => onDateChange(undefined)}
+                  className="text-xs text-primary hover:underline"
+                >
+                  Zurücksetzen
+                </button>
+              )}
+            </div>
+            <CalendarComponent
+              mode="single"
+              selected={selectedDate}
+              onSelect={(date) => onDateChange(date)}
+              className={cn("p-2 pointer-events-auto")}
+              locale={de}
+            />
+          </div>
+        )}
+      </PopoverContent>
+    </Popover>
   );
 };
 
