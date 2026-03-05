@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { CheckCircle, XCircle, Clock, ArrowLeft, MapPin, Calendar } from "lucide-react";
 import { format } from "date-fns";
-import { de } from "date-fns/locale";
+import { de } from "date-fns/locale/de";
 
 interface PendingEvent {
   id: string;
