@@ -100,12 +100,6 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
             <span className="text-evendle-orange text-xl font-bold">+</span>
             <span className="text-white text-lg font-semibold">Create evendle</span>
           </div>
-          <button 
-            onClick={handleClose}
-            className="text-evendle-light-gray hover:text-white transition-colors"
-          >
-            <X className="h-5 w-5" />
-          </button>
         </div>
         
         <div className="p-4 pt-2 space-y-4">
