@@ -1,13 +1,10 @@
-import { useState } from "react";
 import { Search } from "lucide-react";
 import Layout from "@/components/Layout";
 import EventCard from "@/components/EventCard";
 import { useNavigate } from "react-router-dom";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 const Home = () => {
-  const [selectedCity, setSelectedCity] = useState("");
   const navigate = useNavigate();
   
   const topEvents = [{
@@ -77,25 +74,15 @@ const Home = () => {
             </div>
           </div>
 
-          {/* City Selection */}
+          {/* City Button */}
           <div className="max-w-md mx-auto">
-            <div className="relative">
-              <Select value={selectedCity} onValueChange={(value) => {
-                setSelectedCity(value);
-                if (value) {
-                  navigate(`/city/${value}`);
-                }
-              }}>
-                <SelectTrigger className="bg-evendle-light-gray/30 border-none rounded-full h-14 text-white text-center text-lg">
-                  <SelectValue placeholder="your city" className="text-white/70" />
-                </SelectTrigger>
-                <SelectContent className="bg-evendle-dark-card border-evendle-gray z-50">
-                  <SelectItem value="berlin" className="text-white hover:bg-evendle-orange/20">Berlin</SelectItem>
-                  <SelectItem value="vienna" className="text-white hover:bg-evendle-orange/20">Vienna</SelectItem>
-                </SelectContent>
-              </Select>
-              <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 text-evendle-orange h-6 w-6 pointer-events-none" />
-            </div>
+            <button 
+              onClick={() => navigate('/city/innsbruck')}
+              className="w-full bg-evendle-light-gray/30 border-none rounded-full h-14 text-white text-center text-lg flex items-center justify-center gap-2 hover:bg-evendle-light-gray/40 transition-colors"
+            >
+              <span>Innsbruck</span>
+              <Search className="text-evendle-orange h-5 w-5" />
+            </button>
           </div>
         </div>
 
