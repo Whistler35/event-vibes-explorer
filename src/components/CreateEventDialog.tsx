@@ -24,7 +24,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
   onClose,
   position,
   isAdmin = false,
-  onEventCreated,
+  onEventCreated
 }) => {
   const { user } = useAuth();
   const [title, setTitle] = useState('');
@@ -66,9 +66,9 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
       if (image) {
         const fileExt = image.name.split('.').pop();
         const filePath = `events/${user.id}/${Date.now()}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage
-          .from('avatars')
-          .upload(filePath, image);
+        const { error: uploadError } = await supabase.storage.
+        from('avatars').
+        upload(filePath, image);
         if (!uploadError) {
           const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
           imageUrl = data.publicUrl;
@@ -90,7 +90,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
         source: isAdmin ? 'curated' : 'community',
         created_by: user.id,
         image_url: imageUrl,
-        approval_status: approvalStatus,
+        approval_status: approvalStatus
       } as any);
 
       if (error) throw error;
@@ -99,7 +99,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
         toast.success('Event erstellt und sofort veröffentlicht! ✅');
       } else {
         toast.success('Event eingereicht! ⏳', {
-          description: 'Dein Event wird von einem Admin geprüft und dann freigeschaltet.',
+          description: 'Dein Event wird von einem Admin geprüft und dann freigeschaltet.'
         });
       }
 
@@ -124,55 +124,55 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
       open={open}
       onOpenChange={(nextOpen) => {
         if (!nextOpen) handleClose();
-      }}
-    >
+      }}>
+      
       <DialogContent
         className="sm:max-w-[400px] bg-evendle-dark border-evendle-gray p-0 gap-0"
         onPointerDownOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
-      >
+        onInteractOutside={(e) => e.preventDefault()}>
+        
         {/* Header */}
         <div className="flex items-center justify-between p-4 pb-2">
           <div className="flex items-center gap-2">
             <span className="text-evendle-orange text-xl font-bold">+</span>
             <span className="text-white text-lg font-semibold">Create evendle</span>
           </div>
-          {isAdmin ? (
-            <span className="flex items-center gap-1 text-xs text-green-400">
+          {isAdmin ?
+          <span className="flex items-center gap-1 text-xs text-green-400">
               <ShieldCheck className="h-3.5 w-3.5" /> Admin
-            </span>
-          ) : (
-            <span className="flex items-center gap-1 text-xs text-yellow-400">
+            </span> :
+
+          <span className="flex items-center gap-1 text-xs text-yellow-400">
               <Clock className="h-3.5 w-3.5" /> Prüfung nötig
             </span>
-          )}
+          }
         </div>
 
-        {!isAdmin && (
-          <div className="mx-4 px-3 py-2 rounded-lg bg-yellow-400/10 border border-yellow-400/20 text-yellow-300 text-xs">
+        {!isAdmin &&
+        <div className="mx-4 px-3 py-2 rounded-lg bg-yellow-400/10 border border-yellow-400/20 text-yellow-300 text-xs">
             Dein Event wird nach Admin-Freigabe sichtbar.
           </div>
-        )}
+        }
 
         <div className="p-4 pt-2 space-y-4">
           {/* Image Upload */}
           <div className="space-y-2">
             <Label className="text-white text-sm">Bild</Label>
             <div className="relative">
-              {imagePreview ? (
-                <div className="relative">
+              {imagePreview ?
+              <div className="relative">
                   <img src={imagePreview} alt="Event" className="w-full h-32 object-cover rounded-xl border border-dashed border-evendle-gray" />
-                  <Button variant="secondary" size="sm" className="absolute top-2 right-2 bg-evendle-dark-card/80" onClick={() => { setImage(null); setImagePreview(null); }}>
+                  <Button variant="secondary" size="sm" className="absolute top-2 right-2 bg-evendle-dark-card/80" onClick={() => {setImage(null);setImagePreview(null);}}>
                     <X className="h-4 w-4" />
                   </Button>
-                </div>
-              ) : (
-                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-evendle-gray rounded-xl cursor-pointer hover:border-evendle-orange/50 transition-colors bg-transparent">
+                </div> :
+
+              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-evendle-gray rounded-xl cursor-pointer hover:border-evendle-orange/50 transition-colors bg-transparent">
                   <Camera className="h-8 w-8 text-evendle-gray" />
                   <span className="text-sm text-evendle-gray mt-2">Bild hinzufügen</span>
                   <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                 </label>
-              )}
+              }
             </div>
           </div>
 
@@ -185,8 +185,8 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
           {/* Category */}
           <div className="space-y-2">
             <Label className="text-white text-sm">Kategorie *</Label>
-            {isAdmin ? (
-              <Select value={category} onValueChange={(val) => setCategory(val as EventCategory)}>
+            {isAdmin ?
+            <Select value={category} onValueChange={(val) => setCategory(val as EventCategory)}>
                 <SelectTrigger className="bg-transparent border-evendle-gray text-white rounded-xl h-12">
                   <SelectValue placeholder="Kategorie wählen" />
                 </SelectTrigger>
@@ -201,13 +201,13 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
                   <SelectItem value="workshop">🔧 Workshop</SelectItem>
                   <SelectItem value="other">📌 Sonstiges</SelectItem>
                 </SelectContent>
-              </Select>
-            ) : (
-              <div className="flex items-center gap-2 h-12 px-3 rounded-xl border border-evendle-gray text-white bg-transparent">
+              </Select> :
+
+            <div className="flex items-center gap-2 h-12 px-3 rounded-xl border border-evendle-gray text-white bg-transparent">
                 <span>👥 Community</span>
-                <span className="text-xs text-evendle-light-gray ml-auto">Nur Admins können andere Kategorien wählen</span>
-              </div>
-            )}
+                <span className="text-xs text-evendle-light-gray ml-auto">
+</span>
+              </div>}
           </div>
 
           {/* Description */}
@@ -239,8 +239,8 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
           </div>
         </div>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>);
+
 };
 
 export default CreateEventDialog;
