@@ -10,9 +10,12 @@ const Nearby = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<[number, number] | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<EventCategory | ''>('');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
   const { data: searchResult, isLoading } = useSearchEvents({
     category: selectedCategory || undefined,
+    date_from: selectedDate ? selectedDate.toISOString().split('T')[0] : undefined,
+    date_to: selectedDate ? selectedDate.toISOString().split('T')[0] : undefined,
     limit: 100,
   });
 
@@ -53,7 +56,7 @@ const Nearby = () => {
 
         {/* Category Filter */}
         <div className="absolute top-14 left-0 right-0 z-10 px-4">
-          <CategoryFilter selected={selectedCategory} onChange={setSelectedCategory} />
+          <CategoryFilter selected={selectedCategory} onChange={setSelectedCategory} selectedDate={selectedDate} onDateChange={setSelectedDate} />
         </div>
 
         {/* Loading indicator */}
