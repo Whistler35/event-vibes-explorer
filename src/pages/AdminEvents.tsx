@@ -8,8 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { CheckCircle, XCircle, Clock, ArrowLeft, MapPin, Calendar } from "lucide-react";
-import { format } from "date-fns";
-import { de } from "date-fns/locale/de";
+
+const formatDate = (dateStr: string) => {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("de-DE", { day: "2-digit", month: "short", year: "numeric" }) +
+    ", " + d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+};
 
 interface PendingEvent {
   id: string;
@@ -138,7 +142,7 @@ const AdminEvents = () => {
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5" />
-                      {format(new Date(event.event_date), "dd. MMM yyyy, HH:mm", { locale: de })}
+                      {formatDate(event.event_date)}
                     </span>
                     <span className="flex items-center gap-1">
                       <MapPin className="w-3.5 h-3.5" />
