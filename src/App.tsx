@@ -8,7 +8,7 @@ import Home from "./pages/Home";
 import EventDetail from "./pages/EventDetail";
 import EventHangouts from "./pages/EventHangouts";
 import Nearby from "./pages/Nearby";
-import Messenger from "./pages/Messenger";
+
 import Chat from "./pages/Chat";
 import CityEvents from "./pages/CityEvents";
 import Profile from "./pages/Profile";
@@ -34,7 +34,7 @@ const App = () => (
               <Route path="/event/:id" element={<EventDetail />} />
               <Route path="/event/:id/hangouts" element={<EventHangouts />} />
               <Route path="/nearby" element={<Nearby />} />
-              <Route path="/messenger" element={<Messenger />} />
+              
               <Route path="/chat/:id" element={<Chat />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/auth" element={<Auth />} />
