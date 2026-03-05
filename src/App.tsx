@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
-import Events from "./pages/Events";
 import EventDetail from "./pages/EventDetail";
 import EventHangouts from "./pages/EventHangouts";
 import Nearby from "./pages/Nearby";
@@ -27,7 +26,6 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/events" element={<Events />} />
             <Route path="/city/:city" element={<CityEvents />} />
             <Route path="/event/:id" element={<EventDetail />} />
             <Route path="/event/:id/hangouts" element={<EventHangouts />} />
