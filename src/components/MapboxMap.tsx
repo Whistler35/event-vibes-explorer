@@ -10,6 +10,11 @@ interface MapEvent {
   position: [number, number]; // [lat, lng]
   category?: string;
   image?: string;
+  description?: string;
+  event_date?: string;
+  location_name?: string;
+  max_participants?: number;
+  current_participants?: number;
 }
 
 interface MapboxMapProps {
@@ -18,6 +23,7 @@ interface MapboxMapProps {
   height?: string;
   events?: MapEvent[];
   onCreateEvent?: (position: [number, number]) => void;
+  onEventClick?: (event: MapEvent) => void;
   showControls?: boolean;
   minZoomForCreate?: number;
   isAdmin?: boolean;
@@ -29,6 +35,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   height = "500px",
   events = [],
   onCreateEvent,
+  onEventClick,
   showControls = true,
   minZoomForCreate = 14,
   isAdmin = false,
@@ -258,21 +265,11 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
       // Store marker reference
       markersRef.current.set(event.id, marker);
 
-      // Add popup on click
-      const popup = new mapboxgl.Popup({
-        offset: 60,
-        closeButton: true,
-        className: 'custom-popup'
-      }).setHTML(`
-        <div style="color: black; padding: 8px; max-width: 200px;">
-          ${event.image ? `<img src="${event.image}" style="width: 100%; height: 80px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;" />` : ''}
-          <h3 style="margin: 0; font-size: 14px; font-weight: bold;">${event.title}</h3>
-          ${event.category ? `<p style="margin: 4px 0 0 0; font-size: 12px; color: #666;">${event.category}</p>` : ''}
-        </div>
-      `);
-
+      // Add click handler
       markerContainer.addEventListener('click', () => {
-        popup.setLngLat([event.position[1], event.position[0]]).addTo(map.current!);
+        if (onEventClick) {
+          onEventClick(event);
+        }
       });
     });
 

@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
-import InteractiveMap from "@/components/InteractiveMap";
+import InteractiveMap, { type MapEvent } from "@/components/InteractiveMap";
 import CreateEventDialog from "@/components/CreateEventDialog";
 import CategoryFilter from "@/components/CategoryFilter";
+import EventDetailSheet from "@/components/EventDetailSheet";
 import { useSearchEvents, type EventCategory, type SearchEvent } from "@/hooks/useSearchEvents";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,6 +15,7 @@ const Nearby = () => {
   const [selectedPosition, setSelectedPosition] = useState<[number, number] | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<EventCategory | ''>('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedEvent, setSelectedEvent] = useState<MapEvent | null>(null);
   const { isAdmin } = useIsAdmin();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -36,7 +38,7 @@ const Nearby = () => {
     setDialogOpen(true);
   };
 
-  const mapEvents = (searchResult?.data || [])
+  const mapEvents: MapEvent[] = (searchResult?.data || [])
     .filter((e: SearchEvent) => e.latitude != null && e.longitude != null)
     .map((e: SearchEvent) => ({
       id: e.id,
@@ -44,6 +46,11 @@ const Nearby = () => {
       position: [e.latitude!, e.longitude!] as [number, number],
       image: e.image_url || undefined,
       category: e.category || undefined,
+      description: e.description || undefined,
+      event_date: e.event_date,
+      location_name: e.location_name,
+      max_participants: e.max_participants || undefined,
+      current_participants: e.current_participants || undefined,
     }));
 
   return (
@@ -64,7 +71,12 @@ const Nearby = () => {
         )}
 
         <div className="absolute top-0 bottom-0 left-0 right-0">
-          <InteractiveMap onCreateEvent={handleCreateEvent} events={mapEvents} isAdmin={true} />
+          <InteractiveMap
+            onCreateEvent={handleCreateEvent}
+            onEventClick={(event) => setSelectedEvent(event)}
+            events={mapEvents}
+            isAdmin={true}
+          />
         </div>
 
         <CreateEventDialog
@@ -73,6 +85,12 @@ const Nearby = () => {
           position={selectedPosition}
           isAdmin={isAdmin}
           onEventCreated={() => refetch()}
+        />
+
+        <EventDetailSheet
+          event={selectedEvent}
+          open={!!selectedEvent}
+          onClose={() => setSelectedEvent(null)}
         />
       </div>
     </Layout>
