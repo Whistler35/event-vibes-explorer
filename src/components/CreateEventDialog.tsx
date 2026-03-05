@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Camera, X } from 'lucide-react';
+import type { EventCategory } from '@/hooks/useSearchEvents';
 
 interface CreateEventDialogProps {
   open: boolean;
@@ -30,6 +32,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
+  const [category, setCategory] = useState<EventCategory>('community');
   const [image, setImage] = useState<string | null>(null);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,6 +65,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
     setDescription('');
     setDate('');
     setTime('');
+    setCategory('community');
     setImage(null);
     onClose();
   };
@@ -71,6 +75,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
     setDescription('');
     setDate('');
     setTime('');
+    setCategory('community');
     setImage(null);
     onClose();
   };
@@ -149,6 +154,27 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
               placeholder="Was machst du?"
               className="bg-transparent border-evendle-gray text-white placeholder:text-evendle-gray rounded-xl h-12"
             />
+          </div>
+
+          {/* Category */}
+          <div className="space-y-2">
+            <Label className="text-white text-sm">Kategorie *</Label>
+            <Select value={category} onValueChange={(val) => setCategory(val as EventCategory)}>
+              <SelectTrigger className="bg-transparent border-evendle-gray text-white rounded-xl h-12">
+                <SelectValue placeholder="Kategorie wählen" />
+              </SelectTrigger>
+              <SelectContent className="bg-card border-border">
+                <SelectItem value="sports">🏀 Sport</SelectItem>
+                <SelectItem value="community">👥 Community</SelectItem>
+                <SelectItem value="music">🎵 Musik</SelectItem>
+                <SelectItem value="culture">🎨 Kultur</SelectItem>
+                <SelectItem value="food">🍕 Food</SelectItem>
+                <SelectItem value="nightlife">🎉 Nightlife</SelectItem>
+                <SelectItem value="outdoor">🌲 Outdoor</SelectItem>
+                <SelectItem value="workshop">🔧 Workshop</SelectItem>
+                <SelectItem value="other">📌 Sonstiges</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Description */}
