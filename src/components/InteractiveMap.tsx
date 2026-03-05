@@ -11,17 +11,19 @@ interface MapEvent {
 interface InteractiveMapProps {
   onCreateEvent?: (position: [number, number]) => void;
   events?: MapEvent[];
+  isAdmin?: boolean;
 }
 
-const InteractiveMap: React.FC<InteractiveMapProps> = ({ onCreateEvent, events = [] }) => {
+const InteractiveMap: React.FC<InteractiveMapProps> = ({ onCreateEvent, events = [], isAdmin = false }) => {
   return (
     <MapboxMap
-      center={[47.2692, 11.4041]} // Innsbruck
+      center={[47.2692, 11.4041]}
       zoom={13}
       height="100%"
       onCreateEvent={onCreateEvent}
       events={events}
       minZoomForCreate={14}
+      isAdmin={isAdmin}
     />
   );
 };

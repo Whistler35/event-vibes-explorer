@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Plus, X, MapPin } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface MapEvent {
   id: number | string;
@@ -19,16 +20,18 @@ interface MapboxMapProps {
   onCreateEvent?: (position: [number, number]) => void;
   showControls?: boolean;
   minZoomForCreate?: number;
+  isAdmin?: boolean;
 }
 
 const MapboxMap: React.FC<MapboxMapProps> = ({
-  center = [47.2692, 11.4041], // Innsbruck default
+  center = [47.2692, 11.4041],
   zoom = 13,
   height = "500px",
   events = [],
   onCreateEvent,
   showControls = true,
-  minZoomForCreate = 14
+  minZoomForCreate = 14,
+  isAdmin = false,
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
@@ -325,7 +328,13 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
       {/* Add Event Button */}
       {!isPlaceMode && isLoaded && (
         <button
-          onClick={enterPlaceMode}
+          onClick={() => {
+            if (isAdmin) {
+              enterPlaceMode();
+            } else {
+              toast.info('Nur Admins können Events erstellen.');
+            }
+          }}
           className="absolute bottom-6 right-6 z-20 w-14 h-14 bg-evendle-orange rounded-full flex items-center justify-center shadow-lg hover:bg-orange-600 transition-colors"
           aria-label="Event erstellen"
         >

@@ -4,6 +4,7 @@ import InteractiveMap from "@/components/InteractiveMap";
 import CreateEventDialog from "@/components/CreateEventDialog";
 import CategoryFilter from "@/components/CategoryFilter";
 import { useSearchEvents, type EventCategory, type SearchEvent } from "@/hooks/useSearchEvents";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { toast } from "sonner";
 
 const Nearby = () => {
@@ -11,6 +12,7 @@ const Nearby = () => {
   const [selectedPosition, setSelectedPosition] = useState<[number, number] | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<EventCategory | ''>('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const { isAdmin } = useIsAdmin();
 
   const { data: searchResult, isLoading } = useSearchEvents({
     category: selectedCategory || undefined,
@@ -68,7 +70,7 @@ const Nearby = () => {
 
         {/* Interactive Map */}
         <div className="absolute top-0 bottom-0 left-0 right-0">
-          <InteractiveMap onCreateEvent={handleCreateEvent} events={mapEvents} />
+          <InteractiveMap onCreateEvent={handleCreateEvent} events={mapEvents} isAdmin={isAdmin} />
         </div>
 
         {/* Create Event Dialog */}
