@@ -1,8 +1,22 @@
+import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { LogOut, Settings, Instagram } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Profile = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast.success('Erfolgreich ausgeloggt');
+    navigate('/');
+  };
+
+
   const profile = {
     name: "Max Mustermann",
     age: 27,
@@ -27,7 +41,7 @@ const Profile = () => {
             <Button variant="ghost" size="icon" className="text-evendle-light-gray hover:text-white">
               <Settings className="w-5 h-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="text-evendle-light-gray hover:text-white">
+            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground" onClick={handleLogout}>
               <LogOut className="w-5 h-5" />
             </Button>
           </div>
