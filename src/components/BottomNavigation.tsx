@@ -1,14 +1,17 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { MapPin, Calendar, MessageCircle, User, Plus } from "lucide-react";
+import { MapPin, Calendar, MessageCircle, User, ShieldCheck } from "lucide-react";
+import { usePendingEventsCount } from "@/hooks/usePendingEventsCount";
 
 const BottomNavigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAdmin, count: pendingCount } = usePendingEventsCount();
 
   const navItems = [
     { id: "events", label: "Events", icon: Calendar, path: "/" },
     { id: "nearby", label: "near by", icon: MapPin, path: "/nearby" },
     { id: "messenger", label: "messenger", icon: MessageCircle, path: "/messenger" },
+    ...(isAdmin ? [{ id: "admin", label: "Admin", icon: ShieldCheck, path: "/admin/events" }] : []),
     { id: "profile", label: "profile", icon: User, path: "/profile" },
   ];
 
@@ -25,7 +28,7 @@ const BottomNavigation = () => {
               onClick={() => navigate(item.path)}
               className="flex flex-col items-center space-y-1 transition-colors duration-200"
             >
-              <div className={`p-3 rounded-full ${
+              <div className={`relative p-3 rounded-full ${
                 isActive 
                   ? 'bg-evendle-orange' 
                   : 'bg-transparent'
@@ -38,6 +41,11 @@ const BottomNavigation = () => {
                       : 'text-evendle-gray'
                   } 
                 />
+                {item.id === "admin" && pendingCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    {pendingCount}
+                  </span>
+                )}
               </div>
               <span className={`text-xs ${isActive ? 'text-evendle-orange' : 'text-evendle-gray'}`}>
                 {item.label}
