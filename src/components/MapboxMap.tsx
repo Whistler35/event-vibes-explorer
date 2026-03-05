@@ -315,12 +315,6 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         </div>
       )}
 
-      {/* Event count badge */}
-      {allEvents.length > 0 && (
-        <div className="absolute top-4 right-4 z-20 rounded-full border border-border bg-card/80 px-3 py-1 text-xs text-foreground">
-          {allEvents.length} Events
-        </div>
-      )}
       
       {/* Add Event Button */}
       {!isPlaceMode && isLoaded && (
