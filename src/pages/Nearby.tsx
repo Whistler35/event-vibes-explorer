@@ -1,23 +1,20 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Layout from "@/components/Layout";
 import InteractiveMap from "@/components/InteractiveMap";
 import CreateEventDialog from "@/components/CreateEventDialog";
+import CategoryFilter from "@/components/CategoryFilter";
+import { useSearchEvents, type EventCategory, type SearchEvent } from "@/hooks/useSearchEvents";
 import { toast } from "sonner";
-
-interface CreatedEvent {
-  id: string;
-  position: [number, number];
-  title: string;
-  description: string;
-  date: string;
-  time: string;
-  image?: string;
-}
 
 const Nearby = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<[number, number] | null>(null);
-  const [createdEvents, setCreatedEvents] = useState<CreatedEvent[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<EventCategory | ''>('');
+
+  const { data: searchResult, isLoading } = useSearchEvents({
+    category: selectedCategory || undefined,
+    limit: 100,
+  });
 
   const handleCreateEvent = (coordinates: [number, number]) => {
     setSelectedPosition(coordinates);
@@ -32,35 +29,39 @@ const Nearby = () => {
     time: string;
     image?: string;
   }) => {
-    // Create new event with unique ID
-    const newEvent: CreatedEvent = {
-      ...event,
-      id: `event-${Date.now()}`
-    };
-    
-    setCreatedEvents(prev => [...prev, newEvent]);
-    
-    console.log('Event created:', newEvent);
-    toast.success('Event erstellt!', {
-      description: event.title
-    });
+    toast.success('Event erstellt!', { description: event.title });
   };
 
-  // Convert to map events format
-  const mapEvents = createdEvents.map(e => ({
-    id: e.id,
-    title: e.title,
-    position: e.position,
-    image: e.image
-  }));
+  // Convert search results to map events format
+  const mapEvents = (searchResult?.data || [])
+    .filter((e: SearchEvent) => e.latitude != null && e.longitude != null)
+    .map((e: SearchEvent) => ({
+      id: e.id,
+      title: e.title,
+      position: [e.latitude!, e.longitude!] as [number, number],
+      image: e.image_url || undefined,
+      category: e.category || undefined,
+    }));
 
   return (
     <Layout>
       <div className="relative h-[calc(100vh-80px)]">
         {/* Header */}
         <div className="absolute top-4 left-4 z-10">
-          <span className="text-black text-2xl font-bold drop-shadow-lg">evendle</span>
+          <span className="text-foreground text-2xl font-bold drop-shadow-lg">evendle</span>
         </div>
+
+        {/* Category Filter */}
+        <div className="absolute top-14 left-0 right-0 z-10 px-4">
+          <CategoryFilter selected={selectedCategory} onChange={setSelectedCategory} />
+        </div>
+
+        {/* Loading indicator */}
+        {isLoading && (
+          <div className="absolute top-24 left-1/2 -translate-x-1/2 z-10 bg-card/90 rounded-full px-3 py-1 text-xs text-foreground">
+            Events laden...
+          </div>
+        )}
 
         {/* Interactive Map */}
         <div className="absolute top-0 bottom-0 left-0 right-0">

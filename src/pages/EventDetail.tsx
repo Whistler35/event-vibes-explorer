@@ -9,25 +9,30 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Calendar, Clock, MapPin, Users, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
+import JoinRequestButton from "@/components/JoinRequestButton";
+import JoinRequestList from "@/components/JoinRequestList";
 
 interface Event {
   id: string;
   title: string;
-  description: string;
+  description: string | null;
   event_date: string;
   location_name: string;
-  latitude: number;
-  longitude: number;
-  image_url?: string;
-  max_participants: number;
-  current_participants: number;
+  latitude: number | null;
+  longitude: number | null;
+  image_url?: string | null;
+  max_participants: number | null;
+  current_participants: number | null;
+  category: string | null;
+  source: string | null;
+  created_by: string | null;
 }
 
 interface Participant {
   id: string;
   user_id: string;
   name: string;
-  avatar_url?: string;
+  avatar_url?: string | null;
 }
 
 const EventDetail = () => {
@@ -39,6 +44,9 @@ const EventDetail = () => {
   const [isParticipant, setIsParticipant] = useState(false);
   const [loading, setLoading] = useState(true);
   const [joinLoading, setJoinLoading] = useState(false);
+
+  const isOwner = user && event?.created_by === user.id;
+  const isCommunityEvent = event?.source === 'community';
 
   useEffect(() => {
     if (id) {
@@ -67,48 +75,37 @@ const EventDetail = () => {
 
   const fetchParticipants = async () => {
     try {
-      // First get event participants
       const { data: participantData, error: participantError } = await supabase
         .from('event_participants')
         .select('id, user_id')
         .eq('event_id', id);
 
       if (participantError) throw participantError;
-
       if (!participantData || participantData.length === 0) {
         setParticipants([]);
         setIsParticipant(false);
         return;
       }
 
-      // Get user IDs
       const userIds = participantData.map(p => p.user_id);
-
-      // Get profiles for these users
-      const { data: profileData, error: profileError } = await supabase
+      const { data: profileData } = await supabase
         .from('profiles')
         .select('user_id, name, avatar_url')
         .in('user_id', userIds);
 
-      if (profileError) throw profileError;
-
-      // Combine the data
       const participantsWithProfiles = participantData.map(participant => {
         const profile = profileData?.find(p => p.user_id === participant.user_id);
         return {
           id: participant.id,
           user_id: participant.user_id,
           name: profile?.name || 'Unbekannter User',
-          avatar_url: profile?.avatar_url
+          avatar_url: profile?.avatar_url,
         };
       });
 
       setParticipants(participantsWithProfiles);
-      
-      // Check if current user is participant
       if (user) {
-        const userParticipant = participantData.find(p => p.user_id === user.id);
-        setIsParticipant(!!userParticipant);
+        setIsParticipant(!!participantData.find(p => p.user_id === user.id));
       }
     } catch (error) {
       console.error('Error fetching participants:', error);
@@ -116,53 +113,35 @@ const EventDetail = () => {
   };
 
   const handleJoinEvent = async () => {
-    console.log('handleJoinEvent called', { user, event, isParticipant });
-    
     if (!user) {
-      console.log('No user found - redirecting to auth');
       toast.error('Du musst eingeloggt sein um Events beizutreten');
       navigate('/auth');
       return;
     }
-    
-    if (!event) {
-      console.log('No event found');
-      return;
-    }
+    if (!event) return;
 
     setJoinLoading(true);
     try {
       if (isParticipant) {
-        // Leave event
         const { error } = await supabase
           .from('event_participants')
           .delete()
           .eq('event_id', event.id)
           .eq('user_id', user.id);
-
         if (error) throw error;
         toast.success('Du hast das Event verlassen');
         setIsParticipant(false);
       } else {
-        // Join event
-        console.log('Attempting to join event:', { eventId: event.id, userId: user.id });
-        const { data, error } = await supabase
+        const { error } = await supabase
           .from('event_participants')
-          .insert({
-            event_id: event.id,
-            user_id: user.id
-          })
+          .insert({ event_id: event.id, user_id: user.id })
           .select();
-
-        console.log('Insert result:', { data, error });
         if (error) throw error;
         toast.success('Du bist dem Event beigetreten! Chat wurde erstellt.');
         setIsParticipant(true);
       }
-      
       fetchParticipants();
     } catch (error: any) {
-      console.error('Error joining/leaving event:', error);
       toast.error(error.message || 'Fehler beim Beitreten/Verlassen');
     } finally {
       setJoinLoading(false);
@@ -177,7 +156,7 @@ const EventDetail = () => {
     return (
       <Layout>
         <div className="p-4 flex items-center justify-center min-h-[50vh]">
-          <div className="text-white">Lädt...</div>
+          <div className="text-foreground">Lädt...</div>
         </div>
       </Layout>
     );
@@ -188,10 +167,8 @@ const EventDetail = () => {
       <Layout>
         <div className="p-4 flex items-center justify-center min-h-[50vh]">
           <div className="text-center space-y-4">
-            <div className="text-white">Event nicht gefunden</div>
-            <Button onClick={() => navigate('/events')}>
-              Zurück zu Events
-            </Button>
+            <div className="text-foreground">Event nicht gefunden</div>
+            <Button onClick={() => navigate('/events')}>Zurück zu Events</Button>
           </div>
         </div>
       </Layout>
@@ -200,10 +177,13 @@ const EventDetail = () => {
 
   const eventDate = new Date(event.event_date);
   const formattedDate = eventDate.toLocaleDateString('de-DE');
-  const formattedTime = eventDate.toLocaleTimeString('de-DE', { 
-    hour: '2-digit', 
-    minute: '2-digit' 
-  });
+  const formattedTime = eventDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+
+  const categoryLabels: Record<string, string> = {
+    music: 'Musik', sports: 'Sport', culture: 'Kultur', food: 'Food',
+    nightlife: 'Nightlife', outdoor: 'Outdoor', community: 'Community',
+    workshop: 'Workshop', other: 'Sonstiges',
+  };
 
   return (
     <Layout>
@@ -214,73 +194,83 @@ const EventDetail = () => {
             variant="ghost"
             size="icon"
             onClick={() => navigate(-1)}
-            className="text-white hover:bg-evendle-dark-card"
+            className="text-foreground hover:bg-card"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h1 className="text-white text-xl font-bold">Event Details</h1>
+          <h1 className="text-foreground text-xl font-bold">Event Details</h1>
+          {event.category && (
+            <Badge variant="secondary" className="bg-primary/20 text-primary border-0">
+              {categoryLabels[event.category] || event.category}
+            </Badge>
+          )}
+          {isCommunityEvent && (
+            <Badge variant="outline" className="border-primary text-primary text-xs">
+              Community
+            </Badge>
+          )}
         </div>
 
         {/* Event Image */}
         {event.image_url && (
           <div className="w-full h-48 rounded-2xl overflow-hidden">
-            <img 
-              src={event.image_url} 
-              alt={event.title}
-              className="w-full h-full object-cover"
-            />
+            <img src={event.image_url} alt={event.title} className="w-full h-full object-cover" />
           </div>
         )}
 
         {/* Event Info */}
-        <Card className="bg-evendle-dark-card border-evendle-gray">
+        <Card className="bg-card border-border">
           <CardContent className="p-6 space-y-4">
             <div>
-              <h2 className="text-white text-2xl font-bold mb-2">{event.title}</h2>
-              <p className="text-evendle-light-gray">{event.description}</p>
+              <h2 className="text-foreground text-2xl font-bold mb-2">{event.title}</h2>
+              <p className="text-muted-foreground">{event.description}</p>
             </div>
 
             <div className="space-y-3">
-              <div className="flex items-center space-x-3 text-evendle-light-gray">
+              <div className="flex items-center space-x-3 text-muted-foreground">
                 <Calendar className="w-5 h-5" />
                 <span>{formattedDate}</span>
               </div>
-
-              <div className="flex items-center space-x-3 text-evendle-light-gray">
+              <div className="flex items-center space-x-3 text-muted-foreground">
                 <Clock className="w-5 h-5" />
                 <span>{formattedTime}</span>
               </div>
-
-              <div className="flex items-center space-x-3 text-evendle-light-gray">
+              <div className="flex items-center space-x-3 text-muted-foreground">
                 <MapPin className="w-5 h-5" />
                 <span>{event.location_name}</span>
               </div>
-
-              <div className="flex items-center space-x-3 text-evendle-light-gray">
+              <div className="flex items-center space-x-3 text-muted-foreground">
                 <Users className="w-5 h-5" />
-                <span>{participants.length} / {event.max_participants} Teilnehmer</span>
+                <span>{participants.length} / {event.max_participants || '∞'} Teilnehmer</span>
               </div>
             </div>
           </CardContent>
         </Card>
 
+        {/* Join Requests for Owner (Community Events) */}
+        {isOwner && isCommunityEvent && (
+          <Card className="bg-card border-border">
+            <CardContent className="p-6">
+              <JoinRequestList eventId={event.id} />
+            </CardContent>
+          </Card>
+        )}
+
         {/* Participants */}
         {participants.length > 0 && (
-          <Card className="bg-evendle-dark-card border-evendle-gray">
+          <Card className="bg-card border-border">
             <CardContent className="p-6">
-              <h3 className="text-white font-bold text-lg mb-4">Teilnehmer</h3>
+              <h3 className="text-foreground font-bold text-lg mb-4">Teilnehmer</h3>
               <div className="flex flex-wrap gap-3">
                 {participants.map((participant) => (
                   <div key={participant.id} className="flex items-center space-x-2">
                     <Avatar className="w-8 h-8">
-                      <AvatarImage src={participant.avatar_url} />
-                      <AvatarFallback className="bg-evendle-orange text-white text-xs">
+                      <AvatarImage src={participant.avatar_url || undefined} />
+                      <AvatarFallback className="bg-primary text-primary-foreground text-xs">
                         {participant.name[0]}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="text-evendle-light-gray text-sm">
-                      {participant.name}
-                    </span>
+                    <span className="text-muted-foreground text-sm">{participant.name}</span>
                   </div>
                 ))}
               </div>
@@ -290,15 +280,17 @@ const EventDetail = () => {
 
         {/* Action Buttons */}
         <div className="space-y-3">
-          {user ? (
+          {isCommunityEvent && !isOwner ? (
+            <JoinRequestButton eventId={event.id} eventOwnerId={event.created_by} />
+          ) : user ? (
             <>
               <Button
                 onClick={handleJoinEvent}
                 disabled={joinLoading}
                 className={`w-full ${
-                  isParticipant 
-                    ? 'bg-evendle-gray hover:bg-evendle-gray/80 text-white' 
-                    : 'bg-evendle-orange hover:bg-evendle-orange/80 text-white'
+                  isParticipant
+                    ? 'bg-muted hover:bg-muted/80 text-foreground'
+                    : 'bg-primary hover:bg-primary/80 text-primary-foreground'
                 }`}
               >
                 {joinLoading ? 'Lädt...' : isParticipant ? 'Event verlassen' : 'Ich bin dabei!'}
@@ -308,7 +300,7 @@ const EventDetail = () => {
                 <Button
                   onClick={handleOpenChat}
                   variant="outline"
-                  className="w-full border-evendle-orange text-evendle-orange hover:bg-evendle-orange hover:text-white"
+                  className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
                 >
                   <MessageCircle className="w-4 h-4 mr-2" />
                   Zum Gruppenchat
@@ -318,7 +310,7 @@ const EventDetail = () => {
           ) : (
             <Button
               onClick={() => navigate('/auth')}
-              className="w-full bg-evendle-orange hover:bg-evendle-orange/80 text-white"
+              className="w-full bg-primary hover:bg-primary/80 text-primary-foreground"
             >
               Anmelden um beizutreten
             </Button>
