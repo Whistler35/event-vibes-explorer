@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { MapPin, Calendar, MessageCircle, User, ShieldCheck } from "lucide-react";
+import { MapPin, Calendar, User, ShieldCheck } from "lucide-react";
 import { usePendingEventsCount } from "@/hooks/usePendingEventsCount";
 
 const BottomNavigation = () => {
@@ -10,7 +10,7 @@ const BottomNavigation = () => {
   const navItems = [
     { id: "events", label: "Events", icon: Calendar, path: "/" },
     { id: "nearby", label: "near by", icon: MapPin, path: "/nearby" },
-    { id: "messenger", label: "messenger", icon: MessageCircle, path: "/messenger" },
+    
     ...(isAdmin ? [{ id: "admin", label: "Admin", icon: ShieldCheck, path: "/admin/events" }] : []),
     { id: "profile", label: "profile", icon: User, path: "/profile" },
   ];
