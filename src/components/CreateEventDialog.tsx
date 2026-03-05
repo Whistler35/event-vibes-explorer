@@ -77,6 +77,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
 
       const eventDate = `${date}T${time}:00`;
       const approvalStatus = isAdmin ? 'approved' : 'pending';
+      const eventCategory = isAdmin ? category : 'community';
 
       const { error } = await supabase.from('events').insert({
         title,
@@ -85,7 +86,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
         latitude: position[0],
         longitude: position[1],
         location_name: `${position[0].toFixed(4)}, ${position[1].toFixed(4)}`,
-        category,
+        category: eventCategory,
         source: isAdmin ? 'curated' : 'community',
         created_by: user.id,
         image_url: imageUrl,
@@ -184,22 +185,29 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
           {/* Category */}
           <div className="space-y-2">
             <Label className="text-white text-sm">Kategorie *</Label>
-            <Select value={category} onValueChange={(val) => setCategory(val as EventCategory)}>
-              <SelectTrigger className="bg-transparent border-evendle-gray text-white rounded-xl h-12">
-                <SelectValue placeholder="Kategorie wählen" />
-              </SelectTrigger>
-              <SelectContent className="bg-card border-border">
-                <SelectItem value="sports">🏀 Sport</SelectItem>
-                <SelectItem value="community">👥 Community</SelectItem>
-                <SelectItem value="music">🎵 Musik</SelectItem>
-                <SelectItem value="culture">🎨 Kultur</SelectItem>
-                <SelectItem value="food">🍕 Food</SelectItem>
-                <SelectItem value="nightlife">🎉 Nightlife</SelectItem>
-                <SelectItem value="outdoor">🌲 Outdoor</SelectItem>
-                <SelectItem value="workshop">🔧 Workshop</SelectItem>
-                <SelectItem value="other">📌 Sonstiges</SelectItem>
-              </SelectContent>
-            </Select>
+            {isAdmin ? (
+              <Select value={category} onValueChange={(val) => setCategory(val as EventCategory)}>
+                <SelectTrigger className="bg-transparent border-evendle-gray text-white rounded-xl h-12">
+                  <SelectValue placeholder="Kategorie wählen" />
+                </SelectTrigger>
+                <SelectContent className="bg-card border-border">
+                  <SelectItem value="sports">🏀 Sport</SelectItem>
+                  <SelectItem value="community">👥 Community</SelectItem>
+                  <SelectItem value="music">🎵 Musik</SelectItem>
+                  <SelectItem value="culture">🎨 Kultur</SelectItem>
+                  <SelectItem value="food">🍕 Food</SelectItem>
+                  <SelectItem value="nightlife">🎉 Nightlife</SelectItem>
+                  <SelectItem value="outdoor">🌲 Outdoor</SelectItem>
+                  <SelectItem value="workshop">🔧 Workshop</SelectItem>
+                  <SelectItem value="other">📌 Sonstiges</SelectItem>
+                </SelectContent>
+              </Select>
+            ) : (
+              <div className="flex items-center gap-2 h-12 px-3 rounded-xl border border-evendle-gray text-white bg-transparent">
+                <span>👥 Community</span>
+                <span className="text-xs text-evendle-light-gray ml-auto">Nur Admins können andere Kategorien wählen</span>
+              </div>
+            )}
           </div>
 
           {/* Description */}
