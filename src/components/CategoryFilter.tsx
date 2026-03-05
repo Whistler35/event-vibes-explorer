@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Music, Dribbble, Palette, UtensilsCrossed, PartyPopper, TreePine, Users, Wrench, SlidersHorizontal, Calendar } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import type { EventCategory } from '@/hooks/useSearchEvents';
 
@@ -101,11 +100,14 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selected, onChange, sel
                 </button>
               )}
             </div>
-            <CalendarComponent
-              mode="single"
-              selected={selectedDate}
-              onSelect={(date) => onDateChange(date)}
-              className={cn("p-2 pointer-events-auto")}
+            <input
+              type="date"
+              value={selectedDate ? `${selectedDate.getFullYear()}-${(selectedDate.getMonth() + 1).toString().padStart(2, '0')}-${selectedDate.getDate().toString().padStart(2, '0')}` : ''}
+              onChange={(e) => {
+                const value = e.target.value;
+                onDateChange(value ? new Date(`${value}T00:00:00`) : undefined);
+              }}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground"
             />
           </div>
         )}
