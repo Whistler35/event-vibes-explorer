@@ -37,6 +37,7 @@ Deno.serve(async (req) => {
       .from('events')
       .select('*', { count: 'exact' })
       .eq('visibility', 'public')
+      .eq('approval_status', 'approved')
       .order('event_date', { ascending: true })
       .range(offset, offset + limit - 1)
 
