@@ -3,8 +3,6 @@ import { Music, Dribbble, Palette, UtensilsCrossed, PartyPopper, TreePine, Users
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
-import { de } from 'date-fns/locale';
 import type { EventCategory } from '@/hooks/useSearchEvents';
 
 const CATEGORIES: { id: EventCategory | ''; label: string; icon: React.ElementType }[] = [
@@ -35,7 +33,10 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selected, onChange, sel
   const filterLabel = (() => {
     const parts: string[] = [];
     if (selected && activeCategory) parts.push(activeCategory.label);
-    if (selectedDate) parts.push(format(selectedDate, 'dd.MM.', { locale: de }));
+    if (selectedDate) {
+      const d = selectedDate;
+      parts.push(`${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}.`);
+    }
     return parts.length > 0 ? parts.join(' · ') : 'Filter';
   })();
 
@@ -105,7 +106,6 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selected, onChange, sel
               selected={selectedDate}
               onSelect={(date) => onDateChange(date)}
               className={cn("p-2 pointer-events-auto")}
-              locale={de}
             />
           </div>
         )}
