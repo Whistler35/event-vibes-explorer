@@ -1,13 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, Instagram } from "lucide-react";
+import { LogOut, Settings, Instagram, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const Profile = () => {
   const { user } = useAuth();
+  const { isAdmin } = useIsAdmin();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -38,6 +40,11 @@ const Profile = () => {
             <span className="text-white text-xl font-bold">evendle</span>
           </div>
           <div className="flex space-x-2">
+            {isAdmin && (
+              <Button variant="ghost" size="icon" className="text-green-400 hover:text-green-300" onClick={() => navigate('/admin/events')}>
+                <ShieldCheck className="w-5 h-5" />
+              </Button>
+            )}
             <Button variant="ghost" size="icon" className="text-evendle-light-gray hover:text-white">
               <Settings className="w-5 h-5" />
             </Button>
