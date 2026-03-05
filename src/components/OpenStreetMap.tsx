@@ -655,7 +655,6 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         position={selectedPosition}
-        onCreateEvent={handleCreateEvent}
       />
     </div>
   );
