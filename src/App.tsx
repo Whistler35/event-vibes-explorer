@@ -14,6 +14,7 @@ import CityEvents from "./pages/CityEvents";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import UserProfile from "./pages/UserProfile";
+import EditProfile from "./pages/EditProfile";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/AuthContext";
 
@@ -38,6 +39,7 @@ const App = () => (
               
               <Route path="/chat/:id" element={<Chat />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/profile/edit" element={<EditProfile />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/admin/events" element={<AdminEvents />} />
               <Route path="/user/:userId" element={<UserProfile />} />
