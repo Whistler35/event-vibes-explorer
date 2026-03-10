@@ -55,6 +55,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
     setCategory('community');
     setImage(null);
     setImagePreview(null);
+    setMaxParticipants('');
   };
 
   const handleSubmit = async () => {
