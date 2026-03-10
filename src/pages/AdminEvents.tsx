@@ -117,9 +117,42 @@ const AdminEvents = () => {
       toast.error("Fehler beim Aktualisieren");
     } else {
       toast.success(currentlyFeatured ? "Nicht mehr Top Event" : "Als Top Event markiert ⭐");
-      setAllEvents((prev) =>
-        prev.map((e) => e.id === eventId ? { ...e, is_featured: !currentlyFeatured } : e)
-      );
+      if (currentlyFeatured) {
+        setAllEvents((prev) => prev.filter((e) => e.id !== eventId));
+      } else {
+        fetchAllEvents();
+      }
+    }
+  };
+
+  const moveEvent = async (eventId: string, direction: "up" | "down") => {
+    const idx = allEvents.findIndex((e) => e.id === eventId);
+    if (idx < 0) return;
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= allEvents.length) return;
+
+    const current = allEvents[idx];
+    const swap = allEvents[swapIdx];
+
+    // Swap featured_order values
+    const { error: e1 } = await supabase
+      .from("events")
+      .update({ featured_order: swap.featured_order } as any)
+      .eq("id", current.id);
+    const { error: e2 } = await supabase
+      .from("events")
+      .update({ featured_order: current.featured_order } as any)
+      .eq("id", swap.id);
+
+    if (e1 || e2) {
+      toast.error("Fehler beim Sortieren");
+    } else {
+      const newEvents = [...allEvents];
+      newEvents[idx] = { ...swap, featured_order: current.featured_order };
+      newEvents[swapIdx] = { ...current, featured_order: swap.featured_order };
+      // Re-sort
+      newEvents.sort((a, b) => a.featured_order - b.featured_order);
+      setAllEvents(newEvents);
     }
   };
 
