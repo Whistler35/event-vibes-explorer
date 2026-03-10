@@ -233,6 +233,23 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
             </div>
           </div>
 
+          {/* Max Participants (only for non-admin community events) */}
+          {!isAdmin && (
+            <div className="space-y-2">
+              <Label htmlFor="maxParticipants" className="text-white text-sm">Max. Teilnehmer *</Label>
+              <Input
+                id="maxParticipants"
+                type="number"
+                min={2}
+                value={maxParticipants}
+                onChange={(e) => setMaxParticipants(e.target.value)}
+                placeholder="z.B. 10 (min. 2)"
+                className="bg-transparent border-evendle-gray text-white placeholder:text-evendle-gray rounded-xl h-12"
+              />
+              <p className="text-evendle-light-gray text-xs">Mindestens 2 Teilnehmer</p>
+            </div>
+          )}
+
           {/* Buttons */}
           <div className="flex gap-3 pt-2">
             <Button variant="outline" onClick={handleClose} className="flex-1 h-12 rounded-xl border-evendle-orange text-evendle-orange hover:bg-evendle-orange/10 hover:text-evendle-orange bg-transparent">
