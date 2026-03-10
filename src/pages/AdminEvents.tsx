@@ -129,20 +129,23 @@ const AdminEvents = () => {
   };
 
   const toggleFeatured = async (eventId: string, currentlyFeatured: boolean) => {
+    const maxOrder = allEvents.length > 0 
+      ? Math.max(...allEvents.map(e => e.featured_order || 0)) + 1 
+      : 0;
+    
     const { error } = await supabase
       .from("events")
-      .update({ is_featured: !currentlyFeatured } as any)
+      .update({ 
+        is_featured: !currentlyFeatured,
+        featured_order: currentlyFeatured ? 0 : maxOrder,
+      } as any)
       .eq("id", eventId);
 
     if (error) {
       toast.error("Fehler beim Aktualisieren");
     } else {
       toast.success(currentlyFeatured ? "Nicht mehr Top Event" : "Als Top Event markiert ⭐");
-      if (currentlyFeatured) {
-        setAllEvents((prev) => prev.filter((e) => e.id !== eventId));
-      } else {
-        fetchAllEvents();
-      }
+      await Promise.all([fetchFeaturedEvents(), fetchNonFeaturedEvents()]);
     }
   };
 
