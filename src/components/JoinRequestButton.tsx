@@ -104,7 +104,7 @@ const JoinRequestButton: React.FC<JoinRequestButtonProps> = ({ eventId, eventOwn
           <Textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="Kurze Nachricht an den Ersteller (optional)..."
+            placeholder="Kurze Nachricht an den Ersteller *"
             className="bg-muted border-border text-foreground placeholder:text-muted-foreground rounded-xl resize-none"
             rows={2}
           />
