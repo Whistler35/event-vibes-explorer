@@ -156,28 +156,22 @@ const AdminEvents = () => {
     const swapIdx = direction === "up" ? idx - 1 : idx + 1;
     if (swapIdx < 0 || swapIdx >= allEvents.length) return;
 
-    const current = allEvents[idx];
-    const swap = allEvents[swapIdx];
+    // Build new order: swap the two items, then assign sequential featured_order values
+    const newEvents = [...allEvents];
+    [newEvents[idx], newEvents[swapIdx]] = [newEvents[swapIdx], newEvents[idx]];
 
-    // Swap featured_order values
-    const { error: e1 } = await supabase
-      .from("events")
-      .update({ featured_order: swap.featured_order } as any)
-      .eq("id", current.id);
-    const { error: e2 } = await supabase
-      .from("events")
-      .update({ featured_order: current.featured_order } as any)
-      .eq("id", swap.id);
+    // Update all featured_order values sequentially to avoid duplicates
+    const updates = newEvents.map((e, i) => 
+      supabase.from("events").update({ featured_order: i + 1 } as any).eq("id", e.id)
+    );
+    const results = await Promise.all(updates);
+    const hasError = results.some(r => r.error);
 
-    if (e1 || e2) {
+    if (hasError) {
       toast.error("Fehler beim Sortieren");
+      await fetchFeaturedEvents();
     } else {
-      const newEvents = [...allEvents];
-      newEvents[idx] = { ...swap, featured_order: current.featured_order };
-      newEvents[swapIdx] = { ...current, featured_order: swap.featured_order };
-      // Re-sort
-      newEvents.sort((a, b) => a.featured_order - b.featured_order);
-      setAllEvents(newEvents);
+      setAllEvents(newEvents.map((e, i) => ({ ...e, featured_order: i + 1 })));
     }
   };
 
