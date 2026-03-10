@@ -266,75 +266,116 @@ const AdminEvents = () => {
           </TabsContent>
 
           {/* Top Events Tab */}
-          <TabsContent value="featured" className="space-y-4 mt-4">
+          <TabsContent value="featured" className="space-y-6 mt-4">
             {loading ? (
               <div className="text-center text-muted-foreground py-12">Laden...</div>
-            ) : allEvents.length === 0 ? (
-              <div className="text-center py-12 space-y-2">
-                <p className="text-muted-foreground text-sm">Keine freigegebenen Events vorhanden.</p>
-              </div>
             ) : (
-              <div className="space-y-3">
-                {allEvents.map((event) => (
-                  <div
-                    key={event.id}
-                    className={`bg-card rounded-2xl overflow-hidden border ${
-                      event.is_featured ? 'border-yellow-400/50' : 'border-border'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3 p-4">
-                      {event.image_url ? (
-                        <img src={event.image_url} alt={event.title} className="w-16 h-16 rounded-xl object-cover shrink-0" />
-                      ) : (
-                        <div className="w-16 h-16 rounded-xl bg-muted flex items-center justify-center text-2xl shrink-0">📅</div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-foreground font-bold text-sm truncate">{event.title}</h3>
-                          {event.is_featured && (
-                            <Star className="w-4 h-4 text-yellow-400 fill-yellow-400 shrink-0" />
+              <>
+                {/* Current featured events */}
+                {allEvents.length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="text-foreground font-semibold text-sm">Aktuelle Top Events</h4>
+                    {allEvents.map((event) => (
+                      <div
+                        key={event.id}
+                        className="bg-card rounded-2xl overflow-hidden border border-yellow-400/50"
+                      >
+                        <div className="flex items-center gap-3 p-4">
+                          {event.image_url ? (
+                            <img src={event.image_url} alt={event.title} className="w-16 h-16 rounded-xl object-cover shrink-0" />
+                          ) : (
+                            <div className="w-16 h-16 rounded-xl bg-muted flex items-center justify-center text-2xl shrink-0">📅</div>
                           )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <h3 className="text-foreground font-bold text-sm truncate">{event.title}</h3>
+                              <Star className="w-4 h-4 text-yellow-400 fill-yellow-400 shrink-0" />
+                            </div>
+                            <p className="text-muted-foreground text-xs">{formatDate(event.event_date)}</p>
+                            <p className="text-muted-foreground text-xs truncate">{event.location_name}</p>
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <div className="flex flex-col">
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-7 w-7"
+                                disabled={allEvents.indexOf(event) === 0}
+                                onClick={() => moveEvent(event.id, "up")}
+                              >
+                                <ChevronUp className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-7 w-7"
+                                disabled={allEvents.indexOf(event) === allEvents.length - 1}
+                                onClick={() => moveEvent(event.id, "down")}
+                              >
+                                <ChevronDown className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <span className="text-muted-foreground text-xs font-mono w-5 text-center">
+                              #{allEvents.indexOf(event) + 1}
+                            </span>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => toggleFeatured(event.id, true)}
+                              className="border-destructive/50 text-destructive hover:bg-destructive/10 shrink-0"
+                            >
+                              <StarOff className="w-4 h-4 mr-1" /> Entfernen
+                            </Button>
+                          </div>
                         </div>
-                        <p className="text-muted-foreground text-xs">{formatDate(event.event_date)}</p>
-                        <p className="text-muted-foreground text-xs truncate">{event.location_name}</p>
                       </div>
-                      <div className="flex items-center gap-1 shrink-0">
-                        <div className="flex flex-col">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-7 w-7"
-                            disabled={allEvents.indexOf(event) === 0}
-                            onClick={() => moveEvent(event.id, "up")}
-                          >
-                            <ChevronUp className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-7 w-7"
-                            disabled={allEvents.indexOf(event) === allEvents.length - 1}
-                            onClick={() => moveEvent(event.id, "down")}
-                          >
-                            <ChevronDown className="w-4 h-4" />
-                          </Button>
-                        </div>
-                        <span className="text-muted-foreground text-xs font-mono w-5 text-center">
-                          #{allEvents.indexOf(event) + 1}
-                        </span>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => toggleFeatured(event.id, event.is_featured)}
-                          className="border-destructive/50 text-destructive hover:bg-destructive/10 shrink-0"
-                        >
-                          <StarOff className="w-4 h-4 mr-1" /> Entfernen
-                        </Button>
-                      </div>
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                )}
+
+                {/* Add new featured events */}
+                <div className="space-y-3">
+                  <h4 className="text-foreground font-semibold text-sm">Events hinzufügen</h4>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input
+                      type="text"
+                      placeholder="Event suchen..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-9 pr-4 py-2 rounded-xl bg-muted border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                    />
+                  </div>
+                  {filteredNonFeatured.length === 0 ? (
+                    <p className="text-muted-foreground text-sm text-center py-4">Keine weiteren Events verfügbar.</p>
+                  ) : (
+                    filteredNonFeatured.map((event) => (
+                      <div key={event.id} className="bg-card rounded-2xl overflow-hidden border border-border">
+                        <div className="flex items-center gap-3 p-4">
+                          {event.image_url ? (
+                            <img src={event.image_url} alt={event.title} className="w-16 h-16 rounded-xl object-cover shrink-0" />
+                          ) : (
+                            <div className="w-16 h-16 rounded-xl bg-muted flex items-center justify-center text-2xl shrink-0">📅</div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-foreground font-bold text-sm truncate">{event.title}</h3>
+                            <p className="text-muted-foreground text-xs">{formatDate(event.event_date)}</p>
+                            <p className="text-muted-foreground text-xs truncate">{event.location_name}</p>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => toggleFeatured(event.id, false)}
+                            className="border-yellow-400/50 text-yellow-400 hover:bg-yellow-400/10 shrink-0"
+                          >
+                            <Star className="w-4 h-4 mr-1" /> Hinzufügen
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </>
             )}
           </TabsContent>
         </Tabs>
