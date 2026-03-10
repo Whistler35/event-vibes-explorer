@@ -28,6 +28,7 @@ interface AdminEvent {
   created_by: string | null;
   approval_status: string;
   is_featured: boolean;
+  featured_order: number;
 }
 
 const AdminEvents = () => {
