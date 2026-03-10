@@ -117,6 +117,7 @@ export type Database = {
           description: string | null
           end_time: string | null
           event_date: string
+          featured_order: number | null
           id: string
           image_url: string | null
           is_featured: boolean
@@ -139,6 +140,7 @@ export type Database = {
           description?: string | null
           end_time?: string | null
           event_date: string
+          featured_order?: number | null
           id?: string
           image_url?: string | null
           is_featured?: boolean
@@ -161,6 +163,7 @@ export type Database = {
           description?: string | null
           end_time?: string | null
           event_date?: string
+          featured_order?: number | null
           id?: string
           image_url?: string | null
           is_featured?: boolean
@@ -665,6 +668,7 @@ export type Database = {
           description: string | null
           end_time: string | null
           event_date: string
+          featured_order: number | null
           id: string
           image_url: string | null
           is_featured: boolean
@@ -696,6 +700,7 @@ export type Database = {
           description: string | null
           end_time: string | null
           event_date: string
+          featured_order: number | null
           id: string
           image_url: string | null
           is_featured: boolean
