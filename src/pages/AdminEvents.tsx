@@ -273,21 +273,39 @@ const AdminEvents = () => {
                         <p className="text-muted-foreground text-xs">{formatDate(event.event_date)}</p>
                         <p className="text-muted-foreground text-xs truncate">{event.location_name}</p>
                       </div>
-                      <Button
-                        size="sm"
-                        variant={event.is_featured ? "outline" : "default"}
-                        onClick={() => toggleFeatured(event.id, event.is_featured)}
-                        className={event.is_featured
-                          ? "border-yellow-400/50 text-yellow-400 hover:bg-yellow-400/10 shrink-0"
-                          : "bg-yellow-500 hover:bg-yellow-600 text-black shrink-0"
-                        }
-                      >
-                        {event.is_featured ? (
-                          <><StarOff className="w-4 h-4 mr-1" /> Entfernen</>
-                        ) : (
-                          <><Star className="w-4 h-4 mr-1" /> Top Event</>
-                        )}
-                      </Button>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <div className="flex flex-col">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7"
+                            disabled={allEvents.indexOf(event) === 0}
+                            onClick={() => moveEvent(event.id, "up")}
+                          >
+                            <ChevronUp className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7"
+                            disabled={allEvents.indexOf(event) === allEvents.length - 1}
+                            onClick={() => moveEvent(event.id, "down")}
+                          >
+                            <ChevronDown className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        <span className="text-muted-foreground text-xs font-mono w-5 text-center">
+                          #{allEvents.indexOf(event) + 1}
+                        </span>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => toggleFeatured(event.id, event.is_featured)}
+                          className="border-destructive/50 text-destructive hover:bg-destructive/10 shrink-0"
+                        >
+                          <StarOff className="w-4 h-4 mr-1" /> Entfernen
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))}
