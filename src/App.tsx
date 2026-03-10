@@ -39,6 +39,7 @@ const App = () => (
               
               <Route path="/chat/:id" element={<Chat />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/profile/edit" element={<EditProfile />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/admin/events" element={<AdminEvents />} />
               <Route path="/user/:userId" element={<UserProfile />} />
