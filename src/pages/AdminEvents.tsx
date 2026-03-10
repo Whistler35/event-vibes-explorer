@@ -37,8 +37,10 @@ const AdminEvents = () => {
   const navigate = useNavigate();
   const [pendingEvents, setPendingEvents] = useState<AdminEvent[]>([]);
   const [allEvents, setAllEvents] = useState<AdminEvent[]>([]);
+  const [nonFeaturedEvents, setNonFeaturedEvents] = useState<AdminEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("pending");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     if (!adminLoading && !isAdmin) {
@@ -58,8 +60,7 @@ const AdminEvents = () => {
     setLoading(false);
   };
 
-  const fetchAllEvents = async () => {
-    setLoading(true);
+  const fetchFeaturedEvents = async () => {
     const { data, error } = await supabase
       .from("events")
       .select("id, title, description, category, event_date, location_name, image_url, created_at, created_by, approval_status, is_featured, featured_order")
@@ -69,6 +70,22 @@ const AdminEvents = () => {
       .order("event_date", { ascending: true });
 
     if (!error && data) setAllEvents(data as AdminEvent[]);
+  };
+
+  const fetchNonFeaturedEvents = async () => {
+    const { data, error } = await supabase
+      .from("events")
+      .select("id, title, description, category, event_date, location_name, image_url, created_at, created_by, approval_status, is_featured, featured_order")
+      .eq("approval_status", "approved")
+      .eq("is_featured", false)
+      .order("event_date", { ascending: true });
+
+    if (!error && data) setNonFeaturedEvents(data as AdminEvent[]);
+  };
+
+  const fetchAllEvents = async () => {
+    setLoading(true);
+    await Promise.all([fetchFeaturedEvents(), fetchNonFeaturedEvents()]);
     setLoading(false);
   };
 
@@ -78,6 +95,10 @@ const AdminEvents = () => {
       else fetchAllEvents();
     }
   }, [isAdmin, tab]);
+
+  const filteredNonFeatured = nonFeaturedEvents.filter((e) =>
+    e.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleApprove = async (eventId: string) => {
     const { error } = await supabase
