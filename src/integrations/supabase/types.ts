@@ -119,6 +119,7 @@ export type Database = {
           event_date: string
           id: string
           image_url: string | null
+          is_featured: boolean
           latitude: number | null
           location: unknown
           location_name: string
@@ -140,6 +141,7 @@ export type Database = {
           event_date: string
           id?: string
           image_url?: string | null
+          is_featured?: boolean
           latitude?: number | null
           location?: unknown
           location_name: string
@@ -161,6 +163,7 @@ export type Database = {
           event_date?: string
           id?: string
           image_url?: string | null
+          is_featured?: boolean
           latitude?: number | null
           location?: unknown
           location_name?: string
@@ -664,6 +667,7 @@ export type Database = {
           event_date: string
           id: string
           image_url: string | null
+          is_featured: boolean
           latitude: number | null
           location: unknown
           location_name: string
@@ -694,6 +698,7 @@ export type Database = {
           event_date: string
           id: string
           image_url: string | null
+          is_featured: boolean
           latitude: number | null
           location: unknown
           location_name: string
