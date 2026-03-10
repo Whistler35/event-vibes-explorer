@@ -34,6 +34,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
   const [category, setCategory] = useState<EventCategory>('community');
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [maxParticipants, setMaxParticipants] = useState<string>('');
   const [loading, setLoading] = useState(false);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
