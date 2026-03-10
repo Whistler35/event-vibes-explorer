@@ -65,12 +65,12 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
       let imageUrl: string | null = null;
       if (image) {
         const fileExt = image.name.split('.').pop();
-        const filePath = `events/${user.id}/${Date.now()}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage.
-        from('avatars').
-        upload(filePath, image);
+        const filePath = `${user.id}/${Date.now()}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage
+          .from('event-images')
+          .upload(filePath, image);
         if (!uploadError) {
-          const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+          const { data } = supabase.storage.from('event-images').getPublicUrl(filePath);
           imageUrl = data.publicUrl;
         }
       }

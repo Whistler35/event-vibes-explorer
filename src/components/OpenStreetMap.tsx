@@ -120,9 +120,11 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
   // Upload image to Supabase storage
   const uploadEventImage = async (file: File): Promise<string | null> => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `events/${fileName}`;
+      const filePath = `${user.id}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('event-images')
