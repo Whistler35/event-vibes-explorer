@@ -34,6 +34,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
   const [category, setCategory] = useState<EventCategory>('community');
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [maxParticipants, setMaxParticipants] = useState<string>('');
   const [loading, setLoading] = useState(false);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,6 +55,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
     setCategory('community');
     setImage(null);
     setImagePreview(null);
+    setMaxParticipants('');
   };
 
   const handleSubmit = async () => {
@@ -79,6 +81,8 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
       const approvalStatus = isAdmin ? 'approved' : 'pending';
       const eventCategory = isAdmin ? category : 'community';
 
+      const parsedMax = maxParticipants ? parseInt(maxParticipants, 10) : null;
+
       const { error } = await supabase.from('events').insert({
         title,
         description,
@@ -90,7 +94,8 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
         source: isAdmin ? 'curated' : 'community',
         created_by: user.id,
         image_url: imageUrl,
-        approval_status: approvalStatus
+        approval_status: approvalStatus,
+        max_participants: !isAdmin && parsedMax && parsedMax >= 2 ? parsedMax : null,
       } as any);
 
       if (error) throw error;
@@ -228,12 +233,29 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
             </div>
           </div>
 
+          {/* Max Participants (only for non-admin community events) */}
+          {!isAdmin && (
+            <div className="space-y-2">
+              <Label htmlFor="maxParticipants" className="text-white text-sm">Max. Teilnehmer *</Label>
+              <Input
+                id="maxParticipants"
+                type="number"
+                min={2}
+                value={maxParticipants}
+                onChange={(e) => setMaxParticipants(e.target.value)}
+                placeholder="z.B. 10 (min. 2)"
+                className="bg-transparent border-evendle-gray text-white placeholder:text-evendle-gray rounded-xl h-12"
+              />
+              <p className="text-evendle-light-gray text-xs">Mindestens 2 Teilnehmer</p>
+            </div>
+          )}
+
           {/* Buttons */}
           <div className="flex gap-3 pt-2">
             <Button variant="outline" onClick={handleClose} className="flex-1 h-12 rounded-xl border-evendle-orange text-evendle-orange hover:bg-evendle-orange/10 hover:text-evendle-orange bg-transparent">
               Abbrechen
             </Button>
-            <Button onClick={handleSubmit} disabled={!title || !date || !time || loading} className="flex-1 h-12 rounded-xl bg-evendle-orange hover:bg-evendle-orange-hover text-white disabled:opacity-50">
+            <Button onClick={handleSubmit} disabled={!title || !date || !time || loading || (!isAdmin && (!maxParticipants || parseInt(maxParticipants) < 2))} className="flex-1 h-12 rounded-xl bg-evendle-orange hover:bg-evendle-orange-hover text-white disabled:opacity-50">
               {loading ? 'Erstelle...' : 'Event erstellen'}
             </Button>
           </div>

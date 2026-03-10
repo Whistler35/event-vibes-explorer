@@ -6,6 +6,8 @@ import { useSearchEvents, type EventCategory } from "@/hooks/useSearchEvents";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Events = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -21,6 +23,22 @@ const Events = () => {
     date_from: selectedFilter === 'today' ? today : undefined,
     date_to: selectedFilter === 'today' ? today + 'T23:59:59' : undefined,
     limit: 50,
+  });
+
+  // Fetch featured/top events
+  const { data: featuredEvents } = useQuery({
+    queryKey: ['featured-events'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('events')
+        .select('id, title, image_url, category, event_date, location_name, source')
+        .eq('is_featured', true)
+        .eq('approval_status', 'approved')
+        .order('event_date', { ascending: true })
+        .limit(10);
+      return data || [];
+    },
+    staleTime: 60_000,
   });
 
   const events = searchResult?.data || [];
@@ -63,10 +81,42 @@ const Events = () => {
         {/* Category Filters */}
         <CategoryFilter selected={selectedCategory} onChange={setSelectedCategory} />
 
+        {/* Top Events Section */}
+        {featuredEvents && featuredEvents.length > 0 && (
+          <div className="space-y-3">
+            <h3 className="text-foreground text-2xl font-bold">⭐ top events</h3>
+            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
+              {featuredEvents.map((event: any) => {
+                const eventDate = new Date(event.event_date);
+                const formattedDate = eventDate.toLocaleDateString('de-DE', { day: '2-digit', month: 'short' });
+                return (
+                  <div
+                    key={event.id}
+                    className="min-w-[200px] max-w-[200px] bg-card rounded-2xl overflow-hidden border border-primary/20 cursor-pointer shrink-0"
+                    onClick={() => handleEventClick(event.id)}
+                  >
+                    <div className="h-28 bg-muted">
+                      {event.image_url ? (
+                        <img src={event.image_url} alt={event.title} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-3xl">🔥</div>
+                      )}
+                    </div>
+                    <div className="p-3 space-y-1">
+                      <h4 className="text-foreground font-bold text-sm truncate">{event.title}</h4>
+                      <p className="text-muted-foreground text-xs">{formattedDate}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Filter Buttons */}
         <div className="space-y-4">
           <div className="flex items-center space-x-4">
-            <h3 className="text-foreground text-2xl font-bold">top events</h3>
+            <h3 className="text-foreground text-2xl font-bold">alle events</h3>
             <div className="flex space-x-3">
               <Button
                 onClick={() => setSelectedFilter("today")}

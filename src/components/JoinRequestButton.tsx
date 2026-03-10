@@ -54,13 +54,18 @@ const JoinRequestButton: React.FC<JoinRequestButtonProps> = ({ eventId, eventOwn
       return;
     }
 
+    if (status === 'none' && !message.trim()) {
+      toast.error('Bitte hinterlasse eine kurze Nachricht');
+      return;
+    }
+
     setLoading(true);
     try {
       if (status === 'none') {
         const { error } = await supabase.from('join_requests').insert({
           event_id: eventId,
           user_id: user.id,
-          message: message || null,
+          message: message.trim(),
         });
         if (error) throw error;
         setStatus('pending');
@@ -104,7 +109,7 @@ const JoinRequestButton: React.FC<JoinRequestButtonProps> = ({ eventId, eventOwn
           <Textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="Kurze Nachricht an den Ersteller (optional)..."
+            placeholder="Kurze Nachricht an den Ersteller *"
             className="bg-muted border-border text-foreground placeholder:text-muted-foreground rounded-xl resize-none"
             rows={2}
           />
