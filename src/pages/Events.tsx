@@ -34,6 +34,7 @@ const Events = () => {
         .select('id, title, image_url, category, event_date, location_name, source')
         .eq('is_featured', true)
         .eq('approval_status', 'approved')
+        .order('featured_order', { ascending: true })
         .order('event_date', { ascending: true })
         .limit(10);
       return data || [];
