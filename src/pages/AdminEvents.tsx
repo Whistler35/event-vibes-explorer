@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { CheckCircle, XCircle, Clock, ArrowLeft, MapPin, Calendar, Star, StarOff } from "lucide-react";
+import { CheckCircle, XCircle, Clock, ArrowLeft, MapPin, Calendar, Star, StarOff, ChevronUp, ChevronDown } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const formatDate = (dateStr: string) => {
@@ -28,6 +28,7 @@ interface AdminEvent {
   created_by: string | null;
   approval_status: string;
   is_featured: boolean;
+  featured_order: number;
 }
 
 const AdminEvents = () => {
@@ -61,9 +62,10 @@ const AdminEvents = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("events")
-      .select("id, title, description, category, event_date, location_name, image_url, created_at, created_by, approval_status, is_featured")
+      .select("id, title, description, category, event_date, location_name, image_url, created_at, created_by, approval_status, is_featured, featured_order")
       .eq("approval_status", "approved")
-      .order("is_featured", { ascending: false })
+      .eq("is_featured", true)
+      .order("featured_order", { ascending: true })
       .order("event_date", { ascending: true });
 
     if (!error && data) setAllEvents(data as AdminEvent[]);
@@ -115,9 +117,42 @@ const AdminEvents = () => {
       toast.error("Fehler beim Aktualisieren");
     } else {
       toast.success(currentlyFeatured ? "Nicht mehr Top Event" : "Als Top Event markiert ⭐");
-      setAllEvents((prev) =>
-        prev.map((e) => e.id === eventId ? { ...e, is_featured: !currentlyFeatured } : e)
-      );
+      if (currentlyFeatured) {
+        setAllEvents((prev) => prev.filter((e) => e.id !== eventId));
+      } else {
+        fetchAllEvents();
+      }
+    }
+  };
+
+  const moveEvent = async (eventId: string, direction: "up" | "down") => {
+    const idx = allEvents.findIndex((e) => e.id === eventId);
+    if (idx < 0) return;
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= allEvents.length) return;
+
+    const current = allEvents[idx];
+    const swap = allEvents[swapIdx];
+
+    // Swap featured_order values
+    const { error: e1 } = await supabase
+      .from("events")
+      .update({ featured_order: swap.featured_order } as any)
+      .eq("id", current.id);
+    const { error: e2 } = await supabase
+      .from("events")
+      .update({ featured_order: current.featured_order } as any)
+      .eq("id", swap.id);
+
+    if (e1 || e2) {
+      toast.error("Fehler beim Sortieren");
+    } else {
+      const newEvents = [...allEvents];
+      newEvents[idx] = { ...swap, featured_order: current.featured_order };
+      newEvents[swapIdx] = { ...current, featured_order: swap.featured_order };
+      // Re-sort
+      newEvents.sort((a, b) => a.featured_order - b.featured_order);
+      setAllEvents(newEvents);
     }
   };
 
@@ -238,21 +273,39 @@ const AdminEvents = () => {
                         <p className="text-muted-foreground text-xs">{formatDate(event.event_date)}</p>
                         <p className="text-muted-foreground text-xs truncate">{event.location_name}</p>
                       </div>
-                      <Button
-                        size="sm"
-                        variant={event.is_featured ? "outline" : "default"}
-                        onClick={() => toggleFeatured(event.id, event.is_featured)}
-                        className={event.is_featured
-                          ? "border-yellow-400/50 text-yellow-400 hover:bg-yellow-400/10 shrink-0"
-                          : "bg-yellow-500 hover:bg-yellow-600 text-black shrink-0"
-                        }
-                      >
-                        {event.is_featured ? (
-                          <><StarOff className="w-4 h-4 mr-1" /> Entfernen</>
-                        ) : (
-                          <><Star className="w-4 h-4 mr-1" /> Top Event</>
-                        )}
-                      </Button>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <div className="flex flex-col">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7"
+                            disabled={allEvents.indexOf(event) === 0}
+                            onClick={() => moveEvent(event.id, "up")}
+                          >
+                            <ChevronUp className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7"
+                            disabled={allEvents.indexOf(event) === allEvents.length - 1}
+                            onClick={() => moveEvent(event.id, "down")}
+                          >
+                            <ChevronDown className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        <span className="text-muted-foreground text-xs font-mono w-5 text-center">
+                          #{allEvents.indexOf(event) + 1}
+                        </span>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => toggleFeatured(event.id, event.is_featured)}
+                          className="border-destructive/50 text-destructive hover:bg-destructive/10 shrink-0"
+                        >
+                          <StarOff className="w-4 h-4 mr-1" /> Entfernen
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))}
