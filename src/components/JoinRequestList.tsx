@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 import { Check, X, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface JoinRequest {
   id: string;
@@ -22,6 +23,7 @@ const JoinRequestList: React.FC<JoinRequestListProps> = ({ eventId }) => {
   const [requests, setRequests] = useState<JoinRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchRequests();
@@ -98,15 +100,20 @@ const JoinRequestList: React.FC<JoinRequestListProps> = ({ eventId }) => {
 
       {pending.map(req => (
         <div key={req.id} className="flex items-center gap-3 p-3 bg-muted rounded-xl">
-          <Avatar className="w-10 h-10">
-            <AvatarImage src={req.profile?.avatar_url || undefined} />
-            <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-              {req.profile?.name?.[0] || '?'}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="text-foreground font-medium text-sm">{req.profile?.name || 'Unbekannt'}</p>
-            {req.message && <p className="text-muted-foreground text-xs truncate">{req.message}</p>}
+          <div 
+            className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer" 
+            onClick={() => navigate(`/user/${req.user_id}`)}
+          >
+            <Avatar className="w-10 h-10">
+              <AvatarImage src={req.profile?.avatar_url || undefined} />
+              <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+                {req.profile?.name?.[0] || '?'}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-foreground font-medium text-sm">{req.profile?.name || 'Unbekannt'}</p>
+              {req.message && <p className="text-muted-foreground text-xs truncate">{req.message}</p>}
+            </div>
           </div>
           <div className="flex gap-2">
             <Button
