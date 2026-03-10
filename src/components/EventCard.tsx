@@ -15,12 +15,16 @@ const EventCard = ({ title, image, date, time, location, category, description, 
       className="bg-card rounded-2xl shadow-card overflow-hidden cursor-pointer transition-transform duration-200 hover:scale-105"
       onClick={onClick}
     >
-      <div className="aspect-video bg-gradient-to-br from-evendle-orange/20 to-evendle-dark-card overflow-hidden">
-        <img 
-          src="https://images.unsplash.com/photo-1500375592092-40eb2168fd21" 
-          alt={title}
-          className="w-full h-full object-cover"
-        />
+      <div className="aspect-video bg-muted overflow-hidden">
+        {image ? (
+          <img 
+            src={image} 
+            alt={title}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-3xl">🔥</div>
+        )}
       </div>
       <div className="p-4">
         <div className="flex justify-between items-start mb-2">
