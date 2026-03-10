@@ -23,6 +23,7 @@ const JoinRequestList: React.FC<JoinRequestListProps> = ({ eventId }) => {
   const [requests, setRequests] = useState<JoinRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchRequests();
