@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 import { Check, X, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface JoinRequest {
   id: string;
