@@ -255,7 +255,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
             <Button variant="outline" onClick={handleClose} className="flex-1 h-12 rounded-xl border-evendle-orange text-evendle-orange hover:bg-evendle-orange/10 hover:text-evendle-orange bg-transparent">
               Abbrechen
             </Button>
-            <Button onClick={handleSubmit} disabled={!title || !date || !time || loading} className="flex-1 h-12 rounded-xl bg-evendle-orange hover:bg-evendle-orange-hover text-white disabled:opacity-50">
+            <Button onClick={handleSubmit} disabled={!title || !date || !time || loading || (!isAdmin && (!maxParticipants || parseInt(maxParticipants) < 2))} className="flex-1 h-12 rounded-xl bg-evendle-orange hover:bg-evendle-orange-hover text-white disabled:opacity-50">
               {loading ? 'Erstelle...' : 'Event erstellen'}
             </Button>
           </div>
