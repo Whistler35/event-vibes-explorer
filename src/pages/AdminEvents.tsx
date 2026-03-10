@@ -62,9 +62,10 @@ const AdminEvents = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("events")
-      .select("id, title, description, category, event_date, location_name, image_url, created_at, created_by, approval_status, is_featured")
+      .select("id, title, description, category, event_date, location_name, image_url, created_at, created_by, approval_status, is_featured, featured_order")
       .eq("approval_status", "approved")
-      .order("is_featured", { ascending: false })
+      .eq("is_featured", true)
+      .order("featured_order", { ascending: true })
       .order("event_date", { ascending: true });
 
     if (!error && data) setAllEvents(data as AdminEvent[]);
