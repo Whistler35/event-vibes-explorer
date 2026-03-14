@@ -44,6 +44,23 @@ const Nearby = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  // Pick up city from Home screen
+  useEffect(() => {
+    const stored = sessionStorage.getItem('selectedCity');
+    if (stored) {
+      try {
+        const loc = JSON.parse(stored);
+        setCityQuery(loc.name?.split(',')[0] || '');
+        setShowSearchBar(true);
+        // Fly after map loads – small delay
+        setTimeout(() => {
+          mapRef.current?.flyTo(loc.lat, loc.lng, 13);
+        }, 1000);
+        sessionStorage.removeItem('selectedCity');
+      } catch {}
+    }
+  }, []);
+
   const { data: searchResult, isLoading: isLoadingPublic, refetch: refetchPublic } = useSearchEvents({
     category: selectedCategory || undefined,
     date_from: selectedDate ? selectedDate.toISOString().split('T')[0] : undefined,
