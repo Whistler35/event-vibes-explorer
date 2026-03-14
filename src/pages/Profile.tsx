@@ -158,7 +158,7 @@ const Profile = () => {
           {/* User Info */}
           <div className="space-y-1">
             <h1 className="text-foreground text-2xl font-bold">
-              {displayName}{profile?.age ? `, ${profile.age}` : ""} {profile?.country || ""}
+              {displayName}{profile?.age ? `, ${profile.age}` : ""}
             </h1>
           </div>
 
