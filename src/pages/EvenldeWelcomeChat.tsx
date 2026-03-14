@@ -1,7 +1,9 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { markConversationRead } from "@/hooks/useUnreadDMCount";
 
 const welcomeMessages = [
   {
