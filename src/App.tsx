@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import EventDetail from "./pages/EventDetail";
 import EventHangouts from "./pages/EventHangouts";
 import Nearby from "./pages/Nearby";
+import EventChatPage from "./pages/EventChatPage";
 
 import Chat from "./pages/Chat";
 import CityEvents from "./pages/CityEvents";
