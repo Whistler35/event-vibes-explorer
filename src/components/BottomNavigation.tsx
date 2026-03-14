@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { MapPin, Calendar, User, ShieldCheck } from "lucide-react";
+import { MapPin, Calendar, User, ShieldCheck, MessageCircle } from "lucide-react";
 import { usePendingEventsCount } from "@/hooks/usePendingEventsCount";
 
 const BottomNavigation = () => {
