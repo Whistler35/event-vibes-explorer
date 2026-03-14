@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, UserPlus, UserCheck, Clock, X, UserMinus } from 'lucide-react';
+import { Search, UserPlus, UserCheck, Clock, X, UserMinus, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ProfileResult {
