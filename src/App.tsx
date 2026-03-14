@@ -11,6 +11,7 @@ import Nearby from "./pages/Nearby";
 import EventChatPage from "./pages/EventChatPage";
 import Messenger from "./pages/Messenger";
 import DirectChat from "./pages/DirectChat";
+import EvenldeWelcomeChat from "./pages/EvenldeWelcomeChat";
 
 import Chat from "./pages/Chat";
 import CityEvents from "./pages/CityEvents";
