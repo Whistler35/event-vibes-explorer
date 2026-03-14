@@ -147,9 +147,12 @@ const Home = () => {
       <div className="min-h-screen bg-background">
         {/* Header with Logo */}
         <div className="p-4 pt-8">
-          <div className="flex items-center space-x-2">
-            <span className="text-primary text-2xl font-bold">+</span>
-            <span className="text-foreground text-xl font-bold">evendle</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <span className="text-primary text-2xl font-bold">+</span>
+              <span className="text-foreground text-xl font-bold">evendle</span>
+            </div>
+            <NotificationBell />
           </div>
         </div>
 
