@@ -263,6 +263,20 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
             </div>
           )}
 
+          {/* Visibility Toggle */}
+          <div className="flex items-center justify-between py-2 px-1">
+            <div className="flex items-center gap-2">
+              {isPrivate ? <Lock className="h-4 w-4 text-muted-foreground" /> : <Globe className="h-4 w-4 text-primary" />}
+              <Label className="text-white text-sm">
+                {isPrivate ? 'Privat – nur für dich sichtbar' : 'Öffentlich – für alle sichtbar'}
+              </Label>
+            </div>
+            <Switch
+              checked={isPrivate}
+              onCheckedChange={setIsPrivate}
+            />
+          </div>
+
           {/* Buttons */}
           <div className="flex gap-3 pt-2">
             <Button variant="outline" onClick={handleClose} className="flex-1 h-12 rounded-xl border-evendle-orange text-evendle-orange hover:bg-evendle-orange/10 hover:text-evendle-orange bg-transparent">
