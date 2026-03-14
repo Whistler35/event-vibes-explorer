@@ -66,7 +66,7 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
   const [userEvents, setUserEvents] = useState<UserEvent[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<[number, number] | null>(null);
-  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
+  const [longPressTimer, setLongPressTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -291,7 +291,7 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
     }).addTo(map.current);
 
     // Add long press handlers for creating events - using proper Leaflet events
-    let pressTimer: NodeJS.Timeout | null = null;
+    let pressTimer: ReturnType<typeof setTimeout> | null = null;
     let isLongPress = false;
 
     // Debug: Test if events are being registered
