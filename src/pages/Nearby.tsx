@@ -131,6 +131,7 @@ const Nearby = () => {
     setCityQuery(loc.name.split(',')[0]);
     setShowCitySuggestions(false);
     mapRef.current?.flyTo(loc.lat, loc.lng, 13);
+    localStorage.setItem('selectedCity', JSON.stringify(loc));
   };
 
   const clearCitySearch = () => {
@@ -138,6 +139,7 @@ const Nearby = () => {
     setCitySuggestions([]);
     setShowCitySuggestions(false);
     setShowSearchBar(false);
+    localStorage.removeItem('selectedCity');
   };
 
   const handleCreateEvent = (coordinates: [number, number]) => {
