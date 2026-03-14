@@ -1,4 +1,5 @@
 import { Search } from "lucide-react";
+import ReelsFeed from "@/components/ReelsFeed";
 import Layout from "@/components/Layout";
 import EventCard from "@/components/EventCard";
 import { useNavigate } from "react-router-dom";
