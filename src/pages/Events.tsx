@@ -63,7 +63,7 @@ const Events = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <img src={evendleLogo} alt="Evendle" className="w-9 h-9 object-contain" />
-            <span className="text-foreground text-xl font-bold">evendle</span>
+            <span className="text-foreground text-xl font-bold">EVENDLE</span>
           </div>
         </div>
 
