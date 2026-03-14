@@ -154,7 +154,7 @@ const EventDetail = () => {
   };
 
   const handleOpenChat = () => {
-    navigate(`/event-hangouts/${id}`);
+    navigate(`/event/${id}/chat`);
   };
 
   if (loading) {
