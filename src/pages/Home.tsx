@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Search, MapPin, X } from "lucide-react";
 import ReelsFeed from "@/components/ReelsFeed";
+import NotificationBell from "@/components/NotificationBell";
 import Layout from "@/components/Layout";
 import EventCard from "@/components/EventCard";
 import { useNavigate } from "react-router-dom";
