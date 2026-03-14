@@ -21,8 +21,25 @@ interface ProfileData {
 const UserProfile = () => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const handleStartDM = async () => {
+    if (!user || !userId) {
+      toast.error("Bitte melde dich an, um Nachrichten zu senden.");
+      return;
+    }
+    const { data, error } = await supabase.rpc("get_or_create_dm", {
+      p_user1: user.id,
+      p_user2: userId,
+    });
+    if (error) {
+      toast.error("Chat konnte nicht erstellt werden.");
+      return;
+    }
+    navigate(`/dm/${data}`);
+  };
 
   useEffect(() => {
     if (!userId) return;
