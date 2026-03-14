@@ -141,12 +141,12 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
       }}>
       
       <DialogContent
-        className="sm:max-w-[400px] bg-card border-border p-0 gap-0"
+        className="sm:max-w-[400px] max-h-[90vh] bg-card border-border p-0 gap-0 flex flex-col overflow-hidden"
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}>
         
         {/* Header */}
-        <div className="flex items-center justify-between p-4 pb-2">
+        <div className="flex items-center justify-between p-4 pb-2 shrink-0">
           <div className="flex items-center gap-2">
             <span className="text-primary text-xl font-bold">+</span>
             <span className="text-foreground text-lg font-semibold">Create evendle</span>
@@ -161,6 +161,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
           }
         </div>
 
+        <div className="overflow-y-auto flex-1 min-h-0">
         {!isAdmin &&
         <div className="mx-4 px-3 py-2 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs">
             Dein Event wird nach Admin-Freigabe sichtbar.
@@ -278,6 +279,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
               {loading ? 'Erstelle...' : 'Event erstellen'}
             </Button>
           </div>
+        </div>
         </div>
       </DialogContent>
     </Dialog>);
