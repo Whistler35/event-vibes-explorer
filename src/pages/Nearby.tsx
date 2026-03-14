@@ -34,17 +34,30 @@ const Nearby = () => {
     limit: 100,
   }, !isPrivateMode);
 
-  // Private events (user's own unlisted events)
+  // Private events (user's own + friends' unlisted events)
   const { data: privateEvents, isLoading: isLoadingPrivate, refetch: refetchPrivate } = useQuery({
     queryKey: ['private-events', user?.id, selectedCategory, selectedDate],
     queryFn: async () => {
       if (!user) return [];
+
+      // Get accepted friend IDs
+      const { data: friendships } = await supabase
+        .from('friendships')
+        .select('requester_id, addressee_id')
+        .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
+        .eq('status', 'accepted');
+
+      const friendIds = (friendships || []).map((f: any) =>
+        f.requester_id === user.id ? f.addressee_id : f.requester_id
+      );
+
+      const allUserIds = [user.id, ...friendIds];
+
       let query = supabase
         .from('events')
         .select('*')
-        .eq('created_by', user.id)
+        .in('created_by', allUserIds)
         .eq('visibility', 'unlisted')
-        .eq('approval_status', 'approved')
         .order('event_date', { ascending: true });
 
       if (selectedCategory) {
