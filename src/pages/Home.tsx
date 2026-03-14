@@ -150,7 +150,7 @@ const Home = () => {
         <div className="p-4 pt-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <img src={evendleLogo} alt="Evendle" className="w-8 h-8 rounded-md" />
+              <img src={evendleLogo} alt="Evendle" className="w-9 h-9 object-contain" />
               <span className="text-foreground text-xl font-bold">evendle</span>
             </div>
             <NotificationBell />
