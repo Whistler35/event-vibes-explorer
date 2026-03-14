@@ -108,6 +108,11 @@ const Home = () => {
             <p className="text-muted-foreground text-sm">Keine Top Events aktuell.</p>
           )}
         </div>
+
+        {/* Reels Feed */}
+        <div className="px-4 pb-8">
+          <ReelsFeed />
+        </div>
       </div>
     </Layout>
   );
