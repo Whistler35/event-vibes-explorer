@@ -1,11 +1,13 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { MapPin, Calendar, User, ShieldCheck, MessageCircle } from "lucide-react";
 import { usePendingEventsCount } from "@/hooks/usePendingEventsCount";
+import { useUnreadDMCount } from "@/hooks/useUnreadDMCount";
 
 const BottomNavigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAdmin, count: pendingCount } = usePendingEventsCount();
+  const { unreadCount } = useUnreadDMCount();
 
   const navItems = [
     { id: "events", label: "Events", icon: Calendar, path: "/" },
@@ -44,6 +46,11 @@ const BottomNavigation = () => {
                 {item.id === "admin" && pendingCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
                     {pendingCount}
+                  </span>
+                )}
+                {item.id === "messenger" && unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    {unreadCount > 9 ? "9+" : unreadCount}
                   </span>
                 )}
               </div>

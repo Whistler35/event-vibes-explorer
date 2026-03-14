@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import Layout from "@/components/Layout";
 import { ArrowLeft, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { markConversationRead } from "@/hooks/useUnreadDMCount";
 
 interface Message {
   id: string;
@@ -65,7 +66,10 @@ const DirectChat = () => {
         .eq("conversation_id", conversationId)
         .order("created_at", { ascending: true });
 
-      if (data) setMessages(data as Message[]);
+      if (data) {
+        setMessages(data as Message[]);
+        markConversationRead(conversationId);
+      }
     };
 
     fetchMessages();
@@ -83,6 +87,7 @@ const DirectChat = () => {
         },
         (payload) => {
           setMessages((prev) => [...prev, payload.new as Message]);
+          markConversationRead(conversationId);
         }
       )
       .subscribe();
