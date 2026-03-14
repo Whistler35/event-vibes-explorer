@@ -280,6 +280,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
             </Button>
           </div>
         </div>
+        </div>
       </DialogContent>
     </Dialog>);
 };
