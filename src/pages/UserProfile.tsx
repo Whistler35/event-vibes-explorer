@@ -120,8 +120,24 @@ const UserProfile = () => {
           {/* User Info */}
           <div className="space-y-1">
             <h2 className="text-foreground text-2xl font-bold">
-              {displayName}{profile.age ? `, ${profile.age}` : ""} {profile.country || ""}
+              {displayName}{profile.age ? `, ${profile.age}` : ""}
             </h2>
+          </div>
+
+          {/* Stats Row */}
+          <div className="flex justify-center gap-8">
+            <button onClick={() => setStatsSheet({ open: true, tab: "hosted" })} className="text-center">
+              <p className="text-foreground text-xl font-bold">{stats.hostedCount}</p>
+              <p className="text-muted-foreground text-xs">Gehostet</p>
+            </button>
+            <button onClick={() => setStatsSheet({ open: true, tab: "participated" })} className="text-center">
+              <p className="text-foreground text-xl font-bold">{stats.participatedCount}</p>
+              <p className="text-muted-foreground text-xs">Teilgenommen</p>
+            </button>
+            <button onClick={() => setStatsSheet({ open: true, tab: "friends" })} className="text-center">
+              <p className="text-foreground text-xl font-bold">{stats.friendsCount}</p>
+              <p className="text-muted-foreground text-xs">Freunde</p>
+            </button>
           </div>
 
           {/* Send Message Button */}
