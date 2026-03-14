@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, MessageCircle, Calendar, Users } from "lucide-react";
+import { Bell, MessageCircle, Calendar, Users, UserPlus, UserCheck } from "lucide-react";
 import { useNotifications, AppNotification } from "@/hooks/useNotifications";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
