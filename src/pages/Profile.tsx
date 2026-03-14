@@ -162,6 +162,22 @@ const Profile = () => {
             </h1>
           </div>
 
+          {/* Stats Row */}
+          <div className="flex justify-center gap-8">
+            <div className="text-center">
+              <p className="text-foreground text-xl font-bold">{stats.hostedCount}</p>
+              <p className="text-muted-foreground text-xs">Gehostet</p>
+            </div>
+            <div className="text-center">
+              <p className="text-foreground text-xl font-bold">{stats.participatedCount}</p>
+              <p className="text-muted-foreground text-xs">Teilgenommen</p>
+            </div>
+            <div className="text-center">
+              <p className="text-foreground text-xl font-bold">{stats.friendsCount}</p>
+              <p className="text-muted-foreground text-xs">Freunde</p>
+            </div>
+          </div>
+
           {/* About Me */}
           {(profile?.bio || profile?.fun_fact) && (
             <div className="text-left space-y-4">
