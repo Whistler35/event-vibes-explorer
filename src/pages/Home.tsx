@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Search, MapPin, X } from "lucide-react";
 import ReelsFeed from "@/components/ReelsFeed";
 import Layout from "@/components/Layout";
@@ -112,6 +112,8 @@ const Home = () => {
     setSearchQuery(loc.name.split(',')[0]);
     setSearchLocation(loc);
     setShowSuggestions(false);
+    // Store for map view
+    sessionStorage.setItem('selectedCity', JSON.stringify(loc));
   };
 
   const clearSearch = () => {
