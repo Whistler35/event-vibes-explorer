@@ -8,6 +8,7 @@ import { usePendingEventsCount } from "@/hooks/usePendingEventsCount";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import FriendSearch from "@/components/FriendSearch";
+import ProfileStatsSheet from "@/components/ProfileStatsSheet";
 
 interface ProfileData {
   name: string;
