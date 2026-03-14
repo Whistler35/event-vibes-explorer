@@ -141,12 +141,12 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
       }}>
       
       <DialogContent
-        className="sm:max-w-[400px] bg-card border-border p-0 gap-0"
+        className="sm:max-w-[400px] max-h-[90vh] bg-card border-border p-0 gap-0 flex flex-col overflow-hidden"
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}>
         
         {/* Header */}
-        <div className="flex items-center justify-between p-4 pb-2">
+        <div className="flex items-center justify-between p-4 pb-2 shrink-0">
           <div className="flex items-center gap-2">
             <span className="text-primary text-xl font-bold">+</span>
             <span className="text-foreground text-lg font-semibold">Create evendle</span>
