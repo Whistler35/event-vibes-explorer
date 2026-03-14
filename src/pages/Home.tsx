@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import evendleLogo from "@/assets/evendle-logo.jpeg";
 import { Search, MapPin, X } from "lucide-react";
 import ReelsFeed from "@/components/ReelsFeed";
 import NotificationBell from "@/components/NotificationBell";
@@ -149,7 +150,7 @@ const Home = () => {
         <div className="p-4 pt-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <span className="text-primary text-2xl font-bold">+</span>
+              <img src={evendleLogo} alt="Evendle" className="w-8 h-8 rounded-md" />
               <span className="text-foreground text-xl font-bold">evendle</span>
             </div>
             <NotificationBell />
