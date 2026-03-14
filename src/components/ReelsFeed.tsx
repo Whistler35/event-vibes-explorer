@@ -2,6 +2,13 @@ import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { Heart, MessageCircle, Share2, Volume2, VolumeX, Play, ChevronDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
+import neonPartyVideo from '@/assets/reels/neon-party.mp4';
+import djSetVideo from '@/assets/reels/dj-set.mp4';
+import streetFoodVideo from '@/assets/reels/street-food.mp4';
+import sunsetYogaVideo from '@/assets/reels/sunset-yoga.mp4';
+import morningRunVideo from '@/assets/reels/morning-run.mp4';
+import rooftopConcertVideo from '@/assets/reels/rooftop-concert.mp4';
+
 interface ReelItem {
   id: string;
   videoUrl: string;
@@ -14,11 +21,11 @@ interface ReelItem {
   author: string;
 }
 
-// Demo reels data with free stock videos
+// Demo reels data with AI-generated videos
 const demoReels: ReelItem[] = [
   {
     id: '1',
-    videoUrl: 'https://cdn.pixabay.com/video/2020/10/21/53064-472619757_large.mp4',
+    videoUrl: neonPartyVideo,
     title: 'Neon Nights Party 🪩',
     description: 'Die heißeste Party der Stadt – Lichter, Beats & gute Vibes!',
     category: 'nightlife',
@@ -28,7 +35,7 @@ const demoReels: ReelItem[] = [
   },
   {
     id: '2',
-    videoUrl: 'https://cdn.pixabay.com/video/2019/06/17/24559-342884783_large.mp4',
+    videoUrl: djSetVideo,
     title: 'DJ Live Set 🎧🔥',
     description: 'Open-Air DJ Session mit fetten Drops – bist du dabei?',
     category: 'music',
@@ -38,7 +45,7 @@ const demoReels: ReelItem[] = [
   },
   {
     id: '3',
-    videoUrl: 'https://cdn.pixabay.com/video/2022/12/21/143883-783152584_large.mp4',
+    videoUrl: streetFoodVideo,
     title: 'Street Food Market 🍜✨',
     description: 'Probier dich durch die besten Street-Food-Stände!',
     category: 'food',
@@ -48,7 +55,7 @@ const demoReels: ReelItem[] = [
   },
   {
     id: '4',
-    videoUrl: 'https://cdn.pixabay.com/video/2021/04/04/69889-533218017_large.mp4',
+    videoUrl: sunsetYogaVideo,
     title: 'Sunset Yoga Flow 🧘‍♀️🌅',
     description: 'Atme ein, lass los – Yoga bei Sonnenuntergang im Park',
     category: 'outdoor',
@@ -58,7 +65,7 @@ const demoReels: ReelItem[] = [
   },
   {
     id: '5',
-    videoUrl: 'https://cdn.pixabay.com/video/2020/05/25/40130-424930032_large.mp4',
+    videoUrl: morningRunVideo,
     title: 'Morning Run Crew 🏃‍♂️💪',
     description: 'Jeden Samstag 7 Uhr – gemeinsam laufen, gemeinsam wachsen',
     category: 'sports',
@@ -68,7 +75,7 @@ const demoReels: ReelItem[] = [
   },
   {
     id: '6',
-    videoUrl: 'https://cdn.pixabay.com/video/2020/07/30/45894-446785498_large.mp4',
+    videoUrl: rooftopConcertVideo,
     title: 'Rooftop Concert 🎶🌃',
     description: 'Live-Musik über den Dächern der Stadt – unvergessliche Nacht!',
     category: 'music',
