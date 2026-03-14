@@ -333,6 +333,14 @@ const EventDetail = () => {
             </Button>
           )}
         </div>
+        {canEdit && event && (
+          <EditEventDialog
+            open={editOpen}
+            onClose={() => setEditOpen(false)}
+            event={event}
+            onEventUpdated={() => fetchEventDetails()}
+          />
+        )}
       </div>
     </Layout>
   );
