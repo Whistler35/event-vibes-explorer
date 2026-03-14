@@ -184,10 +184,11 @@ const FriendSearch: React.FC = () => {
                   <img
                     src={getAvatarUrl(profile)}
                     alt={profile.name}
-                    className="w-10 h-10 rounded-full object-cover"
+                    className="w-10 h-10 rounded-full object-cover cursor-pointer"
+                    onClick={() => navigate(`/user/${profile.user_id}`)}
                   />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-foreground font-medium text-sm truncate">{profile.name}</p>
+                  <div className="flex-1 min-w-0 cursor-pointer" onClick={() => navigate(`/user/${profile.user_id}`)}>
+                    <p className="text-foreground font-medium text-sm truncate hover:text-primary transition-colors">{profile.name}</p>
                     {profile.bio && (
                       <p className="text-muted-foreground text-xs truncate">{profile.bio}</p>
                     )}
