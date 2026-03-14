@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Camera, X, ShieldCheck, Clock } from 'lucide-react';
+import { Camera, X, ShieldCheck, Clock, Globe, Lock } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -17,6 +18,7 @@ interface CreateEventDialogProps {
   position: [number, number] | null;
   isAdmin?: boolean;
   onEventCreated?: () => void;
+  defaultPrivate?: boolean;
 }
 
 const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
@@ -24,7 +26,8 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
   onClose,
   position,
   isAdmin = false,
-  onEventCreated
+  onEventCreated,
+  defaultPrivate = false,
 }) => {
   const { user } = useAuth();
   const [title, setTitle] = useState('');
@@ -35,6 +38,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [maxParticipants, setMaxParticipants] = useState<string>('');
+  const [isPrivate, setIsPrivate] = useState(defaultPrivate);
   const [loading, setLoading] = useState(false);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,6 +51,11 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
     }
   };
 
+  // Sync defaultPrivate when dialog opens
+  useEffect(() => {
+    if (open) setIsPrivate(defaultPrivate);
+  }, [open, defaultPrivate]);
+
   const resetForm = () => {
     setTitle('');
     setDescription('');
@@ -56,6 +65,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
     setImage(null);
     setImagePreview(null);
     setMaxParticipants('');
+    setIsPrivate(defaultPrivate);
   };
 
   const handleSubmit = async () => {
@@ -83,6 +93,8 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
 
       const parsedMax = maxParticipants ? parseInt(maxParticipants, 10) : null;
 
+      const eventVisibility = isPrivate ? 'unlisted' : 'public';
+
       const { error } = await supabase.from('events').insert({
         title,
         description,
@@ -96,6 +108,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
         image_url: imageUrl,
         approval_status: approvalStatus,
         max_participants: !isAdmin && parsedMax && parsedMax >= 2 ? parsedMax : null,
+        visibility: eventVisibility,
       } as any);
 
       if (error) throw error;
@@ -249,6 +262,20 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
               <p className="text-evendle-light-gray text-xs">Mindestens 2 Teilnehmer</p>
             </div>
           )}
+
+          {/* Visibility Toggle */}
+          <div className="flex items-center justify-between py-2 px-1">
+            <div className="flex items-center gap-2">
+              {isPrivate ? <Lock className="h-4 w-4 text-muted-foreground" /> : <Globe className="h-4 w-4 text-primary" />}
+              <Label className="text-white text-sm">
+                {isPrivate ? 'Privat – nur für dich sichtbar' : 'Öffentlich – für alle sichtbar'}
+              </Label>
+            </div>
+            <Switch
+              checked={isPrivate}
+              onCheckedChange={setIsPrivate}
+            />
+          </div>
 
           {/* Buttons */}
           <div className="flex gap-3 pt-2">
