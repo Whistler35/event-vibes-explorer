@@ -247,7 +247,7 @@ const AdminEvents = () => {
                         </Button>
                         <Button
                           onClick={() => handleApprove(event.id)}
-                          className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                          className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
                         >
                           <CheckCircle className="w-4 h-4 mr-1" /> Freigeben
                         </Button>
