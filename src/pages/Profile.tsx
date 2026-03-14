@@ -20,6 +20,12 @@ interface ProfileData {
   instagram_followers: string | null;
 }
 
+interface ProfileStats {
+  friendsCount: number;
+  hostedCount: number;
+  participatedCount: number;
+}
+
 const Profile = () => {
   const { user } = useAuth();
   const { isAdmin, count: pendingCount } = usePendingEventsCount();
@@ -27,7 +33,7 @@ const Profile = () => {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [showFriends, setShowFriends] = useState(false);
-
+  const [stats, setStats] = useState<ProfileStats>({ friendsCount: 0, hostedCount: 0, participatedCount: 0 });
   useEffect(() => {
     if (!user) {
       setLoading(false);
@@ -44,6 +50,30 @@ const Profile = () => {
       if (!error && data) {
         setProfile(data);
       }
+
+      // Fetch stats in parallel
+      const [friendsRes, hostedRes, participatedRes] = await Promise.all([
+        supabase
+          .from("friendships")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "accepted")
+          .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`),
+        supabase
+          .from("events")
+          .select("id", { count: "exact", head: true })
+          .eq("created_by", user.id),
+        supabase
+          .from("event_participants")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", user.id),
+      ]);
+
+      setStats({
+        friendsCount: friendsRes.count || 0,
+        hostedCount: hostedRes.count || 0,
+        participatedCount: participatedRes.count || 0,
+      });
+
       setLoading(false);
     };
 
@@ -130,6 +160,22 @@ const Profile = () => {
             <h1 className="text-foreground text-2xl font-bold">
               {displayName}{profile?.age ? `, ${profile.age}` : ""} {profile?.country || ""}
             </h1>
+          </div>
+
+          {/* Stats Row */}
+          <div className="flex justify-center gap-8">
+            <div className="text-center">
+              <p className="text-foreground text-xl font-bold">{stats.hostedCount}</p>
+              <p className="text-muted-foreground text-xs">Gehostet</p>
+            </div>
+            <div className="text-center">
+              <p className="text-foreground text-xl font-bold">{stats.participatedCount}</p>
+              <p className="text-muted-foreground text-xs">Teilgenommen</p>
+            </div>
+            <div className="text-center">
+              <p className="text-foreground text-xl font-bold">{stats.friendsCount}</p>
+              <p className="text-muted-foreground text-xs">Freunde</p>
+            </div>
           </div>
 
           {/* About Me */}
