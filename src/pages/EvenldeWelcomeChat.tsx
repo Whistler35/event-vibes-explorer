@@ -40,7 +40,6 @@ const welcomeMessages = [
 const EvenldeWelcomeChat = () => {
   const navigate = useNavigate();
 
-  return (
   useEffect(() => {
     markConversationRead("evendle-welcome");
   }, []);
