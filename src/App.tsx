@@ -11,6 +11,7 @@ import Nearby from "./pages/Nearby";
 import EventChatPage from "./pages/EventChatPage";
 import Messenger from "./pages/Messenger";
 import DirectChat from "./pages/DirectChat";
+import EvenldeWelcomeChat from "./pages/EvenldeWelcomeChat";
 
 import Chat from "./pages/Chat";
 import CityEvents from "./pages/CityEvents";
@@ -41,6 +42,7 @@ const App = () => (
               <Route path="/event/:id/chat" element={<EventChatPage />} />
               <Route path="/nearby" element={<Nearby />} />
               <Route path="/messenger" element={<Messenger />} />
+              <Route path="/dm/evendle-welcome" element={<EvenldeWelcomeChat />} />
               <Route path="/dm/:conversationId" element={<DirectChat />} />
               <Route path="/chat/:id" element={<Chat />} />
               <Route path="/profile" element={<Profile />} />

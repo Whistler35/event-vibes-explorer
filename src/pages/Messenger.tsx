@@ -131,22 +131,31 @@ const Messenger = () => {
         </div>
 
         {/* Conversations List */}
-        {isLoading ? (
-          <p className="text-muted-foreground text-center py-8">Laden...</p>
-        ) : conversations.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 space-y-4">
-            <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center">
-              <MessageCircle className="w-8 h-8 text-muted-foreground" />
+        <div className="space-y-1">
+          {/* EVENDLE Welcome Chat - always first */}
+          <div
+            onClick={() => navigate("/dm/evendle-welcome")}
+            className="flex items-center space-x-4 p-3 rounded-2xl cursor-pointer hover:bg-card/50 transition-colors"
+          >
+            <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-primary flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-lg">E</span>
             </div>
-            <p className="text-muted-foreground text-sm text-center">
-              Noch keine Nachrichten.
-              <br />
-              Starte einen Chat über das Profil eines Freundes!
-            </p>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between">
+                <h3 className="text-foreground font-semibold text-lg truncate">EVENDLE</h3>
+                <span className="text-muted-foreground text-sm flex-shrink-0 ml-2">Team</span>
+              </div>
+              <p className="text-muted-foreground text-sm truncate">
+                Willkommen bei Evendle! 🎉
+              </p>
+            </div>
           </div>
-        ) : (
-          <div className="space-y-1">
-            {conversations.map((conversation) => (
+
+          {/* Real conversations */}
+          {isLoading ? (
+            <p className="text-muted-foreground text-center py-8">Laden...</p>
+          ) : (
+            conversations.map((conversation) => (
               <div
                 key={conversation.id}
                 onClick={() => navigate(`/dm/${conversation.id}`)}
@@ -173,9 +182,9 @@ const Messenger = () => {
                   </p>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+            ))
+          )}
+        </div>
       </div>
     </Layout>
   );
