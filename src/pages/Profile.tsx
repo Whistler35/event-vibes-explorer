@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, ShieldCheck, LogIn } from "lucide-react";
+import { LogOut, Settings, ShieldCheck, LogIn, Users } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePendingEventsCount } from "@/hooks/usePendingEventsCount";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import FriendSearch from "@/components/FriendSearch";
 
 interface ProfileData {
   name: string;
