@@ -212,7 +212,15 @@ const Profile = () => {
                     )}
                   </div>
                 </div>
-                <Button variant="outline">View Profile</Button>
+                <Button variant="outline" asChild>
+                  <a
+                    href={`https://instagram.com/${profile.instagram_username.replace(/^@/, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View Profile
+                  </a>
+                </Button>
               </div>
             </div>
           )}
