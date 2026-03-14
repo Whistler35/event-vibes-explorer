@@ -26,6 +26,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showFriends, setShowFriends] = useState(false);
 
   useEffect(() => {
     if (!user) {
