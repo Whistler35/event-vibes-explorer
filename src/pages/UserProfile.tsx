@@ -109,6 +109,14 @@ const UserProfile = () => {
             </h2>
           </div>
 
+          {/* Send Message Button */}
+          {user && userId !== user.id && (
+            <Button onClick={handleStartDM} className="w-full max-w-xs mx-auto">
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Nachricht senden
+            </Button>
+          )}
+
           {/* About Me */}
           {(profile.bio || profile.fun_fact) && (
             <div className="text-left space-y-4">
