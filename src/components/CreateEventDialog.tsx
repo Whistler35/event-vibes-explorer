@@ -17,6 +17,7 @@ interface CreateEventDialogProps {
   position: [number, number] | null;
   isAdmin?: boolean;
   onEventCreated?: () => void;
+  defaultPrivate?: boolean;
 }
 
 const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
@@ -24,7 +25,8 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
   onClose,
   position,
   isAdmin = false,
-  onEventCreated
+  onEventCreated,
+  defaultPrivate = false,
 }) => {
   const { user } = useAuth();
   const [title, setTitle] = useState('');
