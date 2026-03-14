@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Search, MapPin, X } from "lucide-react";
 import ReelsFeed from "@/components/ReelsFeed";
 import Layout from "@/components/Layout";
