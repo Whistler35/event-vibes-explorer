@@ -5,12 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Camera, X, Pencil, Globe, Lock } from 'lucide-react';
+import { Camera, X, Pencil, Globe, Lock, MapPin } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import type { EventCategory } from '@/hooks/useSearchEvents';
+import MapPositionPicker from '@/components/MapPositionPicker';
 
 interface EditEventDialogProps {
   open: boolean;
@@ -21,6 +22,8 @@ interface EditEventDialogProps {
     description: string | null;
     event_date: string;
     location_name: string;
+    latitude: number | null;
+    longitude: number | null;
     category: string | null;
     image_url?: string | null;
     max_participants: number | null;
@@ -47,6 +50,9 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
   const [maxParticipants, setMaxParticipants] = useState<string>('');
   const [isPrivate, setIsPrivate] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showMapPicker, setShowMapPicker] = useState(false);
+  const [newLatitude, setNewLatitude] = useState<number | null>(null);
+  const [newLongitude, setNewLongitude] = useState<number | null>(null);
 
   useEffect(() => {
     if (open && event) {
@@ -58,6 +64,9 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
       setIsPrivate(event.visibility === 'unlisted');
       setImagePreview(event.image_url || null);
       setImage(null);
+      setNewLatitude(event.latitude);
+      setNewLongitude(event.longitude);
+      setShowMapPicker(false);
 
       const d = new Date(event.event_date);
       setDate(d.toISOString().split('T')[0]);
@@ -97,18 +106,26 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
       const eventDate = `${date}T${time}:00`;
       const parsedMax = maxParticipants ? parseInt(maxParticipants, 10) : null;
 
+      const updateData: any = {
+        title,
+        description,
+        event_date: eventDate,
+        location_name: locationName,
+        category: category,
+        image_url: imageUrl,
+        max_participants: parsedMax,
+        visibility: isPrivate ? 'unlisted' : 'public',
+      };
+
+      // Include position update if changed
+      if (newLatitude !== null && newLongitude !== null) {
+        updateData.latitude = newLatitude;
+        updateData.longitude = newLongitude;
+      }
+
       const { error } = await supabase
         .from('events')
-        .update({
-          title,
-          description,
-          event_date: eventDate,
-          location_name: locationName,
-          category: category as any,
-          image_url: imageUrl,
-          max_participants: parsedMax,
-          visibility: isPrivate ? 'unlisted' : 'public',
-        } as any)
+        .update(updateData)
         .eq('id', event.id);
 
       if (error) throw error;
@@ -123,6 +140,8 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
       setLoading(false);
     }
   };
+
+  const hasValidPosition = newLatitude !== null && newLongitude !== null;
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -194,10 +213,41 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
             <Textarea id="edit-description" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className="bg-transparent border-border text-foreground rounded-xl resize-none" />
           </div>
 
-          {/* Location */}
+          {/* Location Name */}
           <div className="space-y-2">
             <Label htmlFor="edit-location" className="text-foreground text-sm">Ort</Label>
             <Input id="edit-location" value={locationName} onChange={(e) => setLocationName(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
+          </div>
+
+          {/* Map Position Picker */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label className="text-foreground text-sm">Position auf der Karte</Label>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowMapPicker(!showMapPicker)}
+                className="text-primary text-xs h-7 px-2"
+              >
+                <MapPin className="h-3 w-3 mr-1" />
+                {showMapPicker ? 'Karte ausblenden' : 'Auf Karte verschieben'}
+              </Button>
+            </div>
+            {showMapPicker && hasValidPosition && (
+              <MapPositionPicker
+                key={`${event.id}-${open}`}
+                initialPosition={[newLatitude!, newLongitude!]}
+                onPositionChange={([lat, lng]) => {
+                  setNewLatitude(lat);
+                  setNewLongitude(lng);
+                }}
+                height="200px"
+              />
+            )}
+            {!hasValidPosition && showMapPicker && (
+              <p className="text-muted-foreground text-xs">Keine Koordinaten vorhanden.</p>
+            )}
           </div>
 
           {/* Date and Time */}
