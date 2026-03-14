@@ -57,6 +57,18 @@ const UserProfile = () => {
       if (!error && data) {
         setProfile(data);
       }
+
+      const [friendsRes, hostedRes, participatedRes] = await Promise.all([
+        supabase.from("friendships").select("id", { count: "exact", head: true }).eq("status", "accepted").or(`requester_id.eq.${userId},addressee_id.eq.${userId}`),
+        supabase.from("events").select("id", { count: "exact", head: true }).eq("created_by", userId),
+        supabase.from("event_participants").select("id", { count: "exact", head: true }).eq("user_id", userId),
+      ]);
+      setStats({
+        friendsCount: friendsRes.count || 0,
+        hostedCount: hostedRes.count || 0,
+        participatedCount: participatedRes.count || 0,
+      });
+
       setLoading(false);
     };
 
