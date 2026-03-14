@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ArrowLeft, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import ProfileStatsSheet from "@/components/ProfileStatsSheet";
 
 interface ProfileData {
   name: string;
@@ -24,6 +25,8 @@ const UserProfile = () => {
   const { user } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({ hostedCount: 0, participatedCount: 0, friendsCount: 0 });
+  const [statsSheet, setStatsSheet] = useState<{ open: boolean; tab: "hosted" | "participated" | "friends" }>({ open: false, tab: "hosted" });
 
   const handleStartDM = async () => {
     if (!user || !userId) {
@@ -54,6 +57,18 @@ const UserProfile = () => {
       if (!error && data) {
         setProfile(data);
       }
+
+      const [friendsRes, hostedRes, participatedRes] = await Promise.all([
+        supabase.from("friendships").select("id", { count: "exact", head: true }).eq("status", "accepted").or(`requester_id.eq.${userId},addressee_id.eq.${userId}`),
+        supabase.from("events").select("id", { count: "exact", head: true }).eq("created_by", userId),
+        supabase.from("event_participants").select("id", { count: "exact", head: true }).eq("user_id", userId),
+      ]);
+      setStats({
+        friendsCount: friendsRes.count || 0,
+        hostedCount: hostedRes.count || 0,
+        participatedCount: participatedRes.count || 0,
+      });
+
       setLoading(false);
     };
 
@@ -105,8 +120,24 @@ const UserProfile = () => {
           {/* User Info */}
           <div className="space-y-1">
             <h2 className="text-foreground text-2xl font-bold">
-              {displayName}{profile.age ? `, ${profile.age}` : ""} {profile.country || ""}
+              {displayName}{profile.age ? `, ${profile.age}` : ""}
             </h2>
+          </div>
+
+          {/* Stats Row */}
+          <div className="flex justify-center gap-8">
+            <button onClick={() => setStatsSheet({ open: true, tab: "hosted" })} className="text-center">
+              <p className="text-foreground text-xl font-bold">{stats.hostedCount}</p>
+              <p className="text-muted-foreground text-xs">Gehostet</p>
+            </button>
+            <button onClick={() => setStatsSheet({ open: true, tab: "participated" })} className="text-center">
+              <p className="text-foreground text-xl font-bold">{stats.participatedCount}</p>
+              <p className="text-muted-foreground text-xs">Teilgenommen</p>
+            </button>
+            <button onClick={() => setStatsSheet({ open: true, tab: "friends" })} className="text-center">
+              <p className="text-foreground text-xl font-bold">{stats.friendsCount}</p>
+              <p className="text-muted-foreground text-xs">Freunde</p>
+            </button>
           </div>
 
           {/* Send Message Button */}
@@ -161,6 +192,14 @@ const UserProfile = () => {
           )}
         </div>
       </div>
+      {userId && (
+        <ProfileStatsSheet
+          open={statsSheet.open}
+          onOpenChange={(open) => setStatsSheet((s) => ({ ...s, open }))}
+          userId={userId}
+          activeTab={statsSheet.tab}
+        />
+      )}
     </Layout>
   );
 };

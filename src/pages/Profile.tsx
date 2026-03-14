@@ -8,6 +8,7 @@ import { usePendingEventsCount } from "@/hooks/usePendingEventsCount";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import FriendSearch from "@/components/FriendSearch";
+import ProfileStatsSheet from "@/components/ProfileStatsSheet";
 
 interface ProfileData {
   name: string;
@@ -33,6 +34,7 @@ const Profile = () => {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [showFriends, setShowFriends] = useState(false);
+  const [statsSheet, setStatsSheet] = useState<{ open: boolean; tab: "hosted" | "participated" | "friends" }>({ open: false, tab: "hosted" });
   const [stats, setStats] = useState<ProfileStats>({ friendsCount: 0, hostedCount: 0, participatedCount: 0 });
   useEffect(() => {
     if (!user) {
@@ -164,18 +166,18 @@ const Profile = () => {
 
           {/* Stats Row */}
           <div className="flex justify-center gap-8">
-            <div className="text-center">
+            <button onClick={() => setStatsSheet({ open: true, tab: "hosted" })} className="text-center">
               <p className="text-foreground text-xl font-bold">{stats.hostedCount}</p>
               <p className="text-muted-foreground text-xs">Gehostet</p>
-            </div>
-            <div className="text-center">
+            </button>
+            <button onClick={() => setStatsSheet({ open: true, tab: "participated" })} className="text-center">
               <p className="text-foreground text-xl font-bold">{stats.participatedCount}</p>
               <p className="text-muted-foreground text-xs">Teilgenommen</p>
-            </div>
-            <div className="text-center">
+            </button>
+            <button onClick={() => setStatsSheet({ open: true, tab: "friends" })} className="text-center">
               <p className="text-foreground text-xl font-bold">{stats.friendsCount}</p>
               <p className="text-muted-foreground text-xs">Freunde</p>
-            </div>
+            </button>
           </div>
 
           {/* About Me */}
@@ -249,6 +251,14 @@ const Profile = () => {
           )}
         </div>
       </div>
+      {user && (
+        <ProfileStatsSheet
+          open={statsSheet.open}
+          onOpenChange={(open) => setStatsSheet((s) => ({ ...s, open }))}
+          userId={user.id}
+          activeTab={statsSheet.tab}
+        />
+      )}
     </Layout>
   );
 };
