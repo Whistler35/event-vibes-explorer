@@ -22,12 +22,17 @@ export function useUnreadDMCount() {
       .select("id")
       .or(`participant1_id.eq.${user.id},participant2_id.eq.${user.id}`);
 
+    let unread = 0;
+
+    // Check EVENDLE welcome chat
+    const welcomeRead = localStorage.getItem("dm_last_read_evendle-welcome");
+    if (!welcomeRead) unread++;
+
     if (!convos || convos.length === 0) {
-      setCount(0);
+      setCount(unread);
       return;
     }
 
-    let unread = 0;
     for (const convo of convos) {
       const lastRead = localStorage.getItem(`dm_last_read_${convo.id}`) || "1970-01-01T00:00:00Z";
 
