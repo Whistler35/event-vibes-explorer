@@ -268,7 +268,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
             <div className="flex items-center gap-2">
               {isPrivate ? <Lock className="h-4 w-4 text-muted-foreground" /> : <Globe className="h-4 w-4 text-primary" />}
               <Label className="text-white text-sm">
-                {isPrivate ? 'Privat – nur für dich sichtbar' : 'Öffentlich – für alle sichtbar'}
+                {isPrivate ? 'Privat – nur für dich & Freunde sichtbar' : 'Öffentlich – für alle sichtbar'}
               </Label>
             </div>
             <Switch
