@@ -72,22 +72,32 @@ const EventChat = ({ eventId, eventTitle }: EventChatProps) => {
   const fetchChat = async () => {
     console.log('fetchChat called for eventId:', eventId);
     try {
-      // Get or create chat for this event
-      const { data: chatData, error: chatError } = await supabase
-        .from('event_chats')
-        .select('id')
-        .eq('event_id', eventId)
-        .single();
+      // Use get_or_create to ensure chat exists
+      const { data: chatIdResult, error: rpcError } = await supabase
+        .rpc('get_or_create_event_chat', { p_event_id: eventId });
 
-      if (chatError && chatError.code !== 'PGRST116') {
-        throw chatError;
-      }
+      if (rpcError) {
+        console.error('RPC error:', rpcError);
+        // Fallback: try to just select
+        const { data: chatData, error: chatError } = await supabase
+          .from('event_chats')
+          .select('id')
+          .eq('event_id', eventId)
+          .maybeSingle();
 
-      if (chatData) {
+        if (chatError || !chatData) {
+          setLoading(false);
+          return;
+        }
         setChatId(chatData.id);
         await fetchMessages(chatData.id);
+        return;
+      }
+
+      if (chatIdResult) {
+        setChatId(chatIdResult);
+        await fetchMessages(chatIdResult);
       } else {
-        // Chat doesn't exist yet, it will be created when someone joins the event
         setLoading(false);
       }
     } catch (error) {
@@ -186,7 +196,7 @@ const EventChat = ({ eventId, eventTitle }: EventChatProps) => {
   if (!chatId) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-center text-evendle-light-gray">
+        <div className="text-center text-muted-foreground">
           <p>Noch kein Chat verfügbar.</p>
           <p className="text-sm mt-2">Der Chat wird erstellt, sobald jemand dem Event beitritt.</p>
         </div>
@@ -196,16 +206,10 @@ const EventChat = ({ eventId, eventTitle }: EventChatProps) => {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Chat Header */}
-      <div className="p-4 border-b border-evendle-gray">
-        <h3 className="text-white font-bold text-lg">{eventTitle}</h3>
-        <p className="text-evendle-light-gray text-sm">Gruppenchat</p>
-      </div>
-
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 ? (
-          <div className="text-center text-evendle-light-gray">
+          <div className="text-center text-muted-foreground">
             <p>Noch keine Nachrichten.</p>
             <p className="text-sm mt-2">Schreibe die erste Nachricht! 👋</p>
           </div>
@@ -222,19 +226,19 @@ const EventChat = ({ eventId, eventTitle }: EventChatProps) => {
               >
                 <Avatar className="w-8 h-8 mt-1">
                   <AvatarImage src={message.user_avatar} />
-                  <AvatarFallback className="bg-evendle-orange text-white text-xs">
+                  <AvatarFallback className="bg-primary text-primary-foreground text-xs">
                     {message.user_name[0]}
                   </AvatarFallback>
                 </Avatar>
                 <div
                   className={`p-3 rounded-2xl ${
                     message.user_id === user?.id
-                      ? 'bg-evendle-orange text-white rounded-br-md'
-                      : 'bg-evendle-dark-card text-white rounded-bl-md'
+                      ? 'bg-primary text-primary-foreground rounded-br-md'
+                      : 'bg-card text-foreground rounded-bl-md'
                   }`}
                 >
                   {message.user_id !== user?.id && (
-                    <p className="text-xs text-evendle-light-gray mb-1">{message.user_name}</p>
+                    <p className="text-xs text-muted-foreground mb-1">{message.user_name}</p>
                   )}
                   <p className="text-sm whitespace-pre-wrap">{message.message}</p>
                   <p className="text-xs opacity-70 mt-1">
@@ -252,19 +256,19 @@ const EventChat = ({ eventId, eventTitle }: EventChatProps) => {
       </div>
 
       {/* Message Input */}
-      <div className="p-4 border-t border-evendle-gray">
+      <div className="p-4 border-t border-border shrink-0">
         <div className="flex space-x-2">
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Nachricht schreiben..."
-            className="flex-1 bg-evendle-dark-card border-evendle-gray text-white"
+            className="flex-1"
           />
           <Button
             onClick={sendMessage}
             disabled={!newMessage.trim() || sending}
-            className="bg-evendle-orange hover:bg-evendle-orange/80 text-white"
+            size="icon"
           >
             {sending ? '...' : <Send className="w-4 h-4" />}
           </Button>

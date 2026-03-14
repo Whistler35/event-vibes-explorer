@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import EventDetail from "./pages/EventDetail";
 import EventHangouts from "./pages/EventHangouts";
 import Nearby from "./pages/Nearby";
+import EventChatPage from "./pages/EventChatPage";
 
 import Chat from "./pages/Chat";
 import CityEvents from "./pages/CityEvents";
@@ -35,6 +36,7 @@ const App = () => (
               <Route path="/city/:city" element={<CityEvents />} />
               <Route path="/event/:id" element={<EventDetail />} />
               <Route path="/event/:id/hangouts" element={<EventHangouts />} />
+              <Route path="/event/:id/chat" element={<EventChatPage />} />
               <Route path="/nearby" element={<Nearby />} />
               
               <Route path="/chat/:id" element={<Chat />} />
