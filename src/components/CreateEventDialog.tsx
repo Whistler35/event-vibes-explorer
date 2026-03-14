@@ -51,6 +51,11 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
     }
   };
 
+  // Sync defaultPrivate when dialog opens
+  useEffect(() => {
+    if (open) setIsPrivate(defaultPrivate);
+  }, [open, defaultPrivate]);
+
   const resetForm = () => {
     setTitle('');
     setDescription('');
@@ -60,6 +65,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
     setImage(null);
     setImagePreview(null);
     setMaxParticipants('');
+    setIsPrivate(defaultPrivate);
   };
 
   const handleSubmit = async () => {
