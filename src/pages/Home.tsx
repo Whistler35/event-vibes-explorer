@@ -28,8 +28,16 @@ function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
 
 const Home = () => {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchLocation, setSearchLocation] = useState<GeocodedLocation | null>(null);
+  const [searchQuery, setSearchQuery] = useState(() => {
+    const stored = localStorage.getItem('selectedCity');
+    if (stored) { try { return JSON.parse(stored).name?.split(',')[0] || ''; } catch {} }
+    return '';
+  });
+  const [searchLocation, setSearchLocation] = useState<GeocodedLocation | null>(() => {
+    const stored = localStorage.getItem('selectedCity');
+    if (stored) { try { return JSON.parse(stored); } catch {} }
+    return null;
+  });
   const [suggestions, setSuggestions] = useState<GeocodedLocation[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
