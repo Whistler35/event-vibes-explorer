@@ -13,18 +13,27 @@ interface ConversationWithProfile {
   other_avatar: string | null;
   last_message: string | null;
   last_message_at: string | null;
+  isUnread: boolean;
 }
+
+const isConversationUnread = (convoId: string, lastMessageAt: string | null, userId: string, senderId?: string): boolean => {
+  const lastRead = localStorage.getItem(`dm_last_read_${convoId}`);
+  if (!lastRead) return true;
+  if (!lastMessageAt) return false;
+  return new Date(lastMessageAt) > new Date(lastRead);
+};
 
 const Messenger = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  const isEvenldeUnread = !localStorage.getItem("dm_last_read_evendle-welcome");
 
   const { data: conversations = [], isLoading } = useQuery({
     queryKey: ["dm-conversations", user?.id],
     queryFn: async () => {
       if (!user) return [];
 
-      // Get all conversations
       const { data: convos, error } = await supabase
         .from("direct_conversations")
         .select("*")
@@ -33,7 +42,6 @@ const Messenger = () => {
 
       if (error || !convos) return [];
 
-      // Get other user profiles
       const otherUserIds = convos.map((c: any) =>
         c.participant1_id === user.id ? c.participant2_id : c.participant1_id
       );
@@ -45,7 +53,6 @@ const Messenger = () => {
         .select("user_id, name, avatar_url")
         .in("user_id", otherUserIds);
 
-      // Get last message for each conversation
       const results: ConversationWithProfile[] = [];
 
       for (const convo of convos) {
@@ -58,11 +65,16 @@ const Messenger = () => {
 
         const { data: lastMsg } = await supabase
           .from("direct_messages")
-          .select("message, created_at")
+          .select("message, created_at, sender_id")
           .eq("conversation_id", (convo as any).id)
           .order("created_at", { ascending: false })
           .limit(1)
           .maybeSingle();
+
+        const lastMessageAt = lastMsg?.created_at || (convo as any).updated_at;
+        const unread =
+          lastMsg?.sender_id !== user.id &&
+          isConversationUnread((convo as any).id, lastMessageAt, user.id);
 
         results.push({
           id: (convo as any).id,
@@ -70,9 +82,18 @@ const Messenger = () => {
           other_name: profile?.name || "Unbekannt",
           other_avatar: profile?.avatar_url || null,
           last_message: lastMsg?.message || null,
-          last_message_at: lastMsg?.created_at || (convo as any).updated_at,
+          last_message_at: lastMessageAt,
+          isUnread: !!unread,
         });
       }
+
+      // Sort: unread first (newest on top), then read (newest on top)
+      results.sort((a, b) => {
+        if (a.isUnread !== b.isUnread) return a.isUnread ? -1 : 1;
+        const dateA = a.last_message_at ? new Date(a.last_message_at).getTime() : 0;
+        const dateB = b.last_message_at ? new Date(b.last_message_at).getTime() : 0;
+        return dateB - dateA;
+      });
 
       return results;
     },
@@ -130,22 +151,30 @@ const Messenger = () => {
           </div>
         </div>
 
-        {/* Conversations List */}
         <div className="space-y-1">
-          {/* EVENDLE Welcome Chat - always first */}
+          {/* EVENDLE Welcome Chat */}
           <div
             onClick={() => navigate("/dm/evendle-welcome")}
-            className="flex items-center space-x-4 p-3 rounded-2xl cursor-pointer hover:bg-card/50 transition-colors"
+            className={`flex items-center space-x-4 p-3 rounded-2xl cursor-pointer transition-colors ${
+              isEvenldeUnread
+                ? "bg-primary/10 border border-primary/20"
+                : "hover:bg-card/50"
+            }`}
           >
-            <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-primary flex items-center justify-center">
+            <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-lg">E</span>
+              {isEvenldeUnread && (
+                <div className="absolute top-0 right-0 w-3 h-3 bg-primary rounded-full border-2 border-background" />
+              )}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
-                <h3 className="text-foreground font-semibold text-lg truncate">EVENDLE</h3>
+                <h3 className={`text-lg truncate ${isEvenldeUnread ? "text-foreground font-bold" : "text-foreground font-semibold"}`}>
+                  EVENDLE
+                </h3>
                 <span className="text-muted-foreground text-sm flex-shrink-0 ml-2">Team</span>
               </div>
-              <p className="text-muted-foreground text-sm truncate">
+              <p className={`text-sm truncate ${isEvenldeUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
                 Willkommen bei Evendle! 🎉
               </p>
             </div>
@@ -159,25 +188,32 @@ const Messenger = () => {
               <div
                 key={conversation.id}
                 onClick={() => navigate(`/dm/${conversation.id}`)}
-                className="flex items-center space-x-4 p-3 rounded-2xl cursor-pointer hover:bg-card/50 transition-colors"
+                className={`flex items-center space-x-4 p-3 rounded-2xl cursor-pointer transition-colors ${
+                  conversation.isUnread
+                    ? "bg-primary/10 border border-primary/20"
+                    : "hover:bg-card/50"
+                }`}
               >
-                <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+                <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
                   <img
                     src={getAvatarUrl(conversation.other_name, conversation.other_avatar)}
                     alt={conversation.other_name}
                     className="w-full h-full object-cover"
                   />
+                  {conversation.isUnread && (
+                    <div className="absolute top-0 right-0 w-3 h-3 bg-primary rounded-full border-2 border-background" />
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-foreground font-semibold text-lg truncate">
+                    <h3 className={`text-lg truncate ${conversation.isUnread ? "text-foreground font-bold" : "text-foreground font-semibold"}`}>
                       {conversation.other_name}
                     </h3>
-                    <span className="text-muted-foreground text-sm flex-shrink-0 ml-2">
+                    <span className={`text-sm flex-shrink-0 ml-2 ${conversation.isUnread ? "text-primary font-semibold" : "text-muted-foreground"}`}>
                       {formatTime(conversation.last_message_at)}
                     </span>
                   </div>
-                  <p className="text-muted-foreground text-sm truncate">
+                  <p className={`text-sm truncate ${conversation.isUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
                     {conversation.last_message || "Noch keine Nachricht"}
                   </p>
                 </div>
