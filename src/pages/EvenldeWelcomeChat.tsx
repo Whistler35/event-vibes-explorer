@@ -41,6 +41,11 @@ const EvenldeWelcomeChat = () => {
   const navigate = useNavigate();
 
   return (
+  useEffect(() => {
+    markConversationRead("evendle-welcome");
+  }, []);
+
+  return (
     <Layout showBottomNav={false}>
       <div className="flex flex-col h-screen">
         {/* Header */}
