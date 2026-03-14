@@ -42,6 +42,7 @@ const App = () => (
               <Route path="/event/:id/chat" element={<EventChatPage />} />
               <Route path="/nearby" element={<Nearby />} />
               <Route path="/messenger" element={<Messenger />} />
+              <Route path="/dm/evendle-welcome" element={<EvenldeWelcomeChat />} />
               <Route path="/dm/:conversationId" element={<DirectChat />} />
               <Route path="/chat/:id" element={<Chat />} />
               <Route path="/profile" element={<Profile />} />
