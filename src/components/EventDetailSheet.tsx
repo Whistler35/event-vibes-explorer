@@ -2,8 +2,12 @@ import React from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Users, Clock, X } from "lucide-react";
+import { Calendar, MapPin, Users, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface EventDetailSheetProps {
   event: {
@@ -50,6 +54,64 @@ const formatEventTime = (dateStr: string) => {
 
 const EventDetailSheet: React.FC<EventDetailSheetProps> = ({ event, open, onClose }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  const eventId = event?.id?.toString() || '';
+
+  // Check if user liked this event
+  const { data: isLiked = false } = useQuery({
+    queryKey: ['event-like', eventId, user?.id],
+    queryFn: async () => {
+      if (!user || !eventId) return false;
+      const { data } = await supabase
+        .from('event_likes')
+        .select('id')
+        .eq('event_id', eventId)
+        .eq('user_id', user.id)
+        .maybeSingle();
+      return !!data;
+    },
+    enabled: !!user && !!eventId && open,
+  });
+
+  // Like count
+  const { data: likeCount = 0 } = useQuery({
+    queryKey: ['event-like-count', eventId],
+    queryFn: async () => {
+      if (!eventId) return 0;
+      const { count } = await supabase
+        .from('event_likes')
+        .select('*', { count: 'exact', head: true })
+        .eq('event_id', eventId);
+      return count || 0;
+    },
+    enabled: !!eventId && open,
+  });
+
+  const toggleLike = useMutation({
+    mutationFn: async () => {
+      if (!user || !eventId) throw new Error('Not authenticated');
+      if (isLiked) {
+        const { error } = await supabase
+          .from('event_likes')
+          .delete()
+          .eq('event_id', eventId)
+          .eq('user_id', user.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('event_likes')
+          .insert({ event_id: eventId, user_id: user.id } as any);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['event-like', eventId] });
+      queryClient.invalidateQueries({ queryKey: ['event-like-count', eventId] });
+    },
+    onError: () => toast.error('Fehler beim Liken.'),
+  });
 
   if (!event) return null;
 
@@ -73,13 +135,31 @@ const EventDetailSheet: React.FC<EventDetailSheetProps> = ({ event, open, onClos
             </div>
           )}
 
-          {/* Title + Category */}
-          <div className="space-y-2">
-            <h2 className="text-foreground text-xl font-bold">{event.title}</h2>
-            {event.category && (
-              <Badge variant="secondary" className="text-xs">
-                {categoryLabels[event.category] || event.category}
-              </Badge>
+          {/* Title + Category + Like */}
+          <div className="flex items-start justify-between gap-2">
+            <div className="space-y-2 flex-1">
+              <h2 className="text-foreground text-xl font-bold">{event.title}</h2>
+              {event.category && (
+                <Badge variant="secondary" className="text-xs">
+                  {categoryLabels[event.category] || event.category}
+                </Badge>
+              )}
+            </div>
+            {user && (
+              <button
+                onClick={() => toggleLike.mutate()}
+                disabled={toggleLike.isPending}
+                className="flex flex-col items-center gap-0.5 pt-1"
+              >
+                <Heart
+                  className={`h-6 w-6 transition-colors ${
+                    isLiked ? 'fill-destructive text-destructive' : 'text-muted-foreground'
+                  }`}
+                />
+                {likeCount > 0 && (
+                  <span className="text-muted-foreground text-xs">{likeCount}</span>
+                )}
+              </button>
             )}
           </div>
 
