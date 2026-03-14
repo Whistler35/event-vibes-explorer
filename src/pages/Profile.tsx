@@ -20,6 +20,12 @@ interface ProfileData {
   instagram_followers: string | null;
 }
 
+interface ProfileStats {
+  friendsCount: number;
+  hostedCount: number;
+  participatedCount: number;
+}
+
 const Profile = () => {
   const { user } = useAuth();
   const { isAdmin, count: pendingCount } = usePendingEventsCount();
