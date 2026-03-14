@@ -112,6 +112,8 @@ const Home = () => {
     setSearchQuery(loc.name.split(',')[0]);
     setSearchLocation(loc);
     setShowSuggestions(false);
+    // Store for map view
+    sessionStorage.setItem('selectedCity', JSON.stringify(loc));
   };
 
   const clearSearch = () => {
