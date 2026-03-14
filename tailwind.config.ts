@@ -53,11 +53,11 @@ export default {
 					foreground: 'hsl(var(--card-foreground))'
 				},
 				evendle: {
-					orange: 'hsl(var(--evendle-orange))',
-					'orange-hover': 'hsl(var(--evendle-orange-hover))',
-					gray: 'hsl(var(--evendle-gray))',
-					'light-gray': 'hsl(var(--evendle-light-gray))',
-					'dark-card': 'hsl(var(--evendle-dark-card))',
+					primary: 'hsl(var(--evendle-primary))',
+					'primary-hover': 'hsl(var(--evendle-primary-hover))',
+					muted: 'hsl(var(--evendle-muted))',
+					'light-muted': 'hsl(var(--evendle-light-muted))',
+					card: 'hsl(var(--evendle-card))',
 					'search-bg': 'hsl(var(--evendle-search-bg))'
 				}
 			},

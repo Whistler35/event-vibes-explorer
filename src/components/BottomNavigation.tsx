@@ -16,7 +16,7 @@ const BottomNavigation = () => {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
+    <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
       <div className="flex justify-around items-center py-3">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
@@ -30,15 +30,15 @@ const BottomNavigation = () => {
             >
               <div className={`relative p-3 rounded-full ${
                 isActive 
-                  ? 'bg-evendle-orange' 
+                  ? 'bg-primary' 
                   : 'bg-transparent'
               }`}>
                 <Icon 
                   size={24} 
                   className={
                     isActive 
-                      ? 'text-white' 
-                      : 'text-evendle-gray'
+                      ? 'text-primary-foreground' 
+                      : 'text-muted-foreground'
                   } 
                 />
                 {item.id === "admin" && pendingCount > 0 && (
@@ -47,7 +47,7 @@ const BottomNavigation = () => {
                   </span>
                 )}
               </div>
-              <span className={`text-xs ${isActive ? 'text-evendle-orange' : 'text-evendle-gray'}`}>
+              <span className={`text-xs ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
                 {item.label}
               </span>
             </button>

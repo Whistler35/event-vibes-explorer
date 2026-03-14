@@ -31,7 +31,7 @@ const Auth = () => {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      if (file.size > 5 * 1024 * 1024) {
         toast.error('Bild ist zu groß. Maximal 5MB erlaubt.');
         return;
       }
@@ -40,7 +40,6 @@ const Auth = () => {
         return;
       }
       setAvatarFile(file);
-      // Create preview URL
       const previewUrl = URL.createObjectURL(file);
       setAvatarUrl(previewUrl);
     }
@@ -80,7 +79,6 @@ const Auth = () => {
           navigate('/');
         }
       } else {
-        // Validation for registration
         if (!name || !age || !country) {
           toast.error('Bitte fülle alle Pflichtfelder aus');
           setLoading(false);
@@ -99,7 +97,6 @@ const Auth = () => {
           return;
         }
 
-        // Sign up user first
         const { error: signUpError, data } = await supabase.auth.signUp({
           email,
           password,
@@ -121,13 +118,11 @@ const Auth = () => {
           return;
         }
 
-        // Upload avatar if file is selected
         let finalAvatarUrl = avatarUrl;
         if (avatarFile && data.user) {
           try {
             finalAvatarUrl = await uploadAvatar(avatarFile, data.user.id);
             
-            // Update profile with avatar URL
             await supabase
               .from('profiles')
               .update({ avatar_url: finalAvatarUrl })
@@ -154,10 +149,10 @@ const Auth = () => {
         {/* Header */}
         <div className="text-center space-y-2">
           <div className="flex items-center justify-center space-x-2">
-            <div className="text-evendle-orange text-3xl font-bold">+</div>
-            <span className="text-white text-2xl font-bold">evendle</span>
+            <div className="text-primary text-3xl font-bold">+</div>
+            <span className="text-foreground text-2xl font-bold">evendle</span>
           </div>
-          <p className="text-evendle-light-gray">
+          <p className="text-muted-foreground">
             {isLogin ? 'Melde dich an' : 'Erstelle dein Profil'}
           </p>
         </div>
@@ -169,16 +164,16 @@ const Auth = () => {
               <div className="relative">
                 <Avatar className="w-24 h-24 cursor-pointer" onClick={() => fileInputRef.current?.click()}>
                   <AvatarImage src={avatarUrl} />
-                  <AvatarFallback className="bg-evendle-dark-card text-evendle-light-gray">
+                  <AvatarFallback className="bg-muted text-muted-foreground">
                     {name ? name[0].toUpperCase() : <Camera className="w-8 h-8" />}
                   </AvatarFallback>
                 </Avatar>
-                <div className="absolute bottom-0 right-0 bg-evendle-orange rounded-full p-1">
-                  <Upload className="w-4 h-4 text-white" />
+                <div className="absolute bottom-0 right-0 bg-primary rounded-full p-1">
+                  <Upload className="w-4 h-4 text-primary-foreground" />
                 </div>
               </div>
               <div className="w-full space-y-2">
-                <Label htmlFor="avatar-file" className="text-white">Profilbild hochladen (optional)</Label>
+                <Label htmlFor="avatar-file" className="text-foreground">Profilbild hochladen (optional)</Label>
                 <input
                   ref={fileInputRef}
                   id="avatar-file"
@@ -191,7 +186,7 @@ const Auth = () => {
                   type="button"
                   variant="outline"
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full border-evendle-gray text-evendle-light-gray hover:bg-evendle-orange hover:text-white"
+                  className="w-full"
                 >
                   {avatarFile ? avatarFile.name : 'Foto auswählen'}
                 </Button>
@@ -202,26 +197,26 @@ const Auth = () => {
           {/* Basic Info */}
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-white">E-Mail *</Label>
+              <Label htmlFor="email" className="text-foreground">E-Mail *</Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="bg-evendle-dark-card border-evendle-gray text-white"
+                className="bg-card border-border text-foreground"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-white">Passwort *</Label>
+              <Label htmlFor="password" className="text-foreground">Passwort *</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="bg-evendle-dark-card border-evendle-gray text-white"
+                className="bg-card border-border text-foreground"
               />
             </div>
 
@@ -229,31 +224,31 @@ const Auth = () => {
             {!isLogin && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-white">Passwort bestätigen *</Label>
+                  <Label htmlFor="confirmPassword" className="text-foreground">Passwort bestätigen *</Label>
                   <Input
                     id="confirmPassword"
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
-                    className="bg-evendle-dark-card border-evendle-gray text-white"
+                    className="bg-card border-border text-foreground"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-white">Name *</Label>
+                  <Label htmlFor="name" className="text-foreground">Name *</Label>
                   <Input
                     id="name"
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
-                    className="bg-evendle-dark-card border-evendle-gray text-white"
+                    className="bg-card border-border text-foreground"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="age" className="text-white">Alter *</Label>
+                    <Label htmlFor="age" className="text-foreground">Alter *</Label>
                     <Input
                       id="age"
                       type="number"
@@ -262,42 +257,42 @@ const Auth = () => {
                       required
                       min="16"
                       max="100"
-                      className="bg-evendle-dark-card border-evendle-gray text-white"
+                      className="bg-card border-border text-foreground"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="country" className="text-white">Land *</Label>
+                    <Label htmlFor="country" className="text-foreground">Land *</Label>
                     <Input
                       id="country"
                       type="text"
                       value={country}
                       onChange={(e) => setCountry(e.target.value)}
                       required
-                      className="bg-evendle-dark-card border-evendle-gray text-white"
+                      className="bg-card border-border text-foreground"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="bio" className="text-white">Über mich</Label>
+                  <Label htmlFor="bio" className="text-foreground">Über mich</Label>
                   <Textarea
                     id="bio"
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
                     placeholder="Erzähle etwas über dich..."
-                    className="bg-evendle-dark-card border-evendle-gray text-white min-h-[80px]"
+                    className="bg-card border-border text-foreground min-h-[80px]"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="funFact" className="text-white">Fun Fact</Label>
+                  <Label htmlFor="funFact" className="text-foreground">Fun Fact</Label>
                   <Textarea
                     id="funFact"
                     value={funFact}
                     onChange={(e) => setFunFact(e.target.value)}
                     placeholder="Teile einen interessanten Fakt über dich..."
-                    className="bg-evendle-dark-card border-evendle-gray text-white min-h-[80px]"
+                    className="bg-card border-border text-foreground min-h-[80px]"
                   />
                 </div>
               </>
@@ -318,7 +313,7 @@ const Auth = () => {
             <button
               type="button"
               onClick={() => setIsLogin(!isLogin)}
-              className="text-evendle-orange hover:underline"
+              className="text-primary hover:underline"
             >
               {isLogin 
                 ? 'Noch kein Account? Jetzt registrieren' 

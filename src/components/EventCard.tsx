@@ -28,14 +28,14 @@ const EventCard = ({ title, image, date, time, location, category, description, 
       </div>
       <div className="p-4">
         <div className="flex justify-between items-start mb-2">
-          <span className="text-evendle-orange text-sm font-medium">{category}</span>
-          <span className="text-evendle-gray text-sm">{date}</span>
+          <span className="text-primary text-sm font-medium">{category}</span>
+          <span className="text-muted-foreground text-sm">{date}</span>
         </div>
-        <h3 className="text-white font-bold text-lg mb-1 line-clamp-2">{title}</h3>
-        <p className="text-evendle-gray text-sm mb-2">{time}</p>
-        <p className="text-evendle-light-gray text-sm mb-2">{location}</p>
+        <h3 className="text-foreground font-bold text-lg mb-1 line-clamp-2">{title}</h3>
+        <p className="text-muted-foreground text-sm mb-2">{time}</p>
+        <p className="text-muted-foreground text-sm mb-2">{location}</p>
         {description && (
-          <p className="text-evendle-gray text-sm line-clamp-2">{description}</p>
+          <p className="text-muted-foreground text-sm line-clamp-2">{description}</p>
         )}
       </div>
     </div>
