@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, UserPlus, UserCheck, Clock, X, UserMinus } from 'lucide-react';
+import { Search, UserPlus, UserCheck, Clock, X, UserMinus, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ProfileResult {
@@ -283,14 +283,31 @@ const FriendSearch: React.FC = () => {
                     <p className="text-muted-foreground text-xs truncate">{profile.bio}</p>
                   )}
                 </div>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => friendship && removeFriend.mutate(friendship.id)}
-                  className="text-muted-foreground hover:text-destructive shrink-0"
-                >
-                  <UserMinus className="h-4 w-4" />
-                </Button>
+                <div className="flex gap-1 shrink-0">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={async () => {
+                      if (!user) return;
+                      const { data } = await supabase.rpc("get_or_create_dm", {
+                        p_user1: user.id,
+                        p_user2: profile.user_id,
+                      });
+                      if (data) navigate(`/dm/${data}`);
+                    }}
+                    className="text-primary hover:text-primary/80"
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => friendship && removeFriend.mutate(friendship.id)}
+                    className="text-muted-foreground hover:text-destructive"
+                  >
+                    <UserMinus className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             );
           })

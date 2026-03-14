@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { ArrowLeft, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface ProfileData {
   name: string;
@@ -19,8 +21,25 @@ interface ProfileData {
 const UserProfile = () => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const handleStartDM = async () => {
+    if (!user || !userId) {
+      toast.error("Bitte melde dich an, um Nachrichten zu senden.");
+      return;
+    }
+    const { data, error } = await supabase.rpc("get_or_create_dm", {
+      p_user1: user.id,
+      p_user2: userId,
+    });
+    if (error) {
+      toast.error("Chat konnte nicht erstellt werden.");
+      return;
+    }
+    navigate(`/dm/${data}`);
+  };
 
   useEffect(() => {
     if (!userId) return;
@@ -89,6 +108,14 @@ const UserProfile = () => {
               {displayName}{profile.age ? `, ${profile.age}` : ""} {profile.country || ""}
             </h2>
           </div>
+
+          {/* Send Message Button */}
+          {user && userId !== user.id && (
+            <Button onClick={handleStartDM} className="w-full max-w-xs mx-auto">
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Nachricht senden
+            </Button>
+          )}
 
           {/* About Me */}
           {(profile.bio || profile.fun_fact) && (
