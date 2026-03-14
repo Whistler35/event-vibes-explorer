@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import Layout from "@/components/Layout";
 import InteractiveMap, { type MapEvent } from "@/components/InteractiveMap";
 import CreateEventDialog from "@/components/CreateEventDialog";
@@ -8,6 +9,10 @@ import EventDetailSheet from "@/components/EventDetailSheet";
 import { useSearchEvents, type EventCategory, type SearchEvent } from "@/hooks/useSearchEvents";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { useAuth } from "@/contexts/AuthContext";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Globe, Lock } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const Nearby = () => {
@@ -16,16 +21,49 @@ const Nearby = () => {
   const [selectedCategory, setSelectedCategory] = useState<EventCategory | ''>('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedEvent, setSelectedEvent] = useState<MapEvent | null>(null);
+  const [isPrivateMode, setIsPrivateMode] = useState(false);
   const { isAdmin } = useIsAdmin();
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const { data: searchResult, isLoading, refetch } = useSearchEvents({
+  // Public events from search edge function
+  const { data: searchResult, isLoading: isLoadingPublic, refetch: refetchPublic } = useSearchEvents({
     category: selectedCategory || undefined,
     date_from: selectedDate ? selectedDate.toISOString().split('T')[0] : undefined,
     date_to: selectedDate ? selectedDate.toISOString().split('T')[0] : undefined,
     limit: 100,
+  }, !isPrivateMode);
+
+  // Private events (user's own unlisted events)
+  const { data: privateEvents, isLoading: isLoadingPrivate, refetch: refetchPrivate } = useQuery({
+    queryKey: ['private-events', user?.id, selectedCategory, selectedDate],
+    queryFn: async () => {
+      if (!user) return [];
+      let query = supabase
+        .from('events')
+        .select('*')
+        .eq('created_by', user.id)
+        .eq('visibility', 'unlisted')
+        .eq('approval_status', 'approved')
+        .order('event_date', { ascending: true });
+
+      if (selectedCategory) {
+        query = query.eq('category', selectedCategory);
+      }
+      if (selectedDate) {
+        const dateStr = selectedDate.toISOString().split('T')[0];
+        query = query.gte('event_date', dateStr).lte('event_date', dateStr + 'T23:59:59');
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: isPrivateMode && !!user,
+    staleTime: 30_000,
   });
+
+  const isLoading = isPrivateMode ? isLoadingPrivate : isLoadingPublic;
 
   const handleCreateEvent = (coordinates: [number, number]) => {
     if (!user) {
@@ -38,7 +76,7 @@ const Nearby = () => {
     setDialogOpen(true);
   };
 
-  const mapEvents: MapEvent[] = (searchResult?.data || [])
+  const publicMapEvents: MapEvent[] = (searchResult?.data || [])
     .filter((e: SearchEvent) => e.latitude != null && e.longitude != null)
     .map((e: SearchEvent) => ({
       id: e.id,
@@ -53,11 +91,56 @@ const Nearby = () => {
       current_participants: e.current_participants || undefined,
     }));
 
+  const privateMapEvents: MapEvent[] = (privateEvents || [])
+    .filter((e) => e.latitude != null && e.longitude != null)
+    .map((e) => ({
+      id: e.id,
+      title: e.title,
+      position: [e.latitude!, e.longitude!] as [number, number],
+      image: e.image_url || undefined,
+      category: e.category || undefined,
+      description: e.description || undefined,
+      event_date: e.event_date,
+      location_name: e.location_name,
+      max_participants: e.max_participants || undefined,
+      current_participants: e.current_participants || undefined,
+    }));
+
+  const mapEvents = isPrivateMode ? privateMapEvents : publicMapEvents;
+
+  const handleRefetch = () => {
+    if (isPrivateMode) {
+      refetchPrivate();
+    } else {
+      refetchPublic();
+    }
+  };
+
   return (
     <Layout>
       <div className="relative h-[calc(100vh-80px)]">
         <div className="absolute top-4 left-4 z-10">
           <span className="text-foreground text-2xl font-bold drop-shadow-lg">evendle</span>
+        </div>
+
+        {/* Public/Private Toggle */}
+        <div className="absolute top-4 right-4 z-10">
+          <div className="flex items-center gap-2 bg-card/90 backdrop-blur-sm rounded-full px-3 py-2 shadow-lg border border-border">
+            <Globe className={`h-4 w-4 transition-colors ${!isPrivateMode ? 'text-primary' : 'text-muted-foreground'}`} />
+            <Switch
+              checked={isPrivateMode}
+              onCheckedChange={(checked) => {
+                if (checked && !user) {
+                  toast.info('Bitte melde dich an, um private Events zu sehen.', {
+                    action: { label: 'Anmelden', onClick: () => navigate('/auth') },
+                  });
+                  return;
+                }
+                setIsPrivateMode(checked);
+              }}
+            />
+            <Lock className={`h-4 w-4 transition-colors ${isPrivateMode ? 'text-primary' : 'text-muted-foreground'}`} />
+          </div>
         </div>
 
         <div className="absolute top-14 left-0 right-0 z-10 px-4">
@@ -84,7 +167,8 @@ const Nearby = () => {
           onClose={() => setDialogOpen(false)}
           position={selectedPosition}
           isAdmin={isAdmin}
-          onEventCreated={() => refetch()}
+          onEventCreated={() => handleRefetch()}
+          defaultPrivate={isPrivateMode}
         />
 
         <EventDetailSheet
