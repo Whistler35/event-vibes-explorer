@@ -46,8 +46,11 @@ const EventDetail = () => {
   const [isParticipant, setIsParticipant] = useState(false);
   const [loading, setLoading] = useState(true);
   const [joinLoading, setJoinLoading] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const { isAdmin } = useIsAdmin();
 
   const isOwner = user && event?.created_by === user.id;
+  const canEdit = isOwner || isAdmin;
   const isCommunityEvent = event?.source === 'community';
 
   useEffect(() => {
