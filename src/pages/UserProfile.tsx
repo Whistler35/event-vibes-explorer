@@ -25,6 +25,8 @@ const UserProfile = () => {
   const { user } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({ hostedCount: 0, participatedCount: 0, friendsCount: 0 });
+  const [statsSheet, setStatsSheet] = useState<{ open: boolean; tab: "hosted" | "participated" | "friends" }>({ open: false, tab: "hosted" });
 
   const handleStartDM = async () => {
     if (!user || !userId) {
