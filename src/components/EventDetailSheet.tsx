@@ -117,13 +117,13 @@ const EventDetailSheet: React.FC<EventDetailSheetProps> = ({ event, open, onClos
 
   return (
     <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
-      <SheetContent side="bottom" className="rounded-t-3xl bg-card border-border p-0 max-h-[75vh]">
+      <SheetContent side="bottom" className="rounded-t-3xl bg-card border-border p-0 max-h-[80vh] flex flex-col overflow-hidden">
         {/* Handle bar */}
-        <div className="flex justify-center pt-3 pb-2">
+        <div className="flex justify-center pt-3 pb-2 shrink-0">
           <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
         </div>
 
-        <div className="overflow-y-auto px-5 pb-6 space-y-4">
+        <div className="overflow-y-auto flex-1 min-h-0 px-5 pb-6 space-y-4 overscroll-contain touch-pan-y">
           {/* Image */}
           {event.image && (
             <div className="rounded-2xl overflow-hidden -mx-1">
