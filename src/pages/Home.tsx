@@ -128,6 +128,7 @@ const Home = () => {
     setSearchLocation(null);
     setSuggestions([]);
     setShowSuggestions(false);
+    localStorage.removeItem('selectedCity');
   };
 
   const categoryLabels: Record<string, string> = {

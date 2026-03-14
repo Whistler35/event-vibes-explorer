@@ -44,19 +44,17 @@ const Nearby = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Pick up city from Home screen
+  // Pick up city from localStorage (persistent)
   useEffect(() => {
-    const stored = sessionStorage.getItem('selectedCity');
+    const stored = localStorage.getItem('selectedCity');
     if (stored) {
       try {
         const loc = JSON.parse(stored);
         setCityQuery(loc.name?.split(',')[0] || '');
         setShowSearchBar(true);
-        // Fly after map loads – small delay
         setTimeout(() => {
           mapRef.current?.flyTo(loc.lat, loc.lng, 13);
         }, 1000);
-        sessionStorage.removeItem('selectedCity');
       } catch {}
     }
   }, []);
