@@ -192,6 +192,14 @@ const UserProfile = () => {
           )}
         </div>
       </div>
+      {userId && (
+        <ProfileStatsSheet
+          open={statsSheet.open}
+          onOpenChange={(open) => setStatsSheet((s) => ({ ...s, open }))}
+          userId={userId}
+          activeTab={statsSheet.tab}
+        />
+      )}
     </Layout>
   );
 };
