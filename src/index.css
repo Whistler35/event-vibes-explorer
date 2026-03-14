@@ -8,85 +8,85 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Evendle App Design System */
-    --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
+    /* Evendle App Design System - Nature Green Theme */
+    --background: 60 20% 95%;
+    --foreground: 0 0% 10%;
 
-    --card: 0 0% 8%;
-    --card-foreground: 0 0% 100%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
 
-    --popover: 0 0% 8%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
 
-    --primary: 14 100% 57%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 107 19% 25%;
+    --primary-foreground: 60 20% 95%;
 
-    --secondary: 0 0% 50%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 77 11% 87%;
+    --secondary-foreground: 0 0% 10%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 77 11% 87%;
+    --muted-foreground: 0 0% 40%;
 
-    --accent: 14 100% 57%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 77 11% 87%;
+    --accent-foreground: 0 0% 10%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 14 100% 57%;
+    --border: 77 11% 82%;
+    --input: 77 11% 82%;
+    --ring: 107 19% 25%;
 
     --radius: 1rem;
 
     /* Custom Evendle Colors */
-    --evendle-orange: 14 100% 57%;
-    --evendle-orange-hover: 14 100% 50%;
-    --evendle-gray: 0 0% 50%;
-    --evendle-light-gray: 0 0% 70%;
-    --evendle-dark-card: 0 0% 8%;
-    --evendle-search-bg: 0 0% 60%;
+    --evendle-primary: 107 19% 25%;
+    --evendle-primary-hover: 107 19% 20%;
+    --evendle-muted: 0 0% 40%;
+    --evendle-light-muted: 0 0% 55%;
+    --evendle-card: 0 0% 100%;
+    --evendle-search-bg: 77 11% 90%;
     
     /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(var(--background)), hsl(0 0% 5%));
-    --gradient-card: linear-gradient(135deg, hsl(var(--evendle-dark-card)), hsl(0 0% 12%));
+    --gradient-hero: linear-gradient(135deg, hsl(var(--background)), hsl(60 20% 92%));
+    --gradient-card: linear-gradient(135deg, hsl(var(--card)), hsl(60 20% 97%));
     
     /* Shadows */
-    --shadow-glow: 0 0 20px hsl(var(--evendle-orange) / 0.3);
-    --shadow-card: 0 4px 12px hsl(0 0% 0% / 0.3);
+    --shadow-glow: 0 0 20px hsl(var(--primary) / 0.15);
+    --shadow-card: 0 4px 12px hsl(0 0% 0% / 0.08);
     
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
-    --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
+    --background: 60 20% 95%;
+    --foreground: 0 0% 10%;
 
-    --card: 0 0% 8%;
-    --card-foreground: 0 0% 100%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
 
-    --popover: 0 0% 8%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
 
-    --primary: 14 100% 57%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 107 19% 25%;
+    --primary-foreground: 60 20% 95%;
 
-    --secondary: 0 0% 50%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 77 11% 87%;
+    --secondary-foreground: 0 0% 10%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 77 11% 87%;
+    --muted-foreground: 0 0% 40%;
 
-    --accent: 14 100% 57%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 77 11% 87%;
+    --accent-foreground: 0 0% 10%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 14 100% 57%;
+    --border: 77 11% 82%;
+    --input: 77 11% 82%;
+    --ring: 107 19% 25%;
   }
 }
 
