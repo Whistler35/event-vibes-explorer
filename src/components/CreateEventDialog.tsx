@@ -93,6 +93,8 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
 
       const parsedMax = maxParticipants ? parseInt(maxParticipants, 10) : null;
 
+      const eventVisibility = isPrivate ? 'unlisted' : 'public';
+
       const { error } = await supabase.from('events').insert({
         title,
         description,
@@ -106,6 +108,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
         image_url: imageUrl,
         approval_status: approvalStatus,
         max_participants: !isAdmin && parsedMax && parsedMax >= 2 ? parsedMax : null,
+        visibility: eventVisibility,
       } as any);
 
       if (error) throw error;
