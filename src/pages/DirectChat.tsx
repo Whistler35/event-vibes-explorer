@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import Layout from "@/components/Layout";
 import { ArrowLeft, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { markConversationRead } from "@/hooks/useUnreadDMCount";
 
 interface Message {
   id: string;
