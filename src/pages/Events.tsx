@@ -115,6 +115,9 @@ const Events = () => {
           </div>
         )}
 
+        {/* Reels Feed */}
+        <ReelsFeed />
+
         {/* Filter Buttons */}
         <div className="space-y-4">
           <div className="flex items-center space-x-4">
