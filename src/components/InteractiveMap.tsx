@@ -1,5 +1,5 @@
-import React from 'react';
-import MapboxMap from './MapboxMap';
+import React, { forwardRef } from 'react';
+import MapboxMap, { type MapboxMapHandle } from './MapboxMap';
 
 export interface MapEvent {
   id: number | string;
@@ -21,19 +21,24 @@ interface InteractiveMapProps {
   isAdmin?: boolean;
 }
 
-const InteractiveMap: React.FC<InteractiveMapProps> = ({ onCreateEvent, onEventClick, events = [], isAdmin = false }) => {
-  return (
-    <MapboxMap
-      center={[47.2692, 11.4041]}
-      zoom={13}
-      height="100%"
-      onCreateEvent={onCreateEvent}
-      onEventClick={onEventClick}
-      events={events}
-      minZoomForCreate={14}
-      isAdmin={isAdmin}
-    />
-  );
-};
+const InteractiveMap = forwardRef<MapboxMapHandle, InteractiveMapProps>(
+  ({ onCreateEvent, onEventClick, events = [], isAdmin = false }, ref) => {
+    return (
+      <MapboxMap
+        ref={ref}
+        center={[47.2692, 11.4041]}
+        zoom={13}
+        height="100%"
+        onCreateEvent={onCreateEvent}
+        onEventClick={onEventClick}
+        events={events}
+        minZoomForCreate={14}
+        isAdmin={isAdmin}
+      />
+    );
+  }
+);
+
+InteractiveMap.displayName = 'InteractiveMap';
 
 export default InteractiveMap;
