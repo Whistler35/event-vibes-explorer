@@ -196,7 +196,7 @@ const EventChat = ({ eventId, eventTitle }: EventChatProps) => {
   if (!chatId) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-center text-evendle-light-gray">
+        <div className="text-center text-muted-foreground">
           <p>Noch kein Chat verfügbar.</p>
           <p className="text-sm mt-2">Der Chat wird erstellt, sobald jemand dem Event beitritt.</p>
         </div>
