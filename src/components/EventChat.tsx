@@ -72,22 +72,32 @@ const EventChat = ({ eventId, eventTitle }: EventChatProps) => {
   const fetchChat = async () => {
     console.log('fetchChat called for eventId:', eventId);
     try {
-      // Get or create chat for this event
-      const { data: chatData, error: chatError } = await supabase
-        .from('event_chats')
-        .select('id')
-        .eq('event_id', eventId)
-        .single();
+      // Use get_or_create to ensure chat exists
+      const { data: chatIdResult, error: rpcError } = await supabase
+        .rpc('get_or_create_event_chat', { p_event_id: eventId });
 
-      if (chatError && chatError.code !== 'PGRST116') {
-        throw chatError;
-      }
+      if (rpcError) {
+        console.error('RPC error:', rpcError);
+        // Fallback: try to just select
+        const { data: chatData, error: chatError } = await supabase
+          .from('event_chats')
+          .select('id')
+          .eq('event_id', eventId)
+          .maybeSingle();
 
-      if (chatData) {
+        if (chatError || !chatData) {
+          setLoading(false);
+          return;
+        }
         setChatId(chatData.id);
         await fetchMessages(chatData.id);
+        return;
+      }
+
+      if (chatIdResult) {
+        setChatId(chatIdResult);
+        await fetchMessages(chatIdResult);
       } else {
-        // Chat doesn't exist yet, it will be created when someone joins the event
         setLoading(false);
       }
     } catch (error) {

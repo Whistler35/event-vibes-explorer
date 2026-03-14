@@ -36,6 +36,7 @@ const App = () => (
               <Route path="/city/:city" element={<CityEvents />} />
               <Route path="/event/:id" element={<EventDetail />} />
               <Route path="/event/:id/hangouts" element={<EventHangouts />} />
+              <Route path="/event/:id/chat" element={<EventChatPage />} />
               <Route path="/nearby" element={<Nearby />} />
               
               <Route path="/chat/:id" element={<Chat />} />
