@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import evendleLogo from "@/assets/evendle-logo.jpeg";
 import { Search, MapPin, X } from "lucide-react";
 import ReelsFeed from "@/components/ReelsFeed";
 import NotificationBell from "@/components/NotificationBell";

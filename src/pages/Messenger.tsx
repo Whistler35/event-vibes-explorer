@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import evendleLogo from "@/assets/evendle-logo.jpeg";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";

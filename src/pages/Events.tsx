@@ -1,4 +1,5 @@
 import { useState } from "react";
+import evendleLogo from "@/assets/evendle-logo.jpeg";
 import { Search } from "lucide-react";
 import Layout from "@/components/Layout";
 import CategoryFilter from "@/components/CategoryFilter";
