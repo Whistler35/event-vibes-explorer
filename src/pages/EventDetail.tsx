@@ -194,25 +194,37 @@ const EventDetail = () => {
     <Layout>
       <div className="p-4 space-y-6">
         {/* Header */}
-        <div className="flex items-center space-x-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate(-1)}
-            className="text-foreground hover:bg-card"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h1 className="text-foreground text-xl font-bold">Event Details</h1>
-          {event.category && (
-            <Badge variant="secondary" className="bg-primary/20 text-primary border-0">
-              {categoryLabels[event.category] || event.category}
-            </Badge>
-          )}
-          {isCommunityEvent && (
-            <Badge variant="outline" className="border-primary text-primary text-xs">
-              Community
-            </Badge>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(-1)}
+              className="text-foreground hover:bg-card"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <h1 className="text-foreground text-xl font-bold">Event Details</h1>
+            {event.category && (
+              <Badge variant="secondary" className="bg-primary/20 text-primary border-0">
+                {categoryLabels[event.category] || event.category}
+              </Badge>
+            )}
+            {isCommunityEvent && (
+              <Badge variant="outline" className="border-primary text-primary text-xs">
+                Community
+              </Badge>
+            )}
+          </div>
+          {canEdit && (
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setEditOpen(true)}
+              className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+            >
+              <Pencil className="w-4 h-4" />
+            </Button>
           )}
         </div>
 
