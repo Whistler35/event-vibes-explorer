@@ -127,7 +127,7 @@ const Profile = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="text-primary text-2xl font-bold">+</div>
+            <img src={evendleLogo} alt="Evendle" className="w-8 h-8 rounded-md" />
             <span className="text-foreground text-xl font-bold">evendle</span>
           </div>
           <div className="flex space-x-2">
