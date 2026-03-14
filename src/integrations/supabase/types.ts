@@ -664,6 +664,10 @@ export type Database = {
         Returns: boolean
       }
       geomfromewkt: { Args: { "": string }; Returns: unknown }
+      get_or_create_event_chat: {
+        Args: { p_event_id: string }
+        Returns: string
+      }
       gettransactionid: { Args: never; Returns: unknown }
       has_role: {
         Args: {
