@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ArrowLeft, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import ProfileStatsSheet from "@/components/ProfileStatsSheet";
 
 interface ProfileData {
   name: string;
