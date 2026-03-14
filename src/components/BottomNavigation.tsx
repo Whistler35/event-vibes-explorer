@@ -10,7 +10,7 @@ const BottomNavigation = () => {
   const navItems = [
     { id: "events", label: "Events", icon: Calendar, path: "/" },
     { id: "nearby", label: "near by", icon: MapPin, path: "/nearby" },
-    
+    { id: "messenger", label: "Chat", icon: MessageCircle, path: "/messenger" },
     ...(isAdmin ? [{ id: "admin", label: "Admin", icon: ShieldCheck, path: "/admin/events" }] : []),
     { id: "profile", label: "profile", icon: User, path: "/profile" },
   ];
