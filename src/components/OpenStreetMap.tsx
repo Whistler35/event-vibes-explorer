@@ -291,7 +291,7 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
     }).addTo(map.current);
 
     // Add long press handlers for creating events - using proper Leaflet events
-    let pressTimer: NodeJS.Timeout | null = null;
+    let pressTimer: ReturnType<typeof setTimeout> | null = null;
     let isLongPress = false;
 
     // Debug: Test if events are being registered
