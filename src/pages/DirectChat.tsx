@@ -66,7 +66,10 @@ const DirectChat = () => {
         .eq("conversation_id", conversationId)
         .order("created_at", { ascending: true });
 
-      if (data) setMessages(data as Message[]);
+      if (data) {
+        setMessages(data as Message[]);
+        markConversationRead(conversationId);
+      }
     };
 
     fetchMessages();
