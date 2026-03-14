@@ -33,12 +33,6 @@ export function useUnreadDMCount() {
       return;
     }
 
-    let unread = 0;
-
-    // Check EVENDLE welcome chat
-    const welcomeRead = localStorage.getItem("dm_last_read_evendle-welcome");
-    if (!welcomeRead) unread++;
-
     for (const convo of convos) {
       const lastRead = localStorage.getItem(`dm_last_read_${convo.id}`) || "1970-01-01T00:00:00Z";
 
