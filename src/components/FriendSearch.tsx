@@ -25,6 +25,7 @@ interface Friendship {
 const FriendSearch: React.FC = () => {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   // Fetch all friendships for current user
