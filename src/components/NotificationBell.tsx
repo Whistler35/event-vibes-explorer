@@ -29,6 +29,10 @@ const NotificationBell = () => {
       navigate(`/dm/${notif.data.conversation_id}`);
     } else if ((notif.type === "friend_event_created" || notif.type === "friend_joined_event") && notif.data?.event_id) {
       navigate(`/event/${notif.data.event_id}`);
+    } else if (notif.type === "friend_request" && notif.data?.requester_id) {
+      navigate(`/user/${notif.data.requester_id}`);
+    } else if (notif.type === "friend_accepted" && notif.data?.friend_id) {
+      navigate(`/user/${notif.data.friend_id}`);
     }
     setOpen(false);
   };
