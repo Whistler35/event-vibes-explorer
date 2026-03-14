@@ -6,11 +6,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Calendar, Clock, MapPin, Users, MessageCircle } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, MapPin, Users, MessageCircle, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import JoinRequestButton from "@/components/JoinRequestButton";
 import JoinRequestList from "@/components/JoinRequestList";
+import EditEventDialog from "@/components/EditEventDialog";
 
 interface Event {
   id: string;
@@ -44,8 +46,11 @@ const EventDetail = () => {
   const [isParticipant, setIsParticipant] = useState(false);
   const [loading, setLoading] = useState(true);
   const [joinLoading, setJoinLoading] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const { isAdmin } = useIsAdmin();
 
   const isOwner = user && event?.created_by === user.id;
+  const canEdit = isOwner || isAdmin;
   const isCommunityEvent = event?.source === 'community';
 
   useEffect(() => {
@@ -189,25 +194,37 @@ const EventDetail = () => {
     <Layout>
       <div className="p-4 space-y-6">
         {/* Header */}
-        <div className="flex items-center space-x-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate(-1)}
-            className="text-foreground hover:bg-card"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h1 className="text-foreground text-xl font-bold">Event Details</h1>
-          {event.category && (
-            <Badge variant="secondary" className="bg-primary/20 text-primary border-0">
-              {categoryLabels[event.category] || event.category}
-            </Badge>
-          )}
-          {isCommunityEvent && (
-            <Badge variant="outline" className="border-primary text-primary text-xs">
-              Community
-            </Badge>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(-1)}
+              className="text-foreground hover:bg-card"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <h1 className="text-foreground text-xl font-bold">Event Details</h1>
+            {event.category && (
+              <Badge variant="secondary" className="bg-primary/20 text-primary border-0">
+                {categoryLabels[event.category] || event.category}
+              </Badge>
+            )}
+            {isCommunityEvent && (
+              <Badge variant="outline" className="border-primary text-primary text-xs">
+                Community
+              </Badge>
+            )}
+          </div>
+          {canEdit && (
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setEditOpen(true)}
+              className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+            >
+              <Pencil className="w-4 h-4" />
+            </Button>
           )}
         </div>
 
@@ -316,6 +333,14 @@ const EventDetail = () => {
             </Button>
           )}
         </div>
+        {canEdit && event && (
+          <EditEventDialog
+            open={editOpen}
+            onClose={() => setEditOpen(false)}
+            event={event}
+            onEventUpdated={() => fetchEventDetails()}
+          />
+        )}
       </div>
     </Layout>
   );
