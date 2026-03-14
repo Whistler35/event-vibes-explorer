@@ -150,7 +150,7 @@ const Auth = () => {
         <div className="text-center space-y-2">
           <div className="flex items-center justify-center space-x-2">
             <div className="text-primary text-3xl font-bold">+</div>
-            <span className="text-foreground text-2xl font-bold">evendle</span>
+            <span className="text-foreground text-2xl font-bold">EVENDLE</span>
           </div>
           <p className="text-muted-foreground">
             {isLogin ? 'Melde dich an' : 'Erstelle dein Profil'}
