@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -24,6 +25,7 @@ interface Friendship {
 const FriendSearch: React.FC = () => {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   // Fetch all friendships for current user
@@ -182,10 +184,11 @@ const FriendSearch: React.FC = () => {
                   <img
                     src={getAvatarUrl(profile)}
                     alt={profile.name}
-                    className="w-10 h-10 rounded-full object-cover"
+                    className="w-10 h-10 rounded-full object-cover cursor-pointer"
+                    onClick={() => navigate(`/user/${profile.user_id}`)}
                   />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-foreground font-medium text-sm truncate">{profile.name}</p>
+                  <div className="flex-1 min-w-0 cursor-pointer" onClick={() => navigate(`/user/${profile.user_id}`)}>
+                    <p className="text-foreground font-medium text-sm truncate hover:text-primary transition-colors">{profile.name}</p>
                     {profile.bio && (
                       <p className="text-muted-foreground text-xs truncate">{profile.bio}</p>
                     )}
@@ -228,10 +231,11 @@ const FriendSearch: React.FC = () => {
                 <img
                   src={getAvatarUrl(profile)}
                   alt={profile.name}
-                  className="w-10 h-10 rounded-full object-cover"
+                  className="w-10 h-10 rounded-full object-cover cursor-pointer"
+                  onClick={() => navigate(`/user/${profile.user_id}`)}
                 />
-                <div className="flex-1 min-w-0">
-                  <p className="text-foreground font-medium text-sm truncate">{profile.name}</p>
+                <div className="flex-1 min-w-0 cursor-pointer" onClick={() => navigate(`/user/${profile.user_id}`)}>
+                  <p className="text-foreground font-medium text-sm truncate hover:text-primary transition-colors">{profile.name}</p>
                 </div>
                 <div className="flex gap-1">
                   <Button
@@ -270,10 +274,11 @@ const FriendSearch: React.FC = () => {
                 <img
                   src={getAvatarUrl(profile)}
                   alt={profile.name}
-                  className="w-10 h-10 rounded-full object-cover"
+                  className="w-10 h-10 rounded-full object-cover cursor-pointer"
+                  onClick={() => navigate(`/user/${profile.user_id}`)}
                 />
-                <div className="flex-1 min-w-0">
-                  <p className="text-foreground font-medium text-sm truncate">{profile.name}</p>
+                <div className="flex-1 min-w-0 cursor-pointer" onClick={() => navigate(`/user/${profile.user_id}`)}>
+                  <p className="text-foreground font-medium text-sm truncate hover:text-primary transition-colors">{profile.name}</p>
                   {profile.bio && (
                     <p className="text-muted-foreground text-xs truncate">{profile.bio}</p>
                   )}
