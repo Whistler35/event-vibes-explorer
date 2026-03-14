@@ -1,4 +1,5 @@
 import { Search } from "lucide-react";
+import ReelsFeed from "@/components/ReelsFeed";
 import Layout from "@/components/Layout";
 import EventCard from "@/components/EventCard";
 import { useNavigate } from "react-router-dom";
@@ -106,6 +107,11 @@ const Home = () => {
           ) : (
             <p className="text-muted-foreground text-sm">Keine Top Events aktuell.</p>
           )}
+        </div>
+
+        {/* Reels Feed */}
+        <div className="px-4 pb-8">
+          <ReelsFeed />
         </div>
       </div>
     </Layout>
