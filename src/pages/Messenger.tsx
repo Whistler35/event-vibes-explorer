@@ -155,8 +155,7 @@ const Messenger = () => {
           {isLoading ? (
             <p className="text-muted-foreground text-center py-8">Laden...</p>
           ) : (
-          <div className="space-y-1">
-            {conversations.map((conversation) => (
+            conversations.map((conversation) => (
               <div
                 key={conversation.id}
                 onClick={() => navigate(`/dm/${conversation.id}`)}
@@ -183,9 +182,9 @@ const Messenger = () => {
                   </p>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+            ))
+          )}
+        </div>
       </div>
     </Layout>
   );
