@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, MessageCircle, Calendar, Users } from "lucide-react";
+import { Bell, MessageCircle, Calendar, Users, UserPlus, UserCheck } from "lucide-react";
 import { useNotifications, AppNotification } from "@/hooks/useNotifications";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,8 @@ const NotificationBell = () => {
       case "new_dm": return <MessageCircle className="w-5 h-5 text-primary" />;
       case "friend_event_created": return <Calendar className="w-5 h-5 text-primary" />;
       case "friend_joined_event": return <Users className="w-5 h-5 text-primary" />;
+      case "friend_request": return <UserPlus className="w-5 h-5 text-primary" />;
+      case "friend_accepted": return <UserCheck className="w-5 h-5 text-primary" />;
       default: return <Bell className="w-5 h-5 text-primary" />;
     }
   };
@@ -27,6 +29,10 @@ const NotificationBell = () => {
       navigate(`/dm/${notif.data.conversation_id}`);
     } else if ((notif.type === "friend_event_created" || notif.type === "friend_joined_event") && notif.data?.event_id) {
       navigate(`/event/${notif.data.event_id}`);
+    } else if (notif.type === "friend_request" && notif.data?.requester_id) {
+      navigate(`/user/${notif.data.requester_id}`);
+    } else if (notif.type === "friend_accepted" && notif.data?.friend_id) {
+      navigate(`/user/${notif.data.friend_id}`);
     }
     setOpen(false);
   };
