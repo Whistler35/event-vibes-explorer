@@ -51,7 +51,6 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
     }
   };
 
-  // Sync defaultPrivate when dialog opens
   useEffect(() => {
     if (open) setIsPrivate(defaultPrivate);
   }, [open, defaultPrivate]);
@@ -73,7 +72,6 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
 
     setLoading(true);
     try {
-      // Upload image if present
       let imageUrl: string | null = null;
       if (image) {
         const fileExt = image.name.split('.').pop();
@@ -90,9 +88,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
       const eventDate = `${date}T${time}:00`;
       const approvalStatus = isAdmin ? 'approved' : 'pending';
       const eventCategory = isAdmin ? category : 'community';
-
       const parsedMax = maxParticipants ? parseInt(maxParticipants, 10) : null;
-
       const eventVisibility = isPrivate ? 'unlisted' : 'public';
 
       const { error } = await supabase.from('events').insert({
@@ -145,29 +141,28 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
       }}>
       
       <DialogContent
-        className="sm:max-w-[400px] bg-evendle-dark border-evendle-gray p-0 gap-0"
+        className="sm:max-w-[400px] bg-card border-border p-0 gap-0"
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}>
         
         {/* Header */}
         <div className="flex items-center justify-between p-4 pb-2">
           <div className="flex items-center gap-2">
-            <span className="text-evendle-orange text-xl font-bold">+</span>
-            <span className="text-white text-lg font-semibold">Create evendle</span>
+            <span className="text-primary text-xl font-bold">+</span>
+            <span className="text-foreground text-lg font-semibold">Create evendle</span>
           </div>
           {isAdmin ?
-          <span className="flex items-center gap-1 text-xs text-green-400">
+          <span className="flex items-center gap-1 text-xs text-green-600">
               <ShieldCheck className="h-3.5 w-3.5" /> Admin
             </span> :
-
-          <span className="flex items-center gap-1 text-xs text-yellow-400">
+          <span className="flex items-center gap-1 text-xs text-yellow-600">
               <Clock className="h-3.5 w-3.5" /> Prüfung nötig
             </span>
           }
         </div>
 
         {!isAdmin &&
-        <div className="mx-4 px-3 py-2 rounded-lg bg-yellow-400/10 border border-yellow-400/20 text-yellow-300 text-xs">
+        <div className="mx-4 px-3 py-2 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs">
             Dein Event wird nach Admin-Freigabe sichtbar.
           </div>
         }
@@ -175,19 +170,18 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
         <div className="p-4 pt-2 space-y-4">
           {/* Image Upload */}
           <div className="space-y-2">
-            <Label className="text-white text-sm">Bild</Label>
+            <Label className="text-foreground text-sm">Bild</Label>
             <div className="relative">
               {imagePreview ?
               <div className="relative">
-                  <img src={imagePreview} alt="Event" className="w-full h-32 object-cover rounded-xl border border-dashed border-evendle-gray" />
-                  <Button variant="secondary" size="sm" className="absolute top-2 right-2 bg-evendle-dark-card/80" onClick={() => {setImage(null);setImagePreview(null);}}>
+                  <img src={imagePreview} alt="Event" className="w-full h-32 object-cover rounded-xl border border-dashed border-border" />
+                  <Button variant="secondary" size="sm" className="absolute top-2 right-2" onClick={() => {setImage(null);setImagePreview(null);}}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div> :
-
-              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-evendle-gray rounded-xl cursor-pointer hover:border-evendle-orange/50 transition-colors bg-transparent">
-                  <Camera className="h-8 w-8 text-evendle-gray" />
-                  <span className="text-sm text-evendle-gray mt-2">Bild hinzufügen</span>
+              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/50 transition-colors bg-transparent">
+                  <Camera className="h-8 w-8 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground mt-2">Bild hinzufügen</span>
                   <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                 </label>
               }
@@ -196,16 +190,16 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
 
           {/* Title */}
           <div className="space-y-2">
-            <Label htmlFor="title" className="text-white text-sm">Titel *</Label>
-            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Was machst du?" className="bg-transparent border-evendle-gray text-white placeholder:text-evendle-gray rounded-xl h-12" />
+            <Label htmlFor="title" className="text-foreground text-sm">Titel *</Label>
+            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Was machst du?" className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12" />
           </div>
 
           {/* Category */}
           <div className="space-y-2">
-            <Label className="text-white text-sm">Kategorie *</Label>
+            <Label className="text-foreground text-sm">Kategorie *</Label>
             {isAdmin ?
             <Select value={category} onValueChange={(val) => setCategory(val as EventCategory)}>
-                <SelectTrigger className="bg-transparent border-evendle-gray text-white rounded-xl h-12">
+                <SelectTrigger className="bg-transparent border-border text-foreground rounded-xl h-12">
                   <SelectValue placeholder="Kategorie wählen" />
                 </SelectTrigger>
                 <SelectContent className="bg-card border-border">
@@ -220,36 +214,34 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
                   <SelectItem value="other">📌 Sonstiges</SelectItem>
                 </SelectContent>
               </Select> :
-
-            <div className="flex items-center gap-2 h-12 px-3 rounded-xl border border-evendle-gray text-white bg-transparent">
+            <div className="flex items-center gap-2 h-12 px-3 rounded-xl border border-border text-foreground bg-transparent">
                 <span>👥 Community</span>
-                <span className="text-xs text-evendle-light-gray ml-auto">
-</span>
+                <span className="text-xs text-muted-foreground ml-auto"></span>
               </div>}
           </div>
 
           {/* Description */}
           <div className="space-y-2">
-            <Label htmlFor="description" className="text-white text-sm">Beschreibung</Label>
-            <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Beschreibe dein Event..." rows={3} className="bg-transparent border-evendle-gray text-white placeholder:text-evendle-gray rounded-xl resize-none" />
+            <Label htmlFor="description" className="text-foreground text-sm">Beschreibung</Label>
+            <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Beschreibe dein Event..." rows={3} className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl resize-none" />
           </div>
 
           {/* Date and Time */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="date" className="text-white text-sm">Datum *</Label>
-              <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="bg-transparent border-evendle-gray text-white rounded-xl h-12 [color-scheme:dark]" />
+              <Label htmlFor="date" className="text-foreground text-sm">Datum *</Label>
+              <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="time" className="text-white text-sm">Zeit *</Label>
-              <Input id="time" type="time" value={time} onChange={(e) => setTime(e.target.value)} className="bg-transparent border-evendle-gray text-white rounded-xl h-12 [color-scheme:dark]" />
+              <Label htmlFor="time" className="text-foreground text-sm">Zeit *</Label>
+              <Input id="time" type="time" value={time} onChange={(e) => setTime(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
             </div>
           </div>
 
-          {/* Max Participants (only for non-admin community events) */}
+          {/* Max Participants */}
           {!isAdmin && (
             <div className="space-y-2">
-              <Label htmlFor="maxParticipants" className="text-white text-sm">Max. Teilnehmer *</Label>
+              <Label htmlFor="maxParticipants" className="text-foreground text-sm">Max. Teilnehmer *</Label>
               <Input
                 id="maxParticipants"
                 type="number"
@@ -257,9 +249,9 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
                 value={maxParticipants}
                 onChange={(e) => setMaxParticipants(e.target.value)}
                 placeholder="z.B. 10 (min. 2)"
-                className="bg-transparent border-evendle-gray text-white placeholder:text-evendle-gray rounded-xl h-12"
+                className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12"
               />
-              <p className="text-evendle-light-gray text-xs">Mindestens 2 Teilnehmer</p>
+              <p className="text-muted-foreground text-xs">Mindestens 2 Teilnehmer</p>
             </div>
           )}
 
@@ -267,7 +259,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
           <div className="flex items-center justify-between py-2 px-1">
             <div className="flex items-center gap-2">
               {isPrivate ? <Lock className="h-4 w-4 text-muted-foreground" /> : <Globe className="h-4 w-4 text-primary" />}
-              <Label className="text-white text-sm">
+              <Label className="text-foreground text-sm">
                 {isPrivate ? 'Privat – nur für dich & Freunde sichtbar' : 'Öffentlich – für alle sichtbar'}
               </Label>
             </div>
@@ -279,17 +271,16 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
 
           {/* Buttons */}
           <div className="flex gap-3 pt-2">
-            <Button variant="outline" onClick={handleClose} className="flex-1 h-12 rounded-xl border-evendle-orange text-evendle-orange hover:bg-evendle-orange/10 hover:text-evendle-orange bg-transparent">
+            <Button variant="outline" onClick={handleClose} className="flex-1 h-12 rounded-xl">
               Abbrechen
             </Button>
-            <Button onClick={handleSubmit} disabled={!title || !date || !time || loading || (!isAdmin && (!maxParticipants || parseInt(maxParticipants) < 2))} className="flex-1 h-12 rounded-xl bg-evendle-orange hover:bg-evendle-orange-hover text-white disabled:opacity-50">
+            <Button onClick={handleSubmit} disabled={!title || !date || !time || loading || (!isAdmin && (!maxParticipants || parseInt(maxParticipants) < 2))} className="flex-1 h-12 rounded-xl">
               {loading ? 'Erstelle...' : 'Event erstellen'}
             </Button>
           </div>
         </div>
       </DialogContent>
     </Dialog>);
-
 };
 
 export default CreateEventDialog;

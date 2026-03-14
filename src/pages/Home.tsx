@@ -67,7 +67,7 @@ const Home = () => {
           <div className="max-w-md mx-auto">
             <button
               onClick={() => navigate('/city/innsbruck')}
-              className="w-full bg-muted/30 border-none rounded-full h-14 text-foreground text-center text-lg flex items-center justify-center gap-2 hover:bg-muted/40 transition-colors"
+              className="w-full bg-muted/50 border border-border rounded-full h-14 text-foreground text-center text-lg flex items-center justify-center gap-2 hover:bg-muted/70 transition-colors"
             >
               <span>Innsbruck</span>
               <Search className="text-primary h-5 w-5" />

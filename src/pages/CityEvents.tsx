@@ -12,7 +12,6 @@ const CityEvents = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedDate, setSelectedDate] = useState("all");
 
-  // Mock events data - in real app this would come from API
   const allEvents = [
     {
       id: "8e2ebc17-c1b6-4a3d-8aae-2f49edcdcb0b",
@@ -71,7 +70,6 @@ const CityEvents = () => {
     }
   ];
 
-  // Filter events by city and selected filters
   const filteredEvents = allEvents.filter(event => {
     const cityMatch = event.city === city?.toLowerCase();
     const categoryMatch = selectedCategory === "all" || event.category.toLowerCase() === selectedCategory.toLowerCase();
@@ -97,34 +95,32 @@ const CityEvents = () => {
             variant="ghost" 
             size="icon"
             onClick={() => navigate('/')}
-            className="text-white hover:bg-evendle-dark-card"
           >
             <ArrowLeft className="h-6 w-6" />
           </Button>
-          <h1 className="text-white text-2xl font-bold">Events in {cityName}</h1>
+          <h1 className="text-foreground text-2xl font-bold">Events in {cityName}</h1>
         </div>
 
         {/* Filters */}
         <div className="space-y-4">
-          <h2 className="text-white text-lg font-semibold flex items-center">
+          <h2 className="text-foreground text-lg font-semibold flex items-center">
             <Filter className="mr-2 h-5 w-5" />
             Filter Events
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Category Filter */}
             <div>
-              <label className="text-evendle-gray text-sm mb-2 block">Category</label>
+              <label className="text-muted-foreground text-sm mb-2 block">Category</label>
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="bg-evendle-dark-card border-evendle-gray text-white">
+                <SelectTrigger className="bg-card border-border text-foreground">
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
-                <SelectContent className="bg-evendle-dark-card border-evendle-gray z-50">
+                <SelectContent className="bg-card border-border z-50">
                   {categories.map((category) => (
                     <SelectItem 
                       key={category} 
                       value={category}
-                      className="text-white hover:bg-evendle-orange/20"
+                      className="text-foreground hover:bg-primary/10"
                     >
                       {category === "all" ? "All Categories" : category}
                     </SelectItem>
@@ -133,22 +129,21 @@ const CityEvents = () => {
               </Select>
             </div>
 
-            {/* Date Filter */}
             <div>
-              <label className="text-evendle-gray text-sm mb-2 block flex items-center">
+              <label className="text-muted-foreground text-sm mb-2 block flex items-center">
                 <Calendar className="mr-1 h-4 w-4" />
                 Date
               </label>
               <Select value={selectedDate} onValueChange={setSelectedDate}>
-                <SelectTrigger className="bg-evendle-dark-card border-evendle-gray text-white">
+                <SelectTrigger className="bg-card border-border text-foreground">
                   <SelectValue placeholder="Select date" />
                 </SelectTrigger>
-                <SelectContent className="bg-evendle-dark-card border-evendle-gray z-50">
+                <SelectContent className="bg-card border-border z-50">
                   {dates.map((date) => (
                     <SelectItem 
                       key={date} 
                       value={date}
-                      className="text-white hover:bg-evendle-orange/20"
+                      className="text-foreground hover:bg-primary/10"
                     >
                       {date === "all" ? "All Dates" : date}
                     </SelectItem>
@@ -161,13 +156,13 @@ const CityEvents = () => {
 
         {/* Events List */}
         <div className="space-y-4">
-          <h2 className="text-white text-lg font-semibold">
+          <h2 className="text-foreground text-lg font-semibold">
             {filteredEvents.length} Events Found
           </h2>
           
           {filteredEvents.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-evendle-gray text-lg">No events found matching your filters.</p>
+              <p className="text-muted-foreground text-lg">No events found matching your filters.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
