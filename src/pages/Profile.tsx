@@ -171,6 +171,21 @@ const Profile = () => {
             </div>
           )}
 
+          {/* Friends Section */}
+          <div className="space-y-4 text-left">
+            <button
+              onClick={() => setShowFriends(!showFriends)}
+              className="flex items-center gap-2 text-foreground font-bold text-lg w-full"
+            >
+              <Users className="h-5 w-5 text-primary" />
+              Freunde
+              <span className="text-muted-foreground text-sm font-normal ml-auto">
+                {showFriends ? 'Ausblenden' : 'Anzeigen'}
+              </span>
+            </button>
+            {showFriends && <FriendSearch />}
+          </div>
+
           {/* No profile data hint */}
           {!profile && (
             <div className="text-center py-8 space-y-2">
