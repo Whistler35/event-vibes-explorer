@@ -28,8 +28,16 @@ function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
 
 const Home = () => {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchLocation, setSearchLocation] = useState<GeocodedLocation | null>(null);
+  const [searchQuery, setSearchQuery] = useState(() => {
+    const stored = localStorage.getItem('selectedCity');
+    if (stored) { try { return JSON.parse(stored).name?.split(',')[0] || ''; } catch {} }
+    return '';
+  });
+  const [searchLocation, setSearchLocation] = useState<GeocodedLocation | null>(() => {
+    const stored = localStorage.getItem('selectedCity');
+    if (stored) { try { return JSON.parse(stored); } catch {} }
+    return null;
+  });
   const [suggestions, setSuggestions] = useState<GeocodedLocation[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
@@ -112,8 +120,7 @@ const Home = () => {
     setSearchQuery(loc.name.split(',')[0]);
     setSearchLocation(loc);
     setShowSuggestions(false);
-    // Store for map view
-    sessionStorage.setItem('selectedCity', JSON.stringify(loc));
+    localStorage.setItem('selectedCity', JSON.stringify(loc));
   };
 
   const clearSearch = () => {
@@ -121,6 +128,7 @@ const Home = () => {
     setSearchLocation(null);
     setSuggestions([]);
     setShowSuggestions(false);
+    localStorage.removeItem('selectedCity');
   };
 
   const categoryLabels: Record<string, string> = {
