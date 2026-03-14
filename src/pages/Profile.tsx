@@ -33,7 +33,7 @@ const Profile = () => {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [showFriends, setShowFriends] = useState(false);
-
+  const [stats, setStats] = useState<ProfileStats>({ friendsCount: 0, hostedCount: 0, participatedCount: 0 });
   useEffect(() => {
     if (!user) {
       setLoading(false);
