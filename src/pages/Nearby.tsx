@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import evendleLogo from "@/assets/evendle-logo.jpeg";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Layout from "@/components/Layout";
@@ -184,8 +185,9 @@ const Nearby = () => {
   return (
     <Layout>
       <div className="relative h-[calc(100vh-80px)]">
-        <div className="absolute top-4 left-4 z-10">
-          <span className="text-foreground text-2xl font-bold drop-shadow-lg">evendle</span>
+        <div className="absolute top-4 left-4 z-10 flex items-center space-x-2">
+          <img src={evendleLogo} alt="Evendle" className="w-9 h-9 object-contain" />
+          <span className="text-foreground text-xl font-bold drop-shadow-lg">EVENDLE</span>
         </div>
 
         {/* Public/Private Toggle */}
