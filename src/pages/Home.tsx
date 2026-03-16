@@ -145,7 +145,7 @@ const Home = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-background">
+      <div className="bg-background">
         {/* Header with Logo */}
         <div className="p-4 pt-8">
           <div className="flex items-center justify-between">
