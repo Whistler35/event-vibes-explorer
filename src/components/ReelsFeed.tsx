@@ -233,10 +233,10 @@ const ReelsFeed: React.FC = () => {
       {/* Reels Container */}
       <div
         ref={containerRef}
-        className={`snap-y snap-mandatory overflow-y-auto scrollbar-hide rounded-2xl transition-all duration-300 ${
+        className={`snap-y snap-mandatory overflow-y-auto scrollbar-hide rounded-2xl transition-all duration-300 scroll-container ${
           isExpanded ? 'h-[80vh]' : 'h-[65vh]'
         }`}
-        style={{ scrollSnapType: 'y mandatory' }}
+        style={{ scrollSnapType: 'y mandatory', touchAction: 'pan-y' }}
       >
         {demoReels.map((reel, index) => (
           <div key={reel.id} className="snap-start snap-always" style={{ height: '100%' }}>
