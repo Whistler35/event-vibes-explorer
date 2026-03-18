@@ -273,7 +273,7 @@ const Home = () => {
             return true;
           });
           const displayedEvents = showAllNearby ? filteredNearby : filteredNearby.slice(0, 5);
-          const hasActiveFilters = !!nearbyCategory || !!nearbyDateRange?.from;
+          const hasActiveFilters = nearbyCategories.length > 0 || !!nearbyDateRange?.from;
 
           const formatDateLabel = () => {
             if (!nearbyDateRange?.from) return 'Datum';
