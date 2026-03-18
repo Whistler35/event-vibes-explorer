@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 const Events = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("today");
-  const [selectedCategory, setSelectedCategory] = useState<EventCategory | ''>('');
+  const [selectedCategories, setSelectedCategories] = useState<EventCategory[]>([]);
   const navigate = useNavigate();
 
   const today = new Date().toISOString().split('T')[0];
