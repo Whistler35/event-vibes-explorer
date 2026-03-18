@@ -262,7 +262,7 @@ const Nearby = () => {
         )}
 
         <div className={`absolute ${showSearchBar ? 'top-28' : 'top-14'} left-0 right-0 z-10 px-4 transition-all`}>
-          <CategoryFilter selected={selectedCategory} onChange={setSelectedCategory} selectedDateRange={selectedDateRange} onDateRangeChange={setSelectedDateRange} />
+          <CategoryFilter selectedCategories={selectedCategories} onCategoriesChange={setSelectedCategories} selectedDateRange={selectedDateRange} onDateRangeChange={setSelectedDateRange} />
         </div>
 
         {isLoading && (
