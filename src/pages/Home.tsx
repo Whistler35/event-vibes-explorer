@@ -32,7 +32,8 @@ const Home = () => {
   const navigate = useNavigate();
   const [showAllNearby, setShowAllNearby] = useState(false);
   const [nearbyCategory, setNearbyCategory] = useState<string>('');
-  const [nearbyDate, setNearbyDate] = useState<string>('');
+  const [nearbyDateFrom, setNearbyDateFrom] = useState<string>('');
+  const [nearbyDateTo, setNearbyDateTo] = useState<string>('');
   const [showNearbyFilters, setShowNearbyFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState(() => {
     const stored = localStorage.getItem('selectedCity');
