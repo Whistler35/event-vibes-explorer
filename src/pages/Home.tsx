@@ -305,7 +305,7 @@ const Home = () => {
                 </button>
                 {hasActiveFilters && (
                   <button
-                    onClick={() => { setNearbyCategory(''); setNearbyDateRange(undefined); setShowAllNearby(false); }}
+                    onClick={() => { setNearbyCategories([]); setNearbyDateRange(undefined); setShowAllNearby(false); }}
                     className="text-xs text-muted-foreground hover:text-foreground"
                   >
                     Zurücksetzen
