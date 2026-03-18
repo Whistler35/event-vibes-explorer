@@ -3,8 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
- * Tracks unread direct messages.
- * Uses a simple "last_read" timestamp stored in localStorage per conversation.
+ * Tracks unread direct messages using database-persisted read timestamps.
  */
 export function useUnreadDMCount() {
   const { user } = useAuth();
@@ -33,8 +32,23 @@ export function useUnreadDMCount() {
       return;
     }
 
+    // Get all read timestamps for this user in one query
+    const convoIds = convos.map((c) => c.id);
+    const { data: reads } = await supabase
+      .from("conversation_reads")
+      .select("conversation_id, last_read_at")
+      .eq("user_id", user.id)
+      .in("conversation_id", convoIds);
+
+    const readMap = new Map<string, string>();
+    if (reads) {
+      for (const r of reads) {
+        readMap.set(r.conversation_id, r.last_read_at);
+      }
+    }
+
     for (const convo of convos) {
-      const lastRead = localStorage.getItem(`dm_last_read_${convo.id}`) || "1970-01-01T00:00:00Z";
+      const lastRead = readMap.get(convo.id) || "1970-01-01T00:00:00Z";
 
       const { count: msgCount } = await supabase
         .from("direct_messages")
@@ -52,7 +66,6 @@ export function useUnreadDMCount() {
   useEffect(() => {
     computeCount();
 
-    // Listen for new DMs via realtime
     if (!user) return;
 
     const channel = supabase
@@ -61,7 +74,6 @@ export function useUnreadDMCount() {
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "direct_messages" },
         (payload) => {
-          // Only recompute if message is not from current user
           if ((payload.new as any).sender_id !== user.id) {
             computeCount();
           }
@@ -79,7 +91,44 @@ export function useUnreadDMCount() {
 
 /**
  * Mark a conversation as read (call when user opens the chat).
+ * Upserts a row in conversation_reads.
  */
-export function markConversationRead(conversationId: string) {
-  localStorage.setItem(`dm_last_read_${conversationId}`, new Date().toISOString());
+export async function markConversationRead(conversationId: string, userId?: string) {
+  // Special case for welcome chat
+  if (conversationId === "evendle-welcome") {
+    localStorage.setItem("dm_last_read_evendle-welcome", new Date().toISOString());
+    return;
+  }
+
+  if (!userId) {
+    const { data: { user } } = await supabase.auth.getUser();
+    userId = user?.id;
+  }
+
+  if (!userId) return;
+
+  const now = new Date().toISOString();
+
+  // Try update first, then insert if no rows updated
+  const { data: existing } = await supabase
+    .from("conversation_reads")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("conversation_id", conversationId)
+    .maybeSingle();
+
+  if (existing) {
+    await supabase
+      .from("conversation_reads")
+      .update({ last_read_at: now } as any)
+      .eq("id", existing.id);
+  } else {
+    await supabase
+      .from("conversation_reads")
+      .insert({
+        user_id: userId,
+        conversation_id: conversationId,
+        last_read_at: now,
+      } as any);
+  }
 }
