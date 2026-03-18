@@ -92,7 +92,7 @@ const Nearby = () => {
         .in('created_by', allUserIds)
         .eq('visibility', 'unlisted')
         .order('event_date', { ascending: true });
-      if (selectedCategory) query = query.eq('category', selectedCategory);
+      if (selectedCategories.length > 0) query = query.in('category', selectedCategories);
       if (selectedDateRange?.from) {
         const fromStr = selectedDateRange.from.toISOString().split('T')[0];
         const toStr = selectedDateRange.to ? selectedDateRange.to.toISOString().split('T')[0] : fromStr;
