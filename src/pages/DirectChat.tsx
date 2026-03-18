@@ -68,7 +68,7 @@ const DirectChat = () => {
 
       if (data) {
         setMessages(data as Message[]);
-        markConversationRead(conversationId);
+        markConversationRead(conversationId, user?.id);
       }
     };
 
