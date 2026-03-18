@@ -82,7 +82,7 @@ const Events = () => {
         </div>
 
         {/* Category Filters */}
-        <CategoryFilter selected={selectedCategory} onChange={setSelectedCategory} />
+        <CategoryFilter selectedCategories={selectedCategories} onCategoriesChange={setSelectedCategories} />
 
         {/* Top Events Section */}
         {featuredEvents && featuredEvents.length > 0 && (
