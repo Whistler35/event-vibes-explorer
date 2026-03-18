@@ -74,7 +74,7 @@ const Nearby = () => {
   }, !isPrivateMode);
 
   const { data: privateEvents, isLoading: isLoadingPrivate, refetch: refetchPrivate } = useQuery({
-    queryKey: ['private-events', user?.id, selectedCategory, selectedDateRange?.from?.getTime(), selectedDateRange?.to?.getTime()],
+    queryKey: ['private-events', user?.id, selectedCategories, selectedDateRange?.from?.getTime(), selectedDateRange?.to?.getTime()],
     queryFn: async () => {
       if (!user) return [];
       const { data: friendships } = await supabase
