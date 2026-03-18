@@ -74,77 +74,83 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selected, onChange, sel
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 mt-2 w-72 rounded-md border border-border bg-card p-3 shadow-lg z-50 max-h-[70vh] overflow-y-auto">
-          {/* Categories */}
-          <div className="space-y-2">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Kategorie</p>
-            <div className="flex flex-wrap gap-1.5">
-              {CATEGORIES.map(({ id, label, icon: Icon }) => {
-                const isActive = selected === id;
-                return (
-                  <button
-                    key={id}
-                    onClick={() => {
-                      onChange(id);
-                      if (!onDateRangeChange) setOpen(false);
-                    }}
-                    className={cn(
-                      'flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition-colors',
-                      isActive
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                    )}
-                  >
-                    <Icon className="w-3.5 h-3.5" />
-                    {label}
-                  </button>
-                );
-              })}
+        <div className="absolute top-full left-0 mt-2 w-72 rounded-md border border-border bg-card shadow-lg z-50 max-h-[60vh] flex flex-col">
+          <div className="p-3 overflow-y-auto flex-1 min-h-0">
+            {/* Categories */}
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Kategorie</p>
+              <div className="flex flex-wrap gap-1.5">
+                {CATEGORIES.map(({ id, label, icon: Icon }) => {
+                  const isActive = selected === id;
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => {
+                        onChange(id);
+                        if (!onDateRangeChange) setOpen(false);
+                      }}
+                      className={cn(
+                        'flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition-colors',
+                        isActive
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                      )}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
+
+            {/* Date range picker */}
+            {onDateRangeChange && (
+              <div className="mt-3 pt-3 border-t border-border space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                    <CalendarIcon className="w-3 h-3" />
+                    Datum
+                  </p>
+                  {selectedDateRange?.from && (
+                    <button
+                      onClick={() => onDateRangeChange(undefined)}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      Zurücksetzen
+                    </button>
+                  )}
+                </div>
+                <Calendar
+                  mode="range"
+                  weekStartsOn={1}
+                  selected={selectedDateRange}
+                  onSelect={(range) => onDateRangeChange(range || undefined)}
+                  numberOfMonths={1}
+                  className={cn("p-0 pointer-events-auto")}
+                />
+              </div>
+            )}
           </div>
 
-          {/* Date range picker */}
+          {/* Sticky action buttons */}
           {onDateRangeChange && (
-            <div className="mt-3 pt-3 border-t border-border space-y-2">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
-                  <CalendarIcon className="w-3 h-3" />
-                  Datum
-                </p>
-                {selectedDateRange?.from && (
-                  <button
-                    onClick={() => onDateRangeChange(undefined)}
-                    className="text-xs text-primary hover:underline"
-                  >
-                    Zurücksetzen
-                  </button>
-                )}
-              </div>
-              <Calendar
-                mode="range"
-                weekStartsOn={1}
-                selected={selectedDateRange}
-                onSelect={(range) => onDateRangeChange(range || undefined)}
-                numberOfMonths={1}
-                className={cn("p-0 pointer-events-auto")}
-              />
-              <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="flex-1 text-xs"
-                  onClick={() => { onDateRangeChange(undefined); }}
-                >
-                  Löschen
-                </Button>
-                <Button
-                  size="sm"
-                  className="flex-1 text-xs"
-                  onClick={() => setOpen(false)}
-                >
-                  Übernehmen
-                </Button>
-              </div>
+            <div className="flex gap-2 p-3 pt-0 border-t border-border bg-card rounded-b-md">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex-1 text-xs"
+                onClick={() => { onDateRangeChange(undefined); }}
+              >
+                Löschen
+              </Button>
+              <Button
+                size="sm"
+                className="flex-1 text-xs"
+                onClick={() => setOpen(false)}
+              >
+                Übernehmen
+              </Button>
             </div>
           )}
         </div>
