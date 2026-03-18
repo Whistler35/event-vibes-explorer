@@ -149,7 +149,7 @@ const Auth = () => {
         {/* Header */}
         <div className="text-center space-y-2">
           <div className="flex items-center justify-center space-x-2">
-            <div className="text-primary text-3xl font-bold">+</div>
+            <img src={evendleLogo} alt="Evendle" className="w-9 h-9 object-contain" />
             <span className="text-foreground text-2xl font-bold">EVENDLE</span>
           </div>
           <p className="text-muted-foreground">
