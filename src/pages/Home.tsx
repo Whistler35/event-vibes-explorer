@@ -36,7 +36,7 @@ function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
 const Home = () => {
   const navigate = useNavigate();
   const [showAllNearby, setShowAllNearby] = useState(false);
-  const [nearbyCategory, setNearbyCategory] = useState<string>('');
+  const [nearbyCategories, setNearbyCategories] = useState<string[]>([]);
   const [nearbyDateRange, setNearbyDateRange] = useState<DateRange | undefined>(undefined);
   const [showNearbyFilters, setShowNearbyFilters] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
@@ -260,7 +260,7 @@ const Home = () => {
         {/* Nearby Events (when location selected) */}
         {searchLocation && nearbyEvents && nearbyEvents.length > 0 && (() => {
           const filteredNearby = nearbyEvents.filter((event: any) => {
-            if (nearbyCategory && event.category !== nearbyCategory) return false;
+            if (nearbyCategories.length > 0 && !nearbyCategories.includes(event.category)) return false;
             if (nearbyDateRange?.from) {
               const eventDay = new Date(event.event_date);
               eventDay.setHours(0, 0, 0, 0);
@@ -273,7 +273,7 @@ const Home = () => {
             return true;
           });
           const displayedEvents = showAllNearby ? filteredNearby : filteredNearby.slice(0, 5);
-          const hasActiveFilters = !!nearbyCategory || !!nearbyDateRange?.from;
+          const hasActiveFilters = nearbyCategories.length > 0 || !!nearbyDateRange?.from;
 
           const formatDateLabel = () => {
             if (!nearbyDateRange?.from) return 'Datum';
@@ -305,7 +305,7 @@ const Home = () => {
                 </button>
                 {hasActiveFilters && (
                   <button
-                    onClick={() => { setNearbyCategory(''); setNearbyDateRange(undefined); setShowAllNearby(false); }}
+                    onClick={() => { setNearbyCategories([]); setNearbyDateRange(undefined); setShowAllNearby(false); }}
                     className="text-xs text-muted-foreground hover:text-foreground"
                   >
                     Zurücksetzen
@@ -315,17 +315,34 @@ const Home = () => {
 
               {/* Filter controls */}
               {showNearbyFilters && (
-                <div className="flex gap-2 mb-4">
-                  <select
-                    value={nearbyCategory}
-                    onChange={(e) => { setNearbyCategory(e.target.value); setShowAllNearby(false); }}
-                    className="flex-1 px-3 py-2 text-sm rounded-full bg-card border border-border text-foreground"
-                  >
-                    <option value="">Alle Kategorien</option>
-                    {Object.entries(categoryLabels).map(([key, label]) => (
-                      <option key={key} value={key}>{label}</option>
-                    ))}
-                  </select>
+                <div className="space-y-3 mb-4">
+                  {/* Category chips - multi-select */}
+                  <div className="flex flex-wrap gap-1.5">
+                    {Object.entries(categoryLabels).map(([key, label]) => {
+                      const isActive = nearbyCategories.includes(key);
+                      return (
+                        <button
+                          key={key}
+                          onClick={() => {
+                            setNearbyCategories(prev =>
+                              isActive ? prev.filter(c => c !== key) : [...prev, key]
+                            );
+                            setShowAllNearby(false);
+                          }}
+                          className={cn(
+                            'px-2.5 py-1.5 rounded-full text-xs font-medium transition-colors',
+                            isActive
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                          )}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Date picker */}
                   <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                     <PopoverTrigger asChild>
                       <Button
@@ -339,7 +356,7 @@ const Home = () => {
                         {formatDateLabel()}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="end">
+                    <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         mode="range"
                         weekStartsOn={1}

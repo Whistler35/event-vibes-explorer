@@ -6,8 +6,7 @@ import { Button } from '@/components/ui/button';
 import type { EventCategory } from '@/hooks/useSearchEvents';
 import type { DateRange } from 'react-day-picker';
 
-const CATEGORIES: { id: EventCategory | ''; label: string; icon: React.ElementType }[] = [
-  { id: '', label: 'Alle', icon: SlidersHorizontal },
+const CATEGORIES: { id: EventCategory; label: string; icon: React.ElementType }[] = [
   { id: 'music', label: 'Musik', icon: Music },
   { id: 'sports', label: 'Sport', icon: Dribbble },
   { id: 'culture', label: 'Kultur', icon: Palette },
@@ -19,24 +18,28 @@ const CATEGORIES: { id: EventCategory | ''; label: string; icon: React.ElementTy
 ];
 
 interface CategoryFilterProps {
-  selected: EventCategory | '';
-  onChange: (category: EventCategory | '') => void;
+  selectedCategories: EventCategory[];
+  onCategoriesChange: (categories: EventCategory[]) => void;
   selectedDateRange?: DateRange;
   onDateRangeChange?: (range: DateRange | undefined) => void;
 }
 
-const CategoryFilter: React.FC<CategoryFilterProps> = ({ selected, onChange, selectedDateRange, onDateRangeChange }) => {
+const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategories, onCategoriesChange, selectedDateRange, onDateRangeChange }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  const activeCategory = CATEGORIES.find(c => c.id === selected);
-  const hasActiveFilter = selected !== '' || !!selectedDateRange?.from;
+  const hasActiveFilter = selectedCategories.length > 0 || !!selectedDateRange?.from;
 
   const fmt = (d: Date) => `${d.getDate().toString().padStart(2, '0')}.${(d.getMonth() + 1).toString().padStart(2, '0')}.`;
 
   const filterLabel = (() => {
     const parts: string[] = [];
-    if (selected && activeCategory) parts.push(activeCategory.label);
+    if (selectedCategories.length === 1) {
+      const cat = CATEGORIES.find(c => c.id === selectedCategories[0]);
+      if (cat) parts.push(cat.label);
+    } else if (selectedCategories.length > 1) {
+      parts.push(`${selectedCategories.length} Kategorien`);
+    }
     if (selectedDateRange?.from) {
       if (selectedDateRange.to && selectedDateRange.from.getTime() !== selectedDateRange.to.getTime()) {
         parts.push(`${fmt(selectedDateRange.from)} – ${fmt(selectedDateRange.to)}`);
@@ -46,6 +49,14 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selected, onChange, sel
     }
     return parts.length > 0 ? parts.join(' · ') : 'Filter';
   })();
+
+  const toggleCategory = (id: EventCategory) => {
+    if (selectedCategories.includes(id)) {
+      onCategoriesChange(selectedCategories.filter(c => c !== id));
+    } else {
+      onCategoriesChange([...selectedCategories, id]);
+    }
+  };
 
   // Close on outside click
   useEffect(() => {
@@ -78,17 +89,24 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selected, onChange, sel
           <div className="p-3 overflow-y-auto flex-1 min-h-0">
             {/* Categories */}
             <div className="space-y-2">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Kategorie</p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Kategorie</p>
+                {selectedCategories.length > 0 && (
+                  <button
+                    onClick={() => onCategoriesChange([])}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    Alle abwählen
+                  </button>
+                )}
+              </div>
               <div className="flex flex-wrap gap-1.5">
                 {CATEGORIES.map(({ id, label, icon: Icon }) => {
-                  const isActive = selected === id;
+                  const isActive = selectedCategories.includes(id);
                   return (
                     <button
                       key={id}
-                      onClick={() => {
-                        onChange(id);
-                        if (!onDateRangeChange) setOpen(false);
-                      }}
+                      onClick={() => toggleCategory(id)}
                       className={cn(
                         'flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition-colors',
                         isActive
@@ -140,7 +158,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selected, onChange, sel
                 variant="ghost"
                 size="sm"
                 className="flex-1 text-xs"
-                onClick={() => { onDateRangeChange(undefined); }}
+                onClick={() => { onCategoriesChange([]); onDateRangeChange(undefined); }}
               >
                 Löschen
               </Button>

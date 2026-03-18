@@ -29,7 +29,7 @@ interface GeoResult {
 const Nearby = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<[number, number] | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<EventCategory | ''>('');
+  const [selectedCategories, setSelectedCategories] = useState<EventCategory[]>([]);
   const [selectedDateRange, setSelectedDateRange] = useState<DateRange | undefined>(undefined);
   const [selectedEvent, setSelectedEvent] = useState<MapEvent | null>(null);
   const [isPrivateMode, setIsPrivateMode] = useState(false);
@@ -67,14 +67,14 @@ const Nearby = () => {
   }, []);
 
   const { data: searchResult, isLoading: isLoadingPublic, refetch: refetchPublic } = useSearchEvents({
-    category: selectedCategory || undefined,
+    categories: selectedCategories.length > 0 ? selectedCategories : undefined,
     date_from: selectedDateRange?.from ? selectedDateRange.from.toISOString().split('T')[0] : undefined,
     date_to: selectedDateRange?.to ? selectedDateRange.to.toISOString().split('T')[0] : (selectedDateRange?.from ? selectedDateRange.from.toISOString().split('T')[0] : undefined),
     limit: 100,
   }, !isPrivateMode);
 
   const { data: privateEvents, isLoading: isLoadingPrivate, refetch: refetchPrivate } = useQuery({
-    queryKey: ['private-events', user?.id, selectedCategory, selectedDateRange?.from?.getTime(), selectedDateRange?.to?.getTime()],
+    queryKey: ['private-events', user?.id, selectedCategories, selectedDateRange?.from?.getTime(), selectedDateRange?.to?.getTime()],
     queryFn: async () => {
       if (!user) return [];
       const { data: friendships } = await supabase
@@ -92,7 +92,7 @@ const Nearby = () => {
         .in('created_by', allUserIds)
         .eq('visibility', 'unlisted')
         .order('event_date', { ascending: true });
-      if (selectedCategory) query = query.eq('category', selectedCategory);
+      if (selectedCategories.length > 0) query = query.in('category', selectedCategories);
       if (selectedDateRange?.from) {
         const fromStr = selectedDateRange.from.toISOString().split('T')[0];
         const toStr = selectedDateRange.to ? selectedDateRange.to.toISOString().split('T')[0] : fromStr;
@@ -262,7 +262,7 @@ const Nearby = () => {
         )}
 
         <div className={`absolute ${showSearchBar ? 'top-28' : 'top-14'} left-0 right-0 z-10 px-4 transition-all`}>
-          <CategoryFilter selected={selectedCategory} onChange={setSelectedCategory} selectedDateRange={selectedDateRange} onDateRangeChange={setSelectedDateRange} />
+          <CategoryFilter selectedCategories={selectedCategories} onCategoriesChange={setSelectedCategories} selectedDateRange={selectedDateRange} onDateRangeChange={setSelectedDateRange} />
         </div>
 
         {isLoading && (

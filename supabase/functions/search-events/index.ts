@@ -9,6 +9,7 @@ interface SearchParams {
   bbox?: { sw_lat: number; sw_lng: number; ne_lat: number; ne_lng: number }
   radius?: { lat: number; lng: number; meters: number }
   category?: string
+  categories?: string[]
   source?: string
   date_from?: string
   date_to?: string
@@ -42,7 +43,9 @@ Deno.serve(async (req) => {
       .range(offset, offset + limit - 1)
 
     // Apply filters
-    if (params.category) {
+    if (params.categories && params.categories.length > 0) {
+      query = query.in('category', params.categories)
+    } else if (params.category) {
       query = query.eq('category', params.category)
     }
     if (params.source) {

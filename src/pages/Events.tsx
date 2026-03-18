@@ -14,13 +14,13 @@ import { supabase } from "@/integrations/supabase/client";
 const Events = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("today");
-  const [selectedCategory, setSelectedCategory] = useState<EventCategory | ''>('');
+  const [selectedCategories, setSelectedCategories] = useState<EventCategory[]>([]);
   const navigate = useNavigate();
 
   const today = new Date().toISOString().split('T')[0];
 
   const { data: searchResult, isLoading } = useSearchEvents({
-    category: selectedCategory || undefined,
+    categories: selectedCategories.length > 0 ? selectedCategories : undefined,
     text: searchQuery || undefined,
     date_from: selectedFilter === 'today' ? today : undefined,
     date_to: selectedFilter === 'today' ? today + 'T23:59:59' : undefined,
@@ -82,7 +82,7 @@ const Events = () => {
         </div>
 
         {/* Category Filters */}
-        <CategoryFilter selected={selectedCategory} onChange={setSelectedCategory} />
+        <CategoryFilter selectedCategories={selectedCategories} onCategoriesChange={setSelectedCategories} />
 
         {/* Top Events Section */}
         {featuredEvents && featuredEvents.length > 0 && (
