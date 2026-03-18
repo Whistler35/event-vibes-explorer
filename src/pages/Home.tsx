@@ -258,7 +258,7 @@ const Home = () => {
               Sortiert nach Entfernung
             </p>
             <div className="grid grid-cols-1 gap-4">
-              {nearbyEvents.slice(0, 20).map((event: any) => {
+              {(showAllNearby ? nearbyEvents : nearbyEvents.slice(0, 5)).map((event: any) => {
                 const dist = haversineDistance(searchLocation.lat, searchLocation.lng, event.latitude, event.longitude);
                 const eventDate = new Date(event.event_date);
                 const formattedDate = eventDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -277,6 +277,14 @@ const Home = () => {
                 );
               })}
             </div>
+            {nearbyEvents.length > 5 && (
+              <button
+                onClick={() => setShowAllNearby(!showAllNearby)}
+                className="mt-4 w-full py-2.5 text-sm font-medium text-primary border border-border rounded-full hover:bg-muted/50 transition-colors"
+              >
+                {showAllNearby ? 'Weniger anzeigen' : `Alle ${nearbyEvents.length} Events anzeigen`}
+              </button>
+            )}
           </div>
         )}
 
