@@ -25,6 +25,7 @@ const Auth = () => {
   const [avatarUrl, setAvatarUrl] = useState('');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const { signIn, signUp } = useAuth();
