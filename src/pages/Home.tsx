@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import evendleLogo from "@/assets/evendle-logo.jpeg";
-import { Search, MapPin, X } from "lucide-react";
+import { Search, MapPin, X, SlidersHorizontal } from "lucide-react";
 import ReelsFeed from "@/components/ReelsFeed";
 import NotificationBell from "@/components/NotificationBell";
 import Layout from "@/components/Layout";
@@ -31,6 +31,9 @@ function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
 const Home = () => {
   const navigate = useNavigate();
   const [showAllNearby, setShowAllNearby] = useState(false);
+  const [nearbyCategory, setNearbyCategory] = useState<string>('');
+  const [nearbyDate, setNearbyDate] = useState<string>('');
+  const [showNearbyFilters, setShowNearbyFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState(() => {
     const stored = localStorage.getItem('selectedCity');
     if (stored) { try { return JSON.parse(stored).name?.split(',')[0] || ''; } catch {} }
@@ -249,44 +252,106 @@ const Home = () => {
         </div>
 
         {/* Nearby Events (when location selected) */}
-        {searchLocation && nearbyEvents && nearbyEvents.length > 0 && (
-          <div className="px-4 pb-8">
-            <h3 className="text-foreground text-2xl font-bold mb-2">
-              📍 Events nahe {searchQuery}
-            </h3>
-            <p className="text-muted-foreground text-sm mb-4">
-              Sortiert nach Entfernung
-            </p>
-            <div className="grid grid-cols-1 gap-4">
-              {(showAllNearby ? nearbyEvents : nearbyEvents.slice(0, 5)).map((event: any) => {
-                const dist = haversineDistance(searchLocation.lat, searchLocation.lng, event.latitude, event.longitude);
-                const eventDate = new Date(event.event_date);
-                const formattedDate = eventDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                const formattedTime = eventDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-                return (
-                  <EventCard
-                    key={event.id}
-                    title={event.title}
-                    image={event.image_url || ""}
-                    date={formattedDate}
-                    time={formattedTime}
-                    location={`${event.location_name} · ${dist < 1 ? `${Math.round(dist * 1000)}m` : `${dist.toFixed(1)}km`}`}
-                    category={categoryLabels[event.category || ''] || event.category || ''}
-                    onClick={() => handleEventClick(event.id)}
+        {searchLocation && nearbyEvents && nearbyEvents.length > 0 && (() => {
+          const filteredNearby = nearbyEvents.filter((event: any) => {
+            if (nearbyCategory && event.category !== nearbyCategory) return false;
+            if (nearbyDate) {
+              const eventDay = new Date(event.event_date).toISOString().split('T')[0];
+              if (eventDay !== nearbyDate) return false;
+            }
+            return true;
+          });
+          const displayedEvents = showAllNearby ? filteredNearby : filteredNearby.slice(0, 5);
+          const hasActiveFilters = !!nearbyCategory || !!nearbyDate;
+
+          return (
+            <div className="px-4 pb-8">
+              <h3 className="text-foreground text-2xl font-bold mb-2">
+                📍 Events in der Nähe von {searchQuery}
+              </h3>
+
+              {/* Filter toggle */}
+              <div className="flex items-center gap-2 mb-4">
+                <button
+                  onClick={() => setShowNearbyFilters(!showNearbyFilters)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full border transition-colors ${
+                    hasActiveFilters
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted'
+                  }`}
+                >
+                  <SlidersHorizontal className="h-3.5 w-3.5" />
+                  Filter{hasActiveFilters ? ' aktiv' : ''}
+                </button>
+                {hasActiveFilters && (
+                  <button
+                    onClick={() => { setNearbyCategory(''); setNearbyDate(''); setShowAllNearby(false); }}
+                    className="text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    Zurücksetzen
+                  </button>
+                )}
+              </div>
+
+              {/* Filter controls */}
+              {showNearbyFilters && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <select
+                    value={nearbyCategory}
+                    onChange={(e) => { setNearbyCategory(e.target.value); setShowAllNearby(false); }}
+                    className="px-3 py-2 text-sm rounded-full bg-card border border-border text-foreground"
+                  >
+                    <option value="">Alle Kategorien</option>
+                    {Object.entries(categoryLabels).map(([key, label]) => (
+                      <option key={key} value={key}>{label}</option>
+                    ))}
+                  </select>
+                  <input
+                    type="date"
+                    value={nearbyDate}
+                    onChange={(e) => { setNearbyDate(e.target.value); setShowAllNearby(false); }}
+                    className="px-3 py-2 text-sm rounded-full bg-card border border-border text-foreground"
                   />
-                );
-              })}
+                </div>
+              )}
+
+              {filteredNearby.length > 0 ? (
+                <>
+                  <div className="grid grid-cols-1 gap-4">
+                    {displayedEvents.map((event: any) => {
+                      const dist = haversineDistance(searchLocation.lat, searchLocation.lng, event.latitude, event.longitude);
+                      const eventDate = new Date(event.event_date);
+                      const formattedDate = eventDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                      const formattedTime = eventDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+                      return (
+                        <EventCard
+                          key={event.id}
+                          title={event.title}
+                          image={event.image_url || ""}
+                          date={formattedDate}
+                          time={formattedTime}
+                          location={`${event.location_name} · ${dist < 1 ? `${Math.round(dist * 1000)}m` : `${dist.toFixed(1)}km`}`}
+                          category={categoryLabels[event.category || ''] || event.category || ''}
+                          onClick={() => handleEventClick(event.id)}
+                        />
+                      );
+                    })}
+                  </div>
+                  {filteredNearby.length > 5 && (
+                    <button
+                      onClick={() => setShowAllNearby(!showAllNearby)}
+                      className="mt-4 w-full py-2.5 text-sm font-medium text-primary border border-border rounded-full hover:bg-muted/50 transition-colors"
+                    >
+                      {showAllNearby ? 'Weniger anzeigen' : `Alle ${filteredNearby.length} Events anzeigen`}
+                    </button>
+                  )}
+                </>
+              ) : (
+                <p className="text-muted-foreground text-sm">Keine Events mit diesen Filtern gefunden.</p>
+              )}
             </div>
-            {nearbyEvents.length > 5 && (
-              <button
-                onClick={() => setShowAllNearby(!showAllNearby)}
-                className="mt-4 w-full py-2.5 text-sm font-medium text-primary border border-border rounded-full hover:bg-muted/50 transition-colors"
-              >
-                {showAllNearby ? 'Weniger anzeigen' : `Alle ${nearbyEvents.length} Events anzeigen`}
-              </button>
-            )}
-          </div>
-        )}
+          );
+        })()}
 
         {searchLocation && nearbyEvents && nearbyEvents.length === 0 && (
           <div className="px-4 pb-8 text-center">
