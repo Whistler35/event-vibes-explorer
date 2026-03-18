@@ -45,18 +45,23 @@ const Nearby = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Pick up city from localStorage (persistent)
+  // Read stored city for initial map center & search bar state
+  const storedCity = (() => {
+    try {
+      const s = localStorage.getItem('selectedCity');
+      return s ? JSON.parse(s) as GeoResult : null;
+    } catch { return null; }
+  })();
+
+  const initialCenter: [number, number] = storedCity
+    ? [storedCity.lat, storedCity.lng]
+    : [47.2692, 11.4041];
+
+  // Initialise search bar with stored city name
   useEffect(() => {
-    const stored = localStorage.getItem('selectedCity');
-    if (stored) {
-      try {
-        const loc = JSON.parse(stored);
-        setCityQuery(loc.name?.split(',')[0] || '');
-        setShowSearchBar(true);
-        setTimeout(() => {
-          mapRef.current?.flyTo(loc.lat, loc.lng, 13);
-        }, 1000);
-      } catch {}
+    if (storedCity) {
+      setCityQuery(storedCity.name?.split(',')[0] || '');
+      setShowSearchBar(true);
     }
   }, []);
 
