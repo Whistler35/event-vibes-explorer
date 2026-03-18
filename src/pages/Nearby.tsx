@@ -30,7 +30,7 @@ const Nearby = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<[number, number] | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<EventCategory | ''>('');
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedDateRange, setSelectedDateRange] = useState<DateRange | undefined>(undefined);
   const [selectedEvent, setSelectedEvent] = useState<MapEvent | null>(null);
   const [isPrivateMode, setIsPrivateMode] = useState(false);
 
