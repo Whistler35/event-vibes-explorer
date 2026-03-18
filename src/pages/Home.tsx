@@ -30,6 +30,7 @@ function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
 
 const Home = () => {
   const navigate = useNavigate();
+  const [showAllFeatured, setShowAllFeatured] = useState(false);
   const [searchQuery, setSearchQuery] = useState(() => {
     const stored = localStorage.getItem('selectedCity');
     if (stored) { try { return JSON.parse(stored).name?.split(',')[0] || ''; } catch {} }
