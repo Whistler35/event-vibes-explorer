@@ -74,7 +74,7 @@ const Nearby = () => {
   }, !isPrivateMode);
 
   const { data: privateEvents, isLoading: isLoadingPrivate, refetch: refetchPrivate } = useQuery({
-    queryKey: ['private-events', user?.id, selectedCategory, selectedDate],
+    queryKey: ['private-events', user?.id, selectedCategory, selectedDateRange?.from?.getTime(), selectedDateRange?.to?.getTime()],
     queryFn: async () => {
       if (!user) return [];
       const { data: friendships } = await supabase
@@ -93,9 +93,10 @@ const Nearby = () => {
         .eq('visibility', 'unlisted')
         .order('event_date', { ascending: true });
       if (selectedCategory) query = query.eq('category', selectedCategory);
-      if (selectedDate) {
-        const dateStr = selectedDate.toISOString().split('T')[0];
-        query = query.gte('event_date', dateStr).lte('event_date', dateStr + 'T23:59:59');
+      if (selectedDateRange?.from) {
+        const fromStr = selectedDateRange.from.toISOString().split('T')[0];
+        const toStr = selectedDateRange.to ? selectedDateRange.to.toISOString().split('T')[0] : fromStr;
+        query = query.gte('event_date', fromStr).lte('event_date', toStr + 'T23:59:59');
       }
       const { data, error } = await query;
       if (error) throw error;
