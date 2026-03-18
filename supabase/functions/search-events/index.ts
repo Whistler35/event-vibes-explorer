@@ -43,7 +43,9 @@ Deno.serve(async (req) => {
       .range(offset, offset + limit - 1)
 
     // Apply filters
-    if (params.category) {
+    if (params.categories && params.categories.length > 0) {
+      query = query.in('category', params.categories)
+    } else if (params.category) {
       query = query.eq('category', params.category)
     }
     if (params.source) {
