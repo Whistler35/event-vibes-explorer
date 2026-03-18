@@ -20,7 +20,7 @@ const Events = () => {
   const today = new Date().toISOString().split('T')[0];
 
   const { data: searchResult, isLoading } = useSearchEvents({
-    category: selectedCategory || undefined,
+    categories: selectedCategories.length > 0 ? selectedCategories : undefined,
     text: searchQuery || undefined,
     date_from: selectedFilter === 'today' ? today : undefined,
     date_to: selectedFilter === 'today' ? today + 'T23:59:59' : undefined,
