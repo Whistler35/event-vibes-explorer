@@ -8,6 +8,7 @@ export interface SearchEventsParams {
   bbox?: { sw_lat: number; sw_lng: number; ne_lat: number; ne_lng: number };
   radius?: { lat: number; lng: number; meters: number };
   category?: EventCategory;
+  categories?: EventCategory[];
   source?: EventSource;
   date_from?: string;
   date_to?: string;
