@@ -40,8 +40,8 @@ All colors MUST be HSL.
     --radius: 1rem;
 
     /* Custom Evendle Colors */
-    --evendle-primary: 107 19% 25%;
-    --evendle-primary-hover: 107 19% 20%;
+    --evendle-primary: 103 54% 18%;
+    --evendle-primary-hover: 103 54% 14%;
     --evendle-muted: 0 0% 40%;
     --evendle-light-muted: 0 0% 55%;
     --evendle-card: 0 0% 100%;
