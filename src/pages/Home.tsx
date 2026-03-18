@@ -1,6 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import evendleLogo from "@/assets/evendle-logo.jpeg";
-import { Search, MapPin, X, SlidersHorizontal } from "lucide-react";
+import { Search, MapPin, X, SlidersHorizontal, CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import type { DateRange } from "react-day-picker";
 import ReelsFeed from "@/components/ReelsFeed";
 import NotificationBell from "@/components/NotificationBell";
 import Layout from "@/components/Layout";
@@ -32,8 +37,9 @@ const Home = () => {
   const navigate = useNavigate();
   const [showAllNearby, setShowAllNearby] = useState(false);
   const [nearbyCategory, setNearbyCategory] = useState<string>('');
-  const [nearbyDate, setNearbyDate] = useState<string>('');
+  const [nearbyDateRange, setNearbyDateRange] = useState<DateRange | undefined>(undefined);
   const [showNearbyFilters, setShowNearbyFilters] = useState(false);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState(() => {
     const stored = localStorage.getItem('selectedCity');
     if (stored) { try { return JSON.parse(stored).name?.split(',')[0] || ''; } catch {} }
@@ -255,14 +261,28 @@ const Home = () => {
         {searchLocation && nearbyEvents && nearbyEvents.length > 0 && (() => {
           const filteredNearby = nearbyEvents.filter((event: any) => {
             if (nearbyCategory && event.category !== nearbyCategory) return false;
-            if (nearbyDate) {
-              const eventDay = new Date(event.event_date).toISOString().split('T')[0];
-              if (eventDay !== nearbyDate) return false;
+            if (nearbyDateRange?.from) {
+              const eventDay = new Date(event.event_date);
+              eventDay.setHours(0, 0, 0, 0);
+              const from = new Date(nearbyDateRange.from);
+              from.setHours(0, 0, 0, 0);
+              const to = nearbyDateRange.to ? new Date(nearbyDateRange.to) : from;
+              to.setHours(23, 59, 59, 999);
+              if (eventDay < from || eventDay > to) return false;
             }
             return true;
           });
           const displayedEvents = showAllNearby ? filteredNearby : filteredNearby.slice(0, 5);
-          const hasActiveFilters = !!nearbyCategory || !!nearbyDate;
+          const hasActiveFilters = !!nearbyCategory || !!nearbyDateRange?.from;
+
+          const formatDateLabel = () => {
+            if (!nearbyDateRange?.from) return 'Datum';
+            const fmt = (d: Date) => d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+            if (!nearbyDateRange.to || nearbyDateRange.from.getTime() === nearbyDateRange.to.getTime()) {
+              return fmt(nearbyDateRange.from);
+            }
+            return `${fmt(nearbyDateRange.from)} – ${fmt(nearbyDateRange.to)}`;
+          };
 
           return (
             <div className="px-4 pb-8">
@@ -285,7 +305,7 @@ const Home = () => {
                 </button>
                 {hasActiveFilters && (
                   <button
-                    onClick={() => { setNearbyCategory(''); setNearbyDate(''); setShowAllNearby(false); }}
+                    onClick={() => { setNearbyCategory(''); setNearbyDateRange(undefined); setShowAllNearby(false); }}
                     className="text-xs text-muted-foreground hover:text-foreground"
                   >
                     Zurücksetzen
@@ -306,12 +326,46 @@ const Home = () => {
                       <option key={key} value={key}>{label}</option>
                     ))}
                   </select>
-                  <input
-                    type="date"
-                    value={nearbyDate}
-                    onChange={(e) => { setNearbyDate(e.target.value); setShowAllNearby(false); }}
-                    className="px-3 py-2 text-sm rounded-full bg-card border border-border text-foreground"
-                  />
+                  <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "px-3 py-2 text-sm rounded-full bg-card border-border",
+                          !nearbyDateRange?.from && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="h-3.5 w-3.5 mr-1.5" />
+                        {formatDateLabel()}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="end">
+                      <Calendar
+                        mode="range"
+                        selected={nearbyDateRange}
+                        onSelect={(range) => { setNearbyDateRange(range); setShowAllNearby(false); }}
+                        numberOfMonths={1}
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                      <div className="flex gap-2 p-3 pt-0">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => { setNearbyDateRange(undefined); setDatePickerOpen(false); setShowAllNearby(false); }}
+                        >
+                          Löschen
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => setDatePickerOpen(false)}
+                        >
+                          Übernehmen
+                        </Button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               )}
 
