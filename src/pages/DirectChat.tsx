@@ -87,7 +87,7 @@ const DirectChat = () => {
         },
         (payload) => {
           setMessages((prev) => [...prev, payload.new as Message]);
-          markConversationRead(conversationId);
+          markConversationRead(conversationId, user?.id);
         }
       )
       .subscribe();
