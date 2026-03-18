@@ -260,7 +260,7 @@ const Home = () => {
         {/* Nearby Events (when location selected) */}
         {searchLocation && nearbyEvents && nearbyEvents.length > 0 && (() => {
           const filteredNearby = nearbyEvents.filter((event: any) => {
-            if (nearbyCategory && event.category !== nearbyCategory) return false;
+            if (nearbyCategories.length > 0 && !nearbyCategories.includes(event.category)) return false;
             if (nearbyDateRange?.from) {
               const eventDay = new Date(event.event_date);
               eventDay.setHours(0, 0, 0, 0);
