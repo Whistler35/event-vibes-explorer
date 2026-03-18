@@ -276,6 +276,7 @@ const Nearby = () => {
             onEventClick={(event) => setSelectedEvent(event)}
             events={mapEvents}
             isAdmin={true}
+            center={initialCenter}
           />
         </div>
 
