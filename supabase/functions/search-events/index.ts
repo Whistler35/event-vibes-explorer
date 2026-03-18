@@ -9,6 +9,7 @@ interface SearchParams {
   bbox?: { sw_lat: number; sw_lng: number; ne_lat: number; ne_lng: number }
   radius?: { lat: number; lng: number; meters: number }
   category?: string
+  categories?: string[]
   source?: string
   date_from?: string
   date_to?: string
