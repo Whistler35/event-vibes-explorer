@@ -1,6 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import evendleLogo from "@/assets/evendle-logo.jpeg";
-import { Search, MapPin, X, SlidersHorizontal } from "lucide-react";
+import { Search, MapPin, X, SlidersHorizontal, CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import type { DateRange } from "react-day-picker";
 import ReelsFeed from "@/components/ReelsFeed";
 import NotificationBell from "@/components/NotificationBell";
 import Layout from "@/components/Layout";
