@@ -175,7 +175,7 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
       imageElement.style.width = '50px';
       imageElement.style.height = '50px';
       imageElement.style.borderRadius = '50%';
-      imageElement.style.border = '3px solid #ff5722';
+      imageElement.style.border = '3px solid #3B4D34';
       imageElement.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
       imageElement.style.overflow = 'hidden';
       imageElement.style.backgroundColor = '#1a1a2e';
@@ -190,7 +190,7 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
         imageElement.style.display = 'flex';
         imageElement.style.alignItems = 'center';
         imageElement.style.justifyContent = 'center';
-        imageElement.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff5722" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>';
+        imageElement.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3B4D34" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>';
       }
       imageWrapper.appendChild(imageElement);
       const titleLabel = document.createElement('div');
