@@ -2,7 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Music, Dribbble, Palette, UtensilsCrossed, PartyPopper, TreePine, Users, Wrench, SlidersHorizontal, Calendar as CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Calendar } from '@/components/ui/calendar';
+import { Button } from '@/components/ui/button';
 import type { EventCategory } from '@/hooks/useSearchEvents';
+import type { DateRange } from 'react-day-picker';
 
 const CATEGORIES: { id: EventCategory | ''; label: string; icon: React.ElementType }[] = [
   { id: '', label: 'Alle', icon: SlidersHorizontal },
@@ -19,23 +21,28 @@ const CATEGORIES: { id: EventCategory | ''; label: string; icon: React.ElementTy
 interface CategoryFilterProps {
   selected: EventCategory | '';
   onChange: (category: EventCategory | '') => void;
-  selectedDate?: Date;
-  onDateChange?: (date: Date | undefined) => void;
+  selectedDateRange?: DateRange;
+  onDateRangeChange?: (range: DateRange | undefined) => void;
 }
 
-const CategoryFilter: React.FC<CategoryFilterProps> = ({ selected, onChange, selectedDate, onDateChange }) => {
+const CategoryFilter: React.FC<CategoryFilterProps> = ({ selected, onChange, selectedDateRange, onDateRangeChange }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   const activeCategory = CATEGORIES.find(c => c.id === selected);
-  const hasActiveFilter = selected !== '' || !!selectedDate;
+  const hasActiveFilter = selected !== '' || !!selectedDateRange?.from;
+
+  const fmt = (d: Date) => `${d.getDate().toString().padStart(2, '0')}.${(d.getMonth() + 1).toString().padStart(2, '0')}.`;
 
   const filterLabel = (() => {
     const parts: string[] = [];
     if (selected && activeCategory) parts.push(activeCategory.label);
-    if (selectedDate) {
-      const d = selectedDate;
-      parts.push(`${d.getDate().toString().padStart(2, '0')}.${(d.getMonth() + 1).toString().padStart(2, '0')}.`);
+    if (selectedDateRange?.from) {
+      if (selectedDateRange.to && selectedDateRange.from.getTime() !== selectedDateRange.to.getTime()) {
+        parts.push(`${fmt(selectedDateRange.from)} – ${fmt(selectedDateRange.to)}`);
+      } else {
+        parts.push(fmt(selectedDateRange.from));
+      }
     }
     return parts.length > 0 ? parts.join(' · ') : 'Filter';
   })();
@@ -67,7 +74,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selected, onChange, sel
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 mt-2 w-72 rounded-md border border-border bg-card p-3 shadow-lg z-50">
+        <div className="absolute top-full left-0 mt-2 w-72 rounded-md border border-border bg-card p-3 shadow-lg z-50 max-h-[70vh] overflow-y-auto">
           {/* Categories */}
           <div className="space-y-2">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Kategorie</p>
@@ -79,7 +86,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selected, onChange, sel
                     key={id}
                     onClick={() => {
                       onChange(id);
-                      if (!onDateChange) setOpen(false);
+                      if (!onDateRangeChange) setOpen(false);
                     }}
                     className={cn(
                       'flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition-colors',
@@ -96,17 +103,17 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selected, onChange, sel
             </div>
           </div>
 
-          {/* Date picker */}
-          {onDateChange && (
+          {/* Date range picker */}
+          {onDateRangeChange && (
             <div className="mt-3 pt-3 border-t border-border space-y-2">
               <div className="flex items-center justify-between">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
                   <CalendarIcon className="w-3 h-3" />
                   Datum
                 </p>
-                {selectedDate && (
+                {selectedDateRange?.from && (
                   <button
-                    onClick={() => onDateChange(undefined)}
+                    onClick={() => onDateRangeChange(undefined)}
                     className="text-xs text-primary hover:underline"
                   >
                     Zurücksetzen
@@ -114,12 +121,30 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selected, onChange, sel
                 )}
               </div>
               <Calendar
-                mode="single"
+                mode="range"
                 weekStartsOn={1}
-                selected={selectedDate}
-                onSelect={(date) => onDateChange(date || undefined)}
+                selected={selectedDateRange}
+                onSelect={(range) => onDateRangeChange(range || undefined)}
+                numberOfMonths={1}
                 className={cn("p-0 pointer-events-auto")}
               />
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex-1 text-xs"
+                  onClick={() => { onDateRangeChange(undefined); }}
+                >
+                  Löschen
+                </Button>
+                <Button
+                  size="sm"
+                  className="flex-1 text-xs"
+                  onClick={() => setOpen(false)}
+                >
+                  Übernehmen
+                </Button>
+              </div>
             </div>
           )}
         </div>
