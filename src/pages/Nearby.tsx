@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import type { DateRange } from "react-day-picker";
 import evendleLogo from "@/assets/evendle-logo.jpeg";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
