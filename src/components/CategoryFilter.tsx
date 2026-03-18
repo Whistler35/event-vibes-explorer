@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Music, Dribbble, Palette, UtensilsCrossed, PartyPopper, TreePine, Users, Wrench, SlidersHorizontal, Calendar } from 'lucide-react';
+import { Music, Dribbble, Palette, UtensilsCrossed, PartyPopper, TreePine, Users, Wrench, SlidersHorizontal, Calendar as CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Calendar } from '@/components/ui/calendar';
 import type { EventCategory } from '@/hooks/useSearchEvents';
 
 const CATEGORIES: { id: EventCategory | ''; label: string; icon: React.ElementType }[] = [
