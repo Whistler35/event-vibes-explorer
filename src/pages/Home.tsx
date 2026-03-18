@@ -342,6 +342,7 @@ const Home = () => {
                     <PopoverContent className="w-auto p-0" align="end">
                       <Calendar
                         mode="range"
+                        weekStartsOn={1}
                         selected={nearbyDateRange}
                         onSelect={(range) => { setNearbyDateRange(range); setShowAllNearby(false); }}
                         numberOfMonths={1}
