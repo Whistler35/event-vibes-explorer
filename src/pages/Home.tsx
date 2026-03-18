@@ -36,7 +36,7 @@ function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
 const Home = () => {
   const navigate = useNavigate();
   const [showAllNearby, setShowAllNearby] = useState(false);
-  const [nearbyCategory, setNearbyCategory] = useState<string>('');
+  const [nearbyCategories, setNearbyCategories] = useState<string[]>([]);
   const [nearbyDateRange, setNearbyDateRange] = useState<DateRange | undefined>(undefined);
   const [showNearbyFilters, setShowNearbyFilters] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
