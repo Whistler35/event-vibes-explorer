@@ -74,7 +74,8 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selected, onChange, sel
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 mt-2 w-72 rounded-md border border-border bg-card p-3 shadow-lg z-50 max-h-[70vh] overflow-y-auto">
+        <div className="absolute top-full left-0 mt-2 w-72 rounded-md border border-border bg-card shadow-lg z-50 max-h-[60vh] flex flex-col">
+          <div className="p-3 overflow-y-auto flex-1 min-h-0">
           {/* Categories */}
           <div className="space-y-2">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Kategorie</p>
