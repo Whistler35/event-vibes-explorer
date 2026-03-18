@@ -67,7 +67,7 @@ const Nearby = () => {
   }, []);
 
   const { data: searchResult, isLoading: isLoadingPublic, refetch: refetchPublic } = useSearchEvents({
-    category: selectedCategory || undefined,
+    categories: selectedCategories.length > 0 ? selectedCategories : undefined,
     date_from: selectedDateRange?.from ? selectedDateRange.from.toISOString().split('T')[0] : undefined,
     date_to: selectedDateRange?.to ? selectedDateRange.to.toISOString().split('T')[0] : (selectedDateRange?.from ? selectedDateRange.from.toISOString().split('T')[0] : undefined),
     limit: 100,
