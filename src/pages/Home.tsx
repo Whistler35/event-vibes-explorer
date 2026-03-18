@@ -219,40 +219,30 @@ const Home = () => {
           <h3 className="text-foreground text-2xl font-bold mb-6"> top events this week</h3>
 
           {featuredEvents && featuredEvents.length > 0 ? (
-            <>
-              <Carousel className="w-full">
-                <CarouselContent className="-ml-2 md:-ml-4">
-                  {(showAllFeatured ? featuredEvents : featuredEvents.slice(0, 5)).map((event) => {
-                    const eventDate = new Date(event.event_date);
-                    const formattedDate = eventDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                    const formattedTime = eventDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-                    return (
-                      <CarouselItem key={event.id} className="pl-2 md:pl-4 basis-4/5 md:basis-1/2 lg:basis-1/3">
-                        <EventCard
-                          title={event.title}
-                          image={event.image_url || ""}
-                          date={formattedDate}
-                          time={formattedTime}
-                          location={event.location_name}
-                          category={categoryLabels[event.category || ''] || event.category || ''}
-                          onClick={() => handleEventClick(event.id)}
-                        />
-                      </CarouselItem>
-                    );
-                  })}
-                </CarouselContent>
-                <CarouselPrevious className="hidden md:flex left-2" />
-                <CarouselNext className="hidden md:flex right-2" />
-              </Carousel>
-              {featuredEvents.length > 5 && (
-                <button
-                  onClick={() => setShowAllFeatured(!showAllFeatured)}
-                  className="mt-4 w-full py-2.5 text-sm font-medium text-primary border border-border rounded-full hover:bg-muted/50 transition-colors"
-                >
-                  {showAllFeatured ? 'Weniger anzeigen' : `Alle ${featuredEvents.length} Events anzeigen`}
-                </button>
-              )}
-            </>
+            <Carousel className="w-full">
+              <CarouselContent className="-ml-2 md:-ml-4">
+                {featuredEvents.map((event) => {
+                  const eventDate = new Date(event.event_date);
+                  const formattedDate = eventDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                  const formattedTime = eventDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+                  return (
+                    <CarouselItem key={event.id} className="pl-2 md:pl-4 basis-4/5 md:basis-1/2 lg:basis-1/3">
+                      <EventCard
+                        title={event.title}
+                        image={event.image_url || ""}
+                        date={formattedDate}
+                        time={formattedTime}
+                        location={event.location_name}
+                        category={categoryLabels[event.category || ''] || event.category || ''}
+                        onClick={() => handleEventClick(event.id)}
+                      />
+                    </CarouselItem>
+                  );
+                })}
+              </CarouselContent>
+              <CarouselPrevious className="hidden md:flex left-2" />
+              <CarouselNext className="hidden md:flex right-2" />
+            </Carousel>
           ) : (
             <p className="text-muted-foreground text-sm">Keine Top Events aktuell.</p>
           )}
