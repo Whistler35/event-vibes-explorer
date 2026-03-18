@@ -256,14 +256,15 @@ const Home = () => {
         {searchLocation && nearbyEvents && nearbyEvents.length > 0 && (() => {
           const filteredNearby = nearbyEvents.filter((event: any) => {
             if (nearbyCategory && event.category !== nearbyCategory) return false;
-            if (nearbyDate) {
+            if (nearbyDateFrom || nearbyDateTo) {
               const eventDay = new Date(event.event_date).toISOString().split('T')[0];
-              if (eventDay !== nearbyDate) return false;
+              if (nearbyDateFrom && eventDay < nearbyDateFrom) return false;
+              if (nearbyDateTo && eventDay > nearbyDateTo) return false;
             }
             return true;
           });
           const displayedEvents = showAllNearby ? filteredNearby : filteredNearby.slice(0, 5);
-          const hasActiveFilters = !!nearbyCategory || !!nearbyDate;
+          const hasActiveFilters = !!nearbyCategory || !!nearbyDateFrom || !!nearbyDateTo;
 
           return (
             <div className="px-4 pb-8">
@@ -286,7 +287,7 @@ const Home = () => {
                 </button>
                 {hasActiveFilters && (
                   <button
-                    onClick={() => { setNearbyCategory(''); setNearbyDate(''); setShowAllNearby(false); }}
+                    onClick={() => { setNearbyCategory(''); setNearbyDateFrom(''); setNearbyDateTo(''); setShowAllNearby(false); }}
                     className="text-xs text-muted-foreground hover:text-foreground"
                   >
                     Zurücksetzen
@@ -296,23 +297,38 @@ const Home = () => {
 
               {/* Filter controls */}
               {showNearbyFilters && (
-                <div className="flex flex-wrap gap-2 mb-4">
+                <div className="space-y-2 mb-4">
                   <select
                     value={nearbyCategory}
                     onChange={(e) => { setNearbyCategory(e.target.value); setShowAllNearby(false); }}
-                    className="px-3 py-2 text-sm rounded-full bg-card border border-border text-foreground"
+                    className="w-full px-3 py-2 text-sm rounded-full bg-card border border-border text-foreground"
                   >
                     <option value="">Alle Kategorien</option>
                     {Object.entries(categoryLabels).map(([key, label]) => (
                       <option key={key} value={key}>{label}</option>
                     ))}
                   </select>
-                  <input
-                    type="date"
-                    value={nearbyDate}
-                    onChange={(e) => { setNearbyDate(e.target.value); setShowAllNearby(false); }}
-                    className="px-3 py-2 text-sm rounded-full bg-card border border-border text-foreground"
-                  />
+                  <div className="flex gap-2">
+                    <div className="flex-1 relative">
+                      <label className="absolute -top-2 left-3 text-[10px] text-muted-foreground bg-card px-1">Von</label>
+                      <input
+                        type="date"
+                        value={nearbyDateFrom}
+                        onChange={(e) => { setNearbyDateFrom(e.target.value); setShowAllNearby(false); }}
+                        className="w-full px-3 py-2 text-sm rounded-full bg-card border border-border text-foreground"
+                      />
+                    </div>
+                    <div className="flex-1 relative">
+                      <label className="absolute -top-2 left-3 text-[10px] text-muted-foreground bg-card px-1">Bis</label>
+                      <input
+                        type="date"
+                        value={nearbyDateTo}
+                        min={nearbyDateFrom || undefined}
+                        onChange={(e) => { setNearbyDateTo(e.target.value); setShowAllNearby(false); }}
+                        className="w-full px-3 py-2 text-sm rounded-full bg-card border border-border text-foreground"
+                      />
+                    </div>
+                  </div>
                 </div>
               )}
 
