@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import type { DateRange } from "react-day-picker";
 import evendleLogo from "@/assets/evendle-logo.jpeg";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -29,7 +30,7 @@ const Nearby = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<[number, number] | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<EventCategory | ''>('');
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedDateRange, setSelectedDateRange] = useState<DateRange | undefined>(undefined);
   const [selectedEvent, setSelectedEvent] = useState<MapEvent | null>(null);
   const [isPrivateMode, setIsPrivateMode] = useState(false);
 
@@ -67,13 +68,13 @@ const Nearby = () => {
 
   const { data: searchResult, isLoading: isLoadingPublic, refetch: refetchPublic } = useSearchEvents({
     category: selectedCategory || undefined,
-    date_from: selectedDate ? selectedDate.toISOString().split('T')[0] : undefined,
-    date_to: selectedDate ? selectedDate.toISOString().split('T')[0] : undefined,
+    date_from: selectedDateRange?.from ? selectedDateRange.from.toISOString().split('T')[0] : undefined,
+    date_to: selectedDateRange?.to ? selectedDateRange.to.toISOString().split('T')[0] : (selectedDateRange?.from ? selectedDateRange.from.toISOString().split('T')[0] : undefined),
     limit: 100,
   }, !isPrivateMode);
 
   const { data: privateEvents, isLoading: isLoadingPrivate, refetch: refetchPrivate } = useQuery({
-    queryKey: ['private-events', user?.id, selectedCategory, selectedDate],
+    queryKey: ['private-events', user?.id, selectedCategory, selectedDateRange?.from?.getTime(), selectedDateRange?.to?.getTime()],
     queryFn: async () => {
       if (!user) return [];
       const { data: friendships } = await supabase
@@ -92,9 +93,10 @@ const Nearby = () => {
         .eq('visibility', 'unlisted')
         .order('event_date', { ascending: true });
       if (selectedCategory) query = query.eq('category', selectedCategory);
-      if (selectedDate) {
-        const dateStr = selectedDate.toISOString().split('T')[0];
-        query = query.gte('event_date', dateStr).lte('event_date', dateStr + 'T23:59:59');
+      if (selectedDateRange?.from) {
+        const fromStr = selectedDateRange.from.toISOString().split('T')[0];
+        const toStr = selectedDateRange.to ? selectedDateRange.to.toISOString().split('T')[0] : fromStr;
+        query = query.gte('event_date', fromStr).lte('event_date', toStr + 'T23:59:59');
       }
       const { data, error } = await query;
       if (error) throw error;
@@ -260,7 +262,7 @@ const Nearby = () => {
         )}
 
         <div className={`absolute ${showSearchBar ? 'top-28' : 'top-14'} left-0 right-0 z-10 px-4 transition-all`}>
-          <CategoryFilter selected={selectedCategory} onChange={setSelectedCategory} selectedDate={selectedDate} onDateChange={setSelectedDate} />
+          <CategoryFilter selected={selectedCategory} onChange={setSelectedCategory} selectedDateRange={selectedDateRange} onDateRangeChange={setSelectedDateRange} />
         </div>
 
         {isLoading && (
