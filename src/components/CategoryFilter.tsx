@@ -101,7 +101,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selected, onChange, sel
             <div className="mt-3 pt-3 border-t border-border space-y-2">
               <div className="flex items-center justify-between">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
-                  <Calendar className="w-3 h-3" />
+                  <CalendarIcon className="w-3 h-3" />
                   Datum
                 </p>
                 {selectedDate && (
@@ -113,14 +113,12 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selected, onChange, sel
                   </button>
                 )}
               </div>
-              <input
-                type="date"
-                value={selectedDate ? `${selectedDate.getFullYear()}-${(selectedDate.getMonth() + 1).toString().padStart(2, '0')}-${selectedDate.getDate().toString().padStart(2, '0')}` : ''}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  onDateChange(value ? new Date(`${value}T00:00:00`) : undefined);
-                }}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground"
+              <Calendar
+                mode="single"
+                weekStartsOn={1}
+                selected={selectedDate}
+                onSelect={(date) => onDateChange(date || undefined)}
+                className={cn("p-0 pointer-events-auto")}
               />
             </div>
           )}
