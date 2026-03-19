@@ -44,8 +44,8 @@ All colors MUST be HSL.
     --evendle-primary-hover: 122 39% 11%;
     --evendle-muted: 0 0% 35%;
     --evendle-light-muted: 0 0% 50%;
-    --evendle-card: 0 0% 98%;
-    --evendle-search-bg: 0 0% 93%;
+    --evendle-card: 60 72% 92%;
+    --evendle-search-bg: 60 50% 80%;
     
     /* Gradients */
     --gradient-hero: linear-gradient(135deg, hsl(var(--background)), hsl(0 0% 94%));
