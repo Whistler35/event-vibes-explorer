@@ -9,7 +9,7 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Evendle App Design System */
-    --background: 0 0% 96%;
+    --background: 60 72% 85%;
     --foreground: 0 0% 10%;
 
     --card: 0 0% 98%;
