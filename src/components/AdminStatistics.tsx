@@ -252,6 +252,14 @@ const AdminStatistics = () => {
             {TIME_RANGE_LABELS[range]}
           </button>
         ))}
+        <button
+          onClick={exportCSV}
+          disabled={loading || !stats}
+          className="p-2 rounded-xl bg-card border border-border text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+          title="Als CSV exportieren"
+        >
+          <Download className="w-4 h-4" />
+        </button>
       </div>
 
       {loading ? (
