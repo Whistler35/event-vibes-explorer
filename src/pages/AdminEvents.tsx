@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { CheckCircle, XCircle, Clock, ArrowLeft, MapPin, Calendar, Star, StarOff, ChevronUp, ChevronDown } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import AdminStatistics from "@/components/AdminStatistics";
 
 const formatDate = (dateStr: string) => {
   const d = new Date(dateStr);
