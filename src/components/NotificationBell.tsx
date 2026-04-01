@@ -18,6 +18,7 @@ const NotificationBell = () => {
       case "friend_joined_event": return <Users className="w-5 h-5 text-primary" />;
       case "friend_request": return <UserPlus className="w-5 h-5 text-primary" />;
       case "friend_accepted": return <UserCheck className="w-5 h-5 text-primary" />;
+      case "new_event_pending": return <ShieldCheck className="w-5 h-5 text-primary" />;
       default: return <Bell className="w-5 h-5 text-primary" />;
     }
   };
