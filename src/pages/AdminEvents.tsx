@@ -193,11 +193,14 @@ const AdminEvents = () => {
 
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="w-full bg-muted">
-            <TabsTrigger value="pending" className="flex-1">
+            <TabsTrigger value="pending" className="flex-1 text-xs">
               Freigaben {pendingEvents.length > 0 && `(${pendingEvents.length})`}
             </TabsTrigger>
-            <TabsTrigger value="featured" className="flex-1">
+            <TabsTrigger value="featured" className="flex-1 text-xs">
               Top Events
+            </TabsTrigger>
+            <TabsTrigger value="stats" className="flex-1 text-xs">
+              Statistiken
             </TabsTrigger>
           </TabsList>
 
