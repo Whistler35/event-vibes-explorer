@@ -34,6 +34,8 @@ const NotificationBell = () => {
       navigate(`/user/${notif.data.requester_id}`);
     } else if (notif.type === "friend_accepted" && notif.data?.friend_id) {
       navigate(`/user/${notif.data.friend_id}`);
+    } else if (notif.type === "new_event_pending") {
+      navigate("/admin/events");
     }
     setOpen(false);
   };
