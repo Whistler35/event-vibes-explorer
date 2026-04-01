@@ -376,6 +376,11 @@ const AdminEvents = () => {
               </>
             )}
           </TabsContent>
+
+          {/* Statistics Tab */}
+          <TabsContent value="stats" className="mt-4">
+            <AdminStatistics />
+          </TabsContent>
         </Tabs>
       </div>
     </Layout>
