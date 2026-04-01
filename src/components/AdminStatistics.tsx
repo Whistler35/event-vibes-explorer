@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, CalendarDays, UserPlus, MessageCircle, Heart, Handshake, TrendingUp } from "lucide-react";
+import { Users, CalendarDays, UserPlus, MessageCircle, Heart, Handshake, TrendingUp, Download } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 type TimeRange = "7d" | "30d" | "12m" | "all";
