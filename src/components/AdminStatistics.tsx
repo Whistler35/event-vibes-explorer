@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, CalendarDays, UserPlus, MessageCircle, Heart, Handshake, TrendingUp } from "lucide-react";
+import { Users, CalendarDays, UserPlus, MessageCircle, Heart, Handshake, TrendingUp, Download } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 type TimeRange = "7d" | "30d" | "12m" | "all";
@@ -200,10 +200,45 @@ const AdminStatistics = () => {
 
   const chartTitle = timeRange === "7d" ? "Letzte 7 Tage" : timeRange === "30d" ? "Letzte 30 Tage" : timeRange === "12m" ? "Letzte 12 Monate" : "Gesamter Zeitraum";
 
+  const exportCSV = () => {
+    if (!stats) return;
+    const rows = [
+      ["Metrik", "Wert"],
+      ["Zeitraum", chartTitle],
+      ["Nutzer", stats.totalUsers],
+      ["Events gesamt", stats.totalEvents],
+      ["Events genehmigt", stats.approvedEvents],
+      ["Events offen", stats.pendingEvents],
+      ["Events abgelehnt", stats.rejectedEvents],
+      ["Teilnahmen", stats.totalParticipants],
+      ["Gruppen-Nachrichten", stats.totalChatMessages],
+      ["Direktnachrichten", stats.totalDirectMessages],
+      ["Likes", stats.totalLikes],
+      ["Freundschaften", stats.totalFriendships],
+      ["Beitrittsanfragen", stats.totalJoinRequests],
+      ["Ø Teilnahmen/Event", stats.approvedEvents > 0 ? (stats.totalParticipants / stats.approvedEvents).toFixed(1) : "0"],
+      ["Ø Nachrichten/Nutzer", stats.totalUsers > 0 ? ((stats.totalChatMessages + stats.totalDirectMessages) / stats.totalUsers).toFixed(1) : "0"],
+      [],
+      ["Kategorie", "Anzahl"],
+      ...categoryData.map((c) => [c.category, c.count]),
+      [],
+      [timeRange === "7d" || timeRange === "30d" ? "Tag" : "Monat", "Nutzer", "Events"],
+      ...monthlyData.map((m) => [m.month, m.users, m.events]),
+    ];
+    const csv = rows.map((r) => r.join(";")).join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `evendle-statistiken-${timeRange}-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6">
-      {/* Time Range Selector */}
-      <div className="flex gap-2">
+      {/* Time Range Selector + Export */}
+      <div className="flex gap-2 items-center">
         {(Object.keys(TIME_RANGE_LABELS) as TimeRange[]).map((range) => (
           <button
             key={range}
@@ -217,6 +252,14 @@ const AdminStatistics = () => {
             {TIME_RANGE_LABELS[range]}
           </button>
         ))}
+        <button
+          onClick={exportCSV}
+          disabled={loading || !stats}
+          className="p-2 rounded-xl bg-card border border-border text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+          title="Als CSV exportieren"
+        >
+          <Download className="w-4 h-4" />
+        </button>
       </div>
 
       {loading ? (
