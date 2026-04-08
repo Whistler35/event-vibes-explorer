@@ -63,6 +63,49 @@ const UserProfile = () => {
     navigate(`/dm/${data}`);
   };
 
+  const fetchFriendship = useCallback(async () => {
+    if (!user || !userId || userId === user.id) return;
+    const { data } = await supabase
+      .from("friendships")
+      .select("id, requester_id, addressee_id, status")
+      .or(`and(requester_id.eq.${user.id},addressee_id.eq.${userId}),and(requester_id.eq.${userId},addressee_id.eq.${user.id})`)
+      .maybeSingle();
+    setFriendship(data as Friendship | null);
+  }, [user, userId]);
+
+  const sendFriendRequest = async () => {
+    if (!user || !userId) return;
+    setFriendActionLoading(true);
+    const { error } = await supabase.from("friendships").insert({ requester_id: user.id, addressee_id: userId } as any);
+    if (error) toast.error("Anfrage konnte nicht gesendet werden.");
+    else toast.success("Freundschaftsanfrage gesendet!");
+    await fetchFriendship();
+    setFriendActionLoading(false);
+  };
+
+  const respondToRequest = async (status: "accepted" | "rejected") => {
+    if (!friendship) return;
+    setFriendActionLoading(true);
+    const { error } = await supabase
+      .from("friendships")
+      .update({ status, updated_at: new Date().toISOString() } as any)
+      .eq("id", friendship.id);
+    if (error) toast.error("Fehler beim Aktualisieren.");
+    else toast.success(status === "accepted" ? "Freund hinzugefügt! 🎉" : "Anfrage abgelehnt.");
+    await fetchFriendship();
+    setFriendActionLoading(false);
+  };
+
+  const removeFriend = async () => {
+    if (!friendship) return;
+    setFriendActionLoading(true);
+    const { error } = await supabase.from("friendships").delete().eq("id", friendship.id);
+    if (error) toast.error("Fehler beim Entfernen.");
+    else toast.success("Freund entfernt.");
+    setFriendship(null);
+    setFriendActionLoading(false);
+  };
+
   useEffect(() => {
     if (!userId) return;
 
