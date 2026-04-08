@@ -381,6 +381,11 @@ const AdminEvents = () => {
             )}
           </TabsContent>
 
+          {/* Hosts Tab */}
+          <TabsContent value="hosts" className="mt-4">
+            <AdminHostManagement />
+          </TabsContent>
+
           {/* Statistics Tab */}
           <TabsContent value="stats" className="mt-4">
             <AdminStatistics />
