@@ -3,7 +3,7 @@ import evendleLogo from "@/assets/evendle-logo.jpeg";
 import { Search } from "lucide-react";
 import Layout from "@/components/Layout";
 import CategoryFilter from "@/components/CategoryFilter";
-import ReelsFeed from "@/components/ReelsFeed";
+
 import { useSearchEvents, type EventCategory } from "@/hooks/useSearchEvents";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -116,8 +116,6 @@ const Events = () => {
           </div>
         )}
 
-        {/* Reels Feed */}
-        <ReelsFeed />
 
         {/* Filter Buttons */}
         <div className="space-y-4">
