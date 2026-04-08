@@ -6,7 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { DateRange } from "react-day-picker";
-import ReelsFeed from "@/components/ReelsFeed";
+
 import NotificationBell from "@/components/NotificationBell";
 import Layout from "@/components/Layout";
 import EventCard from "@/components/EventCard";
@@ -431,10 +431,6 @@ const Home = () => {
           </div>
         )}
 
-        {/* Reels Feed */}
-        <div className="px-4 pb-8">
-          <ReelsFeed />
-        </div>
       </div>
     </Layout>
   );
