@@ -151,7 +151,8 @@ const UserProfile = () => {
     };
 
     fetchProfile();
-  }, [userId]);
+    fetchFriendship();
+  }, [userId, fetchFriendship]);
 
   if (loading) {
     return (
