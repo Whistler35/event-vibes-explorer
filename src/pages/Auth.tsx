@@ -107,10 +107,18 @@ const Auth = () => {
           navigate('/');
         }
       } else {
-        if (!name || !age || !country) {
-          toast.error('Bitte fülle alle Pflichtfelder aus');
-          setLoading(false);
-          return;
+        if (selectedRole === 'professional_host') {
+          if (!name) {
+            toast.error('Bitte gib deinen Namen ein');
+            setLoading(false);
+            return;
+          }
+        } else {
+          if (!name || !age || !country) {
+            toast.error('Bitte fülle alle Pflichtfelder aus');
+            setLoading(false);
+            return;
+          }
         }
 
         if (password !== confirmPassword) {
@@ -125,18 +133,23 @@ const Auth = () => {
           return;
         }
 
+        const metadata: Record<string, any> = { name };
+        if (selectedRole === 'professional_host') {
+          metadata.is_professional_host = true;
+          if (companyName) metadata.company_name = companyName;
+        } else {
+          metadata.age = parseInt(age);
+          metadata.country = country;
+          metadata.bio = bio;
+          metadata.fun_fact = funFact;
+        }
+
         const { error: signUpError, data } = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/`,
-            data: {
-              name,
-              age: parseInt(age),
-              country,
-              bio,
-              fun_fact: funFact,
-            },
+            data: metadata,
           },
         });
 
@@ -160,14 +173,7 @@ const Auth = () => {
           }
         }
 
-        // Create host profile if professional
-        if (selectedRole === 'professional_host' && data.user) {
-          try {
-            await createHostProfile(data.user.id);
-          } catch (err) {
-            console.error('Error creating host profile:', err);
-          }
-        }
+        // Host profile is created automatically via DB trigger on email confirmation
 
         toast.success('Registrierung erfolgreich! Bitte bestätige deine E-Mail.');
       }
@@ -300,54 +306,58 @@ const Auth = () => {
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="age" className="text-foreground">Alter *</Label>
-                    <Input
-                      id="age"
-                      type="number"
-                      value={age}
-                      onChange={(e) => setAge(e.target.value)}
-                      required
-                      min="16"
-                      max="100"
-                      className="bg-card border-border text-foreground"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="country" className="text-foreground">Land *</Label>
-                    <Input
-                      id="country"
-                      type="text"
-                      value={country}
-                      onChange={(e) => setCountry(e.target.value)}
-                      required
-                      className="bg-card border-border text-foreground"
-                    />
-                  </div>
-                </div>
+                {selectedRole !== 'professional_host' && (
+                  <>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="age" className="text-foreground">Alter *</Label>
+                        <Input
+                          id="age"
+                          type="number"
+                          value={age}
+                          onChange={(e) => setAge(e.target.value)}
+                          required
+                          min="16"
+                          max="100"
+                          className="bg-card border-border text-foreground"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="country" className="text-foreground">Land *</Label>
+                        <Input
+                          id="country"
+                          type="text"
+                          value={country}
+                          onChange={(e) => setCountry(e.target.value)}
+                          required
+                          className="bg-card border-border text-foreground"
+                        />
+                      </div>
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="bio" className="text-foreground">Über mich</Label>
-                  <Textarea
-                    id="bio"
-                    value={bio}
-                    onChange={(e) => setBio(e.target.value)}
-                    placeholder="Erzähle etwas über dich..."
-                    className="bg-card border-border text-foreground min-h-[80px]"
-                  />
-                </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="bio" className="text-foreground">Über mich</Label>
+                      <Textarea
+                        id="bio"
+                        value={bio}
+                        onChange={(e) => setBio(e.target.value)}
+                        placeholder="Erzähle etwas über dich..."
+                        className="bg-card border-border text-foreground min-h-[80px]"
+                      />
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="funFact" className="text-foreground">Fun Fact</Label>
-                  <Textarea
-                    id="funFact"
-                    value={funFact}
-                    onChange={(e) => setFunFact(e.target.value)}
-                    placeholder="Teile einen interessanten Fakt über dich..."
-                    className="bg-card border-border text-foreground min-h-[80px]"
-                  />
-                </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="funFact" className="text-foreground">Fun Fact</Label>
+                      <Textarea
+                        id="funFact"
+                        value={funFact}
+                        onChange={(e) => setFunFact(e.target.value)}
+                        placeholder="Teile einen interessanten Fakt über dich..."
+                        className="bg-card border-border text-foreground min-h-[80px]"
+                      />
+                    </div>
+                  </>
+                )}
               </>
             )}
           </div>

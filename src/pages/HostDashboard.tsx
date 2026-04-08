@@ -12,6 +12,7 @@ import {
   CalendarPlus, BarChart3, CreditCard, Eye, Users, TrendingUp,
   Clock, CheckCircle, FileText, Pencil, Trash2, Star, Loader2
 } from 'lucide-react';
+import CreateEventDialog from '@/components/CreateEventDialog';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
@@ -59,6 +60,7 @@ const HostDashboard = () => {
   const [plan, setPlan] = useState<PlanInfo | null>(null);
   const [eventsUsed, setEventsUsed] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   useEffect(() => {
     if (!user || hostLoading) return;
@@ -140,7 +142,7 @@ const HostDashboard = () => {
               {plan ? plan.name : 'Kein Plan'} · {eventsUsed} Events erstellt
             </p>
           </div>
-          <Button size="sm" onClick={() => navigate('/')}>
+          <Button size="sm" onClick={() => setShowCreateDialog(true)}>
             <CalendarPlus className="w-4 h-4 mr-1" />
             Neues Event
           </Button>
@@ -265,6 +267,17 @@ const HostDashboard = () => {
             Abrechnung
           </Button>
         </div>
+
+        {/* Create Event Dialog */}
+        <CreateEventDialog
+          open={showCreateDialog}
+          onClose={() => setShowCreateDialog(false)}
+          position={null}
+          onEventCreated={() => {
+            setShowCreateDialog(false);
+            fetchData();
+          }}
+        />
       </div>
     </Layout>
   );
