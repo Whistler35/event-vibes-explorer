@@ -170,7 +170,7 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
       markerContainer2.style.cursor = 'pointer';
       const isFeatured = !!(event as any).is_featured;
       const markerSize = isFeatured ? '56px' : '50px';
-      const borderColor = isFeatured ? '#DAA520' : '#173518';
+      const borderColor = isFeatured ? '#f4f4bb' : '#173518';
       
       const imageWrapper = document.createElement('div');
       imageWrapper.style.position = 'relative';
@@ -182,7 +182,7 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
       imageElement.style.borderRadius = '50%';
       imageElement.style.border = `3px solid ${borderColor}`;
       imageElement.style.boxShadow = isFeatured 
-        ? '0 4px 12px rgba(218,165,32,0.5)' 
+        ? '0 4px 12px rgba(244,244,187,0.5)' 
         : '0 4px 12px rgba(0,0,0,0.4)';
       imageElement.style.overflow = 'hidden';
       imageElement.style.backgroundColor = '#1a1a2e';
@@ -210,12 +210,12 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
         starBadge.style.width = '20px';
         starBadge.style.height = '20px';
         starBadge.style.borderRadius = '50%';
-        starBadge.style.backgroundColor = '#DAA520';
+        starBadge.style.backgroundColor = '#d8d87a';
         starBadge.style.display = 'flex';
         starBadge.style.alignItems = 'center';
         starBadge.style.justifyContent = 'center';
         starBadge.style.fontSize = '12px';
-        starBadge.style.color = 'white';
+        starBadge.style.color = '#173518';
         starBadge.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
         starBadge.textContent = '★';
         imageWrapper.appendChild(starBadge);
