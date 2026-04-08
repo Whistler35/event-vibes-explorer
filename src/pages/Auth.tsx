@@ -6,11 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Camera, Upload } from 'lucide-react';
+import { Camera, Upload, User, Building2, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 import evendleLogo from '@/assets/evendle-logo.jpeg';
+import { cn } from '@/lib/utils';
+
+type UserRole = 'private' | 'professional_host';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -26,9 +29,11 @@ const Auth = () => {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<UserRole>('private');
+  const [companyName, setCompanyName] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  const { signIn, signUp } = useAuth();
+
+  const { signIn } = useAuth();
   const navigate = useNavigate();
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,15 +62,35 @@ const Auth = () => {
       .from('avatars')
       .upload(filePath, file);
 
-    if (uploadError) {
-      throw uploadError;
-    }
+    if (uploadError) throw uploadError;
 
     const { data } = supabase.storage
       .from('avatars')
       .getPublicUrl(filePath);
 
     return data.publicUrl;
+  };
+
+  const createHostProfile = async (userId: string) => {
+    // Get pay-per-event plan as default
+    const { data: plan } = await supabase
+      .from('subscription_plans')
+      .select('id')
+      .eq('slug', 'pay-per-event')
+      .single();
+
+    // Assign professional_host role
+    await supabase.from('user_roles').insert({
+      user_id: userId,
+      role: 'professional_host' as any,
+    });
+
+    // Create host profile
+    await supabase.from('host_profiles').insert({
+      user_id: userId,
+      company_name: companyName || null,
+      current_plan_id: plan?.id || null,
+    } as any);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -110,9 +135,9 @@ const Auth = () => {
               age: parseInt(age),
               country,
               bio,
-              fun_fact: funFact
-            }
-          }
+              fun_fact: funFact,
+            },
+          },
         });
 
         if (signUpError) {
@@ -121,19 +146,26 @@ const Auth = () => {
           return;
         }
 
+        // Upload avatar
         let finalAvatarUrl = avatarUrl;
         if (avatarFile && data.user) {
           try {
             finalAvatarUrl = await uploadAvatar(avatarFile, data.user.id);
-            
             await supabase
               .from('profiles')
               .update({ avatar_url: finalAvatarUrl })
               .eq('user_id', data.user.id);
-              
           } catch (uploadError) {
             console.error('Error uploading avatar:', uploadError);
-            toast.error('Profilbild konnte nicht hochgeladen werden, aber Registrierung war erfolgreich');
+          }
+        }
+
+        // Create host profile if professional
+        if (selectedRole === 'professional_host' && data.user) {
+          try {
+            await createHostProfile(data.user.id);
+          } catch (err) {
+            console.error('Error creating host profile:', err);
           }
         }
 
@@ -142,7 +174,7 @@ const Auth = () => {
     } catch (error: any) {
       toast.error('Ein Fehler ist aufgetreten');
     }
-    
+
     setLoading(false);
   };
 
@@ -161,6 +193,11 @@ const Auth = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Role Selection for Register */}
+          {!isLogin && (
+            <RoleSelector selected={selectedRole} onSelect={setSelectedRole} />
+          )}
+
           {/* Profile Picture for Register */}
           {!isLogin && (
             <div className="flex flex-col items-center space-y-4">
@@ -223,7 +260,6 @@ const Auth = () => {
               />
             </div>
 
-            {/* Additional fields for Register */}
             {!isLogin && (
               <>
                 <div className="space-y-2">
@@ -249,6 +285,21 @@ const Auth = () => {
                   />
                 </div>
 
+                {/* Company name for hosts */}
+                {selectedRole === 'professional_host' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="companyName" className="text-foreground">Firmenname (optional)</Label>
+                    <Input
+                      id="companyName"
+                      type="text"
+                      value={companyName}
+                      onChange={(e) => setCompanyName(e.target.value)}
+                      placeholder="z.B. Dein Unternehmen GmbH"
+                      className="bg-card border-border text-foreground"
+                    />
+                  </div>
+                )}
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="age" className="text-foreground">Alter *</Label>
@@ -263,7 +314,6 @@ const Auth = () => {
                       className="bg-card border-border text-foreground"
                     />
                   </div>
-
                   <div className="space-y-2">
                     <Label htmlFor="country" className="text-foreground">Land *</Label>
                     <Input
@@ -302,13 +352,14 @@ const Auth = () => {
             )}
           </div>
 
-          {/* Submit Button */}
-          <Button
-            type="submit"
-            disabled={loading}
-            className="w-full"
-          >
-            {loading ? 'Lädt...' : isLogin ? 'Anmelden' : 'Registrieren'}
+          <Button type="submit" disabled={loading} className="w-full">
+            {loading
+              ? 'Lädt...'
+              : isLogin
+              ? 'Anmelden'
+              : selectedRole === 'professional_host'
+              ? 'Als Professional Host registrieren'
+              : 'Registrieren'}
           </Button>
 
           {/* Divider */}
@@ -321,7 +372,7 @@ const Auth = () => {
             </div>
           </div>
 
-          {/* Social Login Buttons */}
+          {/* Social Login */}
           <div className="space-y-3">
             <Button
               type="button"
@@ -380,10 +431,9 @@ const Auth = () => {
               onClick={() => setIsLogin(!isLogin)}
               className="text-primary hover:underline"
             >
-              {isLogin 
-                ? 'Noch kein Account? Jetzt registrieren' 
-                : 'Bereits registriert? Anmelden'
-              }
+              {isLogin
+                ? 'Noch kein Account? Jetzt registrieren'
+                : 'Bereits registriert? Anmelden'}
             </button>
           </div>
         </form>
@@ -391,5 +441,61 @@ const Auth = () => {
     </div>
   );
 };
+
+// Role selection component
+function RoleSelector({
+  selected,
+  onSelect,
+}: {
+  selected: UserRole;
+  onSelect: (role: UserRole) => void;
+}) {
+  return (
+    <div className="space-y-2">
+      <Label className="text-foreground">Kontotyp wählen</Label>
+      <div className="grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          onClick={() => onSelect('private')}
+          className={cn(
+            'relative flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all',
+            selected === 'private'
+              ? 'border-primary bg-primary/5'
+              : 'border-border bg-card hover:border-muted-foreground/40'
+          )}
+        >
+          {selected === 'private' && (
+            <div className="absolute top-2 right-2 rounded-full bg-primary p-0.5">
+              <Check className="w-3 h-3 text-primary-foreground" />
+            </div>
+          )}
+          <User className="w-8 h-8 text-primary" />
+          <span className="text-sm font-semibold text-foreground">Privat</span>
+          <span className="text-xs text-muted-foreground">Kostenlos</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onSelect('professional_host')}
+          className={cn(
+            'relative flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all',
+            selected === 'professional_host'
+              ? 'border-primary bg-primary/5'
+              : 'border-border bg-card hover:border-muted-foreground/40'
+          )}
+        >
+          {selected === 'professional_host' && (
+            <div className="absolute top-2 right-2 rounded-full bg-primary p-0.5">
+              <Check className="w-3 h-3 text-primary-foreground" />
+            </div>
+          )}
+          <Building2 className="w-8 h-8 text-primary" />
+          <span className="text-sm font-semibold text-foreground">Professional Host</span>
+          <span className="text-xs text-muted-foreground">Ab €29,90</span>
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default Auth;
