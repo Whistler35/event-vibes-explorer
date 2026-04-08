@@ -221,6 +221,38 @@ export type Database = {
           },
         ]
       }
+      event_views: {
+        Row: {
+          event_id: string
+          id: string
+          session_id: string | null
+          viewed_at: string
+          viewer_id: string | null
+        }
+        Insert: {
+          event_id: string
+          id?: string
+          session_id?: string | null
+          viewed_at?: string
+          viewer_id?: string | null
+        }
+        Update: {
+          event_id?: string
+          id?: string
+          session_id?: string | null
+          viewed_at?: string
+          viewer_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_views_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           approval_status: Database["public"]["Enums"]["approval_status"]
@@ -319,6 +351,163 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      host_profiles: {
+        Row: {
+          company_name: string | null
+          created_at: string
+          current_plan_id: string | null
+          id: string
+          is_verified: boolean
+          status: string
+          total_events_created: number
+          total_revenue_cents: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string
+          current_plan_id?: string | null
+          id?: string
+          is_verified?: boolean
+          status?: string
+          total_events_created?: number
+          total_revenue_cents?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string
+          current_plan_id?: string | null
+          id?: string
+          is_verified?: boolean
+          status?: string
+          total_events_created?: number
+          total_revenue_cents?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "host_profiles_current_plan_id_fkey"
+            columns: ["current_plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      host_subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string
+          current_period_start: string
+          events_used_this_period: number
+          host_id: string
+          id: string
+          next_billing_date: string | null
+          plan_id: string
+          status: string
+          stripe_subscription_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string
+          current_period_start?: string
+          events_used_this_period?: number
+          host_id: string
+          id?: string
+          next_billing_date?: string | null
+          plan_id: string
+          status?: string
+          stripe_subscription_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string
+          current_period_start?: string
+          events_used_this_period?: number
+          host_id?: string
+          id?: string
+          next_billing_date?: string | null
+          plan_id?: string
+          status?: string
+          stripe_subscription_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "host_subscriptions_host_id_fkey"
+            columns: ["host_id"]
+            isOneToOne: false
+            referencedRelation: "host_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "host_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          currency: string
+          description: string | null
+          host_id: string
+          id: string
+          invoice_number: string | null
+          pdf_url: string | null
+          period_end: string | null
+          period_start: string | null
+          status: string
+          stripe_invoice_id: string | null
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          currency?: string
+          description?: string | null
+          host_id: string
+          id?: string
+          invoice_number?: string | null
+          pdf_url?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          status?: string
+          stripe_invoice_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          description?: string | null
+          host_id?: string
+          id?: string
+          invoice_number?: string | null
+          pdf_url?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          status?: string
+          stripe_invoice_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_host_id_fkey"
+            columns: ["host_id"]
+            isOneToOne: false
+            referencedRelation: "host_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       join_requests: {
         Row: {
@@ -457,6 +646,48 @@ export type Database = {
           proj4text?: string | null
           srid?: number
           srtext?: string | null
+        }
+        Relationships: []
+      }
+      subscription_plans: {
+        Row: {
+          additional_event_price_cents: number | null
+          created_at: string
+          description: string | null
+          features: Json | null
+          id: string
+          included_events: number | null
+          is_active: boolean
+          name: string
+          price_cents: number
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          additional_event_price_cents?: number | null
+          created_at?: string
+          description?: string | null
+          features?: Json | null
+          id?: string
+          included_events?: number | null
+          is_active?: boolean
+          name: string
+          price_cents?: number
+          slug: string
+          sort_order?: number
+        }
+        Update: {
+          additional_event_price_cents?: number | null
+          created_at?: string
+          description?: string | null
+          features?: Json | null
+          id?: string
+          included_events?: number | null
+          is_active?: boolean
+          name?: string
+          price_cents?: number
+          slug?: string
+          sort_order?: number
         }
         Relationships: []
       }
@@ -1497,7 +1728,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
+      app_role: "admin" | "moderator" | "user" | "professional_host"
       approval_status: "pending" | "approved" | "rejected"
       event_category:
         | "music"
@@ -1647,7 +1878,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user"],
+      app_role: ["admin", "moderator", "user", "professional_host"],
       approval_status: ["pending", "approved", "rejected"],
       event_category: [
         "music",
