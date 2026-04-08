@@ -23,6 +23,7 @@ import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/AuthContext";
 
 const AdminEvents = lazy(() => import("./pages/AdminEvents"));
+const HostDashboard = lazy(() => import("./pages/HostDashboard"));
 
 const queryClient = new QueryClient();
 
