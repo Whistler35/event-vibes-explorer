@@ -24,6 +24,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 
 const AdminEvents = lazy(() => import("./pages/AdminEvents"));
 const HostDashboard = lazy(() => import("./pages/HostDashboard"));
+const HostStats = lazy(() => import("./pages/HostStats"));
 
 const queryClient = new QueryClient();
 
