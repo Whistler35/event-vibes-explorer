@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import FriendSearch from "@/components/FriendSearch";
 import ProfileStatsSheet from "@/components/ProfileStatsSheet";
 import { Badge } from "@/components/ui/badge";
+import { getInstagramUrl } from "@/lib/utils";
 
 interface ProfileData {
   name: string;
