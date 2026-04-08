@@ -231,12 +231,72 @@ const UserProfile = () => {
             </button>
           </div>
 
-          {/* Send Message Button */}
+          {/* Friendship & Message Actions */}
           {user && userId !== user.id && (
-            <Button onClick={handleStartDM} className="w-full max-w-xs mx-auto">
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Nachricht senden
-            </Button>
+            <div className="flex flex-col items-center gap-3 w-full max-w-xs mx-auto">
+              {/* Pending request received - show accept/reject */}
+              {friendship?.status === "pending" && friendship.addressee_id === user.id && (
+                <div className="w-full space-y-2">
+                  <p className="text-sm text-muted-foreground">Möchte mit dir befreundet sein</p>
+                  <div className="flex gap-2 w-full">
+                    <Button
+                      onClick={() => respondToRequest("accepted")}
+                      disabled={friendActionLoading}
+                      className="flex-1"
+                    >
+                      <UserCheck className="w-4 h-4 mr-2" />
+                      Annehmen
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => respondToRequest("rejected")}
+                      disabled={friendActionLoading}
+                      className="flex-1"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Ablehnen
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Pending request sent */}
+              {friendship?.status === "pending" && friendship.requester_id === user.id && (
+                <Button variant="outline" disabled className="w-full">
+                  <Clock className="w-4 h-4 mr-2" />
+                  Anfrage gesendet
+                </Button>
+              )}
+
+              {/* Already friends */}
+              {friendship?.status === "accepted" && (
+                <div className="flex gap-2 w-full">
+                  <Button onClick={handleStartDM} className="flex-1">
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Nachricht
+                  </Button>
+                  <Button variant="outline" onClick={removeFriend} disabled={friendActionLoading} className="text-destructive hover:text-destructive">
+                    <UserMinus className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+
+              {/* No friendship yet */}
+              {!friendship && (
+                <Button onClick={sendFriendRequest} disabled={friendActionLoading} className="w-full">
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Freund hinzufügen
+                </Button>
+              )}
+
+              {/* Always show message option if friends */}
+              {friendship?.status === "accepted" ? null : (
+                <Button variant="ghost" onClick={handleStartDM} className="w-full text-muted-foreground">
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Nachricht senden
+                </Button>
+              )}
+            </div>
           )}
 
           {/* Host Links */}
