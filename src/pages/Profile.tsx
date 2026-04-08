@@ -143,6 +143,8 @@ const Profile = () => {
 
   const displayName = profile?.name || user.email?.split("@")[0] || "User";
   const avatarUrl = profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=ff5722&color=fff&size=400`;
+  const hostInstagramUrl = getInstagramUrl(hostProfile?.instagram_username);
+  const profileInstagramUrl = getInstagramUrl(profile?.instagram_username);
 
   return (
     <Layout>
