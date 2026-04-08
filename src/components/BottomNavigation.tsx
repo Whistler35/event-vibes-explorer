@@ -1,18 +1,21 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { MapPin, Calendar, User, ShieldCheck, MessageCircle } from "lucide-react";
+import { MapPin, Calendar, User, ShieldCheck, MessageCircle, Building2 } from "lucide-react";
 import { usePendingEventsCount } from "@/hooks/usePendingEventsCount";
 import { useUnreadDMCount } from "@/hooks/useUnreadDMCount";
+import { useIsHost } from "@/hooks/useIsHost";
 
 const BottomNavigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAdmin, count: pendingCount } = usePendingEventsCount();
   const { unreadCount } = useUnreadDMCount();
+  const { isHost } = useIsHost();
 
   const navItems = [
     { id: "events", label: "Events", icon: Calendar, path: "/" },
     { id: "nearby", label: "near by", icon: MapPin, path: "/nearby" },
     { id: "messenger", label: "Chat", icon: MessageCircle, path: "/messenger" },
+    ...(isHost ? [{ id: "host", label: "Host", icon: Building2, path: "/host/dashboard" }] : []),
     ...(isAdmin ? [{ id: "admin", label: "Admin", icon: ShieldCheck, path: "/admin/events" }] : []),
     { id: "profile", label: "profile", icon: User, path: "/profile" },
   ];
