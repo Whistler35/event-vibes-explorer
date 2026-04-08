@@ -1,46 +1,27 @@
 
 
-## Top Events auf der Karte hervorheben
+## Top Events — Corporate Design Farben
 
-### Konzept
-Events mit `is_top_event = true` bekommen auf der Karte einen goldenen Rahmen und ein kleines Stern-Badge. Admins und Hosts (via Pay-per-Event "Top Event" Option) können Events als Top Event markieren.
+Aus der Corporate Identity ergeben sich vier Farben: **Forest (#173518)**, **White (#ffffff)**, **Citrus (#f4f4bb)** und **Lime (#d8d87a)**.
 
-### Datenbank
-Die `events`-Tabelle hat bereits ein `is_featured`-Feld (boolean, default false). Dieses wird als "Top Event"-Flag genutzt -- keine Migration nötig.
+Statt dem aktuellen Gold (#DAA520) werden Top Event Marker mit **Citrus (#f4f4bb)** als Rahmenfarbe und **Lime (#d8d87a)** als Stern-Badge-Hintergrund gestaltet. Das passt perfekt zum Evendle Branding.
 
 ### Änderungen
 
-**1. Search-Events Edge Function anpassen**
-- `is_featured` im SELECT und in der Response zurückgeben, damit die Karte weiß, welche Events Top Events sind.
+**`src/components/MapboxMap.tsx`** — Marker-Styling anpassen:
+- Rahmenfarbe Featured: `#DAA520` → `#f4f4bb` (Citrus)
+- Box-Shadow Featured: goldener Glow → Citrus-Glow (`rgba(244,244,187,0.5)`)
+- Stern-Badge Hintergrund: `#DAA520` → `#d8d87a` (Lime)
+- Stern-Badge Textfarbe: weiß → `#173518` (Forest) für besseren Kontrast
 
-**2. `useSearchEvents.ts` -- Interface erweitern**
-- `SearchEvent` um `is_featured: boolean` ergänzen.
-
-**3. `InteractiveMap.tsx` und `MapboxMap.tsx` -- MapEvent erweitern**
-- `MapEvent` Interface um `is_featured?: boolean` ergänzen.
-
-**4. `MapboxMap.tsx` -- Marker-Rendering anpassen**
-- Wenn `event.is_featured === true`:
-  - Goldener Rahmen (`#DAA520`) statt dem Standard-Grün (`#3B4D34`)
-  - Kleines Stern-Icon (★) als Badge oben rechts am Marker-Kreis
-  - Leicht größerer Marker (56px statt 50px) für mehr Sichtbarkeit
-
-**5. `Nearby.tsx` -- `is_featured` an MapEvents durchreichen**
-- Bei publicMapEvents und privateMapEvents das Feld `is_featured` mappen.
-
-**6. Host-Seite / Admin -- Top Event setzen**
-- Im CreateEventDialog bzw. Billing-Flow: Wenn Host "Top Event" (€49.90) wählt, wird `is_featured = true` gesetzt.
-- Im Admin Panel: Admins können Events als "Top Event" markieren/entfernen.
-
-### Visuelles Ergebnis
 ```text
   Normal Marker          Top Event Marker
   ┌──────────┐          ┌──────────┐
   │  ┌────┐  │          │  ┌────┐★ │
   │  │ 🖼️ │  │          │  │ 🖼️ │  │
   │  └────┘  │          │  └────┘  │
-  │  grün    │          │  gold    │
-  │  Rahmen  │          │  Rahmen  │
+  │ #173518  │          │ #f4f4bb  │
+  │  Forest  │          │  Citrus  │
   └──────────┘          └──────────┘
 ```
 
