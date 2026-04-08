@@ -31,6 +31,8 @@ const Auth = () => {
   const [socialLoading, setSocialLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState<UserRole>('private');
   const [companyName, setCompanyName] = useState('');
+  const [hostWebsite, setHostWebsite] = useState('');
+  const [hostInstagram, setHostInstagram] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { signIn } = useAuth();
@@ -137,6 +139,8 @@ const Auth = () => {
         if (selectedRole === 'professional_host') {
           metadata.is_professional_host = true;
           if (companyName) metadata.company_name = companyName;
+          if (hostWebsite) metadata.website_url = hostWebsite;
+          if (hostInstagram) metadata.instagram_username = hostInstagram;
         } else {
           metadata.age = parseInt(age);
           metadata.country = country;
@@ -291,19 +295,42 @@ const Auth = () => {
                   />
                 </div>
 
-                {/* Company name for hosts */}
                 {selectedRole === 'professional_host' && (
-                  <div className="space-y-2">
-                    <Label htmlFor="companyName" className="text-foreground">Firmenname (optional)</Label>
-                    <Input
-                      id="companyName"
-                      type="text"
-                      value={companyName}
-                      onChange={(e) => setCompanyName(e.target.value)}
-                      placeholder="z.B. Dein Unternehmen GmbH"
-                      className="bg-card border-border text-foreground"
-                    />
-                  </div>
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="companyName" className="text-foreground">Firmenname (optional)</Label>
+                      <Input
+                        id="companyName"
+                        type="text"
+                        value={companyName}
+                        onChange={(e) => setCompanyName(e.target.value)}
+                        placeholder="z.B. Dein Unternehmen GmbH"
+                        className="bg-card border-border text-foreground"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="hostWebsite" className="text-foreground">Website (optional)</Label>
+                      <Input
+                        id="hostWebsite"
+                        type="url"
+                        value={hostWebsite}
+                        onChange={(e) => setHostWebsite(e.target.value)}
+                        placeholder="https://deine-website.de"
+                        className="bg-card border-border text-foreground"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="hostInstagram" className="text-foreground">Instagram (optional)</Label>
+                      <Input
+                        id="hostInstagram"
+                        type="text"
+                        value={hostInstagram}
+                        onChange={(e) => setHostInstagram(e.target.value)}
+                        placeholder="@dein_handle"
+                        className="bg-card border-border text-foreground"
+                      />
+                    </div>
+                  </>
                 )}
 
                 {selectedRole !== 'professional_host' && (
