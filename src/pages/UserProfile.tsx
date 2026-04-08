@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { ArrowLeft, MessageCircle, Building2, Globe, ExternalLink, ShieldCheck } from "lucide-react";
+import { ArrowLeft, MessageCircle, Building2, Globe, ExternalLink, ShieldCheck, UserPlus, UserCheck, UserMinus, Clock, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -27,6 +27,13 @@ interface HostProfileData {
   is_verified: boolean;
 }
 
+interface Friendship {
+  id: string;
+  requester_id: string;
+  addressee_id: string;
+  status: string;
+}
+
 const UserProfile = () => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
@@ -37,6 +44,8 @@ const UserProfile = () => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ hostedCount: 0, participatedCount: 0, friendsCount: 0 });
   const [statsSheet, setStatsSheet] = useState<{ open: boolean; tab: "hosted" | "participated" | "friends" }>({ open: false, tab: "hosted" });
+  const [friendship, setFriendship] = useState<Friendship | null>(null);
+  const [friendActionLoading, setFriendActionLoading] = useState(false);
 
   const handleStartDM = async () => {
     if (!user || !userId) {
@@ -52,6 +61,49 @@ const UserProfile = () => {
       return;
     }
     navigate(`/dm/${data}`);
+  };
+
+  const fetchFriendship = useCallback(async () => {
+    if (!user || !userId || userId === user.id) return;
+    const { data } = await supabase
+      .from("friendships")
+      .select("id, requester_id, addressee_id, status")
+      .or(`and(requester_id.eq.${user.id},addressee_id.eq.${userId}),and(requester_id.eq.${userId},addressee_id.eq.${user.id})`)
+      .maybeSingle();
+    setFriendship(data as Friendship | null);
+  }, [user, userId]);
+
+  const sendFriendRequest = async () => {
+    if (!user || !userId) return;
+    setFriendActionLoading(true);
+    const { error } = await supabase.from("friendships").insert({ requester_id: user.id, addressee_id: userId } as any);
+    if (error) toast.error("Anfrage konnte nicht gesendet werden.");
+    else toast.success("Freundschaftsanfrage gesendet!");
+    await fetchFriendship();
+    setFriendActionLoading(false);
+  };
+
+  const respondToRequest = async (status: "accepted" | "rejected") => {
+    if (!friendship) return;
+    setFriendActionLoading(true);
+    const { error } = await supabase
+      .from("friendships")
+      .update({ status, updated_at: new Date().toISOString() } as any)
+      .eq("id", friendship.id);
+    if (error) toast.error("Fehler beim Aktualisieren.");
+    else toast.success(status === "accepted" ? "Freund hinzugefügt! 🎉" : "Anfrage abgelehnt.");
+    await fetchFriendship();
+    setFriendActionLoading(false);
+  };
+
+  const removeFriend = async () => {
+    if (!friendship) return;
+    setFriendActionLoading(true);
+    const { error } = await supabase.from("friendships").delete().eq("id", friendship.id);
+    if (error) toast.error("Fehler beim Entfernen.");
+    else toast.success("Freund entfernt.");
+    setFriendship(null);
+    setFriendActionLoading(false);
   };
 
   useEffect(() => {
@@ -99,7 +151,8 @@ const UserProfile = () => {
     };
 
     fetchProfile();
-  }, [userId]);
+    fetchFriendship();
+  }, [userId, fetchFriendship]);
 
   if (loading) {
     return (
@@ -178,12 +231,72 @@ const UserProfile = () => {
             </button>
           </div>
 
-          {/* Send Message Button */}
+          {/* Friendship & Message Actions */}
           {user && userId !== user.id && (
-            <Button onClick={handleStartDM} className="w-full max-w-xs mx-auto">
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Nachricht senden
-            </Button>
+            <div className="flex flex-col items-center gap-3 w-full max-w-xs mx-auto">
+              {/* Pending request received - show accept/reject */}
+              {friendship?.status === "pending" && friendship.addressee_id === user.id && (
+                <div className="w-full space-y-2">
+                  <p className="text-sm text-muted-foreground">Möchte mit dir befreundet sein</p>
+                  <div className="flex gap-2 w-full">
+                    <Button
+                      onClick={() => respondToRequest("accepted")}
+                      disabled={friendActionLoading}
+                      className="flex-1"
+                    >
+                      <UserCheck className="w-4 h-4 mr-2" />
+                      Annehmen
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => respondToRequest("rejected")}
+                      disabled={friendActionLoading}
+                      className="flex-1"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Ablehnen
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Pending request sent */}
+              {friendship?.status === "pending" && friendship.requester_id === user.id && (
+                <Button variant="outline" disabled className="w-full">
+                  <Clock className="w-4 h-4 mr-2" />
+                  Anfrage gesendet
+                </Button>
+              )}
+
+              {/* Already friends */}
+              {friendship?.status === "accepted" && (
+                <div className="flex gap-2 w-full">
+                  <Button onClick={handleStartDM} className="flex-1">
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Nachricht
+                  </Button>
+                  <Button variant="outline" onClick={removeFriend} disabled={friendActionLoading} className="text-destructive hover:text-destructive">
+                    <UserMinus className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+
+              {/* No friendship yet */}
+              {!friendship && (
+                <Button onClick={sendFriendRequest} disabled={friendActionLoading} className="w-full">
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Freund hinzufügen
+                </Button>
+              )}
+
+              {/* Always show message option if friends */}
+              {friendship?.status === "accepted" ? null : (
+                <Button variant="ghost" onClick={handleStartDM} className="w-full text-muted-foreground">
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Nachricht senden
+                </Button>
+              )}
+            </div>
           )}
 
           {/* Host Links */}
