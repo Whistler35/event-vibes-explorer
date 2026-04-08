@@ -134,8 +134,13 @@ const Profile = () => {
             <span className="text-foreground text-xl font-bold">EVENDLE</span>
           </div>
           <div className="flex space-x-2">
+            {isHost && (
+              <Button variant="ghost" size="icon" className="text-primary hover:text-primary/80" onClick={() => navigate("/host/dashboard")}>
+                <Building2 className="w-5 h-5" />
+              </Button>
+            )}
             {isAdmin && (
-              <Button variant="ghost" size="icon" className="relative text-green-400 hover:text-green-300" onClick={() => navigate("/admin/events")}>
+              <Button variant="ghost" size="icon" className="relative text-primary hover:text-primary/80" onClick={() => navigate("/admin/events")}>
                 <ShieldCheck className="w-5 h-5" />
                 {pendingCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
