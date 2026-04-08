@@ -1,34 +1,46 @@
 
 
-## Aktueller Stand
+## Top Events auf der Karte hervorheben
 
-Der Admin-Bereich existiert bereits unter `/admin/events` und ist über das Schild-Icon (🛡️) auf der Profilseite erreichbar. Das Problem: Es gibt keinen visuellen Hinweis, dass neue Anfragen vorliegen — kein Badge, keine Zahl, keine Benachrichtigung.
+### Konzept
+Events mit `is_top_event = true` bekommen auf der Karte einen goldenen Rahmen und ein kleines Stern-Badge. Admins und Hosts (via Pay-per-Event "Top Event" Option) können Events als Top Event markieren.
 
-## Plan
+### Datenbank
+Die `events`-Tabelle hat bereits ein `is_featured`-Feld (boolean, default false). Dieses wird als "Top Event"-Flag genutzt -- keine Migration nötig.
 
-### 1. Pending-Counter Badge am Admin-Icon (Profil-Header)
+### Änderungen
 
-- Im `Profile.tsx` einen Echtzeit-Counter der pending Events laden (`SELECT count(*) FROM events WHERE approval_status = 'pending'`)
-- Am ShieldCheck-Icon ein rotes Badge mit der Anzahl anzeigen (z.B. rote Blase mit "3")
-- Nur sichtbar wenn `count > 0`
+**1. Search-Events Edge Function anpassen**
+- `is_featured` im SELECT und in der Response zurückgeben, damit die Karte weiß, welche Events Top Events sind.
 
-### 2. Admin-Bereich in der BottomNavigation sichtbar machen
+**2. `useSearchEvents.ts` -- Interface erweitern**
+- `SearchEvent` um `is_featured: boolean` ergänzen.
 
-- Optional: Für Admins einen zusätzlichen Nav-Eintrag oder ein Indikator-Dot in der Bottom Navigation hinzufügen, damit man nicht erst zum Profil navigieren muss
+**3. `InteractiveMap.tsx` und `MapboxMap.tsx` -- MapEvent erweitern**
+- `MapEvent` Interface um `is_featured?: boolean` ergänzen.
 
-### 3. Zusammenfassung des Flows
+**4. `MapboxMap.tsx` -- Marker-Rendering anpassen**
+- Wenn `event.is_featured === true`:
+  - Goldener Rahmen (`#DAA520`) statt dem Standard-Grün (`#3B4D34`)
+  - Kleines Stern-Icon (★) als Badge oben rechts am Marker-Kreis
+  - Leicht größerer Marker (56px statt 50px) für mehr Sichtbarkeit
 
+**5. `Nearby.tsx` -- `is_featured` an MapEvents durchreichen**
+- Bei publicMapEvents und privateMapEvents das Feld `is_featured` mappen.
+
+**6. Host-Seite / Admin -- Top Event setzen**
+- Im CreateEventDialog bzw. Billing-Flow: Wenn Host "Top Event" (€49.90) wählt, wird `is_featured = true` gesetzt.
+- Im Admin Panel: Admins können Events als "Top Event" markieren/entfernen.
+
+### Visuelles Ergebnis
 ```text
-User erstellt Community Event → Status: pending → Event unsichtbar auf Karte
-                                                 ↓
-Admin sieht Badge "3" am 🛡️ Icon → klickt → /admin/events
-                                                 ↓
-                                    Freigeben oder Ablehnen
+  Normal Marker          Top Event Marker
+  ┌──────────┐          ┌──────────┐
+  │  ┌────┐  │          │  ┌────┐★ │
+  │  │ 🖼️ │  │          │  │ 🖼️ │  │
+  │  └────┘  │          │  └────┘  │
+  │  grün    │          │  gold    │
+  │  Rahmen  │          │  Rahmen  │
+  └──────────┘          └──────────┘
 ```
-
-### Technische Details
-
-- Query: `supabase.from('events').select('id', { count: 'exact', head: true }).eq('approval_status', 'pending')` — nutzt den bestehenden Admin-RLS-Policy
-- Badge-Komponente: Kleiner roter Kreis mit Zahl, absolut positioniert über dem ShieldCheck-Button
-- State via `useState` + `useEffect` im Profile-Component
 
