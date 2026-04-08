@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { CheckCircle, XCircle, Clock, ArrowLeft, MapPin, Calendar, Star, StarOff, ChevronUp, ChevronDown } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AdminStatistics from "@/components/AdminStatistics";
+import AdminHostManagement from "@/components/AdminHostManagement";
 
 const formatDate = (dateStr: string) => {
   const d = new Date(dateStr);
@@ -199,8 +200,11 @@ const AdminEvents = () => {
             <TabsTrigger value="featured" className="flex-1 text-xs">
               Top Events
             </TabsTrigger>
+            <TabsTrigger value="hosts" className="flex-1 text-xs">
+              Hosts
+            </TabsTrigger>
             <TabsTrigger value="stats" className="flex-1 text-xs">
-              Statistiken
+              Stats
             </TabsTrigger>
           </TabsList>
 
