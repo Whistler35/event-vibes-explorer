@@ -27,6 +27,13 @@ interface HostProfileData {
   is_verified: boolean;
 }
 
+interface Friendship {
+  id: string;
+  requester_id: string;
+  addressee_id: string;
+  status: string;
+}
+
 const UserProfile = () => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
@@ -37,6 +44,8 @@ const UserProfile = () => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ hostedCount: 0, participatedCount: 0, friendsCount: 0 });
   const [statsSheet, setStatsSheet] = useState<{ open: boolean; tab: "hosted" | "participated" | "friends" }>({ open: false, tab: "hosted" });
+  const [friendship, setFriendship] = useState<Friendship | null>(null);
+  const [friendActionLoading, setFriendActionLoading] = useState(false);
 
   const handleStartDM = async () => {
     if (!user || !userId) {
