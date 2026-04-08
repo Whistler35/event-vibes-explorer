@@ -14,6 +14,7 @@ interface MapEvent {
   location_name?: string;
   max_participants?: number;
   current_participants?: number;
+  is_featured?: boolean;
 }
 
 export interface MapboxMapHandle {
@@ -167,16 +168,22 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
       markerContainer2.style.flexDirection = 'column';
       markerContainer2.style.alignItems = 'center';
       markerContainer2.style.cursor = 'pointer';
+      const isFeatured = !!(event as any).is_featured;
+      const markerSize = isFeatured ? '56px' : '50px';
+      const borderColor = isFeatured ? '#DAA520' : '#173518';
+      
       const imageWrapper = document.createElement('div');
       imageWrapper.style.position = 'relative';
-      imageWrapper.style.width = '50px';
-      imageWrapper.style.height = '50px';
+      imageWrapper.style.width = markerSize;
+      imageWrapper.style.height = markerSize;
       const imageElement = document.createElement('div');
-      imageElement.style.width = '50px';
-      imageElement.style.height = '50px';
+      imageElement.style.width = markerSize;
+      imageElement.style.height = markerSize;
       imageElement.style.borderRadius = '50%';
-      imageElement.style.border = '3px solid #3B4D34';
-      imageElement.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
+      imageElement.style.border = `3px solid ${borderColor}`;
+      imageElement.style.boxShadow = isFeatured 
+        ? '0 4px 12px rgba(218,165,32,0.5)' 
+        : '0 4px 12px rgba(0,0,0,0.4)';
       imageElement.style.overflow = 'hidden';
       imageElement.style.backgroundColor = '#1a1a2e';
       if (event.image) {
@@ -190,9 +197,30 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
         imageElement.style.display = 'flex';
         imageElement.style.alignItems = 'center';
         imageElement.style.justifyContent = 'center';
-        imageElement.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3B4D34" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>';
+        imageElement.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${borderColor}" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`;
       }
       imageWrapper.appendChild(imageElement);
+      
+      // Star badge for featured events
+      if (isFeatured) {
+        const starBadge = document.createElement('div');
+        starBadge.style.position = 'absolute';
+        starBadge.style.top = '-4px';
+        starBadge.style.right = '-4px';
+        starBadge.style.width = '20px';
+        starBadge.style.height = '20px';
+        starBadge.style.borderRadius = '50%';
+        starBadge.style.backgroundColor = '#DAA520';
+        starBadge.style.display = 'flex';
+        starBadge.style.alignItems = 'center';
+        starBadge.style.justifyContent = 'center';
+        starBadge.style.fontSize = '12px';
+        starBadge.style.color = 'white';
+        starBadge.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
+        starBadge.textContent = '★';
+        imageWrapper.appendChild(starBadge);
+      }
+      
       const titleLabel = document.createElement('div');
       titleLabel.textContent = event.title;
       titleLabel.style.marginTop = '4px';
