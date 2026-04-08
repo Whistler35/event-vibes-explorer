@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { ArrowLeft, MessageCircle, Building2, Globe, ExternalLink, ShieldCheck } from "lucide-react";
+import { ArrowLeft, MessageCircle, Building2, Globe, ExternalLink, ShieldCheck, UserPlus, UserCheck, UserMinus, Clock, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
