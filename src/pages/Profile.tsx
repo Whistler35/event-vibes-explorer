@@ -234,7 +234,7 @@ const Profile = () => {
               {hostProfile?.instagram_username && (
                 <Button variant="outline" size="sm" asChild>
                   <a
-                    href={`https://instagram.com/${hostProfile.instagram_username.replace(/^@/, '')}`}
+                    href={`https://www.instagram.com/${hostProfile.instagram_username.replace(/^@/, '')}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -283,7 +283,7 @@ const Profile = () => {
                 </div>
                 <Button variant="outline" asChild>
                   <a
-                    href={`https://instagram.com/${profile.instagram_username.replace(/^@/, '')}`}
+                    href={`https://www.instagram.com/${profile.instagram_username.replace(/^@/, '')}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
