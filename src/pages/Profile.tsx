@@ -3,9 +3,10 @@ import evendleLogo from "@/assets/evendle-logo.jpeg";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, ShieldCheck, LogIn, Users } from "lucide-react";
+import { LogOut, Settings, ShieldCheck, LogIn, Users, Building2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePendingEventsCount } from "@/hooks/usePendingEventsCount";
+import { useIsHost } from "@/hooks/useIsHost";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import FriendSearch from "@/components/FriendSearch";
@@ -31,6 +32,7 @@ interface ProfileStats {
 const Profile = () => {
   const { user } = useAuth();
   const { isAdmin, count: pendingCount } = usePendingEventsCount();
+  const { isHost } = useIsHost();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
