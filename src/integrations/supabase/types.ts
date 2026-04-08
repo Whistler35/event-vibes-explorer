@@ -358,36 +358,42 @@ export type Database = {
           created_at: string
           current_plan_id: string | null
           id: string
+          instagram_username: string | null
           is_verified: boolean
           status: string
           total_events_created: number
           total_revenue_cents: number
           updated_at: string
           user_id: string
+          website_url: string | null
         }
         Insert: {
           company_name?: string | null
           created_at?: string
           current_plan_id?: string | null
           id?: string
+          instagram_username?: string | null
           is_verified?: boolean
           status?: string
           total_events_created?: number
           total_revenue_cents?: number
           updated_at?: string
           user_id: string
+          website_url?: string | null
         }
         Update: {
           company_name?: string | null
           created_at?: string
           current_plan_id?: string | null
           id?: string
+          instagram_username?: string | null
           is_verified?: boolean
           status?: string
           total_events_created?: number
           total_revenue_cents?: number
           updated_at?: string
           user_id?: string
+          website_url?: string | null
         }
         Relationships: [
           {
