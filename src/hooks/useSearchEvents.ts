@@ -35,6 +35,7 @@ export interface SearchEvent {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  is_featured: boolean;
 }
 
 interface SearchResult {

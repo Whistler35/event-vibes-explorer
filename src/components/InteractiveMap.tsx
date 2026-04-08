@@ -12,6 +12,7 @@ export interface MapEvent {
   location_name?: string;
   max_participants?: number;
   current_participants?: number;
+  is_featured?: boolean;
 }
 
 interface InteractiveMapProps {

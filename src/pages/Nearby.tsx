@@ -170,6 +170,7 @@ const Nearby = () => {
       description: e.description || undefined, event_date: e.event_date,
       location_name: e.location_name, max_participants: e.max_participants || undefined,
       current_participants: e.current_participants || undefined,
+      is_featured: e.is_featured || false,
     }));
 
   const privateMapEvents: MapEvent[] = (privateEvents || [])
@@ -181,6 +182,7 @@ const Nearby = () => {
       description: e.description || undefined, event_date: e.event_date,
       location_name: e.location_name, max_participants: e.max_participants || undefined,
       current_participants: e.current_participants || undefined,
+      is_featured: (e as any).is_featured || false,
     }));
 
   const mapEvents = isPrivateMode ? privateMapEvents : publicMapEvents;
