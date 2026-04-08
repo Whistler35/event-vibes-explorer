@@ -23,6 +23,7 @@ import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/AuthContext";
 
 const AdminEvents = lazy(() => import("./pages/AdminEvents"));
+const HostDashboard = lazy(() => import("./pages/HostDashboard"));
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ const App = () => (
               <Route path="/profile/edit" element={<EditProfile />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/admin/events" element={<AdminEvents />} />
+              <Route path="/host/dashboard" element={<HostDashboard />} />
               <Route path="/user/:userId" element={<UserProfile />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

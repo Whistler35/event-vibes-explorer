@@ -3,9 +3,10 @@ import evendleLogo from "@/assets/evendle-logo.jpeg";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, ShieldCheck, LogIn, Users } from "lucide-react";
+import { LogOut, Settings, ShieldCheck, LogIn, Users, Building2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePendingEventsCount } from "@/hooks/usePendingEventsCount";
+import { useIsHost } from "@/hooks/useIsHost";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import FriendSearch from "@/components/FriendSearch";
@@ -31,6 +32,7 @@ interface ProfileStats {
 const Profile = () => {
   const { user } = useAuth();
   const { isAdmin, count: pendingCount } = usePendingEventsCount();
+  const { isHost } = useIsHost();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -132,8 +134,13 @@ const Profile = () => {
             <span className="text-foreground text-xl font-bold">EVENDLE</span>
           </div>
           <div className="flex space-x-2">
+            {isHost && (
+              <Button variant="ghost" size="icon" className="text-primary hover:text-primary/80" onClick={() => navigate("/host/dashboard")}>
+                <Building2 className="w-5 h-5" />
+              </Button>
+            )}
             {isAdmin && (
-              <Button variant="ghost" size="icon" className="relative text-green-400 hover:text-green-300" onClick={() => navigate("/admin/events")}>
+              <Button variant="ghost" size="icon" className="relative text-primary hover:text-primary/80" onClick={() => navigate("/admin/events")}>
                 <ShieldCheck className="w-5 h-5" />
                 {pendingCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
