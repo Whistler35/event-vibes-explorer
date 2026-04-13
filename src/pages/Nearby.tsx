@@ -200,7 +200,7 @@ const Nearby = () => {
         </div>
 
         {/* Public/Private Toggle */}
-        <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+        <div className="absolute top-4 right-4 z-10 flex items-center gap-2 px-[30px]">
           {/* Search toggle button */}
           <button
             onClick={() => setShowSearchBar(!showSearchBar)}
