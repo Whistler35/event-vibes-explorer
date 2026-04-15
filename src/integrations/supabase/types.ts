@@ -405,6 +405,33 @@ export type Database = {
           },
         ]
       }
+      host_ratings: {
+        Row: {
+          created_at: string
+          host_user_id: string
+          id: string
+          rating: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          host_user_id: string
+          id?: string
+          rating: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          host_user_id?: string
+          id?: string
+          rating?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       host_subscriptions: {
         Row: {
           created_at: string
