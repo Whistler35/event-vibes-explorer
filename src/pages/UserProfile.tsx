@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import ProfileStatsSheet from "@/components/ProfileStatsSheet";
+import HostRating from "@/components/HostRating";
 import { getInstagramUrl } from "@/lib/utils";
 
 interface ProfileData {
@@ -224,10 +225,11 @@ const UserProfile = () => {
               <p className="text-foreground text-xl font-bold">{stats.hostedCount}</p>
               <p className="text-muted-foreground text-xs">Gehostet</p>
             </button>
-            <button onClick={() => setStatsSheet({ open: true, tab: "participated" })} className="text-center">
-              <p className="text-foreground text-xl font-bold">{stats.participatedCount}</p>
-              <p className="text-muted-foreground text-xs">Teilgenommen</p>
-            </button>
+            {isHost && userId && (
+              <div className="text-center">
+                <HostRating hostUserId={userId} interactive={!!user && user.id !== userId} />
+              </div>
+            )}
             <button onClick={() => setStatsSheet({ open: true, tab: "friends" })} className="text-center">
               <p className="text-foreground text-xl font-bold">{stats.friendsCount}</p>
               <p className="text-muted-foreground text-xs">Freunde</p>

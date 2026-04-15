@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import FriendSearch from "@/components/FriendSearch";
 import ProfileStatsSheet from "@/components/ProfileStatsSheet";
+import HostRating from "@/components/HostRating";
 import { Badge } from "@/components/ui/badge";
 import { getInstagramUrl } from "@/lib/utils";
 
@@ -212,10 +213,11 @@ const Profile = () => {
               <p className="text-foreground text-xl font-bold">{stats.hostedCount}</p>
               <p className="text-muted-foreground text-xs">Gehostet</p>
             </button>
-            <button onClick={() => setStatsSheet({ open: true, tab: "participated" })} className="text-center">
-              <p className="text-foreground text-xl font-bold">{stats.participatedCount}</p>
-              <p className="text-muted-foreground text-xs">Teilgenommen</p>
-            </button>
+            {isHost && (
+              <div className="text-center">
+                <HostRating hostUserId={user.id} size="sm" />
+              </div>
+            )}
             <button onClick={() => setStatsSheet({ open: true, tab: "friends" })} className="text-center">
               <p className="text-foreground text-xl font-bold">{stats.friendsCount}</p>
               <p className="text-muted-foreground text-xs">Freunde</p>
