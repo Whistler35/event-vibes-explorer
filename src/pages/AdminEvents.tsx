@@ -250,6 +250,9 @@ const AdminEvents = () => {
             <TabsTrigger value="hosts" className="flex-1 text-xs">
               Hosts
             </TabsTrigger>
+            <TabsTrigger value="manage" className="flex-1 text-xs">
+              Löschen
+            </TabsTrigger>
             <TabsTrigger value="stats" className="flex-1 text-xs">
               Stats
             </TabsTrigger>
