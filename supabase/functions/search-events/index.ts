@@ -18,22 +18,98 @@ interface SearchParams {
   offset?: number
 }
 
+const ALLOWED_CATEGORIES = new Set([
+  'music', 'sports', 'culture', 'food', 'nightlife',
+  'outdoor', 'community', 'workshop', 'other',
+])
+const ALLOWED_SOURCES = new Set(['curated', 'imported', 'community'])
+
+function isFiniteNumber(n: unknown): n is number {
+  return typeof n === 'number' && Number.isFinite(n)
+}
+
+function isValidIsoDate(s: unknown): s is string {
+  return typeof s === 'string' && s.length <= 64 && !Number.isNaN(Date.parse(s))
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
+    // Use ANON key so RLS applies — public events are already readable
+    // by the "Public can view approved visible events" policy.
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+      Deno.env.get('SUPABASE_ANON_KEY')!
     )
 
-    const params: SearchParams = req.method === 'POST' ? await req.json() : {}
-    const limit = Math.min(params.limit || 50, 200)
-    const offset = params.offset || 0
+    let raw: unknown = {}
+    if (req.method === 'POST') {
+      try {
+        raw = await req.json()
+      } catch {
+        return new Response(
+          JSON.stringify({ error: 'Invalid JSON body' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+    }
+    const params = (raw ?? {}) as SearchParams
 
-    // Start with base query - service role bypasses RLS, so we filter visibility manually
+    // ---- Validate & sanitize inputs ----
+    const limit = Math.min(Math.max(Number(params.limit) || 50, 1), 200)
+    const offset = Math.max(Number(params.offset) || 0, 0)
+
+    let categories: string[] | undefined
+    if (Array.isArray(params.categories)) {
+      categories = params.categories
+        .filter((c): c is string => typeof c === 'string')
+        .filter((c) => ALLOWED_CATEGORIES.has(c))
+        .slice(0, 20)
+      if (categories.length === 0) categories = undefined
+    }
+    const category =
+      !categories && typeof params.category === 'string' && ALLOWED_CATEGORIES.has(params.category)
+        ? params.category
+        : undefined
+
+    const source =
+      typeof params.source === 'string' && ALLOWED_SOURCES.has(params.source)
+        ? params.source
+        : undefined
+
+    const dateFrom = isValidIsoDate(params.date_from) ? params.date_from : undefined
+    const dateTo = isValidIsoDate(params.date_to) ? params.date_to : undefined
+
+    // Sanitize free-text search: strip PostgREST filter syntax chars and cap length
+    let safeText: string | undefined
+    if (typeof params.text === 'string' && params.text.trim().length > 0) {
+      safeText = params.text
+        .trim()
+        .slice(0, 200)
+        .replace(/[(),*%]/g, '')
+        .replace(/\s+/g, ' ')
+      if (safeText.length === 0) safeText = undefined
+    }
+
+    // Validate bbox / radius numerics
+    let bbox: SearchParams['bbox']
+    if (params.bbox &&
+        isFiniteNumber(params.bbox.sw_lat) && isFiniteNumber(params.bbox.sw_lng) &&
+        isFiniteNumber(params.bbox.ne_lat) && isFiniteNumber(params.bbox.ne_lng)) {
+      bbox = params.bbox
+    }
+    let radius: SearchParams['radius']
+    if (params.radius &&
+        isFiniteNumber(params.radius.lat) && isFiniteNumber(params.radius.lng) &&
+        isFiniteNumber(params.radius.meters) && params.radius.meters > 0 &&
+        params.radius.meters <= 500_000) {
+      radius = params.radius
+    }
+
+    // Build query — RLS already restricts to public+approved rows
     let query = supabase
       .from('events')
       .select('*', { count: 'exact' })
@@ -42,35 +118,27 @@ Deno.serve(async (req) => {
       .order('event_date', { ascending: true })
       .range(offset, offset + limit - 1)
 
-    // Apply filters
-    if (params.categories && params.categories.length > 0) {
-      query = query.in('category', params.categories)
-    } else if (params.category) {
-      query = query.eq('category', params.category)
+    if (categories && categories.length > 0) {
+      query = query.in('category', categories)
+    } else if (category) {
+      query = query.eq('category', category)
     }
-    if (params.source) {
-      query = query.eq('source', params.source)
-    }
-    if (params.date_from) {
-      query = query.gte('event_date', params.date_from)
-    }
-    if (params.date_to) {
-      query = query.lte('event_date', params.date_to)
-    }
-    if (params.text) {
-      query = query.or(`title.ilike.%${params.text}%,description.ilike.%${params.text}%`)
+    if (source) query = query.eq('source', source)
+    if (dateFrom) query = query.gte('event_date', dateFrom)
+    if (dateTo) query = query.lte('event_date', dateTo)
+    if (safeText) {
+      query = query.or(
+        `title.ilike.%${safeText}%,description.ilike.%${safeText}%`
+      )
     }
 
     const { data, error, count } = await query
-
     if (error) throw error
 
-    // Apply geo filters client-side for now (PostGIS RPC functions will be added via migration)
     let filteredData = data || []
 
-    if (params.bbox) {
-      const { sw_lat, sw_lng, ne_lat, ne_lng } = params.bbox
-      // Try PostGIS RPC first, fallback to lat/lng filtering
+    if (bbox) {
+      const { sw_lat, sw_lng, ne_lat, ne_lng } = bbox
       const { data: geoData, error: geoError } = await supabase.rpc('search_events_bbox', {
         sw_lat, sw_lng, ne_lat, ne_lng,
       })
@@ -78,7 +146,6 @@ Deno.serve(async (req) => {
         const geoIds = new Set(geoData.map((r: any) => r.id))
         filteredData = filteredData.filter(e => geoIds.has(e.id))
       } else {
-        // Fallback: simple lat/lng bounding box
         filteredData = filteredData.filter(e =>
           e.latitude != null && e.longitude != null &&
           e.latitude >= sw_lat && e.latitude <= ne_lat &&
@@ -87,8 +154,8 @@ Deno.serve(async (req) => {
       }
     }
 
-    if (params.radius) {
-      const { lat, lng, meters } = params.radius
+    if (radius) {
+      const { lat, lng, meters } = radius
       const { data: geoData, error: geoError } = await supabase.rpc('search_events_radius', {
         center_lat: lat, center_lng: lng, radius_meters: meters,
       })
@@ -96,7 +163,6 @@ Deno.serve(async (req) => {
         const geoIds = new Set(geoData.map((r: any) => r.id))
         filteredData = filteredData.filter(e => geoIds.has(e.id))
       } else {
-        // Fallback: Haversine approximation
         const toRad = (deg: number) => deg * Math.PI / 180
         filteredData = filteredData.filter(e => {
           if (e.latitude == null || e.longitude == null) return false
