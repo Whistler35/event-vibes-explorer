@@ -57,6 +57,32 @@ All colors MUST be HSL.
     
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Blitz feature tokens */
+    --blitz-forest: 122 39% 15%;
+    --blitz-pink: 330 100% 50%;
+  }
+
+  @keyframes blitz-pulse {
+    0%, 100% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 hsl(var(--blitz-pink) / 0.6), 0 0 60px hsl(var(--blitz-pink) / 0.6);
+    }
+    50% {
+      transform: scale(1.05);
+      box-shadow: 0 0 0 14px hsl(var(--blitz-pink) / 0), 0 0 80px hsl(var(--blitz-pink) / 0.8);
+    }
+  }
+  .animate-blitz-pulse {
+    animation: blitz-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes blitz-bolt-pulse {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px hsl(var(--blitz-pink) / 0.8)); }
+    50% { transform: scale(1.15); filter: drop-shadow(0 0 12px hsl(var(--blitz-pink))); }
+  }
+  .animate-blitz-bolt {
+    animation: blitz-bolt-pulse 1.4s ease-in-out infinite;
   }
 
   .dark {

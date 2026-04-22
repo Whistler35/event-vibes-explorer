@@ -12,6 +12,8 @@ import EventChatPage from "./pages/EventChatPage";
 import Messenger from "./pages/Messenger";
 import DirectChat from "./pages/DirectChat";
 import EvenldeWelcomeChat from "./pages/EvenldeWelcomeChat";
+import Blitz from "./pages/Blitz";
+import BlitzMatch from "./pages/BlitzMatch";
 
 import Chat from "./pages/Chat";
 import CityEvents from "./pages/CityEvents";
@@ -44,6 +46,8 @@ const App = () => (
               <Route path="/event/:id/hangouts" element={<EventHangouts />} />
               <Route path="/event/:id/chat" element={<EventChatPage />} />
               <Route path="/nearby" element={<Nearby />} />
+              <Route path="/blitz" element={<Blitz />} />
+              <Route path="/blitz/match/:matchId" element={<BlitzMatch />} />
               <Route path="/messenger" element={<Messenger />} />
               <Route path="/dm/evendle-welcome" element={<EvenldeWelcomeChat />} />
               <Route path="/dm/:conversationId" element={<DirectChat />} />

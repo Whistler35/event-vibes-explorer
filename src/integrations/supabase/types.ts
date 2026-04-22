@@ -14,6 +14,159 @@ export type Database = {
   }
   public: {
     Tables: {
+      blitz_chat_messages: {
+        Row: {
+          created_at: string
+          id: string
+          match_id: string
+          message: string
+          sender_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          match_id: string
+          message: string
+          sender_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          match_id?: string
+          message?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blitz_chat_messages_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "blitz_matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blitz_matches: {
+        Row: {
+          blitz_request_id: string
+          chat_expires_at: string
+          created_at: string
+          host_id: string
+          id: string
+          participant_id: string
+          status: Database["public"]["Enums"]["blitz_match_status"]
+          updated_at: string
+        }
+        Insert: {
+          blitz_request_id: string
+          chat_expires_at?: string
+          created_at?: string
+          host_id: string
+          id?: string
+          participant_id: string
+          status?: Database["public"]["Enums"]["blitz_match_status"]
+          updated_at?: string
+        }
+        Update: {
+          blitz_request_id?: string
+          chat_expires_at?: string
+          created_at?: string
+          host_id?: string
+          id?: string
+          participant_id?: string
+          status?: Database["public"]["Enums"]["blitz_match_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blitz_matches_blitz_request_id_fkey"
+            columns: ["blitz_request_id"]
+            isOneToOne: false
+            referencedRelation: "blitz_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blitz_requests: {
+        Row: {
+          activity: string
+          city: string | null
+          created_at: string
+          duration_minutes: number
+          expires_at: string
+          host_id: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          status: Database["public"]["Enums"]["blitz_status"]
+          updated_at: string
+        }
+        Insert: {
+          activity: string
+          city?: string | null
+          created_at?: string
+          duration_minutes?: number
+          expires_at: string
+          host_id: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          status?: Database["public"]["Enums"]["blitz_status"]
+          updated_at?: string
+        }
+        Update: {
+          activity?: string
+          city?: string | null
+          created_at?: string
+          duration_minutes?: number
+          expires_at?: string
+          host_id?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          status?: Database["public"]["Enums"]["blitz_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      blitz_swipes: {
+        Row: {
+          blitz_request_id: string
+          created_at: string
+          direction: Database["public"]["Enums"]["blitz_swipe_direction"]
+          id: string
+          status: string
+          swiper_id: string
+          updated_at: string
+        }
+        Insert: {
+          blitz_request_id: string
+          created_at?: string
+          direction: Database["public"]["Enums"]["blitz_swipe_direction"]
+          id?: string
+          status?: string
+          swiper_id: string
+          updated_at?: string
+        }
+        Update: {
+          blitz_request_id?: string
+          created_at?: string
+          direction?: Database["public"]["Enums"]["blitz_swipe_direction"]
+          id?: string
+          status?: string
+          swiper_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blitz_swipes_blitz_request_id_fkey"
+            columns: ["blitz_request_id"]
+            isOneToOne: false
+            referencedRelation: "blitz_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_messages: {
         Row: {
           chat_id: string
@@ -1763,6 +1916,9 @@ export type Database = {
     Enums: {
       app_role: "admin" | "moderator" | "user" | "professional_host"
       approval_status: "pending" | "approved" | "rejected"
+      blitz_match_status: "active" | "expired" | "closed"
+      blitz_status: "active" | "expired" | "cancelled" | "matched"
+      blitz_swipe_direction: "left" | "right"
       event_category:
         | "music"
         | "sports"
@@ -1913,6 +2069,9 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "moderator", "user", "professional_host"],
       approval_status: ["pending", "approved", "rejected"],
+      blitz_match_status: ["active", "expired", "closed"],
+      blitz_status: ["active", "expired", "cancelled", "matched"],
+      blitz_swipe_direction: ["left", "right"],
       event_category: [
         "music",
         "sports",
