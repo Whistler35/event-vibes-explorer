@@ -1,5 +1,15 @@
 import { useEffect, useState } from "react";
-import { Search, BarChart3 } from "lucide-react";
+import { Search, BarChart3, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
@@ -51,6 +61,11 @@ const AdminEvents = () => {
     }
   }, [isAdmin, adminLoading, navigate]);
 
+  const [manageEvents, setManageEvents] = useState<AdminEvent[]>([]);
+  const [manageSearch, setManageSearch] = useState("");
+  const [manageFilter, setManageFilter] = useState<"all" | "past" | "upcoming">("past");
+  const [eventToDelete, setEventToDelete] = useState<AdminEvent | null>(null);
+
   const fetchPendingEvents = async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -92,16 +107,48 @@ const AdminEvents = () => {
     setLoading(false);
   };
 
+  const fetchManageEvents = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("events")
+      .select("id, title, description, category, event_date, location_name, image_url, created_at, created_by, approval_status, is_featured, featured_order")
+      .order("event_date", { ascending: false });
+    if (!error && data) setManageEvents(data as AdminEvent[]);
+    setLoading(false);
+  };
+
   useEffect(() => {
     if (isAdmin) {
       if (tab === "pending") fetchPendingEvents();
-      else fetchAllEvents();
+      else if (tab === "featured") fetchAllEvents();
+      else if (tab === "manage") fetchManageEvents();
     }
   }, [isAdmin, tab]);
 
   const filteredNonFeatured = nonFeaturedEvents.filter((e) =>
     e.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const filteredManageEvents = manageEvents.filter((e) => {
+    const matchesSearch = e.title.toLowerCase().includes(manageSearch.toLowerCase()) ||
+      e.location_name.toLowerCase().includes(manageSearch.toLowerCase());
+    const isPast = new Date(e.event_date) < new Date();
+    if (manageFilter === "past") return matchesSearch && isPast;
+    if (manageFilter === "upcoming") return matchesSearch && !isPast;
+    return matchesSearch;
+  });
+
+  const handleDeleteEvent = async () => {
+    if (!eventToDelete) return;
+    const { error } = await supabase.from("events").delete().eq("id", eventToDelete.id);
+    if (error) {
+      toast.error("Fehler beim Löschen");
+    } else {
+      toast.success(`"${eventToDelete.title}" gelöscht`);
+      setManageEvents((prev) => prev.filter((e) => e.id !== eventToDelete.id));
+      setEventToDelete(null);
+    }
+  };
 
   const handleApprove = async (eventId: string) => {
     const { error } = await supabase
@@ -202,6 +249,9 @@ const AdminEvents = () => {
             </TabsTrigger>
             <TabsTrigger value="hosts" className="flex-1 text-xs">
               Hosts
+            </TabsTrigger>
+            <TabsTrigger value="manage" className="flex-1 text-xs">
+              Löschen
             </TabsTrigger>
             <TabsTrigger value="stats" className="flex-1 text-xs">
               Stats
@@ -386,11 +436,119 @@ const AdminEvents = () => {
             <AdminHostManagement />
           </TabsContent>
 
+          {/* Manage / Delete Events Tab */}
+          <TabsContent value="manage" className="space-y-4 mt-4">
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant={manageFilter === "past" ? "default" : "outline"}
+                  onClick={() => setManageFilter("past")}
+                  className="flex-1"
+                >
+                  Vergangene
+                </Button>
+                <Button
+                  size="sm"
+                  variant={manageFilter === "upcoming" ? "default" : "outline"}
+                  onClick={() => setManageFilter("upcoming")}
+                  className="flex-1"
+                >
+                  Kommende
+                </Button>
+                <Button
+                  size="sm"
+                  variant={manageFilter === "all" ? "default" : "outline"}
+                  onClick={() => setManageFilter("all")}
+                  className="flex-1"
+                >
+                  Alle
+                </Button>
+              </div>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Event oder Ort suchen..."
+                  value={manageSearch}
+                  onChange={(e) => setManageSearch(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 rounded-xl bg-muted border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+            </div>
+
+            {loading ? (
+              <div className="text-center text-muted-foreground py-12">Laden...</div>
+            ) : filteredManageEvents.length === 0 ? (
+              <p className="text-muted-foreground text-sm text-center py-8">Keine Events gefunden.</p>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-muted-foreground text-xs">{filteredManageEvents.length} Events</p>
+                {filteredManageEvents.map((event) => {
+                  const isPast = new Date(event.event_date) < new Date();
+                  return (
+                    <div key={event.id} className="bg-card rounded-2xl overflow-hidden border border-border">
+                      <div className="flex items-center gap-3 p-4">
+                        {event.image_url ? (
+                          <img src={event.image_url} alt={event.title} className="w-14 h-14 rounded-xl object-cover shrink-0" />
+                        ) : (
+                          <div className="w-14 h-14 rounded-xl bg-muted flex items-center justify-center text-2xl shrink-0">📅</div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-foreground font-bold text-sm truncate">{event.title}</h3>
+                            {isPast && (
+                              <Badge variant="outline" className="text-muted-foreground border-border shrink-0 text-[10px]">
+                                Vergangen
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-muted-foreground text-xs">{formatDate(event.event_date)}</p>
+                          <p className="text-muted-foreground text-xs truncate">{event.location_name}</p>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setEventToDelete(event)}
+                          className="border-destructive/50 text-destructive hover:bg-destructive hover:text-destructive-foreground shrink-0"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Hosts Tab — moved below manage in JSX order is fine; Tabs match by value */}
+
           {/* Statistics Tab */}
           <TabsContent value="stats" className="mt-4">
             <AdminStatistics />
           </TabsContent>
         </Tabs>
+
+        <AlertDialog open={!!eventToDelete} onOpenChange={(open) => !open && setEventToDelete(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Event endgültig löschen?</AlertDialogTitle>
+              <AlertDialogDescription>
+                "{eventToDelete?.title}" wird unwiderruflich aus der Datenbank entfernt. Alle zugehörigen Anmeldungen, Likes und Chats werden ebenfalls verloren gehen.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteEvent}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Löschen
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </Layout>
   );
