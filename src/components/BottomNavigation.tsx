@@ -11,11 +11,11 @@ const BottomNavigation = () => {
 
   const navItems = [
     { id: "events", label: "EVENTS", icon: Calendar, path: "/" },
-    { id: "nearby", label: "near by", icon: MapPin, path: "/nearby" },
-    { id: "blitz", label: "Blitz", icon: Zap, path: "/blitz", isBlitz: true },
-    { id: "messenger", label: "Chat", icon: MessageCircle, path: "/messenger" },
+    { id: "nearby", label: "NEAR BY", icon: MapPin, path: "/nearby" },
+    { id: "blitz", label: "BLAST", icon: Zap, path: "/blitz", isBlitz: true },
+    { id: "messenger", label: "CHAT", icon: MessageCircle, path: "/messenger" },
     ...(isHost ? [{ id: "host", label: "Host", icon: Building2, path: "/host/dashboard" }] : []),
-    { id: "profile", label: "profile", icon: User, path: "/profile" },
+    { id: "profile", label: "PROFILE", icon: User, path: "/profile" },
   ];
 
   return (
@@ -32,7 +32,7 @@ const BottomNavigation = () => {
                 key={item.id}
                 onClick={() => navigate(item.path)}
                 className="flex flex-col items-center space-y-1 transition-colors duration-200"
-                aria-label="Blitz"
+                aria-label="BLAST"
               >
                 <div className={`relative -mt-4 p-3 rounded-full bg-[hsl(var(--blitz-pink))] shadow-[0_6px_20px_hsl(var(--blitz-pink)/0.5)] ${
                   isActive ? "ring-4 ring-[hsl(var(--blitz-pink))]/30" : "animate-blitz-bolt"
