@@ -61,6 +61,11 @@ const AdminEvents = () => {
     }
   }, [isAdmin, adminLoading, navigate]);
 
+  const [manageEvents, setManageEvents] = useState<AdminEvent[]>([]);
+  const [manageSearch, setManageSearch] = useState("");
+  const [manageFilter, setManageFilter] = useState<"all" | "past" | "upcoming">("past");
+  const [eventToDelete, setEventToDelete] = useState<AdminEvent | null>(null);
+
   const fetchPendingEvents = async () => {
     setLoading(true);
     const { data, error } = await supabase
