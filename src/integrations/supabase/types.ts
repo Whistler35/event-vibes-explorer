@@ -1068,6 +1068,16 @@ export type Database = {
             }
             Returns: string
           }
+      create_notification: {
+        Args: {
+          _body: string
+          _data?: Json
+          _title: string
+          _type: string
+          _user_id: string
+        }
+        Returns: string
+      }
       disablelongtransactions: { Args: never; Returns: string }
       dropgeometrycolumn:
         | {
