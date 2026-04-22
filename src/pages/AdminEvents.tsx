@@ -107,16 +107,48 @@ const AdminEvents = () => {
     setLoading(false);
   };
 
+  const fetchManageEvents = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("events")
+      .select("id, title, description, category, event_date, location_name, image_url, created_at, created_by, approval_status, is_featured, featured_order")
+      .order("event_date", { ascending: false });
+    if (!error && data) setManageEvents(data as AdminEvent[]);
+    setLoading(false);
+  };
+
   useEffect(() => {
     if (isAdmin) {
       if (tab === "pending") fetchPendingEvents();
-      else fetchAllEvents();
+      else if (tab === "featured") fetchAllEvents();
+      else if (tab === "manage") fetchManageEvents();
     }
   }, [isAdmin, tab]);
 
   const filteredNonFeatured = nonFeaturedEvents.filter((e) =>
     e.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const filteredManageEvents = manageEvents.filter((e) => {
+    const matchesSearch = e.title.toLowerCase().includes(manageSearch.toLowerCase()) ||
+      e.location_name.toLowerCase().includes(manageSearch.toLowerCase());
+    const isPast = new Date(e.event_date) < new Date();
+    if (manageFilter === "past") return matchesSearch && isPast;
+    if (manageFilter === "upcoming") return matchesSearch && !isPast;
+    return matchesSearch;
+  });
+
+  const handleDeleteEvent = async () => {
+    if (!eventToDelete) return;
+    const { error } = await supabase.from("events").delete().eq("id", eventToDelete.id);
+    if (error) {
+      toast.error("Fehler beim Löschen");
+    } else {
+      toast.success(`"${eventToDelete.title}" gelöscht`);
+      setManageEvents((prev) => prev.filter((e) => e.id !== eventToDelete.id));
+      setEventToDelete(null);
+    }
+  };
 
   const handleApprove = async (eventId: string) => {
     const { error } = await supabase
