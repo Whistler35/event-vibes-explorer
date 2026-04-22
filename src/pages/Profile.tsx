@@ -162,16 +162,6 @@ const Profile = () => {
                 <Building2 className="w-5 h-5" />
               </Button>
             )}
-            {isAdmin && (
-              <Button variant="ghost" size="icon" className="relative text-primary hover:text-primary/80" onClick={() => navigate("/admin/events")}>
-                <ShieldCheck className="w-5 h-5" />
-                {pendingCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                    {pendingCount}
-                  </span>
-                )}
-              </Button>
-            )}
             <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground" onClick={() => navigate("/profile/edit")}>
               <Settings className="w-5 h-5" />
             </Button>
@@ -180,6 +170,29 @@ const Profile = () => {
             </Button>
           </div>
         </div>
+
+        {/* Admin Panel - integrated in profile */}
+        {isAdmin && (
+          <button
+            onClick={() => navigate("/admin/events")}
+            className="w-full flex items-center justify-between p-4 rounded-2xl bg-primary text-primary-foreground hover:opacity-95 transition shadow-md"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary-foreground/15 flex items-center justify-center">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <div className="text-left">
+                <p className="font-bold text-sm">Admin Bereich</p>
+                <p className="text-xs opacity-80">Events moderieren &amp; verwalten</p>
+              </div>
+            </div>
+            {pendingCount > 0 && (
+              <span className="bg-destructive text-destructive-foreground text-xs font-bold rounded-full min-w-6 h-6 px-2 flex items-center justify-center">
+                {pendingCount}
+              </span>
+            )}
+          </button>
+        )}
 
         {/* Profile Info */}
         <div className="text-center space-y-6">
