@@ -10,7 +10,7 @@ const BottomNavigation = () => {
   const { isHost } = useIsHost();
 
   const navItems = [
-    { id: "events", label: "Events", icon: Calendar, path: "/" },
+    { id: "events", label: "EVENTS", icon: Calendar, path: "/" },
     { id: "nearby", label: "near by", icon: MapPin, path: "/nearby" },
     { id: "blitz", label: "Blitz", icon: Zap, path: "/blitz", isBlitz: true },
     { id: "messenger", label: "Chat", icon: MessageCircle, path: "/messenger" },
