@@ -11,11 +11,11 @@ const BottomNavigation = () => {
 
   const navItems = [
     { id: "events", label: "EVENTS", icon: Calendar, path: "/" },
-    { id: "nearby", label: "near by", icon: MapPin, path: "/nearby" },
-    { id: "blitz", label: "Blitz", icon: Zap, path: "/blitz", isBlitz: true },
-    { id: "messenger", label: "Chat", icon: MessageCircle, path: "/messenger" },
+    { id: "nearby", label: "NEAR BY", icon: MapPin, path: "/nearby" },
+    { id: "blitz", label: "BLAST", icon: Zap, path: "/blitz", isBlitz: true },
+    { id: "messenger", label: "CHAT", icon: MessageCircle, path: "/messenger" },
     ...(isHost ? [{ id: "host", label: "Host", icon: Building2, path: "/host/dashboard" }] : []),
-    { id: "profile", label: "profile", icon: User, path: "/profile" },
+    { id: "profile", label: "PROFILE", icon: User, path: "/profile" },
   ];
 
   return (
