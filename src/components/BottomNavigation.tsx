@@ -32,7 +32,7 @@ const BottomNavigation = () => {
                 key={item.id}
                 onClick={() => navigate(item.path)}
                 className="flex flex-col items-center space-y-1 transition-colors duration-200"
-                aria-label="Blitz"
+                aria-label="BLAST"
               >
                 <div className={`relative -mt-4 p-3 rounded-full bg-[hsl(var(--blitz-pink))] shadow-[0_6px_20px_hsl(var(--blitz-pink)/0.5)] ${
                   isActive ? "ring-4 ring-[hsl(var(--blitz-pink))]/30" : "animate-blitz-bolt"
