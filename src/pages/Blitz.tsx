@@ -81,7 +81,7 @@ const Blitz = () => {
               onClick={() => navigate("/auth")}
               className="relative px-8 py-4 rounded-2xl bg-[hsl(var(--blitz-pink))] text-white font-black uppercase tracking-wider shadow-[0_8px_32px_hsl(var(--blitz-pink)/0.5)] hover:scale-105 transition"
             >
-              Login zum Blasten
+              LOGIN ZUM BLITZEN
             </button>
           </div>
         </div>
