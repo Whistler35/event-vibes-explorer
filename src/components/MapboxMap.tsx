@@ -278,7 +278,7 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
       {!isPlaceMode && isLoaded && (
         <button
           onClick={() => enterPlaceMode()}
-          className="absolute bottom-6 right-6 z-20 w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors"
+          className="absolute bottom-24 right-6 md:bottom-6 z-20 w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors"
           aria-label="Event erstellen"
         >
           <Plus className="w-8 h-8 text-primary-foreground" />
@@ -301,7 +301,7 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
               <circle cx="16" cy="16" r="4" fill="none" stroke="white" strokeWidth="2" opacity="0.8" />
             </svg>
           </div>
-          <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-30 flex gap-4">
+          <div className="absolute bottom-24 md:bottom-6 left-1/2 transform -translate-x-1/2 z-30 flex gap-4">
             <button onClick={cancelPlaceMode} className="px-6 py-3 bg-card border border-border rounded-full flex items-center gap-2 text-foreground hover:bg-muted transition-colors">
               <X className="w-5 h-5" /><span>Abbrechen</span>
             </button>
