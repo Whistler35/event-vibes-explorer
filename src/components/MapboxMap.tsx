@@ -301,7 +301,7 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
               <circle cx="16" cy="16" r="4" fill="none" stroke="white" strokeWidth="2" opacity="0.8" />
             </svg>
           </div>
-          <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-30 flex gap-4">
+          <div className="absolute bottom-24 md:bottom-6 left-1/2 transform -translate-x-1/2 z-30 flex gap-4">
             <button onClick={cancelPlaceMode} className="px-6 py-3 bg-card border border-border rounded-full flex items-center gap-2 text-foreground hover:bg-muted transition-colors">
               <X className="w-5 h-5" /><span>Abbrechen</span>
             </button>
