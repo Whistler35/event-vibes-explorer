@@ -374,6 +374,39 @@ export type Database = {
           },
         ]
       }
+      event_tickets: {
+        Row: {
+          checked_in_at: string | null
+          checked_in_by: string | null
+          created_at: string
+          event_id: string
+          id: string
+          qr_token: string
+          ticket_code: string
+          user_id: string
+        }
+        Insert: {
+          checked_in_at?: string | null
+          checked_in_by?: string | null
+          created_at?: string
+          event_id: string
+          id?: string
+          qr_token: string
+          ticket_code: string
+          user_id: string
+        }
+        Update: {
+          checked_in_at?: string | null
+          checked_in_by?: string | null
+          created_at?: string
+          event_id?: string
+          id?: string
+          qr_token?: string
+          ticket_code?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       event_views: {
         Row: {
           event_id: string
