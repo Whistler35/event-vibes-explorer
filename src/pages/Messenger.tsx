@@ -245,11 +245,17 @@ const Messenger = () => {
             conversations.map((conversation) => (
               <div
                 key={conversation.id}
-                onClick={() => navigate(`/dm/${conversation.id}`)}
+                onClick={() =>
+                  conversation.isBlitz
+                    ? navigate(`/blitz/match/${conversation.matchId}`)
+                    : navigate(`/dm/${conversation.id}`)
+                }
                 className={`flex items-center space-x-4 p-3 rounded-2xl cursor-pointer transition-colors ${
-                  conversation.isUnread
-                    ? "bg-primary/10 border border-primary/20"
-                    : "hover:bg-card/50"
+                  conversation.isBlitz
+                    ? "bg-[hsl(var(--blitz-pink))]/15 border border-[hsl(var(--blitz-pink))]/40 hover:bg-[hsl(var(--blitz-pink))]/20"
+                    : conversation.isUnread
+                      ? "bg-primary/10 border border-primary/20"
+                      : "hover:bg-card/50"
                 }`}
               >
                 <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
@@ -258,7 +264,12 @@ const Messenger = () => {
                     alt={conversation.other_name}
                     className="w-full h-full object-cover"
                   />
-                  {conversation.isUnread && (
+                  {conversation.isBlitz && (
+                    <div className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-[hsl(var(--blitz-pink))] flex items-center justify-center border-2 border-background">
+                      <Zap className="w-2.5 h-2.5 text-white fill-white" />
+                    </div>
+                  )}
+                  {!conversation.isBlitz && conversation.isUnread && (
                     <div className="absolute top-0 right-0 w-3 h-3 bg-primary rounded-full border-2 border-background" />
                   )}
                 </div>
@@ -266,8 +277,17 @@ const Messenger = () => {
                   <div className="flex items-center justify-between">
                     <h3 className={`text-lg truncate ${conversation.isUnread ? "text-foreground font-bold" : "text-foreground font-semibold"}`}>
                       {conversation.other_name}
+                      {conversation.isBlitz && (
+                        <span className="ml-2 text-[10px] font-black uppercase tracking-wider text-[hsl(var(--blitz-pink))]">
+                          Blitz
+                        </span>
+                      )}
                     </h3>
-                    <span className={`text-sm flex-shrink-0 ml-2 ${conversation.isUnread ? "text-primary font-semibold" : "text-muted-foreground"}`}>
+                    <span className={`text-sm flex-shrink-0 ml-2 ${
+                      conversation.isBlitz
+                        ? "text-[hsl(var(--blitz-pink))] font-bold"
+                        : conversation.isUnread ? "text-primary font-semibold" : "text-muted-foreground"
+                    }`}>
                       {formatTime(conversation.last_message_at)}
                     </span>
                   </div>
