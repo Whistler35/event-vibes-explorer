@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import Layout from "@/components/Layout";
-import { MessageCircle, LogIn } from "lucide-react";
+import { MessageCircle, LogIn, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ConversationWithProfile {
@@ -15,6 +15,10 @@ interface ConversationWithProfile {
   last_message: string | null;
   last_message_at: string | null;
   isUnread: boolean;
+  isBlitz?: boolean;
+  matchId?: string;
+  blitzActivity?: string;
+  expiresAt?: string;
 }
 
 const isConversationUnread = (convoId: string, lastMessageAt: string | null, userId: string, senderId?: string): boolean => {
