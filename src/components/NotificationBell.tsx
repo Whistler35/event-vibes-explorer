@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, MessageCircle, Calendar, Users, UserPlus, UserCheck, ShieldCheck, CheckCircle, XCircle } from "lucide-react";
+import { Bell, MessageCircle, Calendar, Users, UserPlus, UserCheck, ShieldCheck, CheckCircle, XCircle, Zap } from "lucide-react";
 import { useNotifications, AppNotification } from "@/hooks/useNotifications";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,8 @@ const NotificationBell = () => {
       case "new_event_pending": return <ShieldCheck className="w-5 h-5 text-primary" />;
       case "event_approved": return <CheckCircle className="w-5 h-5 text-primary" />;
       case "event_rejected": return <XCircle className="w-5 h-5 text-destructive" />;
+      case "blitz_match": return <Zap className="w-5 h-5 text-[hsl(var(--blitz-pink))] fill-[hsl(var(--blitz-pink))]" />;
+      case "blitz_request": return <Zap className="w-5 h-5 text-[hsl(var(--blitz-pink))]" />;
       default: return <Bell className="w-5 h-5 text-primary" />;
     }
   };
@@ -32,14 +34,20 @@ const NotificationBell = () => {
       navigate(`/dm/${notif.data.conversation_id}`);
     } else if ((notif.type === "friend_event_created" || notif.type === "friend_joined_event") && notif.data?.event_id) {
       navigate(`/event/${notif.data.event_id}`);
-    } else if (notif.type === "friend_request" && notif.data?.requester_id) {
-      navigate(`/user/${notif.data.requester_id}`);
+    } else if (notif.type === "friend_request") {
+      const uid = notif.data?.requester_id || notif.data?.friend_id;
+      if (uid) navigate(`/user/${uid}`);
+      else navigate("/profile");
     } else if (notif.type === "friend_accepted" && notif.data?.friend_id) {
       navigate(`/user/${notif.data.friend_id}`);
     } else if ((notif.type === "event_approved" || notif.type === "event_rejected") && notif.data?.event_id) {
       navigate(`/event/${notif.data.event_id}`);
     } else if (notif.type === "new_event_pending") {
       navigate("/admin/events");
+    } else if (notif.type === "blitz_match" && notif.data?.match_id) {
+      navigate(`/blitz/match/${notif.data.match_id}`);
+    } else if (notif.type === "blitz_request") {
+      navigate("/blitz");
     }
     setOpen(false);
   };
