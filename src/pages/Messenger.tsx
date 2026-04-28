@@ -92,6 +92,59 @@ const Messenger = () => {
         });
       }
 
+      // Load active Blitz matches and append as chats
+      const { data: matches } = await supabase
+        .from("blitz_matches")
+        .select("id, host_id, participant_id, status, chat_expires_at, blitz_request_id, updated_at")
+        .or(`host_id.eq.${user.id},participant_id.eq.${user.id}`)
+        .eq("status", "active")
+        .gt("chat_expires_at", new Date().toISOString())
+        .order("updated_at", { ascending: false });
+
+      if (matches && matches.length > 0) {
+        const matchIds = matches.map((m: any) => m.id);
+        const otherIds = matches.map((m: any) =>
+          m.host_id === user.id ? m.participant_id : m.host_id
+        );
+        const requestIds = matches.map((m: any) => m.blitz_request_id);
+
+        const [{ data: blitzProfiles }, { data: blitzMsgs }, { data: blitzReqs }] = await Promise.all([
+          supabase.from("profiles").select("user_id, name, avatar_url").in("user_id", otherIds),
+          supabase
+            .from("blitz_chat_messages")
+            .select("match_id, message, created_at, sender_id")
+            .in("match_id", matchIds)
+            .order("created_at", { ascending: false }),
+          supabase.from("blitz_requests").select("id, activity").in("id", requestIds),
+        ]);
+
+        for (const m of matches as any[]) {
+          const otherId = m.host_id === user.id ? m.participant_id : m.host_id;
+          const profile = blitzProfiles?.find((p: any) => p.user_id === otherId);
+          const lastMsg = blitzMsgs?.find((msg: any) => msg.match_id === m.id);
+          const activity = blitzReqs?.find((r: any) => r.id === m.blitz_request_id)?.activity;
+          const lastAt = lastMsg?.created_at || m.updated_at;
+          const unread =
+            !!lastMsg &&
+            lastMsg.sender_id !== user.id &&
+            isConversationUnread(`blitz_${m.id}`, lastAt, user.id);
+
+          results.push({
+            id: `blitz_${m.id}`,
+            matchId: m.id,
+            other_user_id: otherId,
+            other_name: profile?.name || "Match",
+            other_avatar: profile?.avatar_url || null,
+            last_message: lastMsg?.message || `⚡ ${activity || "Blitz Match"}`,
+            last_message_at: lastAt,
+            isUnread: unread,
+            isBlitz: true,
+            blitzActivity: activity,
+            expiresAt: m.chat_expires_at,
+          });
+        }
+      }
+
       // Sort: unread first (newest on top), then read (newest on top)
       results.sort((a, b) => {
         if (a.isUnread !== b.isUnread) return a.isUnread ? -1 : 1;
