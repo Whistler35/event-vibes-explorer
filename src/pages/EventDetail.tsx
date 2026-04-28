@@ -8,7 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Calendar, Clock, MapPin, Users, MessageCircle, Pencil } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, MapPin, Users, MessageCircle, Pencil, ScanLine, Ticket as TicketIcon } from "lucide-react";
 import { toast } from "sonner";
 import JoinRequestButton from "@/components/JoinRequestButton";
 import JoinRequestList from "@/components/JoinRequestList";
@@ -314,13 +314,33 @@ const EventDetail = () => {
               </Button>
 
               {isParticipant && (
+                <>
+                  <Button
+                    onClick={() => navigate('/tickets')}
+                    variant="outline"
+                    className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                  >
+                    <TicketIcon className="w-4 h-4 mr-2" />
+                    Mein Ticket anzeigen
+                  </Button>
+                  <Button
+                    onClick={handleOpenChat}
+                    variant="outline"
+                    className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                  >
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Zum Gruppenchat
+                  </Button>
+                </>
+              )}
+              {canEdit && (
                 <Button
-                  onClick={handleOpenChat}
+                  onClick={() => navigate(`/event/${id}/checkin`)}
                   variant="outline"
                   className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
                 >
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Zum Gruppenchat
+                  <ScanLine className="w-4 h-4 mr-2" />
+                  Tickets scannen (Check-in)
                 </Button>
               )}
             </>
