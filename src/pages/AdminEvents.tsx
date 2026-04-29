@@ -314,6 +314,20 @@ const AdminEvents = () => {
 
           {/* Pending Events Tab */}
           <TabsContent value="pending" className="space-y-4 mt-4">
+            <div className="flex justify-end">
+              <Button
+                onClick={handleApifyImport}
+                disabled={importing}
+                variant="outline"
+                size="sm"
+              >
+                {importing ? (
+                  <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Importiere...</>
+                ) : (
+                  <><Download className="w-4 h-4 mr-1" /> Import from Apify</>
+                )}
+              </Button>
+            </div>
             {loading ? (
               <div className="text-center text-muted-foreground py-12">Laden...</div>
             ) : pendingEvents.length === 0 ? (
