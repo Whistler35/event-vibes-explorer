@@ -42,7 +42,22 @@ interface AdminEvent {
   approval_status: string;
   is_featured: boolean;
   featured_order: number;
+  source: string | null;
 }
+
+const SourceBadge = ({ source }: { source: string | null }) => {
+  const s = source || "community";
+  const styles: Record<string, string> = {
+    imported: "bg-blue-500/15 text-blue-600 border-blue-500/30 dark:text-blue-400",
+    curated: "bg-green-500/15 text-green-600 border-green-500/30 dark:text-green-400",
+    community: "bg-orange-500/15 text-orange-600 border-orange-500/30 dark:text-orange-400",
+  };
+  return (
+    <Badge variant="outline" className={`shrink-0 capitalize ${styles[s] || styles.community}`}>
+      {s}
+    </Badge>
+  );
+};
 
 const AdminEvents = () => {
   const { user } = useAuth();
@@ -70,7 +85,7 @@ const AdminEvents = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("events")
-      .select("id, title, description, category, event_date, location_name, image_url, created_at, created_by, approval_status, is_featured")
+      .select("id, title, description, category, event_date, location_name, image_url, created_at, created_by, approval_status, is_featured, source")
       .eq("approval_status", "pending")
       .order("created_at", { ascending: false });
 
@@ -241,8 +256,13 @@ const AdminEvents = () => {
 
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="w-full bg-muted">
-            <TabsTrigger value="pending" className="flex-1 text-xs">
-              Freigaben {pendingEvents.length > 0 && `(${pendingEvents.length})`}
+            <TabsTrigger value="pending" className="flex-1 text-xs relative">
+              Freigaben
+              {pendingEvents.length > 0 && (
+                <span className="ml-1.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold">
+                  {pendingEvents.length}
+                </span>
+              )}
             </TabsTrigger>
             <TabsTrigger value="featured" className="flex-1 text-xs">
               Top Events
@@ -278,9 +298,12 @@ const AdminEvents = () => {
                     <div className="p-4 space-y-3">
                       <div className="flex items-start justify-between gap-2">
                         <h3 className="text-foreground font-bold text-lg">{event.title}</h3>
-                        <Badge variant="outline" className="text-yellow-400 border-yellow-400/30 shrink-0">
-                          <Clock className="w-3 h-3 mr-1" /> Pending
-                        </Badge>
+                        <div className="flex flex-col items-end gap-1 shrink-0">
+                          <Badge variant="outline" className="text-yellow-400 border-yellow-400/30">
+                            <Clock className="w-3 h-3 mr-1" /> Pending
+                          </Badge>
+                          <SourceBadge source={event.source} />
+                        </div>
                       </div>
                       {event.description && (
                         <p className="text-muted-foreground text-sm line-clamp-2">{event.description}</p>
