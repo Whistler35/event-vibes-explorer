@@ -69,6 +69,40 @@ const AdminEvents = () => {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("pending");
   const [searchQuery, setSearchQuery] = useState("");
+  const [importing, setImporting] = useState(false);
+
+  const handleApifyImport = async () => {
+    setImporting(true);
+    try {
+      const apifyRes = await fetch(
+        "https://api.apify.com/v2/datasets/zDo9niy00gyS2OotZ/items?clean=true&format=json"
+      );
+      if (!apifyRes.ok) throw new Error(`Apify HTTP ${apifyRes.status}`);
+      const events = await apifyRes.json();
+      if (!Array.isArray(events)) throw new Error("Unexpected Apify response");
+
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const ingestRes = await fetch(`${supabaseUrl}/functions/v1/ingest-scraped-events`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-webhook-secret": "evendle-secret-2024",
+        },
+        body: JSON.stringify({ secret: "evendle-secret-2024", events }),
+      });
+      const result = await ingestRes.json();
+      if (!ingestRes.ok) throw new Error(result?.error || `Import HTTP ${ingestRes.status}`);
+
+      const inserted = result.inserted ?? 0;
+      const skipped = result.skipped ?? 0;
+      toast.success(`${inserted} events imported successfully${skipped ? ` (${skipped} skipped)` : ""}`);
+      await fetchPendingEvents();
+    } catch (err) {
+      toast.error(`Import fehlgeschlagen: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setImporting(false);
+    }
+  };
 
   useEffect(() => {
     if (!adminLoading && !isAdmin) {
