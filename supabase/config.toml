@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.search-events]
 verify_jwt = false
+
+[functions.ingest-scraped-events]
+verify_jwt = false
