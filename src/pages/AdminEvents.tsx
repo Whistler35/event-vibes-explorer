@@ -191,7 +191,8 @@ const AdminEvents = () => {
     if (!eventToDelete) return;
     const { error } = await supabase.from("events").delete().eq("id", eventToDelete.id);
     if (error) {
-      toast.error("Fehler beim Löschen");
+      console.error("Delete event failed:", error);
+      toast.error(`Fehler beim Löschen: ${error.message}`);
     } else {
       toast.success(`"${eventToDelete.title}" gelöscht`);
       setManageEvents((prev) => prev.filter((e) => e.id !== eventToDelete.id));
