@@ -217,15 +217,9 @@ const Nearby = () => {
     if (carouselEvents.length === 0) setSelectedEventId(null);
   }, [carouselEvents]);
 
-  // Sync map when carousel selection changes — only pan if event is outside viewport
+  // Sync map when carousel selection changes — always pan to the selected event
   const handleCarouselSelect = (ev: MapEvent) => {
     setSelectedEventId(ev.id);
-    if (viewportBounds) {
-      const [lat, lng] = ev.position;
-      const inView = lat >= viewportBounds.south && lat <= viewportBounds.north
-                  && lng >= viewportBounds.west && lng <= viewportBounds.east;
-      if (inView) return;
-    }
     mapRef.current?.flyTo(ev.position[0], ev.position[1]);
   };
 
