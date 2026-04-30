@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react';
-import MapboxMap, { type MapboxMapHandle } from './MapboxMap';
+import MapboxMap, { type MapboxMapHandle, type MapBounds } from './MapboxMap';
 
 export interface MapEvent {
   id: number | string;
@@ -18,6 +18,7 @@ export interface MapEvent {
 interface InteractiveMapProps {
   onCreateEvent?: (position: [number, number]) => void;
   onEventClick?: (event: MapEvent) => void;
+  onViewportChange?: (bounds: MapBounds) => void;
   events?: MapEvent[];
   isAdmin?: boolean;
   center?: [number, number];
@@ -25,7 +26,7 @@ interface InteractiveMapProps {
 }
 
 const InteractiveMap = forwardRef<MapboxMapHandle, InteractiveMapProps>(
-  ({ onCreateEvent, onEventClick, events = [], isAdmin = false, center = [47.2692, 11.4041], selectedEventId = null }, ref) => {
+  ({ onCreateEvent, onEventClick, onViewportChange, events = [], isAdmin = false, center = [47.2692, 11.4041], selectedEventId = null }, ref) => {
     return (
       <MapboxMap
         ref={ref}
@@ -34,6 +35,7 @@ const InteractiveMap = forwardRef<MapboxMapHandle, InteractiveMapProps>(
         height="100%"
         onCreateEvent={onCreateEvent}
         onEventClick={onEventClick}
+        onViewportChange={onViewportChange}
         events={events}
         minZoomForCreate={14}
         isAdmin={isAdmin}
