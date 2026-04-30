@@ -49,6 +49,7 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
 }, ref) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
+  const geolocateRef = useRef<mapboxgl.GeolocateControl | null>(null);
   const onCreateEventRef = useRef(onCreateEvent);
   const onEventClickRef = useRef(onEventClick);
   const [isLoaded, setIsLoaded] = useState(false);
