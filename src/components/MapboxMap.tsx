@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback, useImperativeHandle, f
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import Supercluster from 'supercluster';
-import { Plus, X, MapPin } from 'lucide-react';
+import { Plus, X, MapPin, LocateFixed } from 'lucide-react';
 
 interface MapEvent {
   id: number | string;
