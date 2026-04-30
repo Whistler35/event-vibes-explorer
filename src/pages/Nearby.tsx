@@ -260,8 +260,8 @@ const Nearby = () => {
             onCreateEvent={handleCreateEvent}
             onEventClick={(event) => {
               setSelectedEventId(event.id);
-              mapRef.current?.flyTo(event.position[0], event.position[1], 15);
             }}
+            onViewportChange={(b) => setViewportBounds(b)}
             events={mapEvents}
             isAdmin={true}
             center={initialCenter}
