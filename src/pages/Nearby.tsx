@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import type { DateRange } from "react-day-picker";
 import evendleLogo from "@/assets/evendle-logo.jpeg";
 import { useNavigate } from "react-router-dom";
@@ -6,39 +6,40 @@ import { useQuery } from "@tanstack/react-query";
 import Layout from "@/components/Layout";
 import InteractiveMap, { type MapEvent } from "@/components/InteractiveMap";
 import CreateEventDialog from "@/components/CreateEventDialog";
-import CategoryFilter from "@/components/CategoryFilter";
 import EventDetailSheet from "@/components/EventDetailSheet";
+import EventCarousel from "@/components/EventCarousel";
+import CategoryFilter from "@/components/CategoryFilter";
 import { useSearchEvents, type EventCategory, type SearchEvent } from "@/hooks/useSearchEvents";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { useAuth } from "@/contexts/AuthContext";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
-import { Globe, Lock, Search, MapPin, X } from "lucide-react";
+import { Globe, Lock, Search, MapPin, X, Moon, Tag, Navigation, Flame } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { MapboxMapHandle } from "@/components/MapboxMap";
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiZXZlbmRsZSIsImEiOiJjbWs0aHc2eWQwN2hqM2RyMjI4ZTY0N2F6In0.gMPP_wAbSR4Esz7WlB4Z4Q';
 
-interface GeoResult {
-  name: string;
-  lat: number;
-  lng: number;
-}
+interface GeoResult { name: string; lat: number; lng: number; }
+
+type QuickFilter = 'tonight' | 'free' | 'nearby' | 'popular';
 
 const Nearby = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<[number, number] | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<EventCategory[]>([]);
   const [selectedDateRange, setSelectedDateRange] = useState<DateRange | undefined>(undefined);
+  const [activeQuickFilters, setActiveQuickFilters] = useState<Set<QuickFilter>>(new Set());
   const [selectedEvent, setSelectedEvent] = useState<MapEvent | null>(null);
+  const [selectedEventId, setSelectedEventId] = useState<string | number | null>(null);
   const [isPrivateMode, setIsPrivateMode] = useState(false);
 
-  // City search state
+  // Search bar
+  const [searchOpen, setSearchOpen] = useState(false);
   const [cityQuery, setCityQuery] = useState("");
   const [citySuggestions, setCitySuggestions] = useState<GeoResult[]>([]);
   const [showCitySuggestions, setShowCitySuggestions] = useState(false);
-  const [showSearchBar, setShowSearchBar] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const mapRef = useRef<MapboxMapHandle>(null);
 
@@ -46,35 +47,42 @@ const Nearby = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Read stored city for initial map center & search bar state
   const storedCity = (() => {
-    try {
-      const s = localStorage.getItem('selectedCity');
-      return s ? JSON.parse(s) as GeoResult : null;
-    } catch { return null; }
+    try { const s = localStorage.getItem('selectedCity'); return s ? JSON.parse(s) as GeoResult : null; }
+    catch { return null; }
   })();
 
   const initialCenter: [number, number] = storedCity
     ? [storedCity.lat, storedCity.lng]
     : [47.2692, 11.4041];
 
-  // Initialise search bar with stored city name
   useEffect(() => {
-    if (storedCity) {
-      setCityQuery(storedCity.name?.split(',')[0] || '');
-      setShowSearchBar(true);
-    }
+    if (storedCity) setCityQuery(storedCity.name?.split(',')[0] || '');
   }, []);
+
+  // Build date filter from quick "tonight" or explicit range
+  const dateFilter = useMemo(() => {
+    if (activeQuickFilters.has('tonight')) {
+      const today = new Date().toISOString().split('T')[0];
+      return { from: today, to: today };
+    }
+    if (selectedDateRange?.from) {
+      const from = selectedDateRange.from.toISOString().split('T')[0];
+      const to = (selectedDateRange.to || selectedDateRange.from).toISOString().split('T')[0];
+      return { from, to };
+    }
+    return undefined;
+  }, [activeQuickFilters, selectedDateRange]);
 
   const { data: searchResult, isLoading: isLoadingPublic, refetch: refetchPublic } = useSearchEvents({
     categories: selectedCategories.length > 0 ? selectedCategories : undefined,
-    date_from: selectedDateRange?.from ? selectedDateRange.from.toISOString().split('T')[0] : undefined,
-    date_to: selectedDateRange?.to ? selectedDateRange.to.toISOString().split('T')[0] : (selectedDateRange?.from ? selectedDateRange.from.toISOString().split('T')[0] : undefined),
-    limit: 100,
+    date_from: dateFilter?.from,
+    date_to: dateFilter?.to,
+    limit: 200,
   }, !isPrivateMode);
 
   const { data: privateEvents, isLoading: isLoadingPrivate, refetch: refetchPrivate } = useQuery({
-    queryKey: ['private-events', user?.id, selectedCategories, selectedDateRange?.from?.getTime(), selectedDateRange?.to?.getTime()],
+    queryKey: ['private-events', user?.id, selectedCategories, dateFilter?.from, dateFilter?.to],
     queryFn: async () => {
       if (!user) return [];
       const { data: friendships } = await supabase
@@ -93,10 +101,8 @@ const Nearby = () => {
         .eq('visibility', 'unlisted')
         .order('event_date', { ascending: true });
       if (selectedCategories.length > 0) query = query.in('category', selectedCategories);
-      if (selectedDateRange?.from) {
-        const fromStr = selectedDateRange.from.toISOString().split('T')[0];
-        const toStr = selectedDateRange.to ? selectedDateRange.to.toISOString().split('T')[0] : fromStr;
-        query = query.gte('event_date', fromStr).lte('event_date', toStr + 'T23:59:59');
+      if (dateFilter) {
+        query = query.gte('event_date', dateFilter.from).lte('event_date', dateFilter.to + 'T23:59:59');
       }
       const { data, error } = await query;
       if (error) throw error;
@@ -108,14 +114,11 @@ const Nearby = () => {
 
   const isLoading = isPrivateMode ? isLoadingPrivate : isLoadingPublic;
 
+  // City search
   const handleCityInput = (value: string) => {
     setCityQuery(value);
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (value.length < 2) {
-      setCitySuggestions([]);
-      setShowCitySuggestions(false);
-      return;
-    }
+    if (value.length < 2) { setCitySuggestions([]); setShowCitySuggestions(false); return; }
     debounceRef.current = setTimeout(async () => {
       try {
         const res = await fetch(
@@ -123,15 +126,11 @@ const Nearby = () => {
         );
         const data = await res.json();
         const results: GeoResult[] = (data.features || []).map((f: any) => ({
-          name: f.place_name,
-          lat: f.center[1],
-          lng: f.center[0],
+          name: f.place_name, lat: f.center[1], lng: f.center[0],
         }));
         setCitySuggestions(results);
         setShowCitySuggestions(results.length > 0);
-      } catch {
-        setCitySuggestions([]);
-      }
+      } catch { setCitySuggestions([]); }
     }, 300);
   };
 
@@ -143,10 +142,7 @@ const Nearby = () => {
   };
 
   const clearCitySearch = () => {
-    setCityQuery("");
-    setCitySuggestions([]);
-    setShowCitySuggestions(false);
-    setShowSearchBar(false);
+    setCityQuery(""); setCitySuggestions([]); setShowCitySuggestions(false);
     localStorage.removeItem('selectedCity');
   };
 
@@ -161,6 +157,7 @@ const Nearby = () => {
     setDialogOpen(true);
   };
 
+  // Map data
   const publicMapEvents: MapEvent[] = (searchResult?.data || [])
     .filter((e: SearchEvent) => e.latitude != null && e.longitude != null)
     .map((e: SearchEvent) => ({
@@ -185,74 +182,110 @@ const Nearby = () => {
       is_featured: (e as any).is_featured || false,
     }));
 
-  const mapEvents = isPrivateMode ? privateMapEvents : publicMapEvents;
+  let mapEvents = isPrivateMode ? privateMapEvents : publicMapEvents;
+
+  // "Popular" filter: only featured
+  if (activeQuickFilters.has('popular')) {
+    mapEvents = mapEvents.filter(e => e.is_featured);
+  }
+
+  // Carousel = featured first, then upcoming, max 8
+  const carouselEvents = useMemo(() => {
+    const featured = mapEvents.filter(e => e.is_featured);
+    const others = mapEvents.filter(e => !e.is_featured);
+    const sortedOthers = [...others].sort((a, b) => {
+      const da = a.event_date ? new Date(a.event_date).getTime() : Infinity;
+      const db = b.event_date ? new Date(b.event_date).getTime() : Infinity;
+      return da - db;
+    });
+    return [...featured, ...sortedOthers].slice(0, 8);
+  }, [mapEvents]);
+
+  // Auto-select first carousel item
+  useEffect(() => {
+    if (carouselEvents.length > 0 && (selectedEventId == null || !carouselEvents.find(e => String(e.id) === String(selectedEventId)))) {
+      setSelectedEventId(carouselEvents[0].id);
+    }
+    if (carouselEvents.length === 0) setSelectedEventId(null);
+  }, [carouselEvents]);
+
+  // Sync map when carousel selection changes
+  const handleCarouselSelect = (ev: MapEvent) => {
+    setSelectedEventId(ev.id);
+    mapRef.current?.flyTo(ev.position[0], ev.position[1], 15);
+  };
 
   const handleRefetch = () => {
     if (isPrivateMode) refetchPrivate(); else refetchPublic();
   };
 
+  const toggleQuickFilter = (f: QuickFilter) => {
+    setActiveQuickFilters(prev => {
+      const next = new Set(prev);
+      if (next.has(f)) next.delete(f);
+      else next.add(f);
+      return next;
+    });
+    if (f === 'nearby' && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => mapRef.current?.flyTo(pos.coords.latitude, pos.coords.longitude, 15),
+        () => {}
+      );
+    }
+  };
+
+  const quickPills: { id: QuickFilter; label: string; icon: React.ElementType }[] = [
+    { id: 'tonight', label: 'Heute Abend', icon: Moon },
+    { id: 'free', label: 'Gratis', icon: Tag },
+    { id: 'nearby', label: 'In der Nähe', icon: Navigation },
+    { id: 'popular', label: 'Beliebt', icon: Flame },
+  ];
+
   return (
     <Layout>
-      <div className="relative h-[calc(100vh-80px)]">
-        <div className="absolute top-4 left-4 z-10 flex items-center space-x-2">
-          <img src={evendleLogo} alt="Evendle" className="w-9 h-9 object-contain" />
-          <span className="text-foreground text-xl font-bold drop-shadow-lg">EVENDLE</span>
+      <div className="relative h-[calc(100vh-80px)] overflow-hidden">
+        {/* Map fills everything */}
+        <div className="absolute inset-0">
+          <InteractiveMap
+            ref={mapRef}
+            onCreateEvent={handleCreateEvent}
+            onEventClick={(event) => {
+              setSelectedEventId(event.id);
+              mapRef.current?.flyTo(event.position[0], event.position[1], 15);
+            }}
+            events={mapEvents}
+            isAdmin={true}
+            center={initialCenter}
+            selectedEventId={selectedEventId}
+          />
         </div>
 
-        {/* Public/Private Toggle */}
-        <div className="absolute top-4 right-4 z-10 flex items-center gap-2 px-[30px]">
-          {/* Search toggle button */}
-          <button
-            onClick={() => setShowSearchBar(!showSearchBar)}
-            className="w-10 h-10 bg-card/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-border"
-          >
-            <Search className="h-4 w-4 text-foreground" />
-          </button>
-
-          <div className="flex items-center gap-2 bg-card/90 backdrop-blur-sm rounded-full px-3 py-2 shadow-lg border border-border">
-            <Globe className={`h-4 w-4 transition-colors ${!isPrivateMode ? 'text-primary' : 'text-muted-foreground'}`} />
-            <Switch
-              checked={isPrivateMode}
-              onCheckedChange={(checked) => {
-                if (checked && !user) {
-                  toast.info('Bitte melde dich an, um private Events zu sehen.', {
-                    action: { label: 'Anmelden', onClick: () => navigate('/auth') },
-                  });
-                  return;
-                }
-                setIsPrivateMode(checked);
-              }}
-            />
-            <Lock className={`h-4 w-4 transition-colors ${isPrivateMode ? 'text-primary' : 'text-muted-foreground'}`} />
-          </div>
-        </div>
-
-        {/* City Search Bar */}
-        {showSearchBar && (
-          <div className="absolute top-16 left-4 right-4 z-20">
-            <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
+        {/* TOP BAR: glass search + actions */}
+        <div className="absolute top-3 left-3 right-3 z-20 flex items-start gap-2">
+          {/* Search field */}
+          <div className="flex-1 relative">
+            <div className="flex items-center bg-card/90 backdrop-blur-xl rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.08)] border border-border/50 h-11 px-4">
+              <Search className="h-4 w-4 text-muted-foreground shrink-0" />
+              <input
                 value={cityQuery}
                 onChange={(e) => handleCityInput(e.target.value)}
-                onFocus={() => citySuggestions.length > 0 && setShowCitySuggestions(true)}
-                placeholder="Stadt suchen..."
-                className="pl-9 pr-9 h-10 rounded-full bg-card/95 backdrop-blur-sm border-border text-foreground shadow-lg"
-                autoFocus
+                onFocus={() => { setSearchOpen(true); citySuggestions.length > 0 && setShowCitySuggestions(true); }}
+                placeholder="Events, Orte suchen..."
+                className="flex-1 bg-transparent border-0 outline-none px-3 text-sm text-foreground placeholder:text-muted-foreground"
               />
               {cityQuery && (
-                <button onClick={clearCitySearch} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                <button onClick={clearCitySearch} className="text-muted-foreground hover:text-foreground">
                   <X className="h-4 w-4" />
                 </button>
               )}
             </div>
             {showCitySuggestions && (
-              <div className="mt-1 bg-card border border-border rounded-xl shadow-xl overflow-hidden">
+              <div className="mt-1.5 bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-xl overflow-hidden">
                 {citySuggestions.map((s, i) => (
                   <button
                     key={i}
                     onClick={() => selectCity(s)}
-                    className="w-full px-4 py-3 text-left text-sm text-foreground hover:bg-muted/50 flex items-center gap-3 transition-colors"
+                    className="w-full px-4 py-3 text-left text-sm text-foreground hover:bg-muted/50 flex items-center gap-3"
                   >
                     <MapPin className="h-4 w-4 text-primary shrink-0" />
                     <span className="truncate">{s.name}</span>
@@ -261,27 +294,81 @@ const Nearby = () => {
               </div>
             )}
           </div>
-        )}
 
-        <div className={`absolute ${showSearchBar ? 'top-28' : 'top-14'} left-0 right-0 z-10 px-4 transition-all`}>
-          <CategoryFilter selectedCategories={selectedCategories} onCategoriesChange={setSelectedCategories} selectedDateRange={selectedDateRange} onDateRangeChange={setSelectedDateRange} />
+          {/* Filter button (advanced) */}
+          <div className="h-11 flex items-center bg-card/90 backdrop-blur-xl rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.08)] border border-border/50 px-2">
+            <CategoryFilter
+              selectedCategories={selectedCategories}
+              onCategoriesChange={setSelectedCategories}
+              selectedDateRange={selectedDateRange}
+              onDateRangeChange={setSelectedDateRange}
+            />
+          </div>
+        </div>
+
+        {/* QUICK FILTER PILLS */}
+        <div className="absolute top-[60px] left-0 right-0 z-10 px-3">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+            {quickPills.map(({ id, label, icon: Icon }) => {
+              const active = activeQuickFilters.has(id);
+              return (
+                <button
+                  key={id}
+                  onClick={() => toggleQuickFilter(id)}
+                  className={`shrink-0 flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-semibold transition-all ${
+                    active
+                      ? 'bg-primary text-primary-foreground shadow-md'
+                      : 'bg-card/90 backdrop-blur-xl text-foreground border border-border/50 shadow-sm'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  {label}
+                </button>
+              );
+            })}
+            {/* Public/Private toggle as pill */}
+            <div className="shrink-0 flex items-center gap-2 h-8 px-3 rounded-full bg-card/90 backdrop-blur-xl border border-border/50 shadow-sm">
+              <Globe className={`h-3.5 w-3.5 ${!isPrivateMode ? 'text-primary' : 'text-muted-foreground'}`} />
+              <Switch
+                checked={isPrivateMode}
+                onCheckedChange={(checked) => {
+                  if (checked && !user) {
+                    toast.info('Bitte melde dich an, um private Events zu sehen.', {
+                      action: { label: 'Anmelden', onClick: () => navigate('/auth') },
+                    });
+                    return;
+                  }
+                  setIsPrivateMode(checked);
+                }}
+                className="scale-75"
+              />
+              <Lock className={`h-3.5 w-3.5 ${isPrivateMode ? 'text-primary' : 'text-muted-foreground'}`} />
+            </div>
+          </div>
+        </div>
+
+        {/* Logo discreet */}
+        <div className="absolute top-[100px] left-3 z-10 flex items-center gap-1.5 bg-card/80 backdrop-blur-md rounded-full px-2.5 py-1 shadow-sm border border-border/40">
+          <img src={evendleLogo} alt="Evendle" className="w-4 h-4 object-contain rounded-full" />
+          <span className="text-foreground text-[10px] font-bold tracking-wide">EVENDLE</span>
         </div>
 
         {isLoading && (
-          <div className="absolute top-24 left-1/2 -translate-x-1/2 z-10 bg-card/90 rounded-full px-3 py-1 text-xs text-foreground">
+          <div className="absolute top-[100px] left-1/2 -translate-x-1/2 z-10 bg-card/95 backdrop-blur rounded-full px-3 py-1 text-xs text-foreground shadow">
             Events laden...
           </div>
         )}
 
-        <div className="absolute top-0 bottom-0 left-0 right-0">
-          <InteractiveMap
-            ref={mapRef}
-            onCreateEvent={handleCreateEvent}
-            onEventClick={(event) => setSelectedEvent(event)}
-            events={mapEvents}
-            isAdmin={true}
-            center={initialCenter}
-          />
+        {/* BOTTOM CAROUSEL */}
+        <div className="absolute bottom-0 left-0 right-0 z-10 pb-3 pointer-events-none">
+          <div className="pointer-events-auto">
+            <EventCarousel
+              events={carouselEvents}
+              selectedId={selectedEventId}
+              onSelect={handleCarouselSelect}
+              onExpand={(ev) => setSelectedEvent(ev)}
+            />
+          </div>
         </div>
 
         <CreateEventDialog
