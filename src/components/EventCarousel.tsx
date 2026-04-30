@@ -27,7 +27,7 @@ const formatTime = (iso?: string) => {
 
 // Card geometry
 const CARD_WIDTH = 240;          // px
-const CARD_GAP = -36;            // negative = overlap
+const CARD_GAP = 12;             // spacing between cards
 const STEP = CARD_WIDTH + CARD_GAP;
 
 const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onSelect, onExpand }) => {
@@ -95,15 +95,11 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onSel
       }}
     >
       {events.map((ev, i) => {
-        const offset = i - activeIdx;            // -2,-1,0,1,2
+        const offset = i - activeIdx;
         const abs = Math.abs(offset);
         const isCenter = abs < 0.5;
-        // Arc curve: center is up, sides drop & rotate slightly
-        const translateY = Math.min(28, abs * abs * 8);   // px down
-        const rotate = offset * -4;                        // deg
-        const scale = isCenter ? 1 : Math.max(0.86, 1 - abs * 0.07);
-        const opacity = isCenter ? 1 : Math.max(0.55, 1 - abs * 0.18);
-        const z = 100 - abs;
+        const scale = isCenter ? 1 : Math.max(0.92, 1 - abs * 0.04);
+        const opacity = isCenter ? 1 : Math.max(0.7, 1 - abs * 0.15);
 
         return (
           <button
@@ -115,11 +111,10 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onSel
             className="shrink-0 snap-center text-left rounded-3xl overflow-hidden bg-card border border-border/60"
             style={{
               width: CARD_WIDTH,
-              transform: `translateY(${translateY}px) rotate(${rotate}deg) scale(${scale})`,
+              transform: `scale(${scale})`,
               transformOrigin: 'bottom center',
-              transition: 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease, box-shadow 0.3s ease',
+              transition: 'transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease, box-shadow 0.3s ease',
               opacity,
-              zIndex: z,
               boxShadow: isCenter
                 ? '0 18px 40px -12px hsl(var(--primary) / 0.35), 0 8px 20px rgba(0,0,0,0.18)'
                 : '0 8px 20px rgba(0,0,0,0.15)',
