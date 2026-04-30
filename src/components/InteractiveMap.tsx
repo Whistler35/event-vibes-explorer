@@ -21,10 +21,11 @@ interface InteractiveMapProps {
   events?: MapEvent[];
   isAdmin?: boolean;
   center?: [number, number];
+  selectedEventId?: number | string | null;
 }
 
 const InteractiveMap = forwardRef<MapboxMapHandle, InteractiveMapProps>(
-  ({ onCreateEvent, onEventClick, events = [], isAdmin = false, center = [47.2692, 11.4041] }, ref) => {
+  ({ onCreateEvent, onEventClick, events = [], isAdmin = false, center = [47.2692, 11.4041], selectedEventId = null }, ref) => {
     return (
       <MapboxMap
         ref={ref}
@@ -36,6 +37,7 @@ const InteractiveMap = forwardRef<MapboxMapHandle, InteractiveMapProps>(
         events={events}
         minZoomForCreate={14}
         isAdmin={isAdmin}
+        selectedEventId={selectedEventId}
       />
     );
   }

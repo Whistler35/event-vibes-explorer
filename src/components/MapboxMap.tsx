@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback, useImperativeHandle, forwardRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import Supercluster from 'supercluster';
 import { Plus, X, MapPin } from 'lucide-react';
 
 interface MapEvent {
@@ -31,6 +32,7 @@ interface MapboxMapProps {
   showControls?: boolean;
   minZoomForCreate?: number;
   isAdmin?: boolean;
+  selectedEventId?: number | string | null;
 }
 
 const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
@@ -40,32 +42,33 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
   events = [],
   onCreateEvent,
   onEventClick,
-  showControls = true,
+  showControls = false,
   minZoomForCreate = 14,
   isAdmin = false,
+  selectedEventId = null,
 }, ref) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const onCreateEventRef = useRef(onCreateEvent);
+  const onEventClickRef = useRef(onEventClick);
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Drag-to-place state
   const [isPlaceMode, setIsPlaceMode] = useState(false);
   const [markerPosition, setMarkerPosition] = useState<{ x: number; y: number } | null>(null);
-  const markerRef = useRef<mapboxgl.Marker | null>(null);
 
-  // Keep callback ref updated
+  // Cluster + markers
+  const clusterIndexRef = useRef<Supercluster | null>(null);
+  const markersRef = useRef<Map<string, mapboxgl.Marker>>(new Map());
+
   onCreateEventRef.current = onCreateEvent;
+  onEventClickRef.current = onEventClick;
 
-  const allEvents = events;
-
-  // Expose flyTo via ref
+  // Expose flyTo
   useImperativeHandle(ref, () => ({
     flyTo: (lat: number, lng: number, zoomLevel?: number) => {
-      if (map.current) {
-        map.current.flyTo({ center: [lng, lat], zoom: zoomLevel || 13, duration: 2000 });
-      }
+      map.current?.flyTo({ center: [lng, lat], zoom: zoomLevel || 14, duration: 1200, essential: true });
     },
   }));
 
@@ -81,18 +84,12 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
   const cancelPlaceMode = useCallback(() => {
     setIsPlaceMode(false);
     setMarkerPosition(null);
-    if (markerRef.current) {
-      markerRef.current.remove();
-      markerRef.current = null;
-    }
   }, []);
 
   const confirmPlacement = useCallback(() => {
-    if (!map.current || !markerPosition || !mapContainer.current) return;
+    if (!map.current || !markerPosition) return;
     const point = map.current.unproject([markerPosition.x, markerPosition.y]);
-    if (onCreateEventRef.current) {
-      onCreateEventRef.current([point.lat, point.lng]);
-    }
+    onCreateEventRef.current?.([point.lat, point.lng]);
     cancelPlaceMode();
   }, [markerPosition, cancelPlaceMode]);
 
@@ -124,18 +121,18 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
     document.addEventListener('touchend', handleEnd);
   }, [isPlaceMode]);
 
+  // ---- Init map ----
   useEffect(() => {
-    if (map.current) return;
-    if (!mapContainer.current) return;
+    if (map.current || !mapContainer.current) return;
     try {
-      const mapboxToken = 'pk.eyJ1IjoiZXZlbmRsZSIsImEiOiJjbWs0aHc2eWQwN2hqM2RyMjI4ZTY0N2F6In0.gMPP_wAbSR4Esz7WlB4Z4Q';
-      mapboxgl.accessToken = mapboxToken;
+      mapboxgl.accessToken = 'pk.eyJ1IjoiZXZlbmRsZSIsImEiOiJjbWs0aHc2eWQwN2hqM2RyMjI4ZTY0N2F6In0.gMPP_wAbSR4Esz7WlB4Z4Q';
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/streets-v12',
+        style: 'mapbox://styles/mapbox/light-v11',
         center: [center[1], center[0]],
-        zoom: zoom,
+        zoom,
         pitch: 0,
+        attributionControl: false,
       });
       if (showControls) {
         map.current.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'top-right');
@@ -143,11 +140,11 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
       map.current.on('load', () => setIsLoaded(true));
       map.current.on('error', (e) => {
         console.error('Mapbox error:', e);
-        setError('Fehler beim Laden der Mapbox-Karte');
+        setError('Fehler beim Laden der Karte');
       });
-    } catch (error) {
-      console.error('Error loading Mapbox:', error);
-      setError('Fehler beim Laden der Mapbox-Karte.');
+    } catch (e) {
+      console.error(e);
+      setError('Fehler beim Laden der Karte.');
     }
     return () => {
       map.current?.remove();
@@ -156,108 +153,156 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const markersRef2 = useRef<Map<string | number, mapboxgl.Marker>>(new Map());
+  // ---- Render markers/clusters ----
+  const render = useCallback(() => {
+    if (!map.current || !isLoaded || !clusterIndexRef.current) return;
+    const bounds = map.current.getBounds();
+    const z = Math.round(map.current.getZoom());
+    const bbox: [number, number, number, number] = [
+      bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth(),
+    ];
+    const clusters = clusterIndexRef.current.getClusters(bbox, z);
 
+    const seen = new Set<string>();
+
+    clusters.forEach((c: any) => {
+      const [lng, lat] = c.geometry.coordinates;
+      const isCluster = !!c.properties.cluster;
+      const key = isCluster ? `c-${c.properties.cluster_id}` : `e-${c.properties.event.id}`;
+      seen.add(key);
+
+      let marker = markersRef.current.get(key);
+      if (marker) {
+        marker.setLngLat([lng, lat]);
+        // update selected highlight for event markers
+        if (!isCluster) {
+          const el = marker.getElement();
+          const isSel = String(c.properties.event.id) === String(selectedEventId);
+          el.dataset.selected = isSel ? '1' : '0';
+          // trigger restyle
+          const ring = el.querySelector('[data-ring]') as HTMLElement | null;
+          if (ring) {
+            ring.style.boxShadow = isSel
+              ? '0 0 0 4px hsl(var(--primary) / 0.9), 0 8px 24px hsl(var(--primary) / 0.4)'
+              : c.properties.event.is_featured
+                ? '0 4px 12px rgba(0,0,0,0.25)'
+                : '0 2px 6px rgba(0,0,0,0.25)';
+          }
+        }
+        return;
+      }
+
+      const el = document.createElement('div');
+      el.style.cursor = 'pointer';
+
+      if (isCluster) {
+        const count = c.properties.point_count;
+        el.innerHTML = `
+          <div style="
+            width:${count > 50 ? 56 : count > 10 ? 48 : 40}px;
+            height:${count > 50 ? 56 : count > 10 ? 48 : 40}px;
+            border-radius:9999px;
+            background:hsl(var(--card));
+            color:hsl(var(--primary));
+            display:flex;align-items:center;justify-content:center;
+            font-weight:700;font-size:14px;
+            border:2px solid hsl(var(--primary));
+            box-shadow:0 4px 14px rgba(0,0,0,0.18);
+          ">${count}</div>`;
+        el.addEventListener('click', () => {
+          const expansion = clusterIndexRef.current!.getClusterExpansionZoom(c.properties.cluster_id);
+          map.current!.easeTo({ center: [lng, lat], zoom: Math.min(expansion + 0.5, 18), duration: 600 });
+        });
+      } else {
+        const ev: MapEvent = c.properties.event;
+        const featured = !!ev.is_featured;
+        const isSel = String(ev.id) === String(selectedEventId);
+        if (featured) {
+          // Large image marker
+          const img = ev.image
+            ? `<img src="${ev.image}" style="width:100%;height:100%;object-fit:cover;" alt="" />`
+            : `<div style="width:100%;height:100%;background:hsl(var(--muted));"></div>`;
+          el.innerHTML = `
+            <div data-ring style="
+              width:54px;height:54px;border-radius:9999px;overflow:hidden;
+              border:3px solid hsl(var(--card));
+              background:hsl(var(--card));
+              box-shadow:${isSel
+                ? '0 0 0 4px hsl(var(--primary) / 0.9), 0 8px 24px hsl(var(--primary) / 0.4)'
+                : '0 4px 12px rgba(0,0,0,0.25)'};
+              transition:box-shadow .2s ease, transform .2s ease;
+            ">${img}</div>`;
+        } else {
+          // Small minimal dot
+          el.innerHTML = `
+            <div data-ring style="
+              width:14px;height:14px;border-radius:9999px;
+              background:hsl(var(--primary));
+              border:2px solid hsl(var(--card));
+              box-shadow:${isSel
+                ? '0 0 0 4px hsl(var(--primary) / 0.9), 0 4px 10px hsl(var(--primary) / 0.4)'
+                : '0 2px 6px rgba(0,0,0,0.25)'};
+              transition:box-shadow .2s ease, transform .2s ease;
+            "></div>`;
+        }
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          onEventClickRef.current?.(ev);
+        });
+      }
+
+      marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
+        .setLngLat([lng, lat])
+        .addTo(map.current!);
+      markersRef.current.set(key, marker);
+    });
+
+    // Remove stale markers
+    markersRef.current.forEach((m, k) => {
+      if (!seen.has(k)) {
+        m.remove();
+        markersRef.current.delete(k);
+      }
+    });
+  }, [isLoaded, selectedEventId]);
+
+  // Build cluster index when events change
+  useEffect(() => {
+    if (!isLoaded) return;
+    const index = new Supercluster({ radius: 60, maxZoom: 16 });
+    const points = events
+      .filter(e => Number.isFinite(e.position?.[0]) && Number.isFinite(e.position?.[1]))
+      .map(e => ({
+        type: 'Feature' as const,
+        properties: { event: e },
+        geometry: { type: 'Point' as const, coordinates: [e.position[1], e.position[0]] },
+      }));
+    index.load(points as any);
+    clusterIndexRef.current = index;
+    render();
+  }, [events, isLoaded, render]);
+
+  // Re-render on map move
   useEffect(() => {
     if (!map.current || !isLoaded) return;
-    allEvents.forEach((event) => {
-      if (markersRef2.current.has(event.id)) return;
-      const markerContainer2 = document.createElement('div');
-      markerContainer2.className = 'event-marker-container';
-      markerContainer2.style.display = 'flex';
-      markerContainer2.style.flexDirection = 'column';
-      markerContainer2.style.alignItems = 'center';
-      markerContainer2.style.cursor = 'pointer';
-      const isFeatured = !!(event as any).is_featured;
-      const markerSize = isFeatured ? '56px' : '50px';
-      const borderColor = isFeatured ? '#f4f4bb' : '#173518';
-      
-      const imageWrapper = document.createElement('div');
-      imageWrapper.style.position = 'relative';
-      imageWrapper.style.width = markerSize;
-      imageWrapper.style.height = markerSize;
-      const imageElement = document.createElement('div');
-      imageElement.style.width = markerSize;
-      imageElement.style.height = markerSize;
-      imageElement.style.borderRadius = '50%';
-      imageElement.style.border = `3px solid ${borderColor}`;
-      imageElement.style.boxShadow = isFeatured 
-        ? '0 4px 12px rgba(244,244,187,0.5)' 
-        : '0 4px 12px rgba(0,0,0,0.4)';
-      imageElement.style.overflow = 'hidden';
-      imageElement.style.backgroundColor = '#1a1a2e';
-      if (event.image) {
-        const img = document.createElement('img');
-        img.src = event.image;
-        img.style.width = '100%';
-        img.style.height = '100%';
-        img.style.objectFit = 'cover';
-        imageElement.appendChild(img);
-      } else {
-        imageElement.style.display = 'flex';
-        imageElement.style.alignItems = 'center';
-        imageElement.style.justifyContent = 'center';
-        imageElement.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${borderColor}" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`;
-      }
-      imageWrapper.appendChild(imageElement);
-      
-      // Star badge for featured events
-      if (isFeatured) {
-        const starBadge = document.createElement('div');
-        starBadge.style.position = 'absolute';
-        starBadge.style.top = '-4px';
-        starBadge.style.right = '-4px';
-        starBadge.style.width = '20px';
-        starBadge.style.height = '20px';
-        starBadge.style.borderRadius = '50%';
-        starBadge.style.backgroundColor = '#d8d87a';
-        starBadge.style.display = 'flex';
-        starBadge.style.alignItems = 'center';
-        starBadge.style.justifyContent = 'center';
-        starBadge.style.fontSize = '12px';
-        starBadge.style.color = '#173518';
-        starBadge.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
-        starBadge.textContent = '★';
-        imageWrapper.appendChild(starBadge);
-      }
-      
-      const titleLabel = document.createElement('div');
-      titleLabel.textContent = event.title;
-      titleLabel.style.marginTop = '4px';
-      titleLabel.style.padding = '2px 8px';
-      titleLabel.style.backgroundColor = 'rgba(26, 26, 46, 0.9)';
-      titleLabel.style.color = 'white';
-      titleLabel.style.fontSize = '11px';
-      titleLabel.style.fontWeight = 'bold';
-      titleLabel.style.borderRadius = '10px';
-      titleLabel.style.whiteSpace = 'nowrap';
-      titleLabel.style.maxWidth = '100px';
-      titleLabel.style.overflow = 'hidden';
-      titleLabel.style.textOverflow = 'ellipsis';
-      titleLabel.style.textAlign = 'center';
-      markerContainer2.appendChild(imageWrapper);
-      markerContainer2.appendChild(titleLabel);
-      const marker = new mapboxgl.Marker({ element: markerContainer2, anchor: 'bottom' })
-        .setLngLat([event.position[1], event.position[0]])
-        .addTo(map.current!);
-      markersRef2.current.set(event.id, marker);
-      markerContainer2.addEventListener('click', () => {
-        if (onEventClick) onEventClick(event);
-      });
-    });
-    markersRef2.current.forEach((marker, id) => {
-      if (!allEvents.find(e => e.id === id)) {
-        marker.remove();
-        markersRef2.current.delete(id);
-      }
-    });
-  }, [allEvents, isLoaded]);
+    const m = map.current;
+    const handler = () => render();
+    m.on('moveend', handler);
+    m.on('zoomend', handler);
+    return () => {
+      m.off('moveend', handler);
+      m.off('zoomend', handler);
+    };
+  }, [isLoaded, render]);
+
+  // Re-render on selection change
+  useEffect(() => { render(); }, [selectedEventId, render]);
 
   if (error) {
     return (
       <div style={{ height }} className="w-full rounded-lg border border-border bg-card flex items-center justify-center">
         <div className="text-center p-8">
-          <h3 className="text-foreground text-lg font-bold mb-2">Mapbox Fehler</h3>
+          <h3 className="text-foreground text-lg font-bold mb-2">Karten-Fehler</h3>
           <p className="text-muted-foreground text-sm">{error}</p>
         </div>
       </div>
@@ -265,7 +310,7 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
   }
 
   return (
-    <div style={{ height }} className="w-full rounded-lg overflow-hidden border border-border relative">
+    <div style={{ height }} className="w-full overflow-hidden relative">
       <div ref={mapContainer} style={{ width: '100%', height: '100%' }} />
       {!isLoaded && !error && (
         <div className="absolute inset-0 bg-card flex items-center justify-center">
@@ -277,11 +322,11 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
       )}
       {!isPlaceMode && isLoaded && (
         <button
-          onClick={() => enterPlaceMode()}
-          className="fixed bottom-[calc(6.75rem+env(safe-area-inset-bottom))] right-6 md:absolute md:bottom-6 z-[60] md:z-20 w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors"
+          onClick={enterPlaceMode}
+          className="fixed bottom-[calc(13rem+env(safe-area-inset-bottom))] right-5 md:absolute z-[55] w-12 h-12 bg-primary rounded-full flex items-center justify-center shadow-lg hover:bg-primary/90 transition-all"
           aria-label="Event erstellen"
         >
-          <Plus className="w-8 h-8 text-primary-foreground" />
+          <Plus className="w-6 h-6 text-primary-foreground" />
         </button>
       )}
       {isPlaceMode && markerPosition && (
