@@ -138,6 +138,15 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
       if (showControls) {
         map.current.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'top-right');
       }
+      // Geolocate control (hidden — triggered via custom button)
+      const geo = new mapboxgl.GeolocateControl({
+        positionOptions: { enableHighAccuracy: true },
+        trackUserLocation: true,
+        showUserHeading: true,
+        showAccuracyCircle: true,
+      });
+      geolocateRef.current = geo;
+      map.current.addControl(geo);
       map.current.on('load', () => setIsLoaded(true));
       map.current.on('error', (e) => {
         console.error('Mapbox error:', e);
