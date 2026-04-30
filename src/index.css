@@ -157,3 +157,8 @@ All colors MUST be HSL.
     padding-bottom: calc(6rem + env(safe-area-inset-bottom));
   }
 }
+
+/* Hide default Mapbox geolocate button — we use a custom one. Keep the user-location dot. */
+.mapboxgl-ctrl-top-right .mapboxgl-ctrl-group:has(.mapboxgl-ctrl-geolocate) {
+  display: none !important;
+}

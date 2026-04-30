@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback, useImperativeHandle, f
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import Supercluster from 'supercluster';
-import { Plus, X, MapPin } from 'lucide-react';
+import { Plus, X, MapPin, LocateFixed } from 'lucide-react';
 
 interface MapEvent {
   id: number | string;
@@ -49,6 +49,7 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
 }, ref) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
+  const geolocateRef = useRef<mapboxgl.GeolocateControl | null>(null);
   const onCreateEventRef = useRef(onCreateEvent);
   const onEventClickRef = useRef(onEventClick);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -137,6 +138,15 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
       if (showControls) {
         map.current.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'top-right');
       }
+      // Geolocate control (hidden — triggered via custom button)
+      const geo = new mapboxgl.GeolocateControl({
+        positionOptions: { enableHighAccuracy: true },
+        trackUserLocation: true,
+        showUserHeading: true,
+        showAccuracyCircle: true,
+      });
+      geolocateRef.current = geo;
+      map.current.addControl(geo);
       map.current.on('load', () => setIsLoaded(true));
       map.current.on('error', (e) => {
         console.error('Mapbox error:', e);
@@ -321,13 +331,22 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
         </div>
       )}
       {!isPlaceMode && isLoaded && (
-        <button
-          onClick={enterPlaceMode}
-          className="fixed bottom-[calc(13rem+env(safe-area-inset-bottom))] right-5 md:absolute z-[55] w-12 h-12 bg-primary rounded-full flex items-center justify-center shadow-lg hover:bg-primary/90 transition-all"
-          aria-label="Event erstellen"
-        >
-          <Plus className="w-6 h-6 text-primary-foreground" />
-        </button>
+        <>
+          <button
+            onClick={() => geolocateRef.current?.trigger()}
+            className="absolute bottom-[calc(13rem+env(safe-area-inset-bottom))] left-5 z-[55] w-11 h-11 bg-card/95 backdrop-blur-xl rounded-full flex items-center justify-center shadow-[0_4px_14px_rgba(0,0,0,0.15)] border border-border/50 hover:bg-card transition-all"
+            aria-label="Mein Standort"
+          >
+            <LocateFixed className="w-5 h-5 text-primary" />
+          </button>
+          <button
+            onClick={enterPlaceMode}
+            className="fixed bottom-[calc(13rem+env(safe-area-inset-bottom))] right-5 md:absolute z-[55] w-12 h-12 bg-primary rounded-full flex items-center justify-center shadow-lg hover:bg-primary/90 transition-all"
+            aria-label="Event erstellen"
+          >
+            <Plus className="w-6 h-6 text-primary-foreground" />
+          </button>
+        </>
       )}
       {isPlaceMode && markerPosition && (
         <>
