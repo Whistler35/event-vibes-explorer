@@ -76,7 +76,9 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
   // Expose flyTo + getBounds
   useImperativeHandle(ref, () => ({
     flyTo: (lat: number, lng: number, zoomLevel?: number) => {
-      map.current?.flyTo({ center: [lng, lat], zoom: zoomLevel || 14, duration: 1200, essential: true });
+      const opts: any = { center: [lng, lat], duration: 1000, essential: true };
+      if (typeof zoomLevel === 'number') opts.zoom = zoomLevel;
+      map.current?.flyTo(opts);
     },
     getBounds: () => {
       if (!map.current) return null;
