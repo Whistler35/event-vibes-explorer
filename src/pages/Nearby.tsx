@@ -217,11 +217,16 @@ const Nearby = () => {
     if (carouselEvents.length === 0) setSelectedEventId(null);
   }, [carouselEvents]);
 
-  // Sync map when carousel selection changes — gentle pan (no zoom change) so user keeps context
+  // Sync map when carousel selection changes — only pan if event is outside viewport
   const handleCarouselSelect = (ev: MapEvent) => {
     setSelectedEventId(ev.id);
-    const currentZoom = undefined; // keep zoom
-    mapRef.current?.flyTo(ev.position[0], ev.position[1], currentZoom as any);
+    if (viewportBounds) {
+      const [lat, lng] = ev.position;
+      const inView = lat >= viewportBounds.south && lat <= viewportBounds.north
+                  && lng >= viewportBounds.west && lng <= viewportBounds.east;
+      if (inView) return;
+    }
+    mapRef.current?.flyTo(ev.position[0], ev.position[1]);
   };
 
   const handleRefetch = () => {
