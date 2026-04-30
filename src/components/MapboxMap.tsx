@@ -18,8 +18,13 @@ interface MapEvent {
   is_featured?: boolean;
 }
 
+export interface MapBounds {
+  west: number; south: number; east: number; north: number;
+}
+
 export interface MapboxMapHandle {
   flyTo: (lat: number, lng: number, zoom?: number) => void;
+  getBounds: () => MapBounds | null;
 }
 
 interface MapboxMapProps {
@@ -29,6 +34,7 @@ interface MapboxMapProps {
   events?: MapEvent[];
   onCreateEvent?: (position: [number, number]) => void;
   onEventClick?: (event: MapEvent) => void;
+  onViewportChange?: (bounds: MapBounds) => void;
   showControls?: boolean;
   minZoomForCreate?: number;
   isAdmin?: boolean;
@@ -46,6 +52,7 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
   minZoomForCreate = 14,
   isAdmin = false,
   selectedEventId = null,
+  onViewportChange,
 }, ref) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
@@ -66,10 +73,17 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
   onCreateEventRef.current = onCreateEvent;
   onEventClickRef.current = onEventClick;
 
-  // Expose flyTo
+  // Expose flyTo + getBounds
   useImperativeHandle(ref, () => ({
     flyTo: (lat: number, lng: number, zoomLevel?: number) => {
-      map.current?.flyTo({ center: [lng, lat], zoom: zoomLevel || 14, duration: 1200, essential: true });
+      const opts: any = { center: [lng, lat], duration: 1000, essential: true };
+      if (typeof zoomLevel === 'number') opts.zoom = zoomLevel;
+      map.current?.flyTo(opts);
+    },
+    getBounds: () => {
+      if (!map.current) return null;
+      const b = map.current.getBounds();
+      return { west: b.getWest(), south: b.getSouth(), east: b.getEast(), north: b.getNorth() };
     },
   }));
 
@@ -292,18 +306,26 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
     render();
   }, [events, isLoaded, render]);
 
-  // Re-render on map move
+  // Re-render on map move + emit viewport
   useEffect(() => {
     if (!map.current || !isLoaded) return;
     const m = map.current;
-    const handler = () => render();
+    const handler = () => {
+      render();
+      if (onViewportChange) {
+        const b = m.getBounds();
+        onViewportChange({ west: b.getWest(), south: b.getSouth(), east: b.getEast(), north: b.getNorth() });
+      }
+    };
     m.on('moveend', handler);
     m.on('zoomend', handler);
+    // emit once initially
+    handler();
     return () => {
       m.off('moveend', handler);
       m.off('zoomend', handler);
     };
-  }, [isLoaded, render]);
+  }, [isLoaded, render, onViewportChange]);
 
   // Re-render on selection change
   useEffect(() => { render(); }, [selectedEventId, render]);

@@ -34,6 +34,7 @@ const Nearby = () => {
   const [selectedEvent, setSelectedEvent] = useState<MapEvent | null>(null);
   const [selectedEventId, setSelectedEventId] = useState<string | number | null>(null);
   const [isPrivateMode, setIsPrivateMode] = useState(false);
+  const [viewportBounds, setViewportBounds] = useState<{ west: number; south: number; east: number; north: number } | null>(null);
 
   // Search bar
   const [searchOpen, setSearchOpen] = useState(false);
@@ -189,17 +190,24 @@ const Nearby = () => {
     mapEvents = mapEvents.filter(e => e.is_featured);
   }
 
-  // Carousel = featured first, then upcoming, max 8
+  // Carousel = events visible in current viewport, featured first then by date, max 10
   const carouselEvents = useMemo(() => {
-    const featured = mapEvents.filter(e => e.is_featured);
-    const others = mapEvents.filter(e => !e.is_featured);
+    const inView = viewportBounds
+      ? mapEvents.filter(e => {
+          const [lat, lng] = e.position;
+          return lat >= viewportBounds.south && lat <= viewportBounds.north
+              && lng >= viewportBounds.west && lng <= viewportBounds.east;
+        })
+      : mapEvents;
+    const featured = inView.filter(e => e.is_featured);
+    const others = inView.filter(e => !e.is_featured);
     const sortedOthers = [...others].sort((a, b) => {
       const da = a.event_date ? new Date(a.event_date).getTime() : Infinity;
       const db = b.event_date ? new Date(b.event_date).getTime() : Infinity;
       return da - db;
     });
-    return [...featured, ...sortedOthers].slice(0, 8);
-  }, [mapEvents]);
+    return [...featured, ...sortedOthers].slice(0, 10);
+  }, [mapEvents, viewportBounds]);
 
   // Auto-select first carousel item
   useEffect(() => {
@@ -209,10 +217,16 @@ const Nearby = () => {
     if (carouselEvents.length === 0) setSelectedEventId(null);
   }, [carouselEvents]);
 
-  // Sync map when carousel selection changes
+  // Sync map when carousel selection changes — only pan if event is outside viewport
   const handleCarouselSelect = (ev: MapEvent) => {
     setSelectedEventId(ev.id);
-    mapRef.current?.flyTo(ev.position[0], ev.position[1], 15);
+    if (viewportBounds) {
+      const [lat, lng] = ev.position;
+      const inView = lat >= viewportBounds.south && lat <= viewportBounds.north
+                  && lng >= viewportBounds.west && lng <= viewportBounds.east;
+      if (inView) return;
+    }
+    mapRef.current?.flyTo(ev.position[0], ev.position[1]);
   };
 
   const handleRefetch = () => {
@@ -251,8 +265,8 @@ const Nearby = () => {
             onCreateEvent={handleCreateEvent}
             onEventClick={(event) => {
               setSelectedEventId(event.id);
-              mapRef.current?.flyTo(event.position[0], event.position[1], 15);
             }}
+            onViewportChange={(b) => setViewportBounds(b)}
             events={mapEvents}
             isAdmin={true}
             center={initialCenter}
