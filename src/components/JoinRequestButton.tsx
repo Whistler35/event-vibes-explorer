@@ -92,11 +92,11 @@ const JoinRequestButton: React.FC<JoinRequestButtonProps> = ({ eventId, eventOwn
   if (user?.id === eventOwnerId) return null;
 
   const statusConfig: Record<RequestStatus, { label: string; icon: React.ElementType; variant: 'default' | 'outline' | 'secondary' }> = {
-    none: { label: 'Teilnahme anfragen', icon: UserPlus, variant: 'default' },
-    pending: { label: 'Anfrage ausstehend', icon: Clock, variant: 'outline' },
-    accepted: { label: 'Angenommen ✓', icon: CheckCircle, variant: 'secondary' },
-    rejected: { label: 'Abgelehnt', icon: XCircle, variant: 'secondary' },
-    cancelled: { label: 'Erneut anfragen', icon: UserPlus, variant: 'default' },
+    none: { label: 'Request to join', icon: UserPlus, variant: 'default' },
+    pending: { label: 'Request pending', icon: Clock, variant: 'outline' },
+    accepted: { label: 'Accepted ✓', icon: CheckCircle, variant: 'secondary' },
+    rejected: { label: 'Rejected', icon: XCircle, variant: 'secondary' },
+    cancelled: { label: 'Request again', icon: UserPlus, variant: 'default' },
   };
 
   const config = statusConfig[status];
