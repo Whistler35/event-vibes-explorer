@@ -53,6 +53,8 @@ const Home = () => {
   const [suggestions, setSuggestions] = useState<GeocodedLocation[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const nearbySectionRef = useRef<HTMLDivElement>(null);
+  const shouldScrollRef = useRef(false);
 
   const { data: featuredEvents } = useQuery({
     queryKey: ['featured-events-home'],
