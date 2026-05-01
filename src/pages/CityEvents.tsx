@@ -49,7 +49,7 @@ const CityEvents = () => {
     {
       id: "bd090423-1235-4612-aebb-6eb98ac9e93b",
       title: "VIENNA CLASSICAL NIGHT",
-      subtitle: "KONZERT",
+      subtitle: "CONCERT",
       image: "/lovable-uploads/b5f1b986-aaa0-4148-933c-cabcd3bb5e00.png",
       date: "28.07.2025",
       time: "7 pm",
@@ -59,7 +59,7 @@ const CityEvents = () => {
     },
     {
       id: "ecd82074-8a1e-4809-9a60-0d735b38ebb9",
-      title: "KUNST & KULTUR",
+      title: "ART & CULTURE",
       subtitle: "GALLERY OPENING",
       image: "/lovable-uploads/c5cfa817-d10d-4311-808f-e2d1cb7de838.png",
       date: "30.07.2025",
