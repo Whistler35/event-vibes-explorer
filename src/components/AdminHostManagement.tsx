@@ -158,7 +158,7 @@ const AdminHostManagement = () => {
           <CardContent className="p-3 text-center">
             <CalendarDays className="w-5 h-5 text-primary mx-auto mb-1" />
             <p className="text-foreground font-bold text-lg">{totalEvents}</p>
-            <p className="text-muted-foreground text-[10px]">Events gesamt</p>
+            <p className="text-muted-foreground text-[10px]">Total events</p>
           </CardContent>
         </Card>
         <Card>
