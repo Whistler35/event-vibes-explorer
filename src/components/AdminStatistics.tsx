@@ -263,7 +263,7 @@ const AdminStatistics = () => {
       </div>
 
       {loading ? (
-        <div className="text-center text-muted-foreground py-12">Statistiken laden...</div>
+        <div className="text-center text-muted-foreground py-12">Loading statistics...</div>
       ) : !stats ? null : (
         <>
           {/* Overview Cards */}
