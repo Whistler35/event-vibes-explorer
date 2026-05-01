@@ -289,7 +289,7 @@ const AdminHostManagement = () => {
               <DialogHeader>
                 <DialogTitle>{info.title}</DialogTitle>
                 <DialogDescription>
-                  Möchtest du <strong>{actionDialog.host.profile_name}</strong> wirklich {info.desc}?
+                  Do you really want to {info.desc} <strong>{actionDialog.host.profile_name}</strong>?
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter className="gap-2">
