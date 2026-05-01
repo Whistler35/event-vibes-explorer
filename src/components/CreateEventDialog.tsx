@@ -164,7 +164,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
         <div className="overflow-y-auto flex-1 min-h-0">
         {!isAdmin &&
         <div className="mx-4 px-3 py-2 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs">
-            Dein Event wird nach Admin-Freigabe sichtbar.
+            Your event will be visible after admin approval.
           </div>
         }
 
