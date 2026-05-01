@@ -151,7 +151,7 @@ const AdminHostManagement = () => {
           <CardContent className="p-3 text-center">
             <CheckCircle className="w-5 h-5 text-primary mx-auto mb-1" />
             <p className="text-foreground font-bold text-lg">{activeHosts}</p>
-            <p className="text-muted-foreground text-[10px]">Aktive Hosts</p>
+            <p className="text-muted-foreground text-[10px]">Active hosts</p>
           </CardContent>
         </Card>
         <Card>
