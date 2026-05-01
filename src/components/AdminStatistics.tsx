@@ -333,7 +333,7 @@ const AdminStatistics = () => {
 
           {/* Additional Details */}
           <div>
-            <h4 className="text-foreground font-semibold text-sm mb-3">Weitere Details</h4>
+            <h4 className="text-foreground font-semibold text-sm mb-3">Further Details</h4>
             <div className="bg-card rounded-2xl border border-border divide-y divide-border">
               <div className="flex justify-between p-3">
                 <span className="text-muted-foreground text-sm">Beitrittsanfragen</span>
