@@ -175,7 +175,7 @@ const AdminHostManagement = () => {
       {/* Host List */}
       {hosts.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
-          Noch keine Professional Hosts registriert
+          No professional hosts registered yet
         </div>
       ) : (
         <div className="space-y-3">
