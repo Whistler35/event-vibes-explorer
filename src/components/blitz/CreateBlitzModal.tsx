@@ -31,7 +31,7 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
 
   const requestLocation = () => {
     if (!("geolocation" in navigator)) {
-      setLocError("Standort wird vom Browser nicht unterstützt.");
+      setLocError("Location is not supported by your browser.");
       return;
     }
     setLocating(true);
@@ -44,8 +44,8 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
       (err) => {
         setLocError(
           err.code === err.PERMISSION_DENIED
-            ? "Standort-Freigabe nötig zum Blasten."
-            : "Standort konnte nicht ermittelt werden."
+            ? "Location access required to Blitz."
+            : "Could not determine your location."
         );
         setLocating(false);
       },
@@ -66,11 +66,11 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
 
   const handleSubmit = async () => {
     if (!activity.trim()) {
-      toast.error("Sag uns worauf du Bock hast!");
+      toast.error("Tell us what you're up for!");
       return;
     }
     if (!coords) {
-      toast.error("Standort nötig zum Blasten.");
+      toast.error("Location required to Blitz.");
       return;
     }
     setSubmitting(true);
@@ -87,11 +87,11 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
         longitude: coords.lng,
         radiusKm: radius,
       });
-      toast.success("⚡ Geblastet!");
+      toast.success("⚡ Blitzed!");
       onOpenChange(false);
       onCreated?.();
     } catch (e: any) {
-      toast.error(e.message || "Konnte nicht erstellt werden");
+      toast.error(e.message || "Could not create");
     } finally {
       setSubmitting(false);
     }
@@ -111,19 +111,19 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
             </div>
             <div>
               <p className="text-xs uppercase tracking-widest text-white/60 font-bold">Blitz</p>
-              <h2 className="text-2xl font-black leading-none">Spontan-Request</h2>
+              <h2 className="text-2xl font-black leading-none">Spontaneous Request</h2>
             </div>
           </div>
 
           <div className="space-y-2">
             <label className="text-sm font-bold uppercase tracking-wide text-white/70">
-              Auf was hast du Bock?
+              What are you up for?
             </label>
             <input
               autoFocus
               value={activity}
               onChange={(e) => setActivity(e.target.value)}
-              placeholder="z.B. Tennis, Bouldern, Kaffee…"
+              placeholder="e.g. Tennis, Bouldering, Coffee…"
               maxLength={80}
               className="w-full bg-transparent border-b-2 border-white/30 focus:border-[hsl(var(--blitz-pink))] outline-none text-3xl font-black placeholder:text-white/30 py-2 transition"
             />
@@ -131,7 +131,7 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
 
           <div className="space-y-3">
             <label className="text-sm font-bold uppercase tracking-wide text-white/70">
-              Wie lange?
+              How long?
             </label>
             <div className="grid grid-cols-3 gap-2">
               {DURATIONS.map((d) => {
@@ -181,26 +181,26 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
             {locating ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin text-white/70" />
-                <span className="text-sm text-white/70">Standort wird ermittelt…</span>
+                <span className="text-sm text-white/70">Detecting location…</span>
               </>
             ) : coords ? (
               <>
                 <MapPin className="w-5 h-5 text-[hsl(var(--blitz-pink))]" />
                 <span className="text-sm text-white/80">
-                  Standort aktiv · sichtbar im Umkreis von {radius} km
+                  Location active · visible within {radius} km
                 </span>
               </>
             ) : (
               <>
                 <MapPin className="w-5 h-5 text-white/50" />
                 <div className="flex-1 text-sm text-white/70">
-                  {locError ?? "Standort wird benötigt."}
+                  {locError ?? "Location required."}
                 </div>
                 <button
                   onClick={requestLocation}
                   className="text-xs font-black uppercase tracking-wider text-[hsl(var(--blitz-pink))]"
                 >
-                  Erlauben
+                  Allow
                 </button>
               </>
             )}
@@ -212,7 +212,7 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
             className="w-full mt-2 py-5 rounded-2xl bg-[hsl(var(--blitz-pink))] text-white font-black text-xl tracking-wider uppercase shadow-[0_8px_32px_hsl(var(--blitz-pink)/0.5)] hover:scale-[1.02] active:scale-[0.98] transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             <Zap className="w-6 h-6 fill-white" />
-            {submitting ? "Blasting…" : "Jetzt blasten"}
+            {submitting ? "Blitzing…" : "Blitz now"}
           </button>
         </div>
       </DialogContent>
