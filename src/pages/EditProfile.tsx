@@ -118,6 +118,7 @@ const EditProfile = () => {
         avatar_url: form.avatar_url,
         instagram_username: form.instagram_username.trim() || null,
         instagram_followers: form.instagram_followers.trim() || null,
+        interests: form.interests,
         updated_at: new Date().toISOString(),
       };
 
