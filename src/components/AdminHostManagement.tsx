@@ -71,9 +71,9 @@ const AdminHostManagement = () => {
 
         return {
           ...h,
-          profile_name: profileRes.data?.name || 'Unbekannt',
+          profile_name: profileRes.data?.name || 'Unknown',
           profile_email: '',
-          plan_name: planRes.data?.name || 'Kein Plan',
+          plan_name: planRes.data?.name || 'No plan',
           plan_slug: planRes.data?.slug || '',
           event_count: eventsRes.count || 0,
         };
