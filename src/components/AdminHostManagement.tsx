@@ -230,7 +230,7 @@ const AdminHostManagement = () => {
                     <p className="text-foreground font-bold text-xs">
                       {format(new Date(host.created_at), 'MM/yy')}
                     </p>
-                    <p className="text-muted-foreground text-[9px]">Seit</p>
+                    <p className="text-muted-foreground text-[9px]">Since</p>
                   </div>
                 </div>
 
