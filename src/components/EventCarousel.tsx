@@ -33,6 +33,8 @@ const STEP = CARD_WIDTH + CARD_GAP;
 const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onSelect, onExpand }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const isUserScrollingRef = useRef(false);
+  const programmaticScrollRef = useRef(false);
+  const programmaticTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const [activeIdx, setActiveIdx] = useState(0);
   const [containerWidth, setContainerWidth] = useState(0);
@@ -47,21 +49,31 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onSel
     return () => ro.disconnect();
   }, []);
 
+  const scrollToIndex = useCallback((idx: number) => {
+    if (!scrollRef.current) return;
+    programmaticScrollRef.current = true;
+    if (programmaticTimerRef.current) clearTimeout(programmaticTimerRef.current);
+    const target = idx * STEP - (containerWidth / 2 - CARD_WIDTH / 2);
+    scrollRef.current.scrollTo({ left: target, behavior: 'smooth' });
+    programmaticTimerRef.current = setTimeout(() => {
+      programmaticScrollRef.current = false;
+    }, 500);
+  }, [containerWidth]);
+
   // Sync to externally selected id (e.g. marker tap)
   useEffect(() => {
-    if (!scrollRef.current || selectedId == null || isUserScrollingRef.current) return;
+    if (selectedId == null || isUserScrollingRef.current) return;
     const idx = events.findIndex(e => String(e.id) === String(selectedId));
     if (idx < 0) return;
     setActiveIdx(idx);
-    const target = idx * STEP - (containerWidth / 2 - CARD_WIDTH / 2);
-    scrollRef.current.scrollTo({ left: target, behavior: 'smooth' });
-  }, [selectedId, events, containerWidth]);
+    scrollToIndex(idx);
+  }, [selectedId, events, scrollToIndex]);
 
   const onScroll = useCallback(() => {
     if (!scrollRef.current) return;
+    if (programmaticScrollRef.current) return;
     isUserScrollingRef.current = true;
     const container = scrollRef.current;
-    // Compute active index from scrollLeft
     const center = container.scrollLeft + containerWidth / 2;
     const idx = Math.round((center - CARD_WIDTH / 2) / STEP);
     const clamped = Math.max(0, Math.min(events.length - 1, idx));
@@ -72,7 +84,7 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onSel
       const ev = events[clamped];
       if (ev && String(ev.id) !== String(selectedId)) onSelect(ev);
       isUserScrollingRef.current = false;
-    }, 140);
+    }, 160);
   }, [events, activeIdx, containerWidth, selectedId, onSelect]);
 
   if (events.length === 0) return null;
