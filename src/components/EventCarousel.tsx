@@ -121,10 +121,10 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onSel
               if (isCenter) {
                 onExpand(ev);
               } else {
-                // Cancel any pending scroll-debounced select to avoid race
                 if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
                 isUserScrollingRef.current = false;
                 setActiveIdx(i);
+                scrollToIndex(i);
                 onSelect(ev);
               }
             }}
