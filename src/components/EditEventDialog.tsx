@@ -63,6 +63,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
       setLocationName(event.location_name);
       setCategory((event.category as EventCategory) || 'other');
       setMaxParticipants(event.max_participants?.toString() || '');
+      setPriceEur(event.price_cents && event.price_cents > 0 ? (event.price_cents / 100).toFixed(2) : '');
       setIsPrivate(event.visibility === 'unlisted');
       setImagePreview(event.image_url || null);
       setImage(null);
