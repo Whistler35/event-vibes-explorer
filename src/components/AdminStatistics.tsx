@@ -336,7 +336,7 @@ const AdminStatistics = () => {
             <h4 className="text-foreground font-semibold text-sm mb-3">Further Details</h4>
             <div className="bg-card rounded-2xl border border-border divide-y divide-border">
               <div className="flex justify-between p-3">
-                <span className="text-muted-foreground text-sm">Beitrittsanfragen</span>
+                <span className="text-muted-foreground text-sm">Join Requests</span>
                 <span className="text-foreground text-sm font-semibold">{stats.totalJoinRequests}</span>
               </div>
               <div className="flex justify-between p-3">
