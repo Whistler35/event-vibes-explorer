@@ -13,6 +13,7 @@ export interface SearchEventsParams {
   date_from?: string;
   date_to?: string;
   text?: string;
+  free_only?: boolean;
   limit?: number;
   offset?: number;
 }
