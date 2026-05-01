@@ -28,6 +28,7 @@ interface EditEventDialogProps {
     image_url?: string | null;
     max_participants: number | null;
     visibility?: string | null;
+    price_cents?: number | null;
   };
   onEventUpdated?: () => void;
 }
