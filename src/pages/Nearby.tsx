@@ -346,6 +346,8 @@ const Nearby = () => {
             onCreateEvent={handleCreateEvent}
             onEventClick={(event) => {
               setSelectedEventId(event.id);
+              // Auto-expand the carousel so the matching card is visible
+              setCarouselExpandTrigger(t => t + 1);
               // Pan to the event so the carousel viewport-filter keeps it in view,
               // and the matching card scrolls to the active center.
               carouselDrivingRef.current = true;
