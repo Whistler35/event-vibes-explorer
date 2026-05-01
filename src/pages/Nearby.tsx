@@ -40,6 +40,7 @@ const Nearby = () => {
   // visible card list doesn't reshuffle mid-flight.
   const carouselDrivingRef = useRef(false);
   const carouselDrivingTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const [carouselExpandTrigger, setCarouselExpandTrigger] = useState(0);
 
   // Search bar (events + places)
   const [searchOpen, setSearchOpen] = useState(false);
