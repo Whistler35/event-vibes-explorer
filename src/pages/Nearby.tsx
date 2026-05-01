@@ -45,7 +45,6 @@ const Nearby = () => {
   // Prevents the card order from reshuffling while the user flips through cards.
   const [frozenCarousel, setFrozenCarousel] = useState<MapEvent[] | null>(null);
   const carouselEventsRef = useRef<MapEvent[]>([]);
-  const selectedEventIdRef = useRef<string | number | null>(null);
 
   // Search bar (events + places)
   const [searchOpen, setSearchOpen] = useState(false);
@@ -296,7 +295,6 @@ const Nearby = () => {
   }, [mapEvents, effectiveBounds, selectedEventId]);
 
   carouselEventsRef.current = carouselEvents;
-  selectedEventIdRef.current = selectedEventId;
 
   // The list shown in the carousel: prefer the frozen snapshot during a swipe session.
   const displayedCarouselEvents = frozenCarousel ?? carouselEvents;
