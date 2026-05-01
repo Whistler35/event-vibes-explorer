@@ -144,35 +144,112 @@ const BlitzMatch = () => {
 
   if (showMatchSplash) {
     return (
-      <div className="fixed inset-0 z-50 bg-[hsl(var(--blitz-forest))] flex flex-col items-center justify-center text-white overflow-hidden">
-        <div className="absolute inset-0 bg-[hsl(var(--blitz-pink))] opacity-10 animate-pulse" />
-        <div className="absolute -top-20 -left-20 w-96 h-96 rounded-full bg-[hsl(var(--blitz-pink))] blur-3xl opacity-40 animate-pulse" />
-        <div className="absolute -bottom-20 -right-20 w-96 h-96 rounded-full bg-[hsl(var(--blitz-pink))] blur-3xl opacity-40 animate-pulse" />
+      <div className="fixed inset-0 z-50 bg-[hsl(var(--blitz-forest))] text-white overflow-hidden flex flex-col">
+        {/* Sharp diagonal grid backdrop — urban / sport feeling */}
+        <div
+          className="absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage:
+              "linear-gradient(45deg, white 1px, transparent 1px), linear-gradient(-45deg, white 1px, transparent 1px)",
+            backgroundSize: "28px 28px",
+          }}
+        />
+        {/* Single hard impact flash — no soft floating gradients */}
+        <div className="absolute inset-0 bg-[hsl(var(--blitz-pink))] opacity-0 animate-blitz-impact pointer-events-none" />
 
-        <div className="relative flex items-center gap-6 mb-8">
-          <Avatar className="w-24 h-24 border-4 border-[hsl(var(--blitz-pink))] shadow-[0_0_40px_hsl(var(--blitz-pink)/0.7)]">
-            <AvatarImage src={me?.avatar_url ?? undefined} />
-            <AvatarFallback className="bg-white text-[hsl(var(--blitz-forest))] text-3xl font-black">
-              {me?.name?.[0] ?? "?"}
-            </AvatarFallback>
-          </Avatar>
-          <div className="w-20 h-20 rounded-full bg-[hsl(var(--blitz-pink))] flex items-center justify-center shadow-[0_0_60px_hsl(var(--blitz-pink))] animate-blitz-pulse">
-            <Zap className="w-12 h-12 text-white fill-white" />
-          </div>
-          <Avatar className="w-24 h-24 border-4 border-[hsl(var(--blitz-pink))] shadow-[0_0_40px_hsl(var(--blitz-pink)/0.7)]">
-            <AvatarImage src={other?.avatar_url ?? undefined} />
-            <AvatarFallback className="bg-white text-[hsl(var(--blitz-forest))] text-3xl font-black">
-              {other?.name?.[0] ?? "?"}
-            </AvatarFallback>
-          </Avatar>
+        {/* Top label */}
+        <div className="relative z-10 pt-12 text-center">
+          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-[hsl(var(--blitz-pink))]">
+            ⚡ Activation
+          </p>
         </div>
 
-        <h1 className="relative text-7xl font-black uppercase tracking-tighter text-[hsl(var(--blitz-pink))] drop-shadow-[0_0_30px_hsl(var(--blitz-pink)/0.8)] mb-2">
-          MATCH!
-        </h1>
-        <p className="relative text-white/80 font-bold uppercase tracking-widest text-sm">
-          {activity} with {other?.name ?? "your match"}
-        </p>
+        {/* Impact stage */}
+        <div className="relative z-10 flex-1 flex items-center justify-center">
+          {/* Shockwave rings radiating from center */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+            <div className="w-40 h-40 rounded-full border-[hsl(var(--blitz-pink))] animate-blitz-shockwave" />
+          </div>
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" style={{ animationDelay: "0.4s" }}>
+            <div className="w-40 h-40 rounded-full border-[hsl(var(--blitz-pink))] animate-blitz-shockwave" style={{ animationDelay: "0.4s" }} />
+          </div>
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+            <div className="w-40 h-40 rounded-full border-[hsl(var(--blitz-pink))] animate-blitz-shockwave" style={{ animationDelay: "0.8s" }} />
+          </div>
+
+          {/* Avatars slamming in, asymmetric and angled */}
+          <div className="relative flex items-center justify-center w-full max-w-md px-6">
+            <div className="animate-blitz-slam-left -mr-4 z-10">
+              <div className="relative">
+                <Avatar className="w-24 h-24 rounded-none border-2 border-[hsl(var(--blitz-pink))]" style={{ clipPath: "polygon(8% 0, 100% 0, 92% 100%, 0 100%)" }}>
+                  <AvatarImage src={me?.avatar_url ?? undefined} className="object-cover" />
+                  <AvatarFallback className="rounded-none bg-white text-[hsl(var(--blitz-forest))] text-3xl font-black">
+                    {me?.name?.[0] ?? "?"}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-[hsl(var(--blitz-pink))] text-white text-[9px] font-black uppercase tracking-wider">
+                  P1
+                </span>
+              </div>
+            </div>
+
+            {/* Electric impact between them */}
+            <div className="relative z-20 mx-1">
+              <div className="relative w-16 h-16 bg-[hsl(var(--blitz-pink))] flex items-center justify-center shadow-[0_0_30px_hsl(var(--blitz-pink))]"
+                   style={{ clipPath: "polygon(50% 0, 100% 38%, 78% 38%, 100% 100%, 50% 70%, 0 100%, 22% 38%, 0 38%)" }}>
+                <Zap className="w-9 h-9 text-white fill-white" strokeWidth={3} />
+              </div>
+              {/* Spark line tendrils */}
+              <div className="absolute top-1/2 -left-10 -translate-y-1/2 h-[3px] w-10 bg-[hsl(var(--blitz-pink))] origin-right animate-blitz-spark shadow-[0_0_12px_hsl(var(--blitz-pink))]" />
+              <div className="absolute top-1/2 -right-10 -translate-y-1/2 h-[3px] w-10 bg-[hsl(var(--blitz-pink))] origin-left animate-blitz-spark shadow-[0_0_12px_hsl(var(--blitz-pink))]" />
+            </div>
+
+            <div className="animate-blitz-slam-right -ml-4 z-10">
+              <div className="relative">
+                <Avatar className="w-24 h-24 rounded-none border-2 border-[hsl(var(--blitz-pink))]" style={{ clipPath: "polygon(8% 0, 100% 0, 92% 100%, 0 100%)" }}>
+                  <AvatarImage src={other?.avatar_url ?? undefined} className="object-cover" />
+                  <AvatarFallback className="rounded-none bg-white text-[hsl(var(--blitz-forest))] text-3xl font-black">
+                    {other?.name?.[0] ?? "?"}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-[hsl(var(--blitz-pink))] text-white text-[9px] font-black uppercase tracking-wider">
+                  P2
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Headline + mission card */}
+        <div className="relative z-10 px-6 pb-10 space-y-5">
+          <div className="text-center space-y-1">
+            <h1 className="text-6xl font-black uppercase text-white leading-[0.85] animate-blitz-headline">
+              You're<br/>on!
+            </h1>
+            <p className="text-[11px] font-black uppercase tracking-[0.4em] text-[hsl(var(--blitz-pink))] pt-2">
+              Meetup locked in
+            </p>
+          </div>
+
+          {/* Mission / Plan card — sharp, no rounded softness */}
+          <div className="relative border-2 border-[hsl(var(--blitz-pink))] bg-black/30 backdrop-blur-sm p-4">
+            <div className="absolute -top-2.5 left-3 px-2 bg-[hsl(var(--blitz-forest))] text-[10px] font-black uppercase tracking-[0.3em] text-[hsl(var(--blitz-pink))]">
+              Mission
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/50">Activity</p>
+                <p className="text-xl font-black uppercase text-white truncate">{activity || "—"}</p>
+              </div>
+              <div className="text-right shrink-0">
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/50">With</p>
+                <p className="text-sm font-bold uppercase text-white truncate max-w-[120px]">
+                  {other?.name ?? "Player 2"}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
