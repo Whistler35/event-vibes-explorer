@@ -276,7 +276,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
               Cancel
             </Button>
             <Button onClick={handleSubmit} disabled={!title || !date || !time || loading || (!isAdmin && (!maxParticipants || parseInt(maxParticipants) < 2))} className="flex-1 h-12 rounded-xl">
-              {loading ? 'Erstelle...' : 'Event erstellen'}
+              {loading ? 'Creating...' : 'Create Event'}
             </Button>
           </div>
         </div>
