@@ -72,9 +72,14 @@ const ActiveBlitzScreen = ({ request, onEnded }: ActiveBlitzScreenProps) => {
             <p className="text-sm uppercase tracking-widest text-white/60 font-bold">left</p>
           </div>
 
-          {request.city && (
-            <p className="text-base text-white/70 font-medium">📍 {request.city}</p>
-          )}
+          <div className="flex flex-col items-center gap-1">
+            {request.city && (
+              <p className="text-base text-white/70 font-medium">📍 {request.city}</p>
+            )}
+            <p className="text-xs uppercase tracking-widest text-white/50 font-bold">
+              Radius {request.radius_km} km
+            </p>
+          </div>
         </div>
 
         <button
