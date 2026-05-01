@@ -204,15 +204,15 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent className="bg-card border-border">
-                  <SelectItem value="sports">🏀 Sport</SelectItem>
+                  <SelectItem value="sports">🏀 Sports</SelectItem>
                   <SelectItem value="community">👥 Community</SelectItem>
-                  <SelectItem value="music">🎵 Musik</SelectItem>
-                  <SelectItem value="culture">🎨 Kultur</SelectItem>
+                  <SelectItem value="music">🎵 Music</SelectItem>
+                  <SelectItem value="culture">🎨 Culture</SelectItem>
                   <SelectItem value="food">🍕 Food</SelectItem>
                   <SelectItem value="nightlife">🎉 Nightlife</SelectItem>
                   <SelectItem value="outdoor">🌲 Outdoor</SelectItem>
                   <SelectItem value="workshop">🔧 Workshop</SelectItem>
-                  <SelectItem value="other">📌 Sonstiges</SelectItem>
+                  <SelectItem value="other">📌 Other</SelectItem>
                 </SelectContent>
               </Select> :
             <div className="flex items-center gap-2 h-12 px-3 rounded-xl border border-border text-foreground bg-transparent">
