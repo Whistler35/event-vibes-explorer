@@ -358,6 +358,8 @@ const Nearby = () => {
             ref={mapRef}
             onCreateEvent={handleCreateEvent}
             onEventClick={(event) => {
+              // User tapped a marker on the map → fresh list around that marker.
+              setFrozenCarousel(null);
               setSelectedEventId(event.id);
               // Auto-expand the carousel so the matching card is visible
               setCarouselExpandTrigger(t => t + 1);
@@ -370,7 +372,12 @@ const Nearby = () => {
               }, 1100);
               mapRef.current?.flyTo(event.position[0], event.position[1]);
             }}
-            onViewportChange={(b) => { if (!carouselDrivingRef.current) setViewportBounds(b); }}
+            onViewportChange={(b) => {
+              if (carouselDrivingRef.current) return;
+              // User moved/zoomed the map themselves → unfreeze and refresh the list.
+              setFrozenCarousel(null);
+              setViewportBounds(b);
+            }}
             events={mapEvents}
             isAdmin={true}
             center={initialCenter}
