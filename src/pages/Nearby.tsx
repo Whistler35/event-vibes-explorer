@@ -35,6 +35,8 @@ const Nearby = () => {
   const [selectedEventId, setSelectedEventId] = useState<string | number | null>(null);
   const [isPrivateMode, setIsPrivateMode] = useState(false);
   const [viewportBounds, setViewportBounds] = useState<{ west: number; south: number; east: number; north: number } | null>(null);
+  const [lockedBounds, setLockedBounds] = useState<{ west: number; south: number; east: number; north: number } | null>(null);
+  const carouselLockTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   // Search bar
   const [searchOpen, setSearchOpen] = useState(false);
@@ -191,12 +193,14 @@ const Nearby = () => {
   }
 
   // Carousel = events visible in current viewport, featured first then by date, max 10
+  // Use lockedBounds while carousel is driving the map, so the order doesn't shuffle mid-flight
+  const effectiveBounds = lockedBounds ?? viewportBounds;
   const carouselEvents = useMemo(() => {
-    const inView = viewportBounds
+    const inView = effectiveBounds
       ? mapEvents.filter(e => {
           const [lat, lng] = e.position;
-          return lat >= viewportBounds.south && lat <= viewportBounds.north
-              && lng >= viewportBounds.west && lng <= viewportBounds.east;
+          return lat >= effectiveBounds.south && lat <= effectiveBounds.north
+              && lng >= effectiveBounds.west && lng <= effectiveBounds.east;
         })
       : mapEvents;
     const featured = inView.filter(e => e.is_featured);
@@ -207,7 +211,7 @@ const Nearby = () => {
       return da - db;
     });
     return [...featured, ...sortedOthers].slice(0, 10);
-  }, [mapEvents, viewportBounds]);
+  }, [mapEvents, effectiveBounds]);
 
   // Auto-select first carousel item
   useEffect(() => {
@@ -217,9 +221,13 @@ const Nearby = () => {
     if (carouselEvents.length === 0) setSelectedEventId(null);
   }, [carouselEvents]);
 
-  // Sync map when carousel selection changes — always pan to the selected event
+  // Sync map when carousel selection changes — always pan to the selected event,
+  // and lock the carousel order for ~1.2s so the map flight doesn't reshuffle cards.
   const handleCarouselSelect = (ev: MapEvent) => {
     setSelectedEventId(ev.id);
+    setLockedBounds(effectiveBounds);
+    if (carouselLockTimerRef.current) clearTimeout(carouselLockTimerRef.current);
+    carouselLockTimerRef.current = setTimeout(() => setLockedBounds(null), 1200);
     mapRef.current?.flyTo(ev.position[0], ev.position[1]);
   };
 
