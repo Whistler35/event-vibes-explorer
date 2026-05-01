@@ -171,7 +171,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
         <div className="p-4 pt-2 space-y-4">
           {/* Image Upload */}
           <div className="space-y-2">
-            <Label className="text-foreground text-sm">Bild</Label>
+            <Label className="text-foreground text-sm">Image</Label>
             <div className="relative">
               {imagePreview ?
               <div className="relative">
