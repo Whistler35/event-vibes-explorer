@@ -300,7 +300,7 @@ const AdminStatistics = () => {
                       }}
                       labelStyle={{ color: "hsl(var(--foreground))" }}
                     />
-                    <Bar dataKey="users" name="Nutzer" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="users" name="Users" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                     <Bar dataKey="events" name="Events" fill="hsl(var(--primary) / 0.5)" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
