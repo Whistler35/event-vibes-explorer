@@ -72,7 +72,7 @@ const EventDetail = () => {
       setEvent(data);
     } catch (error) {
       console.error('Error fetching event:', error);
-      toast.error('Event konnte nicht geladen werden');
+      toast.error('Could not load event');
     } finally {
       setLoading(false);
     }
@@ -103,7 +103,7 @@ const EventDetail = () => {
         return {
           id: participant.id,
           user_id: participant.user_id,
-          name: profile?.name || 'Unbekannter User',
+          name: profile?.name || 'Unknown user',
           avatar_url: profile?.avatar_url,
         };
       });
@@ -119,7 +119,7 @@ const EventDetail = () => {
 
   const handleJoinEvent = async () => {
     if (!user) {
-      toast.error('Du musst eingeloggt sein um Events beizutreten');
+      toast.error('You must be signed in to join events');
       navigate('/auth');
       return;
     }
@@ -134,7 +134,7 @@ const EventDetail = () => {
           .eq('event_id', event.id)
           .eq('user_id', user.id);
         if (error) throw error;
-        toast.success('Du hast das Event verlassen');
+        toast.success('You left the event');
         setIsParticipant(false);
       } else {
         const { error } = await supabase
@@ -142,12 +142,12 @@ const EventDetail = () => {
           .insert({ event_id: event.id, user_id: user.id })
           .select();
         if (error) throw error;
-        toast.success('Du bist dem Event beigetreten! Chat wurde erstellt.');
+        toast.success('You joined the event! Chat created.');
         setIsParticipant(true);
       }
       fetchParticipants();
     } catch (error: any) {
-      toast.error(error.message || 'Fehler beim Beitreten/Verlassen');
+      toast.error(error.message || 'Error joining/leaving');
     } finally {
       setJoinLoading(false);
     }
@@ -161,7 +161,7 @@ const EventDetail = () => {
     return (
       <Layout>
         <div className="p-4 flex items-center justify-center min-h-[50vh]">
-          <div className="text-foreground">Lädt...</div>
+          <div className="text-foreground">Loading...</div>
         </div>
       </Layout>
     );
@@ -172,8 +172,8 @@ const EventDetail = () => {
       <Layout>
         <div className="p-4 flex items-center justify-center min-h-[50vh]">
           <div className="text-center space-y-4">
-            <div className="text-foreground">Event nicht gefunden</div>
-            <Button onClick={() => navigate('/events')}>Zurück zu Events</Button>
+            <div className="text-foreground">Event not found</div>
+            <Button onClick={() => navigate('/events')}>Back to events</Button>
           </div>
         </div>
       </Layout>
@@ -181,13 +181,13 @@ const EventDetail = () => {
   }
 
   const eventDate = new Date(event.event_date);
-  const formattedDate = eventDate.toLocaleDateString('de-DE');
-  const formattedTime = eventDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  const formattedDate = eventDate.toLocaleDateString('en-GB');
+  const formattedTime = eventDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 
   const categoryLabels: Record<string, string> = {
-    music: 'Musik', sports: 'Sport', culture: 'Kultur', food: 'Food',
+    music: 'Music', sports: 'Sports', culture: 'Culture', food: 'Food',
     nightlife: 'Nightlife', outdoor: 'Outdoor', community: 'Community',
-    workshop: 'Workshop', other: 'Sonstiges',
+    workshop: 'Workshop', other: 'Other',
   };
 
   return (
@@ -258,7 +258,7 @@ const EventDetail = () => {
               </div>
               <div className="flex items-center space-x-3 text-muted-foreground">
                 <Users className="w-5 h-5" />
-                <span>{participants.length} / {event.max_participants || '∞'} Teilnehmer</span>
+                <span>{participants.length} / {event.max_participants || '∞'} participants</span>
               </div>
             </div>
           </CardContent>
@@ -277,7 +277,7 @@ const EventDetail = () => {
         {participants.length > 0 && (
           <Card className="bg-card border-border">
             <CardContent className="p-6">
-              <h3 className="text-foreground font-bold text-lg mb-4">Teilnehmer</h3>
+              <h3 className="text-foreground font-bold text-lg mb-4">Participants</h3>
               <div className="flex flex-wrap gap-3">
                 {participants.map((participant) => (
                   <div key={participant.id} className="flex items-center space-x-2">
@@ -310,7 +310,7 @@ const EventDetail = () => {
                     : 'bg-primary hover:bg-primary/80 text-primary-foreground'
                 }`}
               >
-                {joinLoading ? 'Lädt...' : isParticipant ? 'Event verlassen' : 'Ich bin dabei!'}
+                {joinLoading ? 'Loading...' : isParticipant ? 'Leave event' : "I'm in!"}
               </Button>
 
               {isParticipant && (
@@ -321,7 +321,7 @@ const EventDetail = () => {
                     className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
                   >
                     <TicketIcon className="w-4 h-4 mr-2" />
-                    Mein Ticket anzeigen
+                    Show my ticket
                   </Button>
                   <Button
                     onClick={handleOpenChat}
@@ -329,7 +329,7 @@ const EventDetail = () => {
                     className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
                   >
                     <MessageCircle className="w-4 h-4 mr-2" />
-                    Zum Gruppenchat
+                    Open group chat
                   </Button>
                 </>
               )}
@@ -340,7 +340,7 @@ const EventDetail = () => {
                   className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
                 >
                   <ScanLine className="w-4 h-4 mr-2" />
-                  Tickets scannen (Check-in)
+                  Scan tickets (Check-in)
                 </Button>
               )}
             </>
@@ -349,7 +349,7 @@ const EventDetail = () => {
               onClick={() => navigate('/auth')}
               className="w-full bg-primary hover:bg-primary/80 text-primary-foreground"
             >
-              Anmelden um beizutreten
+              Sign in to join
             </Button>
           )}
         </div>
