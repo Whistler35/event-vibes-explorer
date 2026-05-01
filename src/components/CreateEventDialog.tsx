@@ -192,7 +192,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
           {/* Title */}
           <div className="space-y-2">
             <Label htmlFor="title" className="text-foreground text-sm">Title *</Label>
-            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Was machst du?" className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12" />
+            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="What are you doing?" className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12" />
           </div>
 
           {/* Category */}
