@@ -256,6 +256,7 @@ const Home = () => {
                         time={formattedTime}
                         location={event.location_name}
                         category={categoryLabels[event.category || ''] || event.category || ''}
+                        priceCents={(event as any).price_cents ?? 0}
                         onClick={() => handleEventClick(event.id)}
                       />
                     </CarouselItem>
