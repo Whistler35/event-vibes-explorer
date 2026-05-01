@@ -29,7 +29,9 @@ const EditProfile = () => {
     avatar_url: "",
     instagram_username: "",
     instagram_followers: "",
+    interests: [] as string[],
   });
+  const [interestInput, setInterestInput] = useState("");
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -39,9 +41,9 @@ const EditProfile = () => {
     const fetchProfile = async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("name, age, country, bio, fun_fact, avatar_url, instagram_username, instagram_followers")
+        .select("name, age, country, bio, fun_fact, avatar_url, instagram_username, instagram_followers, interests")
         .eq("user_id", user.id)
-        .maybeSingle();
+        .maybeSingle() as any;
 
       if (data) {
         setForm({
@@ -53,6 +55,7 @@ const EditProfile = () => {
           avatar_url: data.avatar_url || "",
           instagram_username: data.instagram_username || "",
           instagram_followers: data.instagram_followers || "",
+          interests: data.interests || [],
         });
         setAvatarPreview(data.avatar_url);
       }
@@ -115,6 +118,7 @@ const EditProfile = () => {
         avatar_url: form.avatar_url,
         instagram_username: form.instagram_username.trim() || null,
         instagram_followers: form.instagram_followers.trim() || null,
+        interests: form.interests,
         updated_at: new Date().toISOString(),
       };
 
@@ -242,6 +246,56 @@ const EditProfile = () => {
               className="mt-1 bg-muted border-border text-foreground"
             />
             {errors.fun_fact && <p className="text-destructive text-xs mt-1">{errors.fun_fact}</p>}
+          </div>
+
+          <div>
+            <Label className="text-foreground font-medium">Was ich mache (Interessen)</Label>
+            <p className="text-muted-foreground text-xs mt-0.5">Tipp: kurze Tags, z.B. "Tennis 🎾", "Techno 🎧"</p>
+            <div className="flex gap-2 mt-2">
+              <Input
+                value={interestInput}
+                onChange={(e) => setInterestInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    const v = interestInput.trim();
+                    if (v && !form.interests.includes(v) && form.interests.length < 12) {
+                      setForm((p) => ({ ...p, interests: [...p.interests, v] }));
+                      setInterestInput("");
+                    }
+                  }
+                }}
+                placeholder="Tag eingeben + Enter"
+                className="bg-muted border-border text-foreground"
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  const v = interestInput.trim();
+                  if (v && !form.interests.includes(v) && form.interests.length < 12) {
+                    setForm((p) => ({ ...p, interests: [...p.interests, v] }));
+                    setInterestInput("");
+                  }
+                }}
+              >
+                Add
+              </Button>
+            </div>
+            {form.interests.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                {form.interests.map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => setForm((p) => ({ ...p, interests: p.interests.filter((t) => t !== tag) }))}
+                    className="px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-semibold flex items-center gap-1.5"
+                  >
+                    {tag} <span className="opacity-70">×</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="border-t border-border pt-4">
