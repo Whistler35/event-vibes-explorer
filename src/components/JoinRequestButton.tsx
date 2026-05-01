@@ -55,7 +55,7 @@ const JoinRequestButton: React.FC<JoinRequestButtonProps> = ({ eventId, eventOwn
     }
 
     if (status === 'none' && !message.trim()) {
-      toast.error('Bitte hinterlasse eine kurze Nachricht');
+      toast.error('Please leave a short message');
       return;
     }
 
