@@ -301,43 +301,28 @@ const EventDetail = () => {
           </Card>
         )}
 
-        {/* Action Buttons */}
+        {/* Action Section */}
         <div className="space-y-3">
-          {isCommunityEvent && !isOwner ? (
+          {isCommunityEvent && !isOwner && !isParticipant ? (
             <JoinRequestButton eventId={event.id} eventOwnerId={event.created_by} />
           ) : user ? (
             <>
-              <Button
-                onClick={handleJoinEvent}
-                disabled={joinLoading}
-                className={`w-full ${
-                  isParticipant
-                    ? 'bg-muted hover:bg-muted/80 text-foreground'
-                    : 'bg-primary hover:bg-primary/80 text-primary-foreground'
-                }`}
-              >
-                {joinLoading ? 'Loading...' : isParticipant ? 'Leave event' : "I'm in!"}
-              </Button>
-
-              {isParticipant && (
-                <>
-                  <Button
-                    onClick={() => navigate('/tickets')}
-                    variant="outline"
-                    className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-                  >
-                    <TicketIcon className="w-4 h-4 mr-2" />
-                    Show my ticket
-                  </Button>
-                  <Button
-                    onClick={handleOpenChat}
-                    variant="outline"
-                    className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-                  >
-                    <MessageCircle className="w-4 h-4 mr-2" />
-                    Open group chat
-                  </Button>
-                </>
+              {isParticipant ? (
+                <EventParticipantStatus
+                  event={event}
+                  userId={user.id}
+                  participants={participants}
+                  onLeave={handleJoinEvent}
+                  leaveLoading={joinLoading}
+                />
+              ) : (
+                <Button
+                  onClick={handleJoinEvent}
+                  disabled={joinLoading}
+                  className="w-full bg-primary hover:bg-primary/80 text-primary-foreground h-12 text-base font-bold"
+                >
+                  {joinLoading ? 'Lädt...' : "I'm in!"}
+                </Button>
               )}
               {canEdit && (
                 <Button
@@ -346,7 +331,7 @@ const EventDetail = () => {
                   className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
                 >
                   <ScanLine className="w-4 h-4 mr-2" />
-                  Scan tickets (Check-in)
+                  Tickets scannen (Check-in)
                 </Button>
               )}
             </>
@@ -355,7 +340,7 @@ const EventDetail = () => {
               onClick={() => navigate('/auth')}
               className="w-full bg-primary hover:bg-primary/80 text-primary-foreground"
             >
-              Sign in to join
+              Anmelden um teilzunehmen
             </Button>
           )}
         </div>
