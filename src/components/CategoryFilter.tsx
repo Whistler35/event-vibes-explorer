@@ -128,14 +128,14 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategories, onC
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
                     <CalendarIcon className="w-3 h-3" />
-                    Datum
+                    Date
                   </p>
                   {selectedDateRange?.from && (
                     <button
                       onClick={() => onDateRangeChange(undefined)}
                       className="text-xs text-primary hover:underline"
                     >
-                      Zurücksetzen
+                      Reset
                     </button>
                   )}
                 </div>
