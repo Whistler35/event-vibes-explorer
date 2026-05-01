@@ -537,6 +537,7 @@ const Nearby = () => {
             <EventCarousel
               events={displayedCarouselEvents}
               selectedId={selectedEventId}
+              onInteractionStart={freezeCarouselOrder}
               onSelect={handleCarouselSelect}
               onExpand={(ev) => setSelectedEvent(ev)}
             />
