@@ -29,7 +29,7 @@ const MyPendingSwipesList = () => {
       <div className="flex items-center gap-2 px-1">
         <Hourglass className="w-3.5 h-3.5 text-[hsl(var(--blitz-pink))]" />
         <p className="text-[10px] uppercase tracking-[0.25em] font-black text-[hsl(var(--blitz-forest))]">
-          Deine Anfragen
+          Your Requests
         </p>
       </div>
       {items.map((s) => (
@@ -45,11 +45,11 @@ const MyPendingSwipesList = () => {
           </Avatar>
           <div className="flex-1 min-w-0">
             <p className="font-bold text-sm truncate text-foreground">
-              {s.host_name ?? "Anonym"} · {s.activity}
+              {s.host_name ?? "Anonymous"} · {s.activity}
             </p>
             <p className="text-[11px] text-muted-foreground flex items-center gap-1">
               <Zap className="w-3 h-3 text-[hsl(var(--blitz-pink))] fill-[hsl(var(--blitz-pink))]" />
-              wartet auf Antwort…
+              waiting for response…
             </p>
           </div>
           <div className="text-xs font-black tabular-nums text-[hsl(var(--blitz-pink))]">

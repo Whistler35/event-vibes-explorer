@@ -42,7 +42,7 @@ const MyMatchesBanner = () => {
           </Avatar>
           <div className="flex-1 text-left min-w-0">
             <p className="font-black uppercase text-xs tracking-wider opacity-90 flex items-center gap-1">
-              <Zap className="w-3 h-3 fill-white" /> Match aktiv
+              <Zap className="w-3 h-3 fill-white" /> Match active
             </p>
             <p className="font-bold truncate">
               {m.other_name ?? "Match"} · {m.activity}

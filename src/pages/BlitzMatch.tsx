@@ -52,7 +52,7 @@ const BlitzMatch = () => {
         .eq("id", matchId)
         .maybeSingle();
       if (!m) {
-        toast.error("Match nicht gefunden");
+        toast.error("Match not found");
         navigate("/blitz");
         return;
       }
@@ -171,7 +171,7 @@ const BlitzMatch = () => {
           MATCH!
         </h1>
         <p className="relative text-white/80 font-bold uppercase tracking-widest text-sm">
-          {activity} mit {other?.name ?? "deinem Match"}
+          {activity} with {other?.name ?? "your match"}
         </p>
       </div>
     );
@@ -209,7 +209,7 @@ const BlitzMatch = () => {
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 space-y-3">
         {messages.length === 0 && (
           <div className="text-center text-white/50 text-sm py-12">
-            Schreib ihm/ihr direkt — nur 5 Min zum Koordinieren ⚡
+            Message them directly — only 5 min to coordinate ⚡
           </div>
         )}
         {messages.map((msg) => {
@@ -240,7 +240,7 @@ const BlitzMatch = () => {
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={expired ? "Chat abgelaufen" : "Schreib was…"}
+          placeholder={expired ? "Chat expired" : "Type something…"}
           disabled={expired}
           className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-white/40"
         />
