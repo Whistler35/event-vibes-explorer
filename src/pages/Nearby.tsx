@@ -8,6 +8,7 @@ import InteractiveMap, { type MapEvent } from "@/components/InteractiveMap";
 import CreateEventDialog from "@/components/CreateEventDialog";
 import EventDetailSheet from "@/components/EventDetailSheet";
 import EventCarousel from "@/components/EventCarousel";
+import CollapsibleCarousel from "@/components/CollapsibleCarousel";
 import CategoryFilter from "@/components/CategoryFilter";
 import { useSearchEvents, type EventCategory, type SearchEvent } from "@/hooks/useSearchEvents";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -440,8 +441,29 @@ const Nearby = () => {
           </div>
         </div>
 
+        {/* PUBLIC / PRIVATE TOGGLE — pinned, always visible directly under the search bar */}
+        <div className="absolute top-[58px] right-3 z-20">
+          <div className="flex items-center gap-2 h-9 px-3 rounded-full bg-card/95 backdrop-blur-xl border border-border/50 shadow-[0_4px_14px_rgba(0,0,0,0.10)]">
+            <Globe className={`h-3.5 w-3.5 ${!isPrivateMode ? 'text-primary' : 'text-muted-foreground'}`} />
+            <Switch
+              checked={isPrivateMode}
+              onCheckedChange={(checked) => {
+                if (checked && !user) {
+                  toast.info('Bitte melde dich an, um private Events zu sehen.', {
+                    action: { label: 'Anmelden', onClick: () => navigate('/auth') },
+                  });
+                  return;
+                }
+                setIsPrivateMode(checked);
+              }}
+              className="scale-75"
+            />
+            <Lock className={`h-3.5 w-3.5 ${isPrivateMode ? 'text-primary' : 'text-muted-foreground'}`} />
+          </div>
+        </div>
+
         {/* QUICK FILTER PILLS */}
-        <div className="absolute top-[60px] left-0 right-0 z-10 px-3">
+        <div className="absolute top-[105px] left-0 right-0 z-10 px-3">
           <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
             {quickPills.map(({ id, label, icon: Icon }) => {
               const active = activeQuickFilters.has(id);
@@ -460,49 +482,31 @@ const Nearby = () => {
                 </button>
               );
             })}
-            {/* Public/Private toggle as pill */}
-            <div className="shrink-0 flex items-center gap-2 h-8 px-3 rounded-full bg-card/90 backdrop-blur-xl border border-border/50 shadow-sm">
-              <Globe className={`h-3.5 w-3.5 ${!isPrivateMode ? 'text-primary' : 'text-muted-foreground'}`} />
-              <Switch
-                checked={isPrivateMode}
-                onCheckedChange={(checked) => {
-                  if (checked && !user) {
-                    toast.info('Bitte melde dich an, um private Events zu sehen.', {
-                      action: { label: 'Anmelden', onClick: () => navigate('/auth') },
-                    });
-                    return;
-                  }
-                  setIsPrivateMode(checked);
-                }}
-                className="scale-75"
-              />
-              <Lock className={`h-3.5 w-3.5 ${isPrivateMode ? 'text-primary' : 'text-muted-foreground'}`} />
-            </div>
           </div>
         </div>
 
         {/* Logo discreet */}
-        <div className="absolute top-[100px] left-3 z-10 flex items-center gap-1.5 bg-card/80 backdrop-blur-md rounded-full px-2.5 py-1 shadow-sm border border-border/40">
+        <div className="absolute top-[148px] left-3 z-10 flex items-center gap-1.5 bg-card/80 backdrop-blur-md rounded-full px-2.5 py-1 shadow-sm border border-border/40">
           <img src={evendleLogo} alt="Evendle" className="w-4 h-4 object-contain rounded-full" />
           <span className="text-foreground text-[10px] font-bold tracking-wide">EVENDLE</span>
         </div>
 
         {isLoading && (
-          <div className="absolute top-[100px] left-1/2 -translate-x-1/2 z-10 bg-card/95 backdrop-blur rounded-full px-3 py-1 text-xs text-foreground shadow">
+          <div className="absolute top-[148px] left-1/2 -translate-x-1/2 z-10 bg-card/95 backdrop-blur rounded-full px-3 py-1 text-xs text-foreground shadow">
             Events laden...
           </div>
         )}
 
-        {/* BOTTOM CAROUSEL */}
-        <div className="absolute bottom-0 left-0 right-0 z-10 pb-3 pointer-events-none">
-          <div className="pointer-events-auto">
+        {/* BOTTOM CAROUSEL — collapsible drawer */}
+        <div className="absolute bottom-0 left-0 right-0 z-10">
+          <CollapsibleCarousel expandedHeight={280} collapsedHeight={36}>
             <EventCarousel
               events={carouselEvents}
               selectedId={selectedEventId}
               onSelect={handleCarouselSelect}
               onExpand={(ev) => setSelectedEvent(ev)}
             />
-          </div>
+          </CollapsibleCarousel>
         </div>
 
         <CreateEventDialog
