@@ -293,18 +293,28 @@ const Nearby = () => {
     return [...featured, ...sortedOthers].slice(0, 10);
   }, [mapEvents, effectiveBounds, selectedEventId]);
 
+  // The list shown in the carousel: prefer the frozen snapshot during a swipe session.
+  const displayedCarouselEvents = frozenCarousel ?? carouselEvents;
+
   // Auto-select first carousel item
   useEffect(() => {
-    if (carouselEvents.length > 0 && (selectedEventId == null || !carouselEvents.find(e => String(e.id) === String(selectedEventId)))) {
-      setSelectedEventId(carouselEvents[0].id);
+    if (displayedCarouselEvents.length > 0 && (selectedEventId == null || !displayedCarouselEvents.find(e => String(e.id) === String(selectedEventId)))) {
+      setSelectedEventId(displayedCarouselEvents[0].id);
     }
-    if (carouselEvents.length === 0) setSelectedEventId(null);
-  }, [carouselEvents]);
+    if (displayedCarouselEvents.length === 0) setSelectedEventId(null);
+  }, [displayedCarouselEvents]);
+
+  // Reset the freeze whenever filters / mode change — the user expects a fresh list then.
+  useEffect(() => {
+    setFrozenCarousel(null);
+  }, [selectedCategories, dateFilter?.from, dateFilter?.to, isPrivateMode, activeQuickFilters]);
 
   // Sync map when carousel selection changes — pan only (no zoom change),
   // and freeze viewport-driven re-ordering until the flight settles.
   const handleCarouselSelect = (ev: MapEvent) => {
     setSelectedEventId(ev.id);
+    // Lock the current order so subsequent swipes don't reshuffle the deck.
+    setFrozenCarousel(prev => prev ?? carouselEvents);
     carouselDrivingRef.current = true;
     if (carouselDrivingTimerRef.current) clearTimeout(carouselDrivingTimerRef.current);
     carouselDrivingTimerRef.current = setTimeout(() => {
