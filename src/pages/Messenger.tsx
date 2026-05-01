@@ -148,6 +148,91 @@ const Messenger = () => {
         }
       }
 
+      // Load event group chats (where user participates)
+      const { data: myParticipations } = await supabase
+        .from("event_participants")
+        .select("event_id")
+        .eq("user_id", user.id);
+
+      const eventIds = (myParticipations || []).map((p: any) => p.event_id);
+
+      if (eventIds.length > 0) {
+        const [{ data: eventChats }, { data: eventsData }] = await Promise.all([
+          supabase.from("event_chats").select("id, event_id").in("event_id", eventIds),
+          supabase
+            .from("events")
+            .select("id, title, image_url, current_participants")
+            .in("id", eventIds),
+        ]);
+
+        const chatIds = (eventChats || []).map((c: any) => c.id);
+
+        const [{ data: lastMsgs }, { data: reads }] = await Promise.all([
+          chatIds.length
+            ? supabase
+                .from("chat_messages")
+                .select("chat_id, message, created_at, user_id")
+                .in("chat_id", chatIds)
+                .order("created_at", { ascending: false })
+            : Promise.resolve({ data: [] as any[] }),
+          chatIds.length
+            ? supabase
+                .from("conversation_reads")
+                .select("conversation_id, last_read_at")
+                .in("conversation_id", chatIds)
+                .eq("user_id", user.id)
+            : Promise.resolve({ data: [] as any[] }),
+        ]);
+
+        // Resolve sender names for last messages
+        const senderIds = Array.from(
+          new Set(
+            (lastMsgs || [])
+              .reduce((acc: Record<string, string>, m: any) => {
+                if (!acc[m.chat_id]) acc[m.chat_id] = m.user_id;
+                return acc;
+              }, {} as Record<string, string>) &&
+              (lastMsgs || []).map((m: any) => m.user_id)
+          )
+        );
+        const { data: senderProfiles } = senderIds.length
+          ? await supabase.from("profiles").select("user_id, name").in("user_id", senderIds)
+          : { data: [] as any[] };
+
+        for (const chat of eventChats || []) {
+          const ev = eventsData?.find((e: any) => e.id === (chat as any).event_id);
+          if (!ev) continue;
+          const last = (lastMsgs || []).find((m: any) => m.chat_id === (chat as any).id);
+          const lastAt = last?.created_at || null;
+          const senderName = last
+            ? senderProfiles?.find((p: any) => p.user_id === last.user_id)?.name?.split(" ")[0] || "Jemand"
+            : null;
+          const lastReadEntry = (reads || []).find(
+            (r: any) => r.conversation_id === (chat as any).id
+          );
+          const lastReadAt = lastReadEntry?.last_read_at;
+          const unread =
+            !!last &&
+            last.user_id !== user.id &&
+            (!lastReadAt || new Date(last.created_at) > new Date(lastReadAt));
+
+          results.push({
+            id: `event_${(chat as any).id}`,
+            eventId: (ev as any).id,
+            other_user_id: "",
+            other_name: (ev as any).title,
+            other_avatar: (ev as any).image_url || null,
+            last_message: last
+              ? `${senderName}: ${last.message}`
+              : "Noch keine Nachricht — sag Hallo 👋",
+            last_message_at: lastAt,
+            isUnread: unread,
+            isEventGroup: true,
+            participantCount: (ev as any).current_participants || 0,
+          });
+        }
+      }
+
       // Sort: unread first (newest on top), then read (newest on top)
       results.sort((a, b) => {
         if (a.isUnread !== b.isUnread) return a.isUnread ? -1 : 1;
