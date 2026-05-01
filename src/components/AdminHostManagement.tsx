@@ -105,7 +105,7 @@ const AdminHostManagement = () => {
         .from('host_profiles')
         .update({ status: 'active' } as any)
         .eq('id', host.id);
-      toast.success(`${host.profile_name} aktiviert`);
+      toast.success(`${host.profile_name} activated`);
     } else if (action === 'delete') {
       await supabase.from('host_profiles').delete().eq('id', host.id);
       toast.success(`${host.profile_name} gelöscht`);
