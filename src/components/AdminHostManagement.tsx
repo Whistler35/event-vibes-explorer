@@ -167,7 +167,7 @@ const AdminHostManagement = () => {
             <p className="text-foreground font-bold text-lg">
               €{(totalRevenue / 100).toFixed(0)}
             </p>
-            <p className="text-muted-foreground text-[10px]">Umsatz gesamt</p>
+            <p className="text-muted-foreground text-[10px]">Total revenue</p>
           </CardContent>
         </Card>
       </div>
