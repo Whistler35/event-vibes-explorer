@@ -223,8 +223,8 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
 
           {/* Description */}
           <div className="space-y-2">
-            <Label htmlFor="description" className="text-foreground text-sm">Beschreibung</Label>
-            <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Beschreibe dein Event..." rows={3} className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl resize-none" />
+            <Label htmlFor="description" className="text-foreground text-sm">Description</Label>
+            <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe your event..." rows={3} className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl resize-none" />
           </div>
 
           {/* Date and Time */}
