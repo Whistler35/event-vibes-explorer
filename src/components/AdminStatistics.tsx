@@ -170,7 +170,7 @@ const AdminStatistics = () => {
           label = `${day}.${m}.`;
         } else {
           const [year, month] = key.split("-");
-          label = new Date(Number(year), Number(month) - 1).toLocaleDateString("de-DE", { month: "short", year: "2-digit" });
+          label = new Date(Number(year), Number(month) - 1).toLocaleDateString("en-GB", { month: "short", year: "2-digit" });
         }
         return { month: label, users: val.users, events: val.events };
       });
