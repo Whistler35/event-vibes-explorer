@@ -293,7 +293,7 @@ const AdminHostManagement = () => {
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter className="gap-2">
-                <Button variant="outline" onClick={() => setActionDialog(null)}>Abbrechen</Button>
+                <Button variant="outline" onClick={() => setActionDialog(null)}>Cancel</Button>
                 <Button
                   variant={actionDialog.action === 'delete' || actionDialog.action === 'suspend' ? 'destructive' : 'default'}
                   onClick={handleAction}
