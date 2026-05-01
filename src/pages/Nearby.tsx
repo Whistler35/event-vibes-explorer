@@ -151,7 +151,7 @@ const Nearby = () => {
       try {
         const [placesRes, eventsRes] = await Promise.all([
           fetch(
-            `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?types=place,locality&limit=4&language=de&access_token=${MAPBOX_TOKEN}`,
+            `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?types=place,locality&limit=4&language=en&access_token=${MAPBOX_TOKEN}`,
             { signal: ctrl.signal }
           ).then(r => r.json()).catch(() => ({ features: [] })),
           supabase
@@ -224,8 +224,8 @@ const Nearby = () => {
 
   const handleCreateEvent = (coordinates: [number, number]) => {
     if (!user) {
-      toast.info('Bitte melde dich an, um Events zu erstellen.', {
-        action: { label: 'Anmelden', onClick: () => navigate('/auth') },
+      toast.info('Please sign in to create events.', {
+        action: { label: 'Sign in', onClick: () => navigate('/auth') },
       });
       return;
     }
@@ -355,10 +355,10 @@ const Nearby = () => {
   };
 
   const quickPills: { id: QuickFilter; label: string; icon: React.ElementType }[] = [
-    { id: 'tonight', label: 'Heute Abend', icon: Moon },
-    { id: 'free', label: 'Gratis', icon: Tag },
-    { id: 'nearby', label: 'In der Nähe', icon: Navigation },
-    { id: 'popular', label: 'Beliebt', icon: Flame },
+    { id: 'tonight', label: 'Tonight', icon: Moon },
+    { id: 'free', label: 'Free', icon: Tag },
+    { id: 'nearby', label: 'Nearby', icon: Navigation },
+    { id: 'popular', label: 'Popular', icon: Flame },
   ];
 
   return (
@@ -403,7 +403,7 @@ const Nearby = () => {
                 value={cityQuery}
                 onChange={(e) => handleCityInput(e.target.value)}
                 onFocus={() => { setSearchOpen(true); (citySuggestions.length + eventSuggestions.length) > 0 && setShowCitySuggestions(true); }}
-                placeholder="Events, Orte suchen..."
+                placeholder="Search events, places..."
                 className="flex-1 bg-transparent border-0 outline-none px-3 text-sm text-foreground placeholder:text-muted-foreground"
               />
               {searchLoading && (
@@ -439,7 +439,7 @@ const Nearby = () => {
                             )}
                           </div>
                           <div className="text-[11px] text-muted-foreground truncate">
-                            {ev.event_date && new Date(ev.event_date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
+                            {ev.event_date && new Date(ev.event_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })}
                             {ev.location_name && ` · ${ev.location_name}`}
                           </div>
                         </div>
@@ -449,7 +449,7 @@ const Nearby = () => {
                 )}
                 {citySuggestions.length > 0 && (
                   <>
-                    <div className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Orte</div>
+                    <div className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Places</div>
                     {citySuggestions.map((s, i) => (
                       <button
                         key={`pl-${i}`}
@@ -463,7 +463,7 @@ const Nearby = () => {
                   </>
                 )}
                 {!searchLoading && eventSuggestions.length === 0 && citySuggestions.length === 0 && (
-                  <div className="px-4 py-4 text-sm text-muted-foreground text-center">Keine Events oder Orte gefunden</div>
+                  <div className="px-4 py-4 text-sm text-muted-foreground text-center">No events or places found</div>
                 )}
               </div>
             )}
@@ -488,8 +488,8 @@ const Nearby = () => {
               checked={isPrivateMode}
               onCheckedChange={(checked) => {
                 if (checked && !user) {
-                  toast.info('Bitte melde dich an, um private Events zu sehen.', {
-                    action: { label: 'Anmelden', onClick: () => navigate('/auth') },
+                  toast.info('Please sign in to see private events.', {
+                    action: { label: 'Sign in', onClick: () => navigate('/auth') },
                   });
                   return;
                 }
@@ -527,7 +527,7 @@ const Nearby = () => {
 
         {isLoading && (
           <div className="absolute top-[110px] left-1/2 -translate-x-1/2 z-10 bg-card/95 backdrop-blur rounded-full px-3 py-1 text-xs text-foreground shadow">
-            Events laden...
+            Loading events...
           </div>
         )}
 
