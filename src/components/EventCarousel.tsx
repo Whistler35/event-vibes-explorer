@@ -5,6 +5,7 @@ import type { MapEvent } from './InteractiveMap';
 interface EventCarouselProps {
   events: MapEvent[];
   selectedId: number | string | null;
+  onInteractionStart?: () => void;
   onSelect: (event: MapEvent) => void;
   onExpand: (event: MapEvent) => void;
 }
@@ -30,7 +31,7 @@ const CARD_WIDTH = 240;          // px
 const CARD_GAP = 12;             // spacing between cards
 const STEP = CARD_WIDTH + CARD_GAP;
 
-const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onSelect, onExpand }) => {
+const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInteractionStart, onSelect, onExpand }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const programmaticScrollRef = useRef(false);
   const programmaticTimerRef = useRef<ReturnType<typeof setTimeout>>();
@@ -79,6 +80,7 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onSel
     if (!isScrollingRef.current) {
       isScrollingRef.current = true;
       setIsScrolling(true);
+      onInteractionStart?.();
     }
 
     if (rafRef.current != null) return;
@@ -105,7 +107,7 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onSel
       const ev = events[clamped];
       if (ev && String(ev.id) !== String(selectedId)) onSelect(ev);
     }, 140);
-  }, [events, containerWidth, selectedId, onSelect]);
+  }, [events, containerWidth, selectedId, onInteractionStart, onSelect]);
 
   useEffect(() => () => {
     if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
@@ -150,6 +152,7 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onSel
               if (isCenter) {
                 onExpand(ev);
               } else {
+                onInteractionStart?.();
                 if (settleTimeoutRef.current) clearTimeout(settleTimeoutRef.current);
                 isScrollingRef.current = false;
                 setIsScrolling(false);
