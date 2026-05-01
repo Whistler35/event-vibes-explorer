@@ -1,80 +1,52 @@
-# Nearby: Map-Sync, Filter, Suche
 
-Drei klar abgegrenzte Verbesserungen auf `/nearby`. Marken/Farben bleiben (Forest + Citrus/Lime), kein neues Lib.
+# Karussell-Reihenfolge stabil halten beim Wischen
 
----
+## Problem
 
-## 1) Karte ↔ Karusell – ruhiger Flow
+Wenn der User auf der Karte (`/nearby`) durch das Karussell wischt:
+1. Jeder Swipe triggert `flyTo` → die Karte springt zum Event (cool, soll bleiben)
+2. Nach dem Flug (ca. 1100ms) tauen die `viewportBounds` wieder auf
+3. Die `carouselEvents`-Liste filtert sich auf neue Bounds → **Reihenfolge ändert sich, Karten verschwinden, neue tauchen auf**
+4. Das fühlt sich unruhig an — man verliert die Übersicht über die Karten, durch die man gerade wischt
 
-**Problem:** Beim Zoomen/Panen ändert sich `viewportBounds` ständig → Karusell-Liste wird neu gefiltert → aktiver Index springt → `flyTo` feuert → wieder neue Bounds → Endlos-Schaukel.
+## Lösung
 
-**Lösungen (in `src/pages/Nearby.tsx` + `EventCarousel.tsx`):**
+Die Karussell-Liste soll während einer aktiven "Wisch-Session" **eingefroren** bleiben. Die Liste wird nur dann neu berechnet, wenn:
+- Filter sich ändern (Kategorie, Datum, Quick-Pills, Privatmodus)
+- Der User die Karte aktiv neu positioniert (Pan/Zoom, ohne dass das Karussell ihn dorthin geflogen hat)
+- Das Karussell sich für eine Zeit "beruhigt" hat (kein Swipe mehr)
 
-- **Map-Bewegung debouncen**: `viewportBounds` erst nach 250 ms Ruhe in `MapboxMap` emittieren (im `moveend`-Handler `setTimeout` + `clearTimeout`). Dadurch keine Bounds-Updates während aktivem Pan.
-- **Origin-Tracking statt Lock-Timer**: Statt `lockedBounds`+1.2 s Timer einen Ref `lastInteractionOriginRef` einführen mit Werten `'user'` | `'carousel'`. Wird das Karusell zur Quelle einer `flyTo`-Bewegung, ignoriert die Page **alle** Bounds-Änderungen, bis die Map einen `moveend` ohne weitere Folgebewegung hatte (≥ 1 Animationszyklus). Erst dann wieder `viewportBounds` = aktuelle Bounds.
-- **Karusell-Liste stabilisieren**: Memo-Key inkl. `selectedEventId`, sodass das gerade ausgewählte Event **immer** in der Liste bleibt, auch wenn es kurz aus den Bounds rutscht. → keine „Karte verschwindet beim Tap"-Race mehr.
-- **Tap auf Side-Card**: 
-  - `onClick`: sofort `setActiveIdx(i)`, scrollen ins Zentrum, `onSelect(ev)` → `flyTo`.
-  - Während des `scrollTo` den `onScroll`-Debounce-Select unterdrücken (Flag `programmaticScrollRef`), damit nicht parallel ein zweites Select feuert.
-- **Klick auf Center-Card** öffnet weiterhin Detail-Sheet (`onExpand`).
-- **`flyTo` weicher**: nur panen, **nicht zoomen** (Zoom nur beibehalten). Dauer 700 ms, `essential: true`.
+Das Verhalten "Map fliegt zum gewischten Event" bleibt 1:1 erhalten.
 
-Resultat: Beim Reinzoomen bleibt das Karusell stehen. Swipen pannt die Karte sanft. Side-Card-Tap funktioniert beim ersten Versuch.
+## Vorgehen
 
----
+In `src/pages/Nearby.tsx`:
 
-## 2) Filter-Dropdown nicht mehr abgeschnitten
+1. **Eingefrorenen Snapshot speichern**: Neuer State `frozenCarousel: MapEvent[] | null`. Solange gesetzt, wird er statt der berechneten Liste angezeigt.
 
-**Problem (Screenshot):** `CategoryFilter`-Popover öffnet `absolute left-0` und ragt rechts aus dem Viewport.
+2. **Beim ersten Carousel-Swipe einfrieren**: In `handleCarouselSelect` einmalig die aktuelle `carouselEvents`-Liste als Snapshot speichern. Folge-Swipes lassen den Snapshot unverändert — der User wischt durch die identische Karten-Reihenfolge.
 
-**Fix in `src/components/CategoryFilter.tsx`:**
-- Popover-Positionierung: `right-0` statt `left-0`, plus `max-w-[calc(100vw-1.5rem)]`, Breite auf `w-[18rem]` mit `min(18rem, calc(100vw - 1.5rem))`.
-- Z-Index auf `z-[60]` (über Quick-Pills und Karusell-Top).
-- Sicherheits-Padding `mr-2` damit Schatten nicht beschnitten wirkt.
+3. **Sinnvolles Auftauen**:
+   - Wenn der User die Karte selbst bewegt (Pan/Zoom ohne `carouselDrivingRef`) → Snapshot leeren, Liste neu berechnen.
+   - Wenn Filter, Kategorie, Datum, Privatmodus, Stadt-Auswahl ändern → Snapshot leeren (via `useEffect` auf diese Deps).
+   - Wenn ein Marker direkt auf der Karte angetippt wird → Snapshot leeren, damit das angetippte Event sicher in der frischen Liste landet.
 
----
+4. **Carousel verwendet den Snapshot**: `<EventCarousel events={frozenCarousel ?? carouselEvents} />`. Das stellt sicher, dass `EventCarousel`s interne Sync-Logik (Index ↔ selectedId) auf einer stabilen Liste arbeitet und nicht plötzlich umspringt.
 
-## 3) Globale Suche (Events + Orte)
+5. **Auto-Select-Effekt anpassen**: Der bestehende Effect, der `selectedEventId` auf das erste Element setzt, soll auf der angezeigten Liste (Snapshot wenn vorhanden) basieren, nicht auf der Live-Liste — sonst wechselt die Auswahl trotz Freeze.
 
-**Aktuell:** Suchleiste fragt nur Mapbox-Geocoding (Städte/Orte) ab. Events sind nicht findbar.
+## Technische Details
 
-**Neuer Flow in `src/pages/Nearby.tsx`:**
-- Bei Input-Länge ≥ 2 **parallel** zwei Quellen abfragen:
-  1. **Events** (Supabase): 
-     ```ts
-     supabase.from('events')
-       .select('id,title,category,event_date,location_name,latitude,longitude,image_url,is_featured')
-       .eq('visibility', 'public')
-       .eq('status', 'approved')
-       .or(`title.ilike.%${q}%,description.ilike.%${q}%,location_name.ilike.%${q}%`)
-       .order('event_date', { ascending: true })
-       .limit(6);
-     ```
-  2. **Orte** (Mapbox Geocoding, wie bisher), Limit 4.
-- Suggestions-Dropdown bekommt zwei Sektionen mit Headern „Events" und „Orte":
-  - Event-Eintrag: kleines Bild/Icon nach Kategorie, Titel, Datum + Ort (klein, muted), `Top`-Badge wenn `is_featured`.
-  - Ort-Eintrag: `MapPin`-Icon + Name (wie heute).
-- Klick auf **Event** → `mapRef.current.flyTo(lat, lng, 16)` + `setSelectedEvent(event)` (öffnet `EventDetailSheet`) + Suggestions schließen, Suchfeld auf Event-Titel setzen.
-- Klick auf **Ort** → bestehender `selectCity`-Flow.
-- Loading-State: kleiner Spinner rechts im Suchfeld während Debounce-Fetch.
-- Empty-State: „Keine Events oder Orte gefunden" wenn beide Listen leer.
+- Neuer State: `const [frozenCarousel, setFrozenCarousel] = useState<MapEvent[] | null>(null);`
+- In `handleCarouselSelect`: `if (!frozenCarousel) setFrozenCarousel(carouselEvents);`
+- In `onViewportChange`-Callback: zusätzlich zum bestehenden Guard auch `setFrozenCarousel(null)` aufrufen, **wenn die Bounds-Änderung NICHT vom Karussell stammt** (also wenn `!carouselDrivingRef.current`). Damit taut User-Interaktion mit der Karte den Freeze auf.
+- In `onEventClick` (Marker-Tap): `setFrozenCarousel(null)` damit die Liste sich frisch um den getippten Marker bildet.
+- `useEffect` mit Deps `[selectedCategories, dateFilter?.from, dateFilter?.to, isPrivateMode, activeQuickFilters]` → `setFrozenCarousel(null)`.
+- `displayedCarouselEvents = frozenCarousel ?? carouselEvents` an `EventCarousel` und an den Auto-Select-Effekt übergeben.
 
-**Code-Struktur:**
-- Neuer Hook **nicht nötig** — kompakt direkt im Page-Component mit `useState`/`useEffect` + Debounce (300 ms, ein gemeinsamer `AbortController` für beide Requests).
-- Type für gemischte Suggestions:
-  ```ts
-  type Suggestion =
-    | { kind: 'event'; event: SearchEvent }
-    | { kind: 'place'; place: GeoResult };
-  ```
+## Was unverändert bleibt
 
----
-
-## Geänderte Dateien
-
-- `src/pages/Nearby.tsx` — Suchfunktion (Events + Orte), Origin-Tracking statt Lock-Timer, stabile Carousel-Liste
-- `src/components/EventCarousel.tsx` — Programmatic-Scroll-Flag, Side-Card-Tap härten
-- `src/components/MapboxMap.tsx` — Debounce des Viewport-Emits
-- `src/components/CategoryFilter.tsx` — Popover rechts ausrichten + Viewport-Clamp
-
-Keine DB-, RLS- oder Edge-Function-Änderungen nötig (Events-Query nutzt bestehende Spalten und Policies).
+- Map-Sprung beim Swipe (`flyTo`)
+- Carousel-Layout, Animationen, Marker-Verhalten
+- Datenquellen, Filter, RLS
+- Keine DB-Migrationen

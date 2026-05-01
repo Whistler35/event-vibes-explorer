@@ -41,6 +41,9 @@ const Nearby = () => {
   const carouselDrivingRef = useRef(false);
   const carouselDrivingTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const [carouselExpandTrigger, setCarouselExpandTrigger] = useState(0);
+  // Frozen snapshot of the carousel list during an active swipe session.
+  // Prevents the card order from reshuffling while the user flips through cards.
+  const [frozenCarousel, setFrozenCarousel] = useState<MapEvent[] | null>(null);
 
   // Search bar (events + places)
   const [searchOpen, setSearchOpen] = useState(false);
@@ -290,18 +293,28 @@ const Nearby = () => {
     return [...featured, ...sortedOthers].slice(0, 10);
   }, [mapEvents, effectiveBounds, selectedEventId]);
 
+  // The list shown in the carousel: prefer the frozen snapshot during a swipe session.
+  const displayedCarouselEvents = frozenCarousel ?? carouselEvents;
+
   // Auto-select first carousel item
   useEffect(() => {
-    if (carouselEvents.length > 0 && (selectedEventId == null || !carouselEvents.find(e => String(e.id) === String(selectedEventId)))) {
-      setSelectedEventId(carouselEvents[0].id);
+    if (displayedCarouselEvents.length > 0 && (selectedEventId == null || !displayedCarouselEvents.find(e => String(e.id) === String(selectedEventId)))) {
+      setSelectedEventId(displayedCarouselEvents[0].id);
     }
-    if (carouselEvents.length === 0) setSelectedEventId(null);
-  }, [carouselEvents]);
+    if (displayedCarouselEvents.length === 0) setSelectedEventId(null);
+  }, [displayedCarouselEvents]);
+
+  // Reset the freeze whenever filters / mode change — the user expects a fresh list then.
+  useEffect(() => {
+    setFrozenCarousel(null);
+  }, [selectedCategories, dateFilter?.from, dateFilter?.to, isPrivateMode, activeQuickFilters]);
 
   // Sync map when carousel selection changes — pan only (no zoom change),
   // and freeze viewport-driven re-ordering until the flight settles.
   const handleCarouselSelect = (ev: MapEvent) => {
     setSelectedEventId(ev.id);
+    // Lock the current order so subsequent swipes don't reshuffle the deck.
+    setFrozenCarousel(prev => prev ?? carouselEvents);
     carouselDrivingRef.current = true;
     if (carouselDrivingTimerRef.current) clearTimeout(carouselDrivingTimerRef.current);
     carouselDrivingTimerRef.current = setTimeout(() => {
@@ -345,6 +358,8 @@ const Nearby = () => {
             ref={mapRef}
             onCreateEvent={handleCreateEvent}
             onEventClick={(event) => {
+              // User tapped a marker on the map → fresh list around that marker.
+              setFrozenCarousel(null);
               setSelectedEventId(event.id);
               // Auto-expand the carousel so the matching card is visible
               setCarouselExpandTrigger(t => t + 1);
@@ -357,7 +372,12 @@ const Nearby = () => {
               }, 1100);
               mapRef.current?.flyTo(event.position[0], event.position[1]);
             }}
-            onViewportChange={(b) => { if (!carouselDrivingRef.current) setViewportBounds(b); }}
+            onViewportChange={(b) => {
+              if (carouselDrivingRef.current) return;
+              // User moved/zoomed the map themselves → unfreeze and refresh the list.
+              setFrozenCarousel(null);
+              setViewportBounds(b);
+            }}
             events={mapEvents}
             isAdmin={true}
             center={initialCenter}
@@ -507,7 +527,7 @@ const Nearby = () => {
         <div className="absolute left-0 right-0 z-10" style={{ bottom: 'calc(2.5rem + env(safe-area-inset-bottom))' }}>
           <CollapsibleCarousel expandedHeight={280} collapsedHeight={36} expandTrigger={carouselExpandTrigger}>
             <EventCarousel
-              events={carouselEvents}
+              events={displayedCarouselEvents}
               selectedId={selectedEventId}
               onSelect={handleCarouselSelect}
               onExpand={(ev) => setSelectedEvent(ev)}
