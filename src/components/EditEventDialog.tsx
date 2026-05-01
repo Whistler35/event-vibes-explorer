@@ -160,14 +160,14 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
         <div className="flex items-center justify-between p-4 pb-2">
           <div className="flex items-center gap-2">
             <Pencil className="h-5 w-5 text-primary" />
-            <span className="text-foreground text-lg font-semibold">Event bearbeiten</span>
+            <span className="text-foreground text-lg font-semibold">Edit event</span>
           </div>
         </div>
 
         <div className="p-4 pt-2 space-y-4">
           {/* Image */}
           <div className="space-y-2">
-            <Label className="text-foreground text-sm">Bild</Label>
+            <Label className="text-foreground text-sm">Image</Label>
             <div className="relative">
               {imagePreview ? (
                 <div className="relative">
@@ -179,7 +179,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
               ) : (
                 <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/50 transition-colors bg-transparent">
                   <Camera className="h-8 w-8 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground mt-2">Bild hinzufügen</span>
+                  <span className="text-sm text-muted-foreground mt-2">Add image</span>
                   <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                 </label>
               )}
@@ -188,16 +188,16 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
 
           {/* Title */}
           <div className="space-y-2">
-            <Label htmlFor="edit-title" className="text-foreground text-sm">Titel *</Label>
+            <Label htmlFor="edit-title" className="text-foreground text-sm">Title *</Label>
             <Input id="edit-title" value={title} onChange={(e) => setTitle(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
           </div>
 
           {/* Category */}
           <div className="space-y-2">
-            <Label className="text-foreground text-sm">Kategorie</Label>
+            <Label className="text-foreground text-sm">Category</Label>
             <Select value={category} onValueChange={(val) => setCategory(val as EventCategory)}>
               <SelectTrigger className="bg-transparent border-border text-foreground rounded-xl h-12">
-                <SelectValue placeholder="Kategorie wählen" />
+                <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent className="bg-card border-border">
                 <SelectItem value="sports">⚽ Sport</SelectItem>
@@ -215,20 +215,20 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
 
           {/* Description */}
           <div className="space-y-2">
-            <Label htmlFor="edit-description" className="text-foreground text-sm">Beschreibung</Label>
+            <Label htmlFor="edit-description" className="text-foreground text-sm">Description</Label>
             <Textarea id="edit-description" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className="bg-transparent border-border text-foreground rounded-xl resize-none" />
           </div>
 
           {/* Location Name */}
           <div className="space-y-2">
-            <Label htmlFor="edit-location" className="text-foreground text-sm">Ort</Label>
+            <Label htmlFor="edit-location" className="text-foreground text-sm">Location</Label>
             <Input id="edit-location" value={locationName} onChange={(e) => setLocationName(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
           </div>
 
           {/* Map Position Picker */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-foreground text-sm">Position auf der Karte</Label>
+              <Label className="text-foreground text-sm">Position on the map</Label>
               <Button
                 type="button"
                 variant="ghost"
@@ -237,7 +237,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
                 className="text-primary text-xs h-7 px-2"
               >
                 <MapPin className="h-3 w-3 mr-1" />
-                {showMapPicker ? 'Karte ausblenden' : 'Auf Karte verschieben'}
+                {showMapPicker ? 'Hide map' : 'Move on map'}
               </Button>
             </div>
             {showMapPicker && hasValidPosition && (
@@ -252,18 +252,18 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
               />
             )}
             {!hasValidPosition && showMapPicker && (
-              <p className="text-muted-foreground text-xs">Keine Koordinaten vorhanden.</p>
+              <p className="text-muted-foreground text-xs">No coordinates available.</p>
             )}
           </div>
 
           {/* Date and Time */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-date" className="text-foreground text-sm">Datum *</Label>
+              <Label htmlFor="edit-date" className="text-foreground text-sm">Date *</Label>
               <Input id="edit-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-time" className="text-foreground text-sm">Zeit *</Label>
+              <Label htmlFor="edit-time" className="text-foreground text-sm">Time *</Label>
               <Input id="edit-time" type="time" value={time} onChange={(e) => setTime(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
             </div>
           </div>
@@ -319,7 +319,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
               Cancel
             </Button>
             <Button onClick={handleSubmit} disabled={!title || !date || !time || loading} className="flex-1 h-12 rounded-xl">
-              {loading ? 'Speichern...' : 'Speichern'}
+              {loading ? 'Saving...' : 'Save'}
             </Button>
           </div>
         </div>
