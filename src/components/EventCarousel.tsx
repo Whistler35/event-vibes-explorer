@@ -32,11 +32,13 @@ const STEP = CARD_WIDTH + CARD_GAP;
 
 const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onSelect, onExpand }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const isUserScrollingRef = useRef(false);
   const programmaticScrollRef = useRef(false);
   const programmaticTimerRef = useRef<ReturnType<typeof setTimeout>>();
-  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const settleTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const rafRef = useRef<number | null>(null);
+  const isScrollingRef = useRef(false);
   const [activeIdx, setActiveIdx] = useState(0);
+  const [isScrolling, setIsScrolling] = useState(false);
   const [containerWidth, setContainerWidth] = useState(0);
 
   // Track container width for centering math
@@ -49,43 +51,67 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onSel
     return () => ro.disconnect();
   }, []);
 
-  const scrollToIndex = useCallback((idx: number) => {
-    if (!scrollRef.current) return;
+  const scrollToIndex = useCallback((idx: number, behavior: ScrollBehavior = 'smooth') => {
+    if (!scrollRef.current || containerWidth === 0) return;
     programmaticScrollRef.current = true;
     if (programmaticTimerRef.current) clearTimeout(programmaticTimerRef.current);
     const target = idx * STEP - (containerWidth / 2 - CARD_WIDTH / 2);
-    scrollRef.current.scrollTo({ left: target, behavior: 'smooth' });
+    scrollRef.current.scrollTo({ left: target, behavior });
     programmaticTimerRef.current = setTimeout(() => {
       programmaticScrollRef.current = false;
-    }, 500);
+    }, behavior === 'smooth' ? 500 : 50);
   }, [containerWidth]);
 
-  // Sync to externally selected id (e.g. marker tap)
+  // Sync to externally selected id (e.g. marker tap) — but never while user is scrolling
   useEffect(() => {
-    if (selectedId == null || isUserScrollingRef.current) return;
+    if (selectedId == null || isScrollingRef.current) return;
     const idx = events.findIndex(e => String(e.id) === String(selectedId));
-    if (idx < 0) return;
+    if (idx < 0 || idx === activeIdx) return;
     setActiveIdx(idx);
     scrollToIndex(idx);
-  }, [selectedId, events, scrollToIndex]);
+  }, [selectedId, events, scrollToIndex, activeIdx]);
 
-  const onScroll = useCallback(() => {
+  // High-performance scroll handler: rAF-throttled, no React state churn per frame
+  const handleScroll = useCallback(() => {
     if (!scrollRef.current) return;
     if (programmaticScrollRef.current) return;
-    isUserScrollingRef.current = true;
-    const container = scrollRef.current;
-    const center = container.scrollLeft + containerWidth / 2;
-    const idx = Math.round((center - CARD_WIDTH / 2) / STEP);
-    const clamped = Math.max(0, Math.min(events.length - 1, idx));
-    if (clamped !== activeIdx) setActiveIdx(clamped);
 
-    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
-    scrollTimeoutRef.current = setTimeout(() => {
+    if (!isScrollingRef.current) {
+      isScrollingRef.current = true;
+      setIsScrolling(true);
+    }
+
+    if (rafRef.current != null) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      const container = scrollRef.current;
+      if (!container) return;
+      const center = container.scrollLeft + containerWidth / 2;
+      const idx = Math.round((center - CARD_WIDTH / 2) / STEP);
+      const clamped = Math.max(0, Math.min(events.length - 1, idx));
+      setActiveIdx(prev => (prev === clamped ? prev : clamped));
+    });
+
+    // Settle detection: when scroll stops for 140ms → fire onSelect, re-enable transitions
+    if (settleTimeoutRef.current) clearTimeout(settleTimeoutRef.current);
+    settleTimeoutRef.current = setTimeout(() => {
+      isScrollingRef.current = false;
+      setIsScrolling(false);
+      const container = scrollRef.current;
+      if (!container) return;
+      const center = container.scrollLeft + containerWidth / 2;
+      const idx = Math.round((center - CARD_WIDTH / 2) / STEP);
+      const clamped = Math.max(0, Math.min(events.length - 1, idx));
       const ev = events[clamped];
       if (ev && String(ev.id) !== String(selectedId)) onSelect(ev);
-      isUserScrollingRef.current = false;
-    }, 160);
-  }, [events, activeIdx, containerWidth, selectedId, onSelect]);
+    }, 140);
+  }, [events, containerWidth, selectedId, onSelect]);
+
+  useEffect(() => () => {
+    if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
+    if (settleTimeoutRef.current) clearTimeout(settleTimeoutRef.current);
+    if (programmaticTimerRef.current) clearTimeout(programmaticTimerRef.current);
+  }, []);
 
   if (events.length === 0) return null;
 
@@ -95,8 +121,8 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onSel
   return (
     <div
       ref={scrollRef}
-      onScroll={onScroll}
-      className="flex items-end overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth touch-pan-x overscroll-contain"
+      onScroll={handleScroll}
+      className="flex items-end overflow-x-auto scrollbar-hide snap-x snap-mandatory touch-pan-x overscroll-x-contain"
       style={{
         WebkitOverflowScrolling: 'touch',
         paddingLeft: sidePad,
@@ -104,14 +130,17 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onSel
         paddingTop: 32,
         paddingBottom: 8,
         gap: `${CARD_GAP}px`,
+        contain: 'layout paint',
       }}
     >
       {events.map((ev, i) => {
         const offset = i - activeIdx;
         const abs = Math.abs(offset);
         const isCenter = abs < 0.5;
-        const scale = isCenter ? 1 : Math.max(0.92, 1 - abs * 0.04);
-        const opacity = isCenter ? 1 : Math.max(0.7, 1 - abs * 0.15);
+        // Only consider neighbors for visual effect — distant cards stay static
+        const visualAbs = Math.min(abs, 2);
+        const scale = isCenter ? 1 : Math.max(0.92, 1 - visualAbs * 0.04);
+        const opacity = isCenter ? 1 : Math.max(0.7, 1 - visualAbs * 0.15);
 
         return (
           <button
@@ -121,8 +150,9 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onSel
               if (isCenter) {
                 onExpand(ev);
               } else {
-                if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
-                isUserScrollingRef.current = false;
+                if (settleTimeoutRef.current) clearTimeout(settleTimeoutRef.current);
+                isScrollingRef.current = false;
+                setIsScrolling(false);
                 setActiveIdx(i);
                 scrollToIndex(i);
                 onSelect(ev);
@@ -133,8 +163,11 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onSel
               width: CARD_WIDTH,
               transform: `scale(${scale})`,
               transformOrigin: 'bottom center',
-              transition: 'transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease, box-shadow 0.3s ease',
+              transition: isScrolling
+                ? 'none'
+                : 'transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease, box-shadow 0.25s ease',
               opacity,
+              willChange: 'transform',
               boxShadow: isCenter
                 ? '0 18px 40px -12px hsl(var(--primary) / 0.35), 0 8px 20px rgba(0,0,0,0.18)'
                 : '0 8px 20px rgba(0,0,0,0.15)',
@@ -142,7 +175,7 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onSel
           >
             <div className="relative h-44 bg-muted">
               {ev.image ? (
-                <img src={ev.image} alt="" className="w-full h-full object-cover" draggable={false} />
+                <img src={ev.image} alt="" className="w-full h-full object-cover" draggable={false} loading="lazy" />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-primary/30 to-primary/5" />
               )}
