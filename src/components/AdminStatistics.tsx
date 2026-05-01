@@ -344,7 +344,7 @@ const AdminStatistics = () => {
                 <span className="text-foreground text-sm font-semibold">{stats.rejectedEvents}</span>
               </div>
               <div className="flex justify-between p-3">
-                <span className="text-muted-foreground text-sm">Ø Teilnahmen pro Event</span>
+                <span className="text-muted-foreground text-sm">Ø Participations per Event</span>
                 <span className="text-foreground text-sm font-semibold">
                   {stats.approvedEvents > 0 ? (stats.totalParticipants / stats.approvedEvents).toFixed(1) : "0"}
                 </span>
