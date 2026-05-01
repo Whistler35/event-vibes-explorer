@@ -20,6 +20,7 @@ interface EventDetailSheetProps {
     location_name?: string;
     max_participants?: number;
     current_participants?: number;
+    price_cents?: number;
   } | null;
   open: boolean;
   onClose: () => void;
