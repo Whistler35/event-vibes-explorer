@@ -350,7 +350,7 @@ const AdminStatistics = () => {
                 </span>
               </div>
               <div className="flex justify-between p-3">
-                <span className="text-muted-foreground text-sm">Ø Nachrichten pro Nutzer</span>
+                <span className="text-muted-foreground text-sm">Ø Messages per User</span>
                 <span className="text-foreground text-sm font-semibold">
                   {stats.totalUsers > 0 ? ((stats.totalChatMessages + stats.totalDirectMessages) / stats.totalUsers).toFixed(1) : "0"}
                 </span>
