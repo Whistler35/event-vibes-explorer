@@ -201,7 +201,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
             {isAdmin ?
             <Select value={category} onValueChange={(val) => setCategory(val as EventCategory)}>
                 <SelectTrigger className="bg-transparent border-border text-foreground rounded-xl h-12">
-                  <SelectValue placeholder="Kategorie wählen" />
+                  <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent className="bg-card border-border">
                   <SelectItem value="sports">🏀 Sport</SelectItem>
