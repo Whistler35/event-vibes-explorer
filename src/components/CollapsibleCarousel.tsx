@@ -87,6 +87,22 @@ const CollapsibleCarousel: React.FC<CollapsibleCarouselProps> = ({
         // No background, no border, no shadow — let the cards float on the map
       }}
     >
+      {/* Drag handle — floats on the map */}
+      <div
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        className="w-full h-8 flex flex-col items-center justify-end pb-0 pt-3 cursor-grab active:cursor-grabbing select-none"
+        style={{ touchAction: 'none' }}
+        role="button"
+        aria-label={expanded ? 'Karusell einklappen' : 'Karusell ausklappen'}
+      >
+        <div className="px-3 rounded-full bg-card/80 backdrop-blur-md shadow-sm border border-border/40 items-center py-[6px] flex flex-row gap-[4px] mx-0 my-0">
+          <div className="w-8 h-1 rounded-full bg-muted-foreground/50" />
+          {!expanded && <ChevronUp className="w-3 h-3 text-muted-foreground" />}
+        </div>
+      </div>
 
       {/* Content — fades out when collapsed */}
       <div
