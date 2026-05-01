@@ -71,7 +71,7 @@ const JoinRequestButton: React.FC<JoinRequestButtonProps> = ({ eventId, eventOwn
         setStatus('pending');
         setShowMessage(false);
         setMessage('');
-        toast.success('Anfrage gesendet!');
+        toast.success('Request sent!');
       } else if (status === 'pending') {
         const { error } = await supabase
           .from('join_requests')
