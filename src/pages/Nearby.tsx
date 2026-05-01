@@ -474,7 +474,7 @@ const Nearby = () => {
         </div>
 
         {/* QUICK FILTER PILLS */}
-        <div className="absolute top-[105px] left-0 right-0 z-10 px-3">
+        <div className="absolute top-[60px] left-0 z-10 pl-3 pr-[125px] right-0">
           <div className="gap-2 overflow-x-auto scrollbar-hide pb-1 flex flex-row text-left font-thin mx-0 px-0 py-0 my-0">
             {quickPills.map(({ id, label, icon: Icon }) => {
               const active = activeQuickFilters.has(id);
@@ -497,13 +497,13 @@ const Nearby = () => {
         </div>
 
         {/* Logo discreet */}
-        <div className="absolute top-[148px] left-3 z-10 flex items-center gap-1.5 bg-card/80 backdrop-blur-md rounded-full px-2.5 py-1 shadow-sm border border-border/40">
+        <div className="absolute top-[110px] left-3 z-10 flex items-center gap-1.5 bg-card/80 backdrop-blur-md rounded-full px-2.5 py-1 shadow-sm border border-border/40">
           <img src={evendleLogo} alt="Evendle" className="w-4 h-4 object-contain rounded-full" />
           <span className="text-foreground text-[10px] font-bold tracking-wide">EVENDLE</span>
         </div>
 
         {isLoading && (
-          <div className="absolute top-[148px] left-1/2 -translate-x-1/2 z-10 bg-card/95 backdrop-blur rounded-full px-3 py-1 text-xs text-foreground shadow">
+          <div className="absolute top-[110px] left-1/2 -translate-x-1/2 z-10 bg-card/95 backdrop-blur rounded-full px-3 py-1 text-xs text-foreground shadow">
             Events laden...
           </div>
         )}
