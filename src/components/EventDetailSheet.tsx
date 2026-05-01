@@ -26,20 +26,20 @@ interface EventDetailSheetProps {
 }
 
 const categoryLabels: Record<string, string> = {
-  music: "🎵 Musik",
-  sports: "⚽ Sport",
-  culture: "🎭 Kultur",
+  music: "🎵 Music",
+  sports: "⚽ Sports",
+  culture: "🎭 Culture",
   food: "🍕 Food",
   nightlife: "🌙 Nightlife",
   outdoor: "🏔️ Outdoor",
   community: "👥 Community",
   workshop: "🔧 Workshop",
-  other: "📌 Sonstiges",
+  other: "📌 Other",
 };
 
 const formatEventDate = (dateStr: string) => {
   const d = new Date(dateStr);
-  return d.toLocaleDateString("de-DE", {
+  return d.toLocaleDateString("en-GB", {
     weekday: "long",
     day: "2-digit",
     month: "long",
@@ -49,7 +49,7 @@ const formatEventDate = (dateStr: string) => {
 
 const formatEventTime = (dateStr: string) => {
   const d = new Date(dateStr);
-  return d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }) + " Uhr";
+  return d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 };
 
 const EventDetailSheet: React.FC<EventDetailSheetProps> = ({ event, open, onClose }) => {
@@ -110,7 +110,7 @@ const EventDetailSheet: React.FC<EventDetailSheetProps> = ({ event, open, onClos
       queryClient.invalidateQueries({ queryKey: ['event-like', eventId] });
       queryClient.invalidateQueries({ queryKey: ['event-like-count', eventId] });
     },
-    onError: () => toast.error('Fehler beim Liken.'),
+    onError: () => toast.error('Error liking event.'),
   });
 
   if (!event) return null;
@@ -186,7 +186,7 @@ const EventDetailSheet: React.FC<EventDetailSheetProps> = ({ event, open, onClos
               <div className="flex items-start gap-3">
                 <Users className="w-5 h-5 text-primary mt-0.5 shrink-0" />
                 <p className="text-foreground text-sm">
-                  {event.current_participants ?? 0} / {event.max_participants} Teilnehmer
+                  {event.current_participants ?? 0} / {event.max_participants} Participants
                 </p>
               </div>
             )}
@@ -195,7 +195,7 @@ const EventDetailSheet: React.FC<EventDetailSheetProps> = ({ event, open, onClos
           {/* Description */}
           {event.description && (
             <div>
-              <h3 className="text-foreground text-sm font-semibold mb-1">Beschreibung</h3>
+              <h3 className="text-foreground text-sm font-semibold mb-1">Description</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">{event.description}</p>
             </div>
           )}
@@ -208,7 +208,7 @@ const EventDetailSheet: React.FC<EventDetailSheetProps> = ({ event, open, onClos
               navigate(`/event/${event.id}`);
             }}
           >
-            Mehr Details ansehen
+            View more details
           </Button>
         </div>
       </SheetContent>

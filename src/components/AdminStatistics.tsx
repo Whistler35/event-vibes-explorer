@@ -6,10 +6,10 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGri
 type TimeRange = "7d" | "30d" | "12m" | "all";
 
 const TIME_RANGE_LABELS: Record<TimeRange, string> = {
-  "7d": "7 Tage",
-  "30d": "30 Tage",
-  "12m": "12 Monate",
-  "all": "Gesamt",
+  "7d": "7 Days",
+  "30d": "30 Days",
+  "12m": "12 Months",
+  "all": "Total",
 };
 
 const getDateThreshold = (range: TimeRange): string | null => {
@@ -47,15 +47,15 @@ interface CategoryData {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  music: "Musik",
-  sports: "Sport",
-  culture: "Kultur",
-  food: "Essen",
+  music: "Music",
+  sports: "Sports",
+  culture: "Culture",
+  food: "Food",
   nightlife: "Nightlife",
   outdoor: "Outdoor",
   community: "Community",
   workshop: "Workshop",
-  other: "Sonstiges",
+  other: "Other",
 };
 
 const StatCard = ({ icon: Icon, label, value, subtext }: { icon: any; label: string; value: number | string; subtext?: string }) => (
@@ -170,7 +170,7 @@ const AdminStatistics = () => {
           label = `${day}.${m}.`;
         } else {
           const [year, month] = key.split("-");
-          label = new Date(Number(year), Number(month) - 1).toLocaleDateString("de-DE", { month: "short", year: "2-digit" });
+          label = new Date(Number(year), Number(month) - 1).toLocaleDateString("en-GB", { month: "short", year: "2-digit" });
         }
         return { month: label, users: val.users, events: val.events };
       });
@@ -198,31 +198,31 @@ const AdminStatistics = () => {
     setCategoryData(sorted);
   };
 
-  const chartTitle = timeRange === "7d" ? "Letzte 7 Tage" : timeRange === "30d" ? "Letzte 30 Tage" : timeRange === "12m" ? "Letzte 12 Monate" : "Gesamter Zeitraum";
+  const chartTitle = timeRange === "7d" ? "Last 7 Days" : timeRange === "30d" ? "Last 30 Days" : timeRange === "12m" ? "Last 12 Months" : "Total Period";
 
   const exportCSV = () => {
     if (!stats) return;
     const rows = [
-      ["Metrik", "Wert"],
-      ["Zeitraum", chartTitle],
-      ["Nutzer", stats.totalUsers],
-      ["Events gesamt", stats.totalEvents],
-      ["Events genehmigt", stats.approvedEvents],
-      ["Events offen", stats.pendingEvents],
-      ["Events abgelehnt", stats.rejectedEvents],
-      ["Teilnahmen", stats.totalParticipants],
-      ["Gruppen-Nachrichten", stats.totalChatMessages],
-      ["Direktnachrichten", stats.totalDirectMessages],
+      ["Metric", "Value"],
+      ["Period", chartTitle],
+      ["Users", stats.totalUsers],
+      ["Total Events", stats.totalEvents],
+      ["Events Approved", stats.approvedEvents],
+      ["Events Pending", stats.pendingEvents],
+      ["Events Rejected", stats.rejectedEvents],
+      ["Participations", stats.totalParticipants],
+      ["Group Messages", stats.totalChatMessages],
+      ["Direct Messages", stats.totalDirectMessages],
       ["Likes", stats.totalLikes],
-      ["Freundschaften", stats.totalFriendships],
-      ["Beitrittsanfragen", stats.totalJoinRequests],
-      ["Ø Teilnahmen/Event", stats.approvedEvents > 0 ? (stats.totalParticipants / stats.approvedEvents).toFixed(1) : "0"],
-      ["Ø Nachrichten/Nutzer", stats.totalUsers > 0 ? ((stats.totalChatMessages + stats.totalDirectMessages) / stats.totalUsers).toFixed(1) : "0"],
+      ["Friendships", stats.totalFriendships],
+      ["Join Requests", stats.totalJoinRequests],
+      ["Ø Participations/Event", stats.approvedEvents > 0 ? (stats.totalParticipants / stats.approvedEvents).toFixed(1) : "0"],
+      ["Ø Messages/User", stats.totalUsers > 0 ? ((stats.totalChatMessages + stats.totalDirectMessages) / stats.totalUsers).toFixed(1) : "0"],
       [],
-      ["Kategorie", "Anzahl"],
+      ["Category", "Count"],
       ...categoryData.map((c) => [c.category, c.count]),
       [],
-      [timeRange === "7d" || timeRange === "30d" ? "Tag" : "Monat", "Nutzer", "Events"],
+      [timeRange === "7d" || timeRange === "30d" ? "Day" : "Month", "Users", "Events"],
       ...monthlyData.map((m) => [m.month, m.users, m.events]),
     ];
     const csv = rows.map((r) => r.join(";")).join("\n");
@@ -230,7 +230,7 @@ const AdminStatistics = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `evendle-statistiken-${timeRange}-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `evendle-statistics-${timeRange}-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -256,26 +256,26 @@ const AdminStatistics = () => {
           onClick={exportCSV}
           disabled={loading || !stats}
           className="p-2 rounded-xl bg-card border border-border text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
-          title="Als CSV exportieren"
+          title="Export as CSV"
         >
           <Download className="w-4 h-4" />
         </button>
       </div>
 
       {loading ? (
-        <div className="text-center text-muted-foreground py-12">Statistiken laden...</div>
+        <div className="text-center text-muted-foreground py-12">Loading statistics...</div>
       ) : !stats ? null : (
         <>
           {/* Overview Cards */}
           <div>
-            <h4 className="text-foreground font-semibold text-sm mb-3">Übersicht</h4>
+            <h4 className="text-foreground font-semibold text-sm mb-3">Overview</h4>
             <div className="grid grid-cols-2 gap-3">
-              <StatCard icon={Users} label="Nutzer" value={stats.totalUsers} />
-              <StatCard icon={CalendarDays} label="Events gesamt" value={stats.totalEvents} subtext={`${stats.approvedEvents} genehmigt · ${stats.pendingEvents} offen`} />
-              <StatCard icon={UserPlus} label="Teilnahmen" value={stats.totalParticipants} />
+              <StatCard icon={Users} label="Users" value={stats.totalUsers} />
+              <StatCard icon={CalendarDays} label="Total Events" value={stats.totalEvents} subtext={`${stats.approvedEvents} approved · ${stats.pendingEvents} pending`} />
+              <StatCard icon={UserPlus} label="Participations" value={stats.totalParticipants} />
               <StatCard icon={Heart} label="Likes" value={stats.totalLikes} />
-              <StatCard icon={MessageCircle} label="Nachrichten" value={stats.totalChatMessages + stats.totalDirectMessages} subtext={`${stats.totalChatMessages} Gruppen · ${stats.totalDirectMessages} DMs`} />
-              <StatCard icon={Handshake} label="Freundschaften" value={stats.totalFriendships} />
+              <StatCard icon={MessageCircle} label="Messages" value={stats.totalChatMessages + stats.totalDirectMessages} subtext={`${stats.totalChatMessages} groups · ${stats.totalDirectMessages} DMs`} />
+              <StatCard icon={Handshake} label="Friendships" value={stats.totalFriendships} />
             </div>
           </div>
 
@@ -300,7 +300,7 @@ const AdminStatistics = () => {
                       }}
                       labelStyle={{ color: "hsl(var(--foreground))" }}
                     />
-                    <Bar dataKey="users" name="Nutzer" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="users" name="Users" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                     <Bar dataKey="events" name="Events" fill="hsl(var(--primary) / 0.5)" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -311,7 +311,7 @@ const AdminStatistics = () => {
           {/* Category Breakdown */}
           {categoryData.length > 0 && (
             <div>
-              <h4 className="text-foreground font-semibold text-sm mb-3">Events nach Kategorie</h4>
+              <h4 className="text-foreground font-semibold text-sm mb-3">Events by Category</h4>
               <div className="bg-card rounded-2xl border border-border p-4 space-y-2">
                 {categoryData.map((cat) => (
                   <div key={cat.category} className="flex items-center justify-between">
@@ -333,24 +333,24 @@ const AdminStatistics = () => {
 
           {/* Additional Details */}
           <div>
-            <h4 className="text-foreground font-semibold text-sm mb-3">Weitere Details</h4>
+            <h4 className="text-foreground font-semibold text-sm mb-3">Further Details</h4>
             <div className="bg-card rounded-2xl border border-border divide-y divide-border">
               <div className="flex justify-between p-3">
-                <span className="text-muted-foreground text-sm">Beitrittsanfragen</span>
+                <span className="text-muted-foreground text-sm">Join Requests</span>
                 <span className="text-foreground text-sm font-semibold">{stats.totalJoinRequests}</span>
               </div>
               <div className="flex justify-between p-3">
-                <span className="text-muted-foreground text-sm">Abgelehnte Events</span>
+                <span className="text-muted-foreground text-sm">Rejected Events</span>
                 <span className="text-foreground text-sm font-semibold">{stats.rejectedEvents}</span>
               </div>
               <div className="flex justify-between p-3">
-                <span className="text-muted-foreground text-sm">Ø Teilnahmen pro Event</span>
+                <span className="text-muted-foreground text-sm">Ø Participations per Event</span>
                 <span className="text-foreground text-sm font-semibold">
                   {stats.approvedEvents > 0 ? (stats.totalParticipants / stats.approvedEvents).toFixed(1) : "0"}
                 </span>
               </div>
               <div className="flex justify-between p-3">
-                <span className="text-muted-foreground text-sm">Ø Nachrichten pro Nutzer</span>
+                <span className="text-muted-foreground text-sm">Ø Messages per User</span>
                 <span className="text-foreground text-sm font-semibold">
                   {stats.totalUsers > 0 ? ((stats.totalChatMessages + stats.totalDirectMessages) / stats.totalUsers).toFixed(1) : "0"}
                 </span>

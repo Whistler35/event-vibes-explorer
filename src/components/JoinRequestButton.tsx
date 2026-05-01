@@ -40,12 +40,12 @@ const JoinRequestButton: React.FC<JoinRequestButtonProps> = ({ eventId, eventOwn
 
   const handleRequest = async () => {
     if (!user) {
-      toast.error('Bitte melde dich an');
+      toast.error('Please log in');
       navigate('/auth');
       return;
     }
     if (user.id === eventOwnerId) {
-      toast.info('Du bist der Ersteller dieses Events');
+      toast.info('You are the creator of this event');
       return;
     }
 
@@ -55,7 +55,7 @@ const JoinRequestButton: React.FC<JoinRequestButtonProps> = ({ eventId, eventOwn
     }
 
     if (status === 'none' && !message.trim()) {
-      toast.error('Bitte hinterlasse eine kurze Nachricht');
+      toast.error('Please leave a short message');
       return;
     }
 
@@ -71,7 +71,7 @@ const JoinRequestButton: React.FC<JoinRequestButtonProps> = ({ eventId, eventOwn
         setStatus('pending');
         setShowMessage(false);
         setMessage('');
-        toast.success('Anfrage gesendet!');
+        toast.success('Request sent!');
       } else if (status === 'pending') {
         const { error } = await supabase
           .from('join_requests')
@@ -80,10 +80,10 @@ const JoinRequestButton: React.FC<JoinRequestButtonProps> = ({ eventId, eventOwn
           .eq('user_id', user.id);
         if (error) throw error;
         setStatus('cancelled');
-        toast.info('Anfrage zurückgezogen');
+        toast.info('Request withdrawn');
       }
     } catch (err: any) {
-      toast.error(err.message || 'Fehler');
+      toast.error(err.message || 'Error');
     } finally {
       setLoading(false);
     }
@@ -92,11 +92,11 @@ const JoinRequestButton: React.FC<JoinRequestButtonProps> = ({ eventId, eventOwn
   if (user?.id === eventOwnerId) return null;
 
   const statusConfig: Record<RequestStatus, { label: string; icon: React.ElementType; variant: 'default' | 'outline' | 'secondary' }> = {
-    none: { label: 'Teilnahme anfragen', icon: UserPlus, variant: 'default' },
-    pending: { label: 'Anfrage ausstehend', icon: Clock, variant: 'outline' },
-    accepted: { label: 'Angenommen ✓', icon: CheckCircle, variant: 'secondary' },
-    rejected: { label: 'Abgelehnt', icon: XCircle, variant: 'secondary' },
-    cancelled: { label: 'Erneut anfragen', icon: UserPlus, variant: 'default' },
+    none: { label: 'Request to join', icon: UserPlus, variant: 'default' },
+    pending: { label: 'Request pending', icon: Clock, variant: 'outline' },
+    accepted: { label: 'Accepted ✓', icon: CheckCircle, variant: 'secondary' },
+    rejected: { label: 'Rejected', icon: XCircle, variant: 'secondary' },
+    cancelled: { label: 'Request again', icon: UserPlus, variant: 'default' },
   };
 
   const config = statusConfig[status];
@@ -109,7 +109,7 @@ const JoinRequestButton: React.FC<JoinRequestButtonProps> = ({ eventId, eventOwn
           <Textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="Kurze Nachricht an den Ersteller *"
+            placeholder="Short message to the creator *"
             className="bg-muted border-border text-foreground placeholder:text-muted-foreground rounded-xl resize-none"
             rows={2}
           />

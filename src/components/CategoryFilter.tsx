@@ -7,9 +7,9 @@ import type { EventCategory } from '@/hooks/useSearchEvents';
 import type { DateRange } from 'react-day-picker';
 
 const CATEGORIES: { id: EventCategory; label: string; icon: React.ElementType }[] = [
-  { id: 'music', label: 'Musik', icon: Music },
-  { id: 'sports', label: 'Sport', icon: Dribbble },
-  { id: 'culture', label: 'Kultur', icon: Palette },
+  { id: 'music', label: 'Music', icon: Music },
+  { id: 'sports', label: 'Sports', icon: Dribbble },
+  { id: 'culture', label: 'Culture', icon: Palette },
   { id: 'food', label: 'Food', icon: UtensilsCrossed },
   { id: 'nightlife', label: 'Nightlife', icon: PartyPopper },
   { id: 'outdoor', label: 'Outdoor', icon: TreePine },
@@ -38,7 +38,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategories, onC
       const cat = CATEGORIES.find(c => c.id === selectedCategories[0]);
       if (cat) parts.push(cat.label);
     } else if (selectedCategories.length > 1) {
-      parts.push(`${selectedCategories.length} Kategorien`);
+      parts.push(`${selectedCategories.length} Categories`);
     }
     if (selectedDateRange?.from) {
       if (selectedDateRange.to && selectedDateRange.from.getTime() !== selectedDateRange.to.getTime()) {
@@ -90,13 +90,13 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategories, onC
             {/* Categories */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Kategorie</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Category</p>
                 {selectedCategories.length > 0 && (
                   <button
                     onClick={() => onCategoriesChange([])}
                     className="text-xs text-primary hover:underline"
                   >
-                    Alle abwählen
+                    Deselect all
                   </button>
                 )}
               </div>
@@ -128,14 +128,14 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategories, onC
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
                     <CalendarIcon className="w-3 h-3" />
-                    Datum
+                    Date
                   </p>
                   {selectedDateRange?.from && (
                     <button
                       onClick={() => onDateRangeChange(undefined)}
                       className="text-xs text-primary hover:underline"
                     >
-                      Zurücksetzen
+                      Reset
                     </button>
                   )}
                 </div>
@@ -160,14 +160,14 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategories, onC
                 className="flex-1 text-xs"
                 onClick={() => { onCategoriesChange([]); onDateRangeChange(undefined); }}
               >
-                Löschen
+                Clear
               </Button>
               <Button
                 size="sm"
                 className="flex-1 text-xs"
                 onClick={() => setOpen(false)}
               >
-                Übernehmen
+                Apply
               </Button>
             </div>
           )}
