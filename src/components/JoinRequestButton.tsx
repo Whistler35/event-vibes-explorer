@@ -40,7 +40,7 @@ const JoinRequestButton: React.FC<JoinRequestButtonProps> = ({ eventId, eventOwn
 
   const handleRequest = async () => {
     if (!user) {
-      toast.error('Bitte melde dich an');
+      toast.error('Please log in');
       navigate('/auth');
       return;
     }
