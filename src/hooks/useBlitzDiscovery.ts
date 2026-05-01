@@ -39,7 +39,7 @@ export function useBlitzDiscovery(_city?: string | null) {
   // Get viewer location once
   useEffect(() => {
     if (!("geolocation" in navigator)) {
-      setLocError("Standort wird vom Browser nicht unterstützt.");
+      setLocError("Location is not supported by your browser.");
       return;
     }
     navigator.geolocation.getCurrentPosition(
@@ -47,8 +47,8 @@ export function useBlitzDiscovery(_city?: string | null) {
       (err) =>
         setLocError(
           err.code === err.PERMISSION_DENIED
-            ? "Standort-Freigabe nötig, um Blitze in deiner Nähe zu sehen."
-            : "Standort konnte nicht ermittelt werden."
+            ? "Location access required to see Blitzes near you."
+            : "Could not determine your location."
         ),
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 5 * 60_000 }
     );

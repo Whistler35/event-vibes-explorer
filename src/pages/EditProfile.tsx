@@ -64,12 +64,12 @@ const EditProfile = () => {
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    if (!form.name.trim()) newErrors.name = "Name ist Pflicht";
-    if (!form.age.trim() || isNaN(Number(form.age)) || Number(form.age) < 1) newErrors.age = "Gültiges Alter angeben";
-    if (!form.country.trim()) newErrors.country = "Land ist Pflicht";
-    if (!form.bio.trim()) newErrors.bio = "Kurzbeschreibung ist Pflicht";
-    if (!form.fun_fact.trim()) newErrors.fun_fact = "Fun Fact ist Pflicht";
-    if (!avatarPreview && !form.avatar_url) newErrors.avatar = "Profilbild ist Pflicht";
+    if (!form.name.trim()) newErrors.name = "Name is required";
+    if (!form.age.trim() || isNaN(Number(form.age)) || Number(form.age) < 1) newErrors.age = "Enter a valid age";
+    if (!form.country.trim()) newErrors.country = "Country is required";
+    if (!form.bio.trim()) newErrors.bio = "Short bio is required";
+    if (!form.fun_fact.trim()) newErrors.fun_fact = "Fun fact is required";
+    if (!avatarPreview && !form.avatar_url) newErrors.avatar = "Profile picture is required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -92,9 +92,9 @@ const EditProfile = () => {
       const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
       setForm(prev => ({ ...prev, avatar_url: urlData.publicUrl }));
       setAvatarPreview(urlData.publicUrl);
-      toast.success("Bild hochgeladen!");
+      toast.success("Image uploaded!");
     } catch (err: any) {
-      toast.error(err.message || "Fehler beim Upload");
+      toast.error(err.message || "Upload failed");
     } finally {
       setUploading(false);
     }
@@ -133,10 +133,10 @@ const EditProfile = () => {
       }
 
       if (error) throw error;
-      toast.success("Profil gespeichert!");
+      toast.success("Profile saved!");
       navigate("/profile");
     } catch (err: any) {
-      toast.error(err.message || "Fehler beim Speichern");
+      toast.error(err.message || "Error saving");
     } finally {
       setSaving(false);
     }
@@ -148,7 +148,7 @@ const EditProfile = () => {
     return (
       <Layout>
         <div className="flex items-center justify-center h-[70vh]">
-          <p className="text-muted-foreground">Laden...</p>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </Layout>
     );
@@ -162,7 +162,7 @@ const EditProfile = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate("/profile")} className="text-muted-foreground hover:text-foreground">
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h1 className="text-foreground text-xl font-bold">Profil bearbeiten</h1>
+          <h1 className="text-foreground text-xl font-bold">Edit profile</h1>
         </div>
 
         {/* Avatar */}
@@ -190,7 +190,7 @@ const EditProfile = () => {
             <Input
               value={form.name}
               onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))}
-              placeholder="Dein Name"
+              placeholder="Your name"
               className="mt-1 bg-muted border-border text-foreground"
             />
             {errors.name && <p className="text-destructive text-xs mt-1">{errors.name}</p>}
@@ -198,7 +198,7 @@ const EditProfile = () => {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-foreground font-medium">Alter *</Label>
+              <Label className="text-foreground font-medium">Age *</Label>
               <Input
                 type="number"
                 value={form.age}
@@ -210,7 +210,7 @@ const EditProfile = () => {
               {errors.age && <p className="text-destructive text-xs mt-1">{errors.age}</p>}
             </div>
             <div>
-              <Label className="text-foreground font-medium">Land *</Label>
+              <Label className="text-foreground font-medium">Country *</Label>
               <Input
                 value={form.country}
                 onChange={(e) => setForm(prev => ({ ...prev, country: e.target.value }))}
@@ -222,11 +222,11 @@ const EditProfile = () => {
           </div>
 
           <div>
-            <Label className="text-foreground font-medium">Über mich *</Label>
+            <Label className="text-foreground font-medium">About me *</Label>
             <Textarea
               value={form.bio}
               onChange={(e) => setForm(prev => ({ ...prev, bio: e.target.value }))}
-              placeholder="Erzähle etwas über dich..."
+              placeholder="Tell something about yourself..."
               rows={3}
               className="mt-1 bg-muted border-border text-foreground resize-none"
             />
@@ -238,7 +238,7 @@ const EditProfile = () => {
             <Input
               value={form.fun_fact}
               onChange={(e) => setForm(prev => ({ ...prev, fun_fact: e.target.value }))}
-              placeholder="Etwas Lustiges über dich"
+              placeholder="Something fun about you"
               className="mt-1 bg-muted border-border text-foreground"
             />
             {errors.fun_fact && <p className="text-destructive text-xs mt-1">{errors.fun_fact}</p>}
@@ -248,20 +248,20 @@ const EditProfile = () => {
             <h3 className="text-foreground font-bold text-lg mb-3">Instagram (optional)</h3>
             <div className="space-y-3">
               <div>
-                <Label className="text-muted-foreground font-medium">Benutzername</Label>
+                <Label className="text-muted-foreground font-medium">Username</Label>
                 <Input
                   value={form.instagram_username}
                   onChange={(e) => setForm(prev => ({ ...prev, instagram_username: e.target.value }))}
-                  placeholder="@dein_username"
+                  placeholder="@your_username"
                   className="mt-1 bg-muted border-border text-foreground"
                 />
               </div>
               <div>
-                <Label className="text-muted-foreground font-medium">Follower</Label>
+                <Label className="text-muted-foreground font-medium">Followers</Label>
                 <Input
                   value={form.instagram_followers}
                   onChange={(e) => setForm(prev => ({ ...prev, instagram_followers: e.target.value }))}
-                  placeholder="z.B. 1.2k"
+                  placeholder="e.g. 1.2k"
                   className="mt-1 bg-muted border-border text-foreground"
                 />
               </div>
@@ -276,7 +276,7 @@ const EditProfile = () => {
           className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg"
         >
           {saving ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
-          Profil speichern
+          Save profile
         </Button>
       </div>
     </Layout>

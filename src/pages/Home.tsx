@@ -112,7 +112,7 @@ const Home = () => {
     debounceRef.current = setTimeout(async () => {
       try {
         const res = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(value)}.json?types=place,locality&limit=5&language=de&access_token=${MAPBOX_TOKEN}`
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(value)}.json?types=place,locality&limit=5&language=en&access_token=${MAPBOX_TOKEN}`
         );
         const data = await res.json();
         const results: GeocodedLocation[] = (data.features || []).map((f: any) => ({
@@ -144,9 +144,9 @@ const Home = () => {
   };
 
   const categoryLabels: Record<string, string> = {
-    music: 'Musik', sports: 'Sport', culture: 'Kultur', food: 'Food',
+    music: 'Music', sports: 'Sports', culture: 'Culture', food: 'Food',
     nightlife: 'Nightlife', outdoor: 'Outdoor', community: 'Community',
-    workshop: 'Workshop', other: 'Sonstiges',
+    workshop: 'Workshop', other: 'Other',
   };
 
   const handleEventClick = (eventId: string) => {
@@ -192,7 +192,7 @@ const Home = () => {
                 value={searchQuery}
                 onChange={(e) => handleSearchInput(e.target.value)}
                 onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-                placeholder="Stadt oder Ort eingeben..."
+                placeholder="Enter a city or place..."
                 className="pl-11 pr-16 h-14 rounded-full bg-muted/50 border-border text-foreground text-lg"
               />
               <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
@@ -232,8 +232,8 @@ const Home = () => {
               <CarouselContent className="-ml-2 md:-ml-4">
                 {featuredEvents.map((event) => {
                   const eventDate = new Date(event.event_date);
-                  const formattedDate = eventDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                  const formattedTime = eventDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+                  const formattedDate = eventDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                  const formattedTime = eventDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
                   return (
                     <CarouselItem key={event.id} className="pl-2 md:pl-4 basis-4/5 md:basis-1/2 lg:basis-1/3">
                       <EventCard
@@ -253,7 +253,7 @@ const Home = () => {
               <CarouselNext className="hidden md:flex right-2" />
             </Carousel>
           ) : (
-            <p className="text-muted-foreground text-sm">Keine Top Events aktuell.</p>
+            <p className="text-muted-foreground text-sm">No top events right now.</p>
           )}
         </div>
 
@@ -276,8 +276,8 @@ const Home = () => {
           const hasActiveFilters = nearbyCategories.length > 0 || !!nearbyDateRange?.from;
 
           const formatDateLabel = () => {
-            if (!nearbyDateRange?.from) return 'Datum';
-            const fmt = (d: Date) => d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+            if (!nearbyDateRange?.from) return 'Date';
+            const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' });
             if (!nearbyDateRange.to || nearbyDateRange.from.getTime() === nearbyDateRange.to.getTime()) {
               return fmt(nearbyDateRange.from);
             }
@@ -287,7 +287,7 @@ const Home = () => {
           return (
             <div className="px-4 pb-8">
               <h3 className="text-foreground text-2xl font-bold mb-2">
-                📍 Events in der Nähe von {searchQuery}
+                📍 Events near {searchQuery}
               </h3>
 
               {/* Filter toggle */}
@@ -301,14 +301,14 @@ const Home = () => {
                   }`}
                 >
                   <SlidersHorizontal className="h-3.5 w-3.5" />
-                  Filter{hasActiveFilters ? ' aktiv' : ''}
+                  Filter{hasActiveFilters ? ' active' : ''}
                 </button>
                 {hasActiveFilters && (
                   <button
                     onClick={() => { setNearbyCategories([]); setNearbyDateRange(undefined); setShowAllNearby(false); }}
                     className="text-xs text-muted-foreground hover:text-foreground"
                   >
-                    Zurücksetzen
+                    Reset
                   </button>
                 )}
               </div>
@@ -372,14 +372,14 @@ const Home = () => {
                           className="flex-1"
                           onClick={() => { setNearbyDateRange(undefined); setDatePickerOpen(false); setShowAllNearby(false); }}
                         >
-                          Löschen
+                          Clear
                         </Button>
                         <Button
                           size="sm"
                           className="flex-1"
                           onClick={() => setDatePickerOpen(false)}
                         >
-                          Übernehmen
+                          Apply
                         </Button>
                       </div>
                     </PopoverContent>
@@ -393,8 +393,8 @@ const Home = () => {
                     {displayedEvents.map((event: any) => {
                       const dist = haversineDistance(searchLocation.lat, searchLocation.lng, event.latitude, event.longitude);
                       const eventDate = new Date(event.event_date);
-                      const formattedDate = eventDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                      const formattedTime = eventDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+                      const formattedDate = eventDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                      const formattedTime = eventDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
                       return (
                         <EventCard
                           key={event.id}
@@ -414,12 +414,12 @@ const Home = () => {
                       onClick={() => setShowAllNearby(!showAllNearby)}
                       className="mt-4 w-full py-2.5 text-sm font-medium text-primary border border-border rounded-full hover:bg-muted/50 transition-colors"
                     >
-                      {showAllNearby ? 'Weniger anzeigen' : `Alle ${filteredNearby.length} Events anzeigen`}
+                      {showAllNearby ? 'Show less' : `Show all ${filteredNearby.length} events`}
                     </button>
                   )}
                 </>
               ) : (
-                <p className="text-muted-foreground text-sm">Keine Events mit diesen Filtern gefunden.</p>
+                <p className="text-muted-foreground text-sm">No events match these filters.</p>
               )}
             </div>
           );
@@ -427,7 +427,7 @@ const Home = () => {
 
         {searchLocation && nearbyEvents && nearbyEvents.length === 0 && (
           <div className="px-4 pb-8 text-center">
-            <p className="text-muted-foreground">Keine Events in der Nähe von {searchQuery} gefunden.</p>
+            <p className="text-muted-foreground">No events found near {searchQuery}.</p>
           </div>
         )}
 

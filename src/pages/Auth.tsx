@@ -42,11 +42,11 @@ const Auth = () => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        toast.error('Bild ist zu groß. Maximal 5MB erlaubt.');
+        toast.error('Image too large. Maximum 5MB allowed.');
         return;
       }
       if (!file.type.startsWith('image/')) {
-        toast.error('Bitte wähle eine Bilddatei aus.');
+        toast.error('Please select an image file.');
         return;
       }
       setAvatarFile(file);
@@ -105,32 +105,32 @@ const Auth = () => {
         if (error) {
           toast.error(error.message);
         } else {
-          toast.success('Erfolgreich eingeloggt!', { duration: 1200 });
+          toast.success('Signed in successfully!', { duration: 1200 });
           navigate('/');
         }
       } else {
         if (selectedRole === 'professional_host') {
           if (!name) {
-            toast.error('Bitte gib deinen Namen ein');
+            toast.error('Please enter your name');
             setLoading(false);
             return;
           }
         } else {
           if (!name || !age || !country) {
-            toast.error('Bitte fülle alle Pflichtfelder aus');
+            toast.error('Please fill in all required fields');
             setLoading(false);
             return;
           }
         }
 
         if (password !== confirmPassword) {
-          toast.error('Passwörter stimmen nicht überein');
+          toast.error('Passwords do not match');
           setLoading(false);
           return;
         }
 
         if (password.length < 6) {
-          toast.error('Passwort muss mindestens 6 Zeichen lang sein');
+          toast.error('Password must be at least 6 characters');
           setLoading(false);
           return;
         }
@@ -179,10 +179,10 @@ const Auth = () => {
 
         // Host profile is created automatically via DB trigger on email confirmation
 
-        toast.success('Registrierung erfolgreich! Bitte bestätige deine E-Mail.');
+        toast.success('Sign up successful! Please confirm your email.');
       }
     } catch (error: any) {
-      toast.error('Ein Fehler ist aufgetreten');
+      toast.error('An error occurred');
     }
 
     setLoading(false);
@@ -198,7 +198,7 @@ const Auth = () => {
             <span className="text-foreground text-2xl font-bold">EVENDLE</span>
           </div>
           <p className="text-muted-foreground">
-            {isLogin ? 'Melde dich an' : 'Erstelle dein Profil'}
+            {isLogin ? 'Sign in' : 'Create your profile'}
           </p>
         </div>
 
@@ -223,7 +223,7 @@ const Auth = () => {
                 </div>
               </div>
               <div className="w-full space-y-2">
-                <Label htmlFor="avatar-file" className="text-foreground">Profilbild hochladen (optional)</Label>
+                <Label htmlFor="avatar-file" className="text-foreground">Upload profile picture (optional)</Label>
                 <input
                   ref={fileInputRef}
                   id="avatar-file"
@@ -238,7 +238,7 @@ const Auth = () => {
                   onClick={() => fileInputRef.current?.click()}
                   className="w-full"
                 >
-                  {avatarFile ? avatarFile.name : 'Foto auswählen'}
+                  {avatarFile ? avatarFile.name : 'Choose photo'}
                 </Button>
               </div>
             </div>
@@ -247,7 +247,7 @@ const Auth = () => {
           {/* Basic Info */}
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-foreground">E-Mail *</Label>
+              <Label htmlFor="email" className="text-foreground">Email *</Label>
               <Input
                 id="email"
                 type="email"
@@ -259,7 +259,7 @@ const Auth = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-foreground">Passwort *</Label>
+              <Label htmlFor="password" className="text-foreground">Password *</Label>
               <Input
                 id="password"
                 type="password"
@@ -273,7 +273,7 @@ const Auth = () => {
             {!isLogin && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-foreground">Passwort bestätigen *</Label>
+                  <Label htmlFor="confirmPassword" className="text-foreground">Confirm password *</Label>
                   <Input
                     id="confirmPassword"
                     type="password"
@@ -298,13 +298,13 @@ const Auth = () => {
                 {selectedRole === 'professional_host' && (
                   <>
                     <div className="space-y-2">
-                      <Label htmlFor="companyName" className="text-foreground">Firmenname (optional)</Label>
+                      <Label htmlFor="companyName" className="text-foreground">Company name (optional)</Label>
                       <Input
                         id="companyName"
                         type="text"
                         value={companyName}
                         onChange={(e) => setCompanyName(e.target.value)}
-                        placeholder="z.B. Dein Unternehmen GmbH"
+                        placeholder="e.g. Your Company Ltd."
                         className="bg-card border-border text-foreground"
                       />
                     </div>
@@ -315,7 +315,7 @@ const Auth = () => {
                         type="url"
                         value={hostWebsite}
                         onChange={(e) => setHostWebsite(e.target.value)}
-                        placeholder="https://deine-website.de"
+                        placeholder="https://your-website.com"
                         className="bg-card border-border text-foreground"
                       />
                     </div>
@@ -326,7 +326,7 @@ const Auth = () => {
                         type="text"
                         value={hostInstagram}
                         onChange={(e) => setHostInstagram(e.target.value)}
-                        placeholder="@dein_handle"
+                        placeholder="@your_handle"
                         className="bg-card border-border text-foreground"
                       />
                     </div>
@@ -337,7 +337,7 @@ const Auth = () => {
                   <>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="age" className="text-foreground">Alter *</Label>
+                        <Label htmlFor="age" className="text-foreground">Age *</Label>
                         <Input
                           id="age"
                           type="number"
@@ -350,7 +350,7 @@ const Auth = () => {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="country" className="text-foreground">Land *</Label>
+                        <Label htmlFor="country" className="text-foreground">Country *</Label>
                         <Input
                           id="country"
                           type="text"
@@ -363,12 +363,12 @@ const Auth = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="bio" className="text-foreground">Über mich</Label>
+                      <Label htmlFor="bio" className="text-foreground">About me</Label>
                       <Textarea
                         id="bio"
                         value={bio}
                         onChange={(e) => setBio(e.target.value)}
-                        placeholder="Erzähle etwas über dich..."
+                        placeholder="Tell something about yourself..."
                         className="bg-card border-border text-foreground min-h-[80px]"
                       />
                     </div>
@@ -379,7 +379,7 @@ const Auth = () => {
                         id="funFact"
                         value={funFact}
                         onChange={(e) => setFunFact(e.target.value)}
-                        placeholder="Teile einen interessanten Fakt über dich..."
+                        placeholder="Share an interesting fact about yourself..."
                         className="bg-card border-border text-foreground min-h-[80px]"
                       />
                     </div>
@@ -391,12 +391,12 @@ const Auth = () => {
 
           <Button type="submit" disabled={loading} className="w-full">
             {loading
-              ? 'Lädt...'
+              ? 'Loading...'
               : isLogin
-              ? 'Anmelden'
+              ? 'Sign in'
               : selectedRole === 'professional_host'
-              ? 'Als Professional Host registrieren'
-              : 'Registrieren'}
+              ? 'Sign up as Professional Host'
+              : 'Sign up'}
           </Button>
 
           {/* Divider */}
@@ -405,7 +405,7 @@ const Auth = () => {
               <span className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">oder</span>
+              <span className="bg-background px-2 text-muted-foreground">or</span>
             </div>
           </div>
 
@@ -422,7 +422,7 @@ const Auth = () => {
                   redirect_uri: window.location.origin,
                 });
                 if (error) {
-                  toast.error('Google Login fehlgeschlagen');
+                  toast.error('Google sign-in failed');
                   console.error(error);
                 }
                 setSocialLoading(false);
@@ -434,7 +434,7 @@ const Auth = () => {
                 <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
               </svg>
-              Mit Google anmelden
+              Sign in with Google
             </Button>
 
             <Button
@@ -448,7 +448,7 @@ const Auth = () => {
                   redirect_uri: window.location.origin,
                 });
                 if (error) {
-                  toast.error('Apple Login fehlgeschlagen');
+                  toast.error('Apple sign-in failed');
                   console.error(error);
                 }
                 setSocialLoading(false);
@@ -457,7 +457,7 @@ const Auth = () => {
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
               </svg>
-              Mit Apple anmelden
+              Sign in with Apple
             </Button>
           </div>
 
@@ -469,8 +469,8 @@ const Auth = () => {
               className="text-primary hover:underline"
             >
               {isLogin
-                ? 'Noch kein Account? Jetzt registrieren'
-                : 'Bereits registriert? Anmelden'}
+                ? "Don't have an account? Sign up"
+                : 'Already registered? Sign in'}
             </button>
           </div>
         </form>
@@ -489,7 +489,7 @@ function RoleSelector({
 }) {
   return (
     <div className="space-y-2">
-      <Label className="text-foreground">Kontotyp wählen</Label>
+      <Label className="text-foreground">Choose account type</Label>
       <div className="grid grid-cols-2 gap-3">
         <button
           type="button"
@@ -507,8 +507,8 @@ function RoleSelector({
             </div>
           )}
           <User className="w-8 h-8 text-primary" />
-          <span className="text-sm font-semibold text-foreground">Privat</span>
-          <span className="text-xs text-muted-foreground">Kostenlos</span>
+          <span className="text-sm font-semibold text-foreground">Private</span>
+          <span className="text-xs text-muted-foreground">Free</span>
         </button>
 
         <button
@@ -528,7 +528,7 @@ function RoleSelector({
           )}
           <Building2 className="w-8 h-8 text-primary" />
           <span className="text-sm font-semibold text-foreground">Professional Host</span>
-          <span className="text-xs text-muted-foreground">Ab €29,90</span>
+          <span className="text-xs text-muted-foreground">From €29.90</span>
         </button>
       </div>
     </div>

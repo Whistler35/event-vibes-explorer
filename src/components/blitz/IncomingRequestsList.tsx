@@ -22,11 +22,11 @@ const IncomingRequestsList = ({ blitzRequestId }: Props) => {
   const handleAccept = async (item: IncomingBlitzRequest) => {
     try {
       const match = await acceptBlitzRequest(item);
-      toast("⚡ MATCH!", { description: `Chat mit ${item.swiper_name ?? "Match"} öffnet…` });
+      toast("⚡ MATCH!", { description: `Opening chat with ${item.swiper_name ?? "match"}…` });
       reload();
       navigate(`/blitz/match/${match.id}`);
     } catch (e: any) {
-      toast.error(e.message || "Fehler");
+      toast.error(e.message || "Error");
     }
   };
 
@@ -35,7 +35,7 @@ const IncomingRequestsList = ({ blitzRequestId }: Props) => {
       await rejectBlitzRequest(item.swipe_id);
       reload();
     } catch (e: any) {
-      toast.error(e.message || "Fehler");
+      toast.error(e.message || "Error");
     }
   };
 
@@ -44,7 +44,7 @@ const IncomingRequestsList = ({ blitzRequestId }: Props) => {
       <div className="flex items-center gap-2">
         <Zap className="w-5 h-5 text-[hsl(var(--blitz-pink))] fill-[hsl(var(--blitz-pink))]" />
         <p className="font-black uppercase text-sm tracking-wider">
-          {items.length} {items.length === 1 ? "Anfrage" : "Anfragen"}
+          {items.length} {items.length === 1 ? "Request" : "Requests"}
         </p>
       </div>
       <div className="space-y-2">
@@ -60,7 +60,7 @@ const IncomingRequestsList = ({ blitzRequestId }: Props) => {
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="font-bold leading-tight truncate">{it.swiper_name ?? "Anonym"}</p>
+              <p className="font-bold leading-tight truncate">{it.swiper_name ?? "Anonymous"}</p>
               {it.swiper_bio && (
                 <p className="text-xs text-muted-foreground line-clamp-1">{it.swiper_bio}</p>
               )}
@@ -68,14 +68,14 @@ const IncomingRequestsList = ({ blitzRequestId }: Props) => {
             <button
               onClick={() => handleReject(it)}
               className="w-9 h-9 rounded-full bg-white border border-muted flex items-center justify-center"
-              aria-label="Ablehnen"
+              aria-label="Reject"
             >
               <X className="w-4 h-4 text-muted-foreground" />
             </button>
             <button
               onClick={() => handleAccept(it)}
               className="w-9 h-9 rounded-full bg-[hsl(var(--blitz-pink))] flex items-center justify-center shadow-[0_0_15px_hsl(var(--blitz-pink)/0.5)]"
-              aria-label="Annehmen"
+              aria-label="Accept"
             >
               <Check className="w-4 h-4 text-white" />
             </button>

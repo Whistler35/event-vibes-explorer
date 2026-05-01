@@ -51,7 +51,7 @@ const UserProfile = () => {
 
   const handleStartDM = async () => {
     if (!user || !userId) {
-      toast.error("Bitte melde dich an, um Nachrichten zu senden.");
+      toast.error("Please sign in to send messages.");
       return;
     }
     const { data, error } = await supabase.rpc("get_or_create_dm", {
@@ -59,7 +59,7 @@ const UserProfile = () => {
       p_user2: userId,
     });
     if (error) {
-      toast.error("Chat konnte nicht erstellt werden.");
+      toast.error("Could not create chat.");
       return;
     }
     navigate(`/dm/${data}`);
@@ -79,8 +79,8 @@ const UserProfile = () => {
     if (!user || !userId) return;
     setFriendActionLoading(true);
     const { error } = await supabase.from("friendships").insert({ requester_id: user.id, addressee_id: userId } as any);
-    if (error) toast.error("Anfrage konnte nicht gesendet werden.");
-    else toast.success("Freundschaftsanfrage gesendet!");
+    if (error) toast.error("Could not send request.");
+    else toast.success("Friend request sent!");
     await fetchFriendship();
     setFriendActionLoading(false);
   };
@@ -92,8 +92,8 @@ const UserProfile = () => {
       .from("friendships")
       .update({ status, updated_at: new Date().toISOString() } as any)
       .eq("id", friendship.id);
-    if (error) toast.error("Fehler beim Aktualisieren.");
-    else toast.success(status === "accepted" ? "Freund hinzugefügt! 🎉" : "Anfrage abgelehnt.");
+    if (error) toast.error("Error updating.");
+    else toast.success(status === "accepted" ? "Friend added! 🎉" : "Request rejected.");
     await fetchFriendship();
     setFriendActionLoading(false);
   };
@@ -102,8 +102,8 @@ const UserProfile = () => {
     if (!friendship) return;
     setFriendActionLoading(true);
     const { error } = await supabase.from("friendships").delete().eq("id", friendship.id);
-    if (error) toast.error("Fehler beim Entfernen.");
-    else toast.success("Freund entfernt.");
+    if (error) toast.error("Error removing.");
+    else toast.success("Friend removed.");
     setFriendship(null);
     setFriendActionLoading(false);
   };
@@ -160,7 +160,7 @@ const UserProfile = () => {
     return (
       <Layout>
         <div className="flex items-center justify-center h-[70vh]">
-          <p className="text-muted-foreground">Laden...</p>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </Layout>
     );
@@ -170,14 +170,14 @@ const UserProfile = () => {
     return (
       <Layout>
         <div className="flex flex-col items-center justify-center h-[70vh] space-y-4">
-          <p className="text-muted-foreground">Profil nicht gefunden.</p>
-          <Button variant="outline" onClick={() => navigate(-1)}>Zurück</Button>
+          <p className="text-muted-foreground">Profile not found.</p>
+          <Button variant="outline" onClick={() => navigate(-1)}>Back</Button>
         </div>
       </Layout>
     );
   }
 
-  const displayName = profile.name || "Unbekannt";
+  const displayName = profile.name || "Unknown";
   const avatarUrl = profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=ff5722&color=fff&size=400`;
   const hostInstagramUrl = getInstagramUrl(hostProfile?.instagram_username);
   const profileInstagramUrl = getInstagramUrl(profile.instagram_username);
@@ -190,7 +190,7 @@ const UserProfile = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="text-muted-foreground hover:text-foreground">
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h1 className="text-foreground text-xl font-bold">Profil</h1>
+          <h1 className="text-foreground text-xl font-bold">Profile</h1>
         </div>
 
         {/* Profile Info */}
@@ -223,7 +223,7 @@ const UserProfile = () => {
           <div className="flex justify-center gap-8">
             <button onClick={() => setStatsSheet({ open: true, tab: "hosted" })} className="text-center">
               <p className="text-foreground text-xl font-bold">{stats.hostedCount}</p>
-              <p className="text-muted-foreground text-xs">Gehostet</p>
+              <p className="text-muted-foreground text-xs">Hosted</p>
             </button>
             {isHost && userId && (
               <div className="text-center">
@@ -232,7 +232,7 @@ const UserProfile = () => {
             )}
             <button onClick={() => setStatsSheet({ open: true, tab: "friends" })} className="text-center">
               <p className="text-foreground text-xl font-bold">{stats.friendsCount}</p>
-              <p className="text-muted-foreground text-xs">Freunde</p>
+              <p className="text-muted-foreground text-xs">Friends</p>
             </button>
           </div>
 
@@ -242,7 +242,7 @@ const UserProfile = () => {
               {/* Pending request received - show accept/reject */}
               {friendship?.status === "pending" && friendship.addressee_id === user.id && (
                 <div className="w-full space-y-2">
-                  <p className="text-sm text-muted-foreground">Möchte mit dir befreundet sein</p>
+                  <p className="text-sm text-muted-foreground">Wants to be friends with you</p>
                   <div className="flex gap-2 w-full">
                     <Button
                       onClick={() => respondToRequest("accepted")}
@@ -250,7 +250,7 @@ const UserProfile = () => {
                       className="flex-1"
                     >
                       <UserCheck className="w-4 h-4 mr-2" />
-                      Annehmen
+                      Accept
                     </Button>
                     <Button
                       variant="outline"
@@ -259,7 +259,7 @@ const UserProfile = () => {
                       className="flex-1"
                     >
                       <X className="w-4 h-4 mr-2" />
-                      Ablehnen
+                      Reject
                     </Button>
                   </div>
                 </div>
@@ -269,7 +269,7 @@ const UserProfile = () => {
               {friendship?.status === "pending" && friendship.requester_id === user.id && (
                 <Button variant="outline" disabled className="w-full">
                   <Clock className="w-4 h-4 mr-2" />
-                  Anfrage gesendet
+                  Request sent
                 </Button>
               )}
 
@@ -278,7 +278,7 @@ const UserProfile = () => {
                 <div className="flex gap-2 w-full">
                   <Button onClick={handleStartDM} className="flex-1">
                     <MessageCircle className="w-4 h-4 mr-2" />
-                    Nachricht
+                    Message
                   </Button>
                   <Button variant="outline" onClick={removeFriend} disabled={friendActionLoading} className="text-destructive hover:text-destructive">
                     <UserMinus className="w-4 h-4" />
@@ -290,7 +290,7 @@ const UserProfile = () => {
               {!friendship && (
                 <Button onClick={sendFriendRequest} disabled={friendActionLoading} className="w-full">
                   <UserPlus className="w-4 h-4 mr-2" />
-                  Freund hinzufügen
+                  Add friend
                 </Button>
               )}
 
@@ -298,7 +298,7 @@ const UserProfile = () => {
               {friendship?.status === "accepted" ? null : (
                 <Button variant="ghost" onClick={handleStartDM} className="w-full text-muted-foreground">
                   <MessageCircle className="w-4 h-4 mr-2" />
-                  Nachricht senden
+                  Send message
                 </Button>
               )}
             </div>

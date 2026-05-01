@@ -103,12 +103,12 @@ const SwipeCard = ({ item, onSwipe, isTop }: CardProps) => {
               </AvatarFallback>
             </Avatar>
             <div>
-              <p className="font-bold text-lg leading-tight">{item.host_name ?? "Anonym"}</p>
+              <p className="font-bold text-lg leading-tight">{item.host_name ?? "Anonymous"}</p>
               <p className="text-xs text-white/60 flex items-center gap-1">
                 <MapPin className="w-3 h-3" />
                 {item.distance_km < 1
                   ? `${Math.round(item.distance_km * 1000)} m`
-                  : `${item.distance_km.toFixed(1)} km`} entfernt
+                  : `${item.distance_km.toFixed(1)} km`} away
               </p>
 
             </div>
@@ -129,7 +129,7 @@ const SwipeCard = ({ item, onSwipe, isTop }: CardProps) => {
           <div className="flex items-center justify-center gap-2 pt-4">
             <Zap className="w-5 h-5 text-[hsl(var(--blitz-pink))] fill-[hsl(var(--blitz-pink))]" />
             <span className="text-xs uppercase tracking-[0.3em] text-white/60 font-bold">
-              Swipe → für Match
+              Swipe → for Match
             </span>
           </div>
         </div>
@@ -156,10 +156,10 @@ const DiscoveryDeck = ({ city }: DiscoveryDeckProps) => {
     try {
       await swipeBlitz(item.id, dir);
       if (dir === "right") {
-        toast("⚡ Anfrage gesendet!", { description: `Du wartest auf ${item.host_name ?? "den Host"}.` });
+        toast("⚡ Request sent!", { description: `Waiting for ${item.host_name ?? "the host"}.` });
       }
     } catch (e: any) {
-      toast.error(e.message || "Fehler beim Swipen");
+      toast.error(e.message || "Swipe failed");
     }
     setIndex((i) => i + 1);
   };
@@ -168,7 +168,7 @@ const DiscoveryDeck = ({ city }: DiscoveryDeckProps) => {
     return (
       <div className="h-[calc(100vh-220px)] rounded-3xl bg-[hsl(var(--blitz-forest))] text-white flex flex-col items-center justify-center text-center p-8 gap-4">
         <MapPin className="w-16 h-16 text-[hsl(var(--blitz-pink))] opacity-60" />
-        <h2 className="text-3xl font-black uppercase">Standort nötig</h2>
+        <h2 className="text-3xl font-black uppercase">Location required</h2>
         <p className="text-white/70 max-w-xs">{locError}</p>
       </div>
     );
@@ -188,15 +188,15 @@ const DiscoveryDeck = ({ city }: DiscoveryDeckProps) => {
     return (
       <div className="h-[calc(100vh-220px)] rounded-3xl bg-[hsl(var(--blitz-forest))] text-white flex flex-col items-center justify-center text-center p-8 gap-4">
         <Zap className="w-16 h-16 text-[hsl(var(--blitz-pink))] fill-[hsl(var(--blitz-pink))] opacity-60" />
-        <h2 className="text-3xl font-black uppercase">Keine Blitze</h2>
+        <h2 className="text-3xl font-black uppercase">No Blitzes</h2>
         <p className="text-white/70 max-w-xs">
-          Aktuell läuft kein Blitz in deinem Umkreis. Komm später wieder oder starte selbst einen!
+          No active Blitz around you right now. Come back later or start your own!
         </p>
         <button
           onClick={reload}
           className="mt-4 px-6 py-3 rounded-full bg-[hsl(var(--blitz-pink))] text-white font-bold uppercase text-sm tracking-wide"
         >
-          Neu laden
+          Reload
         </button>
       </div>
     );
@@ -221,14 +221,14 @@ const DiscoveryDeck = ({ city }: DiscoveryDeckProps) => {
         <button
           onClick={() => handleSwipe("left")}
           className="w-16 h-16 rounded-full bg-white border-2 border-muted flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition"
-          aria-label="Ignorieren"
+          aria-label="Skip"
         >
           <X className="w-7 h-7 text-muted-foreground" />
         </button>
         <button
           onClick={() => handleSwipe("right")}
           className="w-16 h-16 rounded-full bg-[hsl(var(--blitz-pink))] flex items-center justify-center shadow-[0_0_30px_hsl(var(--blitz-pink)/0.6)] hover:scale-110 active:scale-95 transition"
-          aria-label="Anfrage senden"
+          aria-label="Send request"
         >
           <Check className="w-7 h-7 text-white" />
         </button>

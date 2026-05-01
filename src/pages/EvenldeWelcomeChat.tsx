@@ -8,31 +8,31 @@ import { markConversationRead } from "@/hooks/useUnreadDMCount";
 const welcomeMessages = [
   {
     id: "1",
-    message: "Hey! 👋 Willkommen bei Evendle!",
+    message: "Hey! 👋 Welcome to Evendle!",
     time: "09:00",
   },
   {
     id: "2",
     message:
-      "Wir freuen uns riesig, dass du hier bist! 🎉 Evendle hilft dir dabei, spannende Events, Veranstaltungen und Unternehmungen in deiner Umgebung zu entdecken.",
+      "We're stoked you're here! 🎉 Evendle helps you discover exciting events, gigs and activities around you.",
     time: "09:00",
   },
   {
     id: "3",
     message:
-      "Ob Konzerte, Sport-Events, Food-Märkte oder spontane Hangouts – hier findest du alles, was in deiner Stadt passiert. 🌆",
+      "Concerts, sports events, food markets or spontaneous hangouts — this is where you'll find everything happening in your city. 🌆",
     time: "09:01",
   },
   {
     id: "4",
     message:
-      "Das Beste daran? Du kannst dich mit anderen Leuten verabreden und gemeinsam Offline-Erlebnisse schaffen. Denn die besten Momente passieren im echten Leben! 🤝✨",
+      "The best part? You can meet up with other people and create real-life moments together. Because the best memories happen offline! 🤝✨",
     time: "09:01",
   },
   {
     id: "5",
     message:
-      "Starte jetzt: Erkunde Events in deiner Nähe, tritt einer Veranstaltung bei und lerne neue Leute kennen. Viel Spaß! 🚀",
+      "Get started: explore events near you, join one and meet new people. Have fun! 🚀",
     time: "09:02",
   },
 ];
@@ -82,7 +82,7 @@ const EvenldeWelcomeChat = () => {
         {/* Info footer */}
         <div className="p-4 border-t border-border bg-background">
           <p className="text-muted-foreground text-xs text-center">
-            Dies ist eine automatische Willkommensnachricht von Evendle.
+            This is an automatic welcome message from Evendle.
           </p>
         </div>
       </div>

@@ -47,7 +47,7 @@ const Blitz = () => {
     );
     if (fresh) {
       seenMatchIds.current.add(fresh.id);
-      toast("⚡ Match!", { description: `${fresh.other_name ?? "Jemand"} hat zugesagt.` });
+      toast("⚡ Match!", { description: `${fresh.other_name ?? "Someone"} accepted.` });
       navigate(`/blitz/match/${fresh.id}`);
     } else {
       matches.forEach((m) => seenMatchIds.current.add(m.id));
@@ -70,10 +70,10 @@ const Blitz = () => {
             <div className="relative space-y-3">
               <p className="text-xs uppercase tracking-[0.3em] text-white/60 font-bold">EVENDLE Blitz</p>
               <h1 className="text-5xl font-black uppercase leading-none">
-                Spontan?<br />Sofort!
+                Spontaneous?<br />Right now!
               </h1>
               <p className="text-white/80 max-w-xs mx-auto text-base">
-                Blast deine Aktivität raus, swipe durch andere und matche in Minuten.
+                Blitz your activity out there, swipe through others and match in minutes.
               </p>
             </div>
 
@@ -81,7 +81,7 @@ const Blitz = () => {
               onClick={() => navigate("/auth")}
               className="relative px-8 py-4 rounded-2xl bg-[hsl(var(--blitz-pink))] text-white font-black uppercase tracking-wider shadow-[0_8px_32px_hsl(var(--blitz-pink)/0.5)] hover:scale-105 transition"
             >
-              LOGIN ZUM BLITZEN
+              LOG IN TO BLITZ
             </button>
           </div>
         </div>
@@ -103,7 +103,7 @@ const Blitz = () => {
                 : "text-muted-foreground"
             }`}
           >
-            Mein Blitz
+            My Blitz
           </button>
           <button
             onClick={() => setTab("discover")}
@@ -136,23 +136,23 @@ const Blitz = () => {
               <div className="relative pt-6 space-y-2">
                 <p className="text-xs uppercase tracking-[0.3em] text-white/60 font-bold">EVENDLE Blitz</p>
                 <h1 className="text-5xl font-black uppercase leading-none">
-                  Spontan<br />Bock?
+                  Feeling<br />Spontaneous?
                 </h1>
                 <p className="text-white/70 mt-3 max-w-xs mx-auto">
-                  Sag's der Stadt — und mach's in den nächsten Minuten.
+                  Tell the city — and make it happen in the next few minutes.
                 </p>
               </div>
 
               <button
                 onClick={() => setCreateOpen(true)}
                 className="relative w-32 h-32 rounded-full bg-[hsl(var(--blitz-pink))] flex items-center justify-center shadow-[0_0_60px_hsl(var(--blitz-pink)/0.6)] hover:scale-105 active:scale-95 transition animate-blitz-pulse"
-                aria-label="Neuen Blitz erstellen"
+                aria-label="Create new Blitz"
               >
                 <Zap className="w-16 h-16 text-white fill-white" />
               </button>
 
               <p className="relative text-sm font-black uppercase tracking-[0.25em] pb-4">
-                Tap zum Blasten
+                Tap to Blitz
               </p>
             </div>
           )

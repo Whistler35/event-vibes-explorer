@@ -25,7 +25,7 @@ const ActiveBlitzScreen = ({ request, onEnded }: ActiveBlitzScreenProps) => {
 
   useEffect(() => {
     if (remainingMs === 0) {
-      toast("⚡ Dein Blitz ist abgelaufen");
+      toast("⚡ Your Blitz expired");
       onEnded();
     }
   }, [remainingMs, onEnded]);
@@ -33,10 +33,10 @@ const ActiveBlitzScreen = ({ request, onEnded }: ActiveBlitzScreenProps) => {
   const handleCancel = async () => {
     try {
       await cancelBlitzRequest(request.id);
-      toast("Blitz abgebrochen");
+      toast("Blitz cancelled");
       onEnded();
     } catch (e: any) {
-      toast.error(e.message || "Fehler");
+      toast.error(e.message || "Error");
     }
   };
 
@@ -56,7 +56,7 @@ const ActiveBlitzScreen = ({ request, onEnded }: ActiveBlitzScreenProps) => {
           <p className="text-xs uppercase tracking-[0.3em] text-white/60 font-bold">Live Blitz</p>
           <div className="flex items-center justify-center gap-2">
             <Zap className="w-6 h-6 text-[hsl(var(--blitz-pink))] fill-[hsl(var(--blitz-pink))]" />
-            <span className="text-sm font-bold text-[hsl(var(--blitz-pink))] uppercase tracking-widest">Aktiv</span>
+            <span className="text-sm font-bold text-[hsl(var(--blitz-pink))] uppercase tracking-widest">Active</span>
           </div>
         </div>
 
@@ -87,7 +87,7 @@ const ActiveBlitzScreen = ({ request, onEnded }: ActiveBlitzScreenProps) => {
           className="flex items-center gap-2 px-6 py-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white font-bold text-sm uppercase tracking-wide transition"
         >
           <X className="w-4 h-4" />
-          Abbrechen
+          Cancel
         </button>
       </div>
     </div>
