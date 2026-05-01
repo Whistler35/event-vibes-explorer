@@ -234,7 +234,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
               <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="time" className="text-foreground text-sm">Zeit *</Label>
+              <Label htmlFor="time" className="text-foreground text-sm">Time *</Label>
               <Input id="time" type="time" value={time} onChange={(e) => setTime(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
             </div>
           </div>
