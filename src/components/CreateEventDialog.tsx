@@ -92,6 +92,8 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
       const eventCategory = isAdmin ? category : 'community';
       const parsedMax = maxParticipants ? parseInt(maxParticipants, 10) : null;
       const eventVisibility = isPrivate ? 'unlisted' : 'public';
+      const parsedPrice = priceEur ? parseFloat(priceEur.replace(',', '.')) : 0;
+      const priceCents = !isNaN(parsedPrice) && parsedPrice > 0 ? Math.round(parsedPrice * 100) : 0;
 
       const { error } = await supabase.from('events').insert({
         title,
@@ -107,6 +109,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
         approval_status: approvalStatus,
         max_participants: !isAdmin && parsedMax && parsedMax >= 2 ? parsedMax : null,
         visibility: eventVisibility,
+        price_cents: priceCents,
       } as any);
 
       if (error) throw error;
