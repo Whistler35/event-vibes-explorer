@@ -85,6 +85,61 @@ All colors MUST be HSL.
     animation: blitz-bolt-pulse 1.4s ease-in-out infinite;
   }
 
+  /* Shockwave ring radiating from impact point */
+  @keyframes blitz-shockwave {
+    0% { transform: scale(0.2); opacity: 0.9; border-width: 6px; }
+    100% { transform: scale(2.4); opacity: 0; border-width: 1px; }
+  }
+  .animate-blitz-shockwave {
+    animation: blitz-shockwave 1.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  }
+
+  /* Sharp impact flash */
+  @keyframes blitz-impact-flash {
+    0% { opacity: 0; transform: scale(0.6); }
+    20% { opacity: 1; transform: scale(1.1); }
+    60% { opacity: 0.4; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.05); }
+  }
+  .animate-blitz-impact {
+    animation: blitz-impact-flash 1.6s ease-out forwards;
+  }
+
+  /* Avatars slamming in from the sides */
+  @keyframes blitz-slam-left {
+    0% { transform: translateX(-120%) rotate(-12deg); opacity: 0; }
+    60% { transform: translateX(10%) rotate(-6deg); opacity: 1; }
+    100% { transform: translateX(0) rotate(-6deg); opacity: 1; }
+  }
+  @keyframes blitz-slam-right {
+    0% { transform: translateX(120%) rotate(12deg); opacity: 0; }
+    60% { transform: translateX(-10%) rotate(6deg); opacity: 1; }
+    100% { transform: translateX(0) rotate(6deg); opacity: 1; }
+  }
+  .animate-blitz-slam-left { animation: blitz-slam-left 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  .animate-blitz-slam-right { animation: blitz-slam-right 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+  /* Electric spark line between avatars */
+  @keyframes blitz-spark {
+    0%, 100% { opacity: 0.6; transform: scaleX(1) skewX(0deg); }
+    25% { opacity: 1; transform: scaleX(1.05) skewX(-4deg); }
+    50% { opacity: 0.4; transform: scaleX(0.95) skewX(3deg); }
+    75% { opacity: 1; transform: scaleX(1.02) skewX(-2deg); }
+  }
+  .animate-blitz-spark {
+    animation: blitz-spark 0.18s linear infinite;
+  }
+
+  /* Headline slam-in */
+  @keyframes blitz-headline-slam {
+    0% { transform: scale(2) translateY(20px); opacity: 0; letter-spacing: 0.5em; }
+    60% { transform: scale(0.95) translateY(0); opacity: 1; letter-spacing: -0.04em; }
+    100% { transform: scale(1) translateY(0); opacity: 1; letter-spacing: -0.04em; }
+  }
+  .animate-blitz-headline {
+    animation: blitz-headline-slam 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
   .dark {
     --background: 0 0% 96%;
     --foreground: 0 0% 10%;
