@@ -345,6 +345,14 @@ const Nearby = () => {
             onCreateEvent={handleCreateEvent}
             onEventClick={(event) => {
               setSelectedEventId(event.id);
+              // Pan to the event so the carousel viewport-filter keeps it in view,
+              // and the matching card scrolls to the active center.
+              carouselDrivingRef.current = true;
+              if (carouselDrivingTimerRef.current) clearTimeout(carouselDrivingTimerRef.current);
+              carouselDrivingTimerRef.current = setTimeout(() => {
+                carouselDrivingRef.current = false;
+              }, 1100);
+              mapRef.current?.flyTo(event.position[0], event.position[1]);
             }}
             onViewportChange={(b) => { if (!carouselDrivingRef.current) setViewportBounds(b); }}
             events={mapEvents}
