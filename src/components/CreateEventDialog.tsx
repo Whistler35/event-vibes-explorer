@@ -156,7 +156,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
               <ShieldCheck className="h-3.5 w-3.5" /> Admin
             </span> :
           <span className="flex items-center gap-1 text-xs text-yellow-600">
-              <Clock className="h-3.5 w-3.5" /> Prüfung nötig
+              <Clock className="h-3.5 w-3.5" /> Review required
             </span>
           }
         </div>
