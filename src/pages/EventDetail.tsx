@@ -353,6 +353,13 @@ const EventDetail = () => {
           />
         )}
       </div>
+      {showJoinedOverlay && event && (
+        <EventJoinedConfirmation
+          eventTitle={event.title}
+          eventDate={event.event_date}
+          onDone={handleConfirmationDone}
+        />
+      )}
     </Layout>
   );
 };
