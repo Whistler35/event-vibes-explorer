@@ -135,6 +135,7 @@ const Home = () => {
     setSearchLocation(loc);
     setShowSuggestions(false);
     localStorage.setItem('selectedCity', JSON.stringify(loc));
+    shouldScrollRef.current = true;
   };
 
   const clearSearch = () => {
