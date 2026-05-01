@@ -216,7 +216,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
                 </SelectContent>
               </Select> :
             <div className="flex items-center gap-2 h-12 px-3 rounded-xl border border-border text-foreground bg-transparent">
-                <span>👥 Community</span>
+                <span>Community</span>
                 <span className="text-xs text-muted-foreground ml-auto"></span>
               </div>}
           </div>
