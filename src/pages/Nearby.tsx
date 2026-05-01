@@ -345,7 +345,7 @@ const Nearby = () => {
             onEventClick={(event) => {
               setSelectedEventId(event.id);
             }}
-            onViewportChange={(b) => setViewportBounds(b)}
+            onViewportChange={(b) => { if (!carouselDrivingRef.current) setViewportBounds(b); }}
             events={mapEvents}
             isAdmin={true}
             center={initialCenter}
@@ -362,28 +362,69 @@ const Nearby = () => {
               <input
                 value={cityQuery}
                 onChange={(e) => handleCityInput(e.target.value)}
-                onFocus={() => { setSearchOpen(true); citySuggestions.length > 0 && setShowCitySuggestions(true); }}
+                onFocus={() => { setSearchOpen(true); (citySuggestions.length + eventSuggestions.length) > 0 && setShowCitySuggestions(true); }}
                 placeholder="Events, Orte suchen..."
                 className="flex-1 bg-transparent border-0 outline-none px-3 text-sm text-foreground placeholder:text-muted-foreground"
               />
-              {cityQuery && (
+              {searchLoading && (
+                <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin shrink-0" />
+              )}
+              {cityQuery && !searchLoading && (
                 <button onClick={clearCitySearch} className="text-muted-foreground hover:text-foreground">
                   <X className="h-4 w-4" />
                 </button>
               )}
             </div>
             {showCitySuggestions && (
-              <div className="mt-1.5 bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-xl overflow-hidden">
-                {citySuggestions.map((s, i) => (
-                  <button
-                    key={i}
-                    onClick={() => selectCity(s)}
-                    className="w-full px-4 py-3 text-left text-sm text-foreground hover:bg-muted/50 flex items-center gap-3"
-                  >
-                    <MapPin className="h-4 w-4 text-primary shrink-0" />
-                    <span className="truncate">{s.name}</span>
-                  </button>
-                ))}
+              <div className="mt-1.5 bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-xl overflow-hidden max-h-[60vh] overflow-y-auto">
+                {eventSuggestions.length > 0 && (
+                  <>
+                    <div className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Events</div>
+                    {eventSuggestions.map((ev) => (
+                      <button
+                        key={`ev-${ev.id}`}
+                        onClick={() => selectEventSuggestion(ev)}
+                        className="w-full px-3 py-2.5 text-left hover:bg-muted/50 flex items-center gap-3"
+                      >
+                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-muted shrink-0">
+                          {ev.image_url
+                            ? <img src={ev.image_url} alt="" className="w-full h-full object-cover" />
+                            : <div className="w-full h-full bg-gradient-to-br from-primary/30 to-primary/5" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-sm font-semibold text-foreground truncate">{ev.title}</span>
+                            {ev.is_featured && (
+                              <span className="px-1.5 py-0.5 rounded-full bg-[hsl(var(--blitz-pink))] text-white text-[9px] font-bold uppercase shrink-0">Top</span>
+                            )}
+                          </div>
+                          <div className="text-[11px] text-muted-foreground truncate">
+                            {ev.event_date && new Date(ev.event_date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
+                            {ev.location_name && ` · ${ev.location_name}`}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </>
+                )}
+                {citySuggestions.length > 0 && (
+                  <>
+                    <div className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Orte</div>
+                    {citySuggestions.map((s, i) => (
+                      <button
+                        key={`pl-${i}`}
+                        onClick={() => selectCity(s)}
+                        className="w-full px-4 py-2.5 text-left text-sm text-foreground hover:bg-muted/50 flex items-center gap-3"
+                      >
+                        <MapPin className="h-4 w-4 text-primary shrink-0" />
+                        <span className="truncate">{s.name}</span>
+                      </button>
+                    ))}
+                  </>
+                )}
+                {!searchLoading && eventSuggestions.length === 0 && citySuggestions.length === 0 && (
+                  <div className="px-4 py-4 text-sm text-muted-foreground text-center">Keine Events oder Orte gefunden</div>
+                )}
               </div>
             )}
           </div>
