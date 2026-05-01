@@ -298,7 +298,7 @@ const Home = () => {
           };
 
           return (
-            <div className="px-4 pb-8">
+            <div ref={nearbySectionRef} className="px-4 pb-8 scroll-mt-4">
               <h3 className="text-foreground text-2xl font-bold mb-2">
                 📍 Events near {searchQuery}
               </h3>
