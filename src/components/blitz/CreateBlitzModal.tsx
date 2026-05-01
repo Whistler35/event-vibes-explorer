@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Zap } from "lucide-react";
+import { Zap, MapPin, Loader2 } from "lucide-react";
 import { createBlitzRequest } from "@/hooks/useBlitzRequest";
 import { toast } from "sonner";
 
@@ -16,14 +16,61 @@ const DURATIONS = [
   { label: "2h", value: 120 },
 ];
 
+const RADIUS_MIN = 1;
+const RADIUS_MAX = 50;
+const RADIUS_STEP = 5;
+
 const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalProps) => {
   const [activity, setActivity] = useState("");
   const [duration, setDuration] = useState(60);
+  const [radius, setRadius] = useState(10);
   const [submitting, setSubmitting] = useState(false);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [locating, setLocating] = useState(false);
+  const [locError, setLocError] = useState<string | null>(null);
+
+  const requestLocation = () => {
+    if (!("geolocation" in navigator)) {
+      setLocError("Standort wird vom Browser nicht unterstützt.");
+      return;
+    }
+    setLocating(true);
+    setLocError(null);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocating(false);
+      },
+      (err) => {
+        setLocError(
+          err.code === err.PERMISSION_DENIED
+            ? "Standort-Freigabe nötig zum Blasten."
+            : "Standort konnte nicht ermittelt werden."
+        );
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
+  };
+
+  useEffect(() => {
+    if (open && !coords) requestLocation();
+    if (!open) {
+      // reset on close
+      setActivity("");
+      setDuration(60);
+      setRadius(10);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const handleSubmit = async () => {
     if (!activity.trim()) {
       toast.error("Sag uns worauf du Bock hast!");
+      return;
+    }
+    if (!coords) {
+      toast.error("Standort nötig zum Blasten.");
       return;
     }
     setSubmitting(true);
@@ -36,10 +83,11 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
         activity,
         durationMinutes: duration,
         city,
+        latitude: coords.lat,
+        longitude: coords.lng,
+        radiusKm: radius,
       });
       toast.success("⚡ Geblastet!");
-      setActivity("");
-      setDuration(60);
       onOpenChange(false);
       onCreated?.();
     } catch (e: any) {
@@ -48,6 +96,8 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
       setSubmitting(false);
     }
   };
+
+  const canSubmit = !submitting && !!activity.trim() && !!coords;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -103,9 +153,62 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
             </div>
           </div>
 
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-bold uppercase tracking-wide text-white/70">
+                Radius
+              </label>
+              <span className="text-2xl font-black text-[hsl(var(--blitz-pink))] tabular-nums">
+                {radius} km
+              </span>
+            </div>
+            <input
+              type="range"
+              min={RADIUS_MIN}
+              max={RADIUS_MAX}
+              step={RADIUS_STEP}
+              value={radius}
+              onChange={(e) => setRadius(Number(e.target.value))}
+              className="w-full accent-[hsl(var(--blitz-pink))] cursor-pointer"
+            />
+            <div className="flex justify-between text-[10px] uppercase tracking-widest text-white/40 font-bold">
+              <span>{RADIUS_MIN} km</span>
+              <span>{RADIUS_MAX} km</span>
+            </div>
+          </div>
+
+          <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 flex items-center gap-3">
+            {locating ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin text-white/70" />
+                <span className="text-sm text-white/70">Standort wird ermittelt…</span>
+              </>
+            ) : coords ? (
+              <>
+                <MapPin className="w-5 h-5 text-[hsl(var(--blitz-pink))]" />
+                <span className="text-sm text-white/80">
+                  Standort aktiv · sichtbar im Umkreis von {radius} km
+                </span>
+              </>
+            ) : (
+              <>
+                <MapPin className="w-5 h-5 text-white/50" />
+                <div className="flex-1 text-sm text-white/70">
+                  {locError ?? "Standort wird benötigt."}
+                </div>
+                <button
+                  onClick={requestLocation}
+                  className="text-xs font-black uppercase tracking-wider text-[hsl(var(--blitz-pink))]"
+                >
+                  Erlauben
+                </button>
+              </>
+            )}
+          </div>
+
           <button
             onClick={handleSubmit}
-            disabled={submitting || !activity.trim()}
+            disabled={!canSubmit}
             className="w-full mt-2 py-5 rounded-2xl bg-[hsl(var(--blitz-pink))] text-white font-black text-xl tracking-wider uppercase shadow-[0_8px_32px_hsl(var(--blitz-pink)/0.5)] hover:scale-[1.02] active:scale-[0.98] transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             <Zap className="w-6 h-6 fill-white" />
