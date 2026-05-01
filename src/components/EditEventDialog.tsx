@@ -270,16 +270,36 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
 
           {/* Max Participants */}
           <div className="space-y-2">
-            <Label htmlFor="edit-maxParticipants" className="text-foreground text-sm">Max. Teilnehmer</Label>
+            <Label htmlFor="edit-maxParticipants" className="text-foreground text-sm">Max. Participants</Label>
             <Input
               id="edit-maxParticipants"
               type="number"
               min={2}
               value={maxParticipants}
               onChange={(e) => setMaxParticipants(e.target.value)}
-              placeholder="Unbegrenzt"
+              placeholder="Unlimited"
               className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12"
             />
+          </div>
+
+          {/* Price */}
+          <div className="space-y-2">
+            <Label htmlFor="edit-price" className="text-foreground text-sm">Price (EUR)</Label>
+            <Input
+              id="edit-price"
+              type="number"
+              min={0}
+              step="0.01"
+              value={priceEur}
+              onChange={(e) => setPriceEur(e.target.value)}
+              placeholder="0 = Free"
+              className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12"
+            />
+            <p className="text-muted-foreground text-xs">
+              {priceEur && parseFloat(priceEur.replace(',', '.')) > 0
+                ? `€${parseFloat(priceEur.replace(',', '.')).toFixed(2)} per ticket`
+                : 'Leave empty or 0 for a free event'}
+            </p>
           </div>
 
           {/* Visibility Toggle */}
@@ -287,7 +307,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
             <div className="flex items-center gap-2">
               {isPrivate ? <Lock className="h-4 w-4 text-muted-foreground" /> : <Globe className="h-4 w-4 text-primary" />}
               <Label className="text-foreground text-sm">
-                {isPrivate ? 'Privat' : 'Öffentlich'}
+                {isPrivate ? 'Private' : 'Public'}
               </Label>
             </div>
             <Switch checked={isPrivate} onCheckedChange={setIsPrivate} />
@@ -296,7 +316,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
           {/* Buttons */}
           <div className="flex gap-3 pt-2">
             <Button variant="outline" onClick={onClose} className="flex-1 h-12 rounded-xl">
-              Abbrechen
+              Cancel
             </Button>
             <Button onClick={handleSubmit} disabled={!title || !date || !time || loading} className="flex-1 h-12 rounded-xl">
               {loading ? 'Speichern...' : 'Speichern'}
