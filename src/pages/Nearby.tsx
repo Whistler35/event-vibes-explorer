@@ -40,12 +40,15 @@ const Nearby = () => {
   const carouselDrivingRef = useRef(false);
   const carouselDrivingTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
-  // Search bar
+  // Search bar (events + places)
   const [searchOpen, setSearchOpen] = useState(false);
   const [cityQuery, setCityQuery] = useState("");
   const [citySuggestions, setCitySuggestions] = useState<GeoResult[]>([]);
+  const [eventSuggestions, setEventSuggestions] = useState<SearchEvent[]>([]);
   const [showCitySuggestions, setShowCitySuggestions] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const searchAbortRef = useRef<AbortController | null>(null);
   const mapRef = useRef<MapboxMapHandle>(null);
 
   const { isAdmin } = useIsAdmin();
