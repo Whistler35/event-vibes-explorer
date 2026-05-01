@@ -182,7 +182,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
                 </div> :
               <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/50 transition-colors bg-transparent">
                   <Camera className="h-8 w-8 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground mt-2">Bild hinzufügen</span>
+                  <span className="text-sm text-muted-foreground mt-2">Add image</span>
                   <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                 </label>
               }
