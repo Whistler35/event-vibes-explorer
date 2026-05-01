@@ -461,6 +461,7 @@ export type Database = {
           location_name: string
           longitude: number | null
           max_participants: number | null
+          price_cents: number
           source: Database["public"]["Enums"]["event_source"] | null
           title: string
           updated_at: string
@@ -484,6 +485,7 @@ export type Database = {
           location_name: string
           longitude?: number | null
           max_participants?: number | null
+          price_cents?: number
           source?: Database["public"]["Enums"]["event_source"] | null
           title: string
           updated_at?: string
@@ -507,6 +509,7 @@ export type Database = {
           location_name?: string
           longitude?: number | null
           max_participants?: number | null
+          price_cents?: number
           source?: Database["public"]["Enums"]["event_source"] | null
           title?: string
           updated_at?: string
@@ -1322,6 +1325,7 @@ export type Database = {
           location_name: string
           longitude: number | null
           max_participants: number | null
+          price_cents: number
           source: Database["public"]["Enums"]["event_source"] | null
           title: string
           updated_at: string
@@ -1354,6 +1358,7 @@ export type Database = {
           location_name: string
           longitude: number | null
           max_participants: number | null
+          price_cents: number
           source: Database["public"]["Enums"]["event_source"] | null
           title: string
           updated_at: string
