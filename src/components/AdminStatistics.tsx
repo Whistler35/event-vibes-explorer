@@ -203,26 +203,26 @@ const AdminStatistics = () => {
   const exportCSV = () => {
     if (!stats) return;
     const rows = [
-      ["Metrik", "Wert"],
-      ["Zeitraum", chartTitle],
-      ["Nutzer", stats.totalUsers],
-      ["Events gesamt", stats.totalEvents],
-      ["Events genehmigt", stats.approvedEvents],
-      ["Events offen", stats.pendingEvents],
-      ["Events abgelehnt", stats.rejectedEvents],
-      ["Teilnahmen", stats.totalParticipants],
-      ["Gruppen-Nachrichten", stats.totalChatMessages],
-      ["Direktnachrichten", stats.totalDirectMessages],
+      ["Metric", "Value"],
+      ["Period", chartTitle],
+      ["Users", stats.totalUsers],
+      ["Total Events", stats.totalEvents],
+      ["Events Approved", stats.approvedEvents],
+      ["Events Pending", stats.pendingEvents],
+      ["Events Rejected", stats.rejectedEvents],
+      ["Participations", stats.totalParticipants],
+      ["Group Messages", stats.totalChatMessages],
+      ["Direct Messages", stats.totalDirectMessages],
       ["Likes", stats.totalLikes],
-      ["Freundschaften", stats.totalFriendships],
-      ["Beitrittsanfragen", stats.totalJoinRequests],
-      ["Ø Teilnahmen/Event", stats.approvedEvents > 0 ? (stats.totalParticipants / stats.approvedEvents).toFixed(1) : "0"],
-      ["Ø Nachrichten/Nutzer", stats.totalUsers > 0 ? ((stats.totalChatMessages + stats.totalDirectMessages) / stats.totalUsers).toFixed(1) : "0"],
+      ["Friendships", stats.totalFriendships],
+      ["Join Requests", stats.totalJoinRequests],
+      ["Ø Participations/Event", stats.approvedEvents > 0 ? (stats.totalParticipants / stats.approvedEvents).toFixed(1) : "0"],
+      ["Ø Messages/User", stats.totalUsers > 0 ? ((stats.totalChatMessages + stats.totalDirectMessages) / stats.totalUsers).toFixed(1) : "0"],
       [],
-      ["Kategorie", "Anzahl"],
+      ["Category", "Count"],
       ...categoryData.map((c) => [c.category, c.count]),
       [],
-      [timeRange === "7d" || timeRange === "30d" ? "Tag" : "Monat", "Nutzer", "Events"],
+      [timeRange === "7d" || timeRange === "30d" ? "Day" : "Month", "Users", "Events"],
       ...monthlyData.map((m) => [m.month, m.users, m.events]),
     ];
     const csv = rows.map((r) => r.join(";")).join("\n");
@@ -230,7 +230,7 @@ const AdminStatistics = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `evendle-statistiken-${timeRange}-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `evendle-statistics-${timeRange}-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
