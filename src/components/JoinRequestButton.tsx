@@ -83,7 +83,7 @@ const JoinRequestButton: React.FC<JoinRequestButtonProps> = ({ eventId, eventOwn
         toast.info('Request withdrawn');
       }
     } catch (err: any) {
-      toast.error(err.message || 'Fehler');
+      toast.error(err.message || 'Error');
     } finally {
       setLoading(false);
     }
