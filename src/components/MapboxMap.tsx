@@ -161,7 +161,14 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
       });
       geolocateRef.current = geo;
       map.current.addControl(geo);
-      map.current.on('load', () => setIsLoaded(true));
+      map.current.on('load', () => {
+        setIsLoaded(true);
+        // Auto-trigger geolocation so the blue dot appears without needing a tap.
+        // Browser will ask for permission the first time; we don't recenter aggressively.
+        setTimeout(() => {
+          try { geolocateRef.current?.trigger(); } catch {}
+        }, 600);
+      });
       map.current.on('error', (e) => {
         console.error('Mapbox error:', e);
         setError('Fehler beim Laden der Karte');
