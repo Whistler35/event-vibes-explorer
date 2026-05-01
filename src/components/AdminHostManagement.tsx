@@ -116,10 +116,10 @@ const AdminHostManagement = () => {
   };
 
   const actionLabels = {
-    verify: { title: 'Host verifizieren', desc: 'als verifizierten Host markieren', btn: 'Verifizieren', icon: CheckCircle },
-    suspend: { title: 'Host sperren', desc: 'vorübergehend sperren', btn: 'Sperren', icon: Ban },
-    activate: { title: 'Host aktivieren', desc: 'wieder aktivieren', btn: 'Aktivieren', icon: CheckCircle },
-    delete: { title: 'Host löschen', desc: 'endgültig löschen', btn: 'Löschen', icon: Trash2 },
+    verify: { title: 'Verify Host', desc: 'mark as verified host', btn: 'Verify', icon: CheckCircle },
+    suspend: { title: 'Suspend Host', desc: 'temporarily suspend', btn: 'Suspend', icon: Ban },
+    activate: { title: 'Activate Host', desc: 'activate again', btn: 'Activate', icon: CheckCircle },
+    delete: { title: 'Delete Host', desc: 'permanently delete', btn: 'Delete', icon: Trash2 },
   };
 
   // Stats
