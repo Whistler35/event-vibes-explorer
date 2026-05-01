@@ -47,15 +47,15 @@ interface CategoryData {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  music: "Musik",
-  sports: "Sport",
-  culture: "Kultur",
-  food: "Essen",
+  music: "Music",
+  sports: "Sports",
+  culture: "Culture",
+  food: "Food",
   nightlife: "Nightlife",
   outdoor: "Outdoor",
   community: "Community",
   workshop: "Workshop",
-  other: "Sonstiges",
+  other: "Other",
 };
 
 const StatCard = ({ icon: Icon, label, value, subtext }: { icon: any; label: string; value: number | string; subtext?: string }) => (
