@@ -230,3 +230,45 @@ All colors MUST be HSL.
   overflow: hidden;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.10) !important;
 }
+
+/* ===== Profile - Blitz Lifestyle Dashboard ===== */
+.profile-blitz-bg {
+  background:
+    radial-gradient(circle at 50% 0%, hsl(140 30% 18%) 0%, hsl(125 35% 11%) 45%, hsl(125 40% 7%) 100%);
+  color: #ffffff;
+}
+.profile-blitz-bg .text-foreground { color: #ffffff; }
+.profile-blitz-bg .text-muted-foreground { color: hsl(120 10% 70%); }
+
+.profile-avatar-halo {
+  background: radial-gradient(circle, hsl(var(--blitz-pink) / 0.45) 0%, transparent 65%);
+  filter: blur(18px);
+}
+
+.fun-fact-sticker {
+  background: linear-gradient(135deg, #fff7d6 0%, #ffe9a8 100%);
+  color: #2a1a00;
+  transform: rotate(-2.5deg);
+  box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.45), 0 2px 0 rgba(0,0,0,0.05) inset;
+}
+
+.blitz-stat-card {
+  background: linear-gradient(180deg, hsl(140 25% 16%) 0%, hsl(135 30% 11%) 100%);
+  border: 1px solid hsl(140 20% 22%);
+  box-shadow: 0 6px 20px -10px rgba(0,0,0,0.6);
+}
+
+.chip-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #ffffff;
+  box-shadow: 0 4px 12px -4px rgba(0,0,0,0.4);
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
