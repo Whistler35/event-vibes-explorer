@@ -248,6 +248,56 @@ const EditProfile = () => {
             {errors.fun_fact && <p className="text-destructive text-xs mt-1">{errors.fun_fact}</p>}
           </div>
 
+          <div>
+            <Label className="text-foreground font-medium">Was ich mache (Interessen)</Label>
+            <p className="text-muted-foreground text-xs mt-0.5">Tipp: kurze Tags, z.B. "Tennis 🎾", "Techno 🎧"</p>
+            <div className="flex gap-2 mt-2">
+              <Input
+                value={interestInput}
+                onChange={(e) => setInterestInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    const v = interestInput.trim();
+                    if (v && !form.interests.includes(v) && form.interests.length < 12) {
+                      setForm((p) => ({ ...p, interests: [...p.interests, v] }));
+                      setInterestInput("");
+                    }
+                  }
+                }}
+                placeholder="Tag eingeben + Enter"
+                className="bg-muted border-border text-foreground"
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  const v = interestInput.trim();
+                  if (v && !form.interests.includes(v) && form.interests.length < 12) {
+                    setForm((p) => ({ ...p, interests: [...p.interests, v] }));
+                    setInterestInput("");
+                  }
+                }}
+              >
+                Add
+              </Button>
+            </div>
+            {form.interests.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                {form.interests.map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => setForm((p) => ({ ...p, interests: p.interests.filter((t) => t !== tag) }))}
+                    className="px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-semibold flex items-center gap-1.5"
+                  >
+                    {tag} <span className="opacity-70">×</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="border-t border-border pt-4">
             <h3 className="text-foreground font-bold text-lg mb-3">Instagram (optional)</h3>
             <div className="space-y-3">
