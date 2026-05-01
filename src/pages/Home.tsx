@@ -439,7 +439,7 @@ const Home = () => {
         })()}
 
         {searchLocation && nearbyEvents && nearbyEvents.length === 0 && (
-          <div className="px-4 pb-8 text-center">
+          <div ref={nearbySectionRef} className="px-4 pb-8 text-center scroll-mt-4">
             <p className="text-muted-foreground">No events found near {searchQuery}.</p>
           </div>
         )}
