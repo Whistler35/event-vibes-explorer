@@ -243,7 +243,7 @@ const AdminHostManagement = () => {
                       className="flex-1 text-xs"
                       onClick={() => setActionDialog({ host, action: 'verify' })}
                     >
-                      <ShieldCheck className="w-3.5 h-3.5 mr-1" /> Verifizieren
+                      <ShieldCheck className="w-3.5 h-3.5 mr-1" /> Verify
                     </Button>
                   )}
                   {host.status === 'active' ? (
