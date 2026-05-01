@@ -29,7 +29,9 @@ const EditProfile = () => {
     avatar_url: "",
     instagram_username: "",
     instagram_followers: "",
+    interests: [] as string[],
   });
+  const [interestInput, setInterestInput] = useState("");
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
