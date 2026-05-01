@@ -206,7 +206,7 @@ const AdminHostManagement = () => {
                     variant={host.status === 'active' ? 'default' : 'destructive'}
                     className="text-[10px] flex-shrink-0"
                   >
-                    {host.status === 'active' ? 'Aktiv' : host.status === 'suspended' ? 'Gesperrt' : host.status}
+                    {host.status === 'active' ? 'Active' : host.status === 'suspended' ? 'Suspended' : host.status}
                   </Badge>
                 </div>
 
