@@ -160,14 +160,14 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategories, onC
                 className="flex-1 text-xs"
                 onClick={() => { onCategoriesChange([]); onDateRangeChange(undefined); }}
               >
-                Löschen
+                Clear
               </Button>
               <Button
                 size="sm"
                 className="flex-1 text-xs"
                 onClick={() => setOpen(false)}
               >
-                Übernehmen
+                Apply
               </Button>
             </div>
           )}
