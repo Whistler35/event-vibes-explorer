@@ -144,7 +144,7 @@ const AdminHostManagement = () => {
           <CardContent className="p-3 text-center">
             <Building2 className="w-5 h-5 text-primary mx-auto mb-1" />
             <p className="text-foreground font-bold text-lg">{totalHosts}</p>
-            <p className="text-muted-foreground text-[10px]">Hosts gesamt</p>
+            <p className="text-muted-foreground text-[10px]">Total hosts</p>
           </CardContent>
         </Card>
         <Card>
