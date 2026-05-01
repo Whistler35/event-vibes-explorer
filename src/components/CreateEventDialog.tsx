@@ -261,6 +261,26 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
             </div>
           )}
 
+          {/* Price */}
+          <div className="space-y-2">
+            <Label htmlFor="price" className="text-foreground text-sm">Price (EUR)</Label>
+            <Input
+              id="price"
+              type="number"
+              min={0}
+              step="0.01"
+              value={priceEur}
+              onChange={(e) => setPriceEur(e.target.value)}
+              placeholder="0 = Free"
+              className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12"
+            />
+            <p className="text-muted-foreground text-xs">
+              {priceEur && parseFloat(priceEur.replace(',', '.')) > 0
+                ? `€${parseFloat(priceEur.replace(',', '.')).toFixed(2)} per ticket`
+                : 'Leave empty or 0 for a free event'}
+            </p>
+          </div>
+
           {/* Visibility Toggle */}
           <div className="flex items-center justify-between py-2 px-1">
             <div className="flex items-center gap-2">
