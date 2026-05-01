@@ -64,8 +64,9 @@ export async function createBlitzRequest(params: {
   activity: string;
   durationMinutes: number;
   city?: string | null;
-  latitude?: number | null;
-  longitude?: number | null;
+  latitude: number;
+  longitude: number;
+  radiusKm: number;
 }) {
   const {
     data: { user },
@@ -81,8 +82,9 @@ export async function createBlitzRequest(params: {
       activity: params.activity.trim(),
       duration_minutes: params.durationMinutes,
       city: params.city ?? null,
-      latitude: params.latitude ?? null,
-      longitude: params.longitude ?? null,
+      latitude: params.latitude,
+      longitude: params.longitude,
+      radius_km: params.radiusKm,
       expires_at: expiresAt,
     })
     .select()
