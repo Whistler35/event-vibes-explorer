@@ -8,6 +8,7 @@ import InteractiveMap, { type MapEvent } from "@/components/InteractiveMap";
 import CreateEventDialog from "@/components/CreateEventDialog";
 import EventDetailSheet from "@/components/EventDetailSheet";
 import EventCarousel from "@/components/EventCarousel";
+import CollapsibleCarousel from "@/components/CollapsibleCarousel";
 import CategoryFilter from "@/components/CategoryFilter";
 import { useSearchEvents, type EventCategory, type SearchEvent } from "@/hooks/useSearchEvents";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
