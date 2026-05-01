@@ -242,17 +242,17 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
           {/* Max Participants */}
           {!isAdmin && (
             <div className="space-y-2">
-              <Label htmlFor="maxParticipants" className="text-foreground text-sm">Max. Teilnehmer *</Label>
+              <Label htmlFor="maxParticipants" className="text-foreground text-sm">Max. Participants *</Label>
               <Input
                 id="maxParticipants"
                 type="number"
                 min={2}
                 value={maxParticipants}
                 onChange={(e) => setMaxParticipants(e.target.value)}
-                placeholder="z.B. 10 (min. 2)"
+                placeholder="e.g. 10 (min. 2)"
                 className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12"
               />
-              <p className="text-muted-foreground text-xs">Mindestens 2 Teilnehmer</p>
+              <p className="text-muted-foreground text-xs">At least 2 participants</p>
             </div>
           )}
 
