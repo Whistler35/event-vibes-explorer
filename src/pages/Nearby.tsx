@@ -41,6 +41,9 @@ const Nearby = () => {
   const carouselDrivingRef = useRef(false);
   const carouselDrivingTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const [carouselExpandTrigger, setCarouselExpandTrigger] = useState(0);
+  // Frozen snapshot of the carousel list during an active swipe session.
+  // Prevents the card order from reshuffling while the user flips through cards.
+  const [frozenCarousel, setFrozenCarousel] = useState<MapEvent[] | null>(null);
 
   // Search bar (events + places)
   const [searchOpen, setSearchOpen] = useState(false);
