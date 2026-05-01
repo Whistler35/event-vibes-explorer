@@ -475,7 +475,7 @@ const Nearby = () => {
 
         {/* QUICK FILTER PILLS */}
         <div className="absolute top-[105px] left-0 right-0 z-10 px-3">
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+          <div className="gap-2 overflow-x-auto scrollbar-hide pb-1 flex flex-row text-left font-thin mx-0 px-0 py-0 my-0">
             {quickPills.map(({ id, label, icon: Icon }) => {
               const active = activeQuickFilters.has(id);
               return (
