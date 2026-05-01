@@ -313,22 +313,28 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
     render();
   }, [events, isLoaded, render]);
 
-  // Re-render on map move + emit viewport
+  // Re-render on map move + emit viewport (debounced)
   useEffect(() => {
     if (!map.current || !isLoaded) return;
     const m = map.current;
+    let viewportTimer: ReturnType<typeof setTimeout> | null = null;
+    const emitViewport = () => {
+      if (!onViewportChange) return;
+      const b = m.getBounds();
+      onViewportChange({ west: b.getWest(), south: b.getSouth(), east: b.getEast(), north: b.getNorth() });
+    };
     const handler = () => {
       render();
-      if (onViewportChange) {
-        const b = m.getBounds();
-        onViewportChange({ west: b.getWest(), south: b.getSouth(), east: b.getEast(), north: b.getNorth() });
-      }
+      if (viewportTimer) clearTimeout(viewportTimer);
+      viewportTimer = setTimeout(emitViewport, 250);
     };
     m.on('moveend', handler);
     m.on('zoomend', handler);
-    // emit once initially
-    handler();
+    // emit once initially (immediate)
+    render();
+    emitViewport();
     return () => {
+      if (viewportTimer) clearTimeout(viewportTimer);
       m.off('moveend', handler);
       m.off('zoomend', handler);
     };
