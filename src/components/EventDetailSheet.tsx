@@ -195,7 +195,7 @@ const EventDetailSheet: React.FC<EventDetailSheetProps> = ({ event, open, onClos
           {/* Description */}
           {event.description && (
             <div>
-              <h3 className="text-foreground text-sm font-semibold mb-1">Beschreibung</h3>
+              <h3 className="text-foreground text-sm font-semibold mb-1">Description</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">{event.description}</p>
             </div>
           )}
