@@ -10,21 +10,58 @@ export interface DiscoveryBlitz {
   city: string | null;
   latitude: number | null;
   longitude: number | null;
+  radius_km: number;
   expires_at: string;
   created_at: string;
   host_name: string | null;
   host_avatar: string | null;
+  distance_km: number;
 }
 
-export function useBlitzDiscovery(city?: string | null) {
+function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const R = 6371;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+export function useBlitzDiscovery(_city?: string | null) {
   const { user } = useAuth();
   const [items, setItems] = useState<DiscoveryBlitz[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewerCoords, setViewerCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [locError, setLocError] = useState<string | null>(null);
+
+  // Get viewer location once
+  useEffect(() => {
+    if (!("geolocation" in navigator)) {
+      setLocError("Standort wird vom Browser nicht unterstützt.");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setViewerCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      (err) =>
+        setLocError(
+          err.code === err.PERMISSION_DENIED
+            ? "Standort-Freigabe nötig, um Blitze in deiner Nähe zu sehen."
+            : "Standort konnte nicht ermittelt werden."
+        ),
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 5 * 60_000 }
+    );
+  }, []);
 
   const load = useCallback(async () => {
     if (!user) {
       setItems([]);
       setLoading(false);
+      return;
+    }
+    if (!viewerCoords) {
+      // wait for location
       return;
     }
     setLoading(true);
@@ -35,27 +72,35 @@ export function useBlitzDiscovery(city?: string | null) {
       .eq("swiper_id", user.id);
     const swipedIds = new Set((swipes ?? []).map((s) => s.blitz_request_id));
 
-    let query = supabase
+    const { data: requests } = await supabase
       .from("blitz_requests")
-      .select("id, host_id, activity, duration_minutes, city, latitude, longitude, expires_at, created_at")
+      .select(
+        "id, host_id, activity, duration_minutes, city, latitude, longitude, radius_km, expires_at, created_at"
+      )
       .eq("status", "active")
       .gt("expires_at", new Date().toISOString())
       .neq("host_id", user.id)
+      .not("latitude", "is", null)
+      .not("longitude", "is", null)
       .order("created_at", { ascending: false })
-      .limit(50);
+      .limit(100);
 
-    if (city) query = query.eq("city", city);
+    const withDistance = (requests ?? [])
+      .filter((r) => !swipedIds.has(r.id) && r.latitude != null && r.longitude != null)
+      .map((r) => ({
+        ...r,
+        distance_km: haversineKm(viewerCoords.lat, viewerCoords.lng, r.latitude!, r.longitude!),
+      }))
+      .filter((r) => r.distance_km <= (r.radius_km ?? 10))
+      .sort((a, b) => a.distance_km - b.distance_km);
 
-    const { data: requests } = await query;
-    const fresh = (requests ?? []).filter((r) => !swipedIds.has(r.id));
-
-    if (fresh.length === 0) {
+    if (withDistance.length === 0) {
       setItems([]);
       setLoading(false);
       return;
     }
 
-    const hostIds = Array.from(new Set(fresh.map((r) => r.host_id)));
+    const hostIds = Array.from(new Set(withDistance.map((r) => r.host_id)));
     const { data: profiles } = await supabase
       .from("profiles")
       .select("user_id, name, avatar_url")
@@ -63,20 +108,20 @@ export function useBlitzDiscovery(city?: string | null) {
     const byUser = new Map((profiles ?? []).map((p) => [p.user_id, p]));
 
     setItems(
-      fresh.map((r) => ({
+      withDistance.map((r) => ({
         ...r,
         host_name: byUser.get(r.host_id)?.name ?? null,
         host_avatar: byUser.get(r.host_id)?.avatar_url ?? null,
       }))
     );
     setLoading(false);
-  }, [user, city]);
+  }, [user, viewerCoords]);
 
   useEffect(() => {
     load();
   }, [load]);
 
-  return { items, loading, reload: load };
+  return { items, loading, reload: load, locError, hasLocation: !!viewerCoords };
 }
 
 export async function swipeBlitz(blitzRequestId: string, direction: "left" | "right") {

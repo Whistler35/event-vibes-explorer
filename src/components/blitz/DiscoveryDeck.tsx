@@ -104,11 +104,13 @@ const SwipeCard = ({ item, onSwipe, isTop }: CardProps) => {
             </Avatar>
             <div>
               <p className="font-bold text-lg leading-tight">{item.host_name ?? "Anonym"}</p>
-              {item.city && (
-                <p className="text-xs text-white/60 flex items-center gap-1">
-                  <MapPin className="w-3 h-3" /> {item.city}
-                </p>
-              )}
+              <p className="text-xs text-white/60 flex items-center gap-1">
+                <MapPin className="w-3 h-3" />
+                {item.distance_km < 1
+                  ? `${Math.round(item.distance_km * 1000)} m`
+                  : `${item.distance_km.toFixed(1)} km`} entfernt
+              </p>
+
             </div>
           </div>
 
@@ -141,7 +143,7 @@ interface DiscoveryDeckProps {
 }
 
 const DiscoveryDeck = ({ city }: DiscoveryDeckProps) => {
-  const { items, loading, reload } = useBlitzDiscovery(city);
+  const { items, loading, reload, locError, hasLocation } = useBlitzDiscovery(city);
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -162,7 +164,17 @@ const DiscoveryDeck = ({ city }: DiscoveryDeckProps) => {
     setIndex((i) => i + 1);
   };
 
-  if (loading) {
+  if (!hasLocation && locError) {
+    return (
+      <div className="h-[calc(100vh-220px)] rounded-3xl bg-[hsl(var(--blitz-forest))] text-white flex flex-col items-center justify-center text-center p-8 gap-4">
+        <MapPin className="w-16 h-16 text-[hsl(var(--blitz-pink))] opacity-60" />
+        <h2 className="text-3xl font-black uppercase">Standort nötig</h2>
+        <p className="text-white/70 max-w-xs">{locError}</p>
+      </div>
+    );
+  }
+
+  if (loading || !hasLocation) {
     return (
       <div className="h-[calc(100vh-220px)] rounded-3xl bg-muted flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
@@ -178,7 +190,7 @@ const DiscoveryDeck = ({ city }: DiscoveryDeckProps) => {
         <Zap className="w-16 h-16 text-[hsl(var(--blitz-pink))] fill-[hsl(var(--blitz-pink))] opacity-60" />
         <h2 className="text-3xl font-black uppercase">Keine Blitze</h2>
         <p className="text-white/70 max-w-xs">
-          Aktuell läuft kein Blitz {city ? `in ${city}` : "in deinem Bereich"}. Komm später wieder oder starte selbst einen!
+          Aktuell läuft kein Blitz in deinem Umkreis. Komm später wieder oder starte selbst einen!
         </p>
         <button
           onClick={reload}
