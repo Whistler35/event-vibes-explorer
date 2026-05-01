@@ -105,7 +105,7 @@ const Auth = () => {
         if (error) {
           toast.error(error.message);
         } else {
-          toast.success('Erfolgreich eingeloggt!');
+          toast.success('Erfolgreich eingeloggt!', { duration: 1200 });
           navigate('/');
         }
       } else {
