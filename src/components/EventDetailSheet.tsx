@@ -186,7 +186,7 @@ const EventDetailSheet: React.FC<EventDetailSheetProps> = ({ event, open, onClos
               <div className="flex items-start gap-3">
                 <Users className="w-5 h-5 text-primary mt-0.5 shrink-0" />
                 <p className="text-foreground text-sm">
-                  {event.current_participants ?? 0} / {event.max_participants} Teilnehmer
+                  {event.current_participants ?? 0} / {event.max_participants} Participants
                 </p>
               </div>
             )}
