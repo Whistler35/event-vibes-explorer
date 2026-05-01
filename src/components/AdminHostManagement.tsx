@@ -224,7 +224,7 @@ const AdminHostManagement = () => {
                     <p className="text-foreground font-bold text-xs">
                       €{(host.total_revenue_cents / 100).toFixed(0)}
                     </p>
-                    <p className="text-muted-foreground text-[9px]">Umsatz</p>
+                    <p className="text-muted-foreground text-[9px]">Revenue</p>
                   </div>
                   <div className="p-1.5 rounded bg-muted/50">
                     <p className="text-foreground font-bold text-xs">
