@@ -104,11 +104,13 @@ const SwipeCard = ({ item, onSwipe, isTop }: CardProps) => {
             </Avatar>
             <div>
               <p className="font-bold text-lg leading-tight">{item.host_name ?? "Anonym"}</p>
-              {item.city && (
-                <p className="text-xs text-white/60 flex items-center gap-1">
-                  <MapPin className="w-3 h-3" /> {item.city}
-                </p>
-              )}
+              <p className="text-xs text-white/60 flex items-center gap-1">
+                <MapPin className="w-3 h-3" />
+                {item.distance_km < 1
+                  ? `${Math.round(item.distance_km * 1000)} m`
+                  : `${item.distance_km.toFixed(1)} km`} entfernt
+              </p>
+
             </div>
           </div>
 
