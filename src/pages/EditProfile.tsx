@@ -41,9 +41,9 @@ const EditProfile = () => {
     const fetchProfile = async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("name, age, country, bio, fun_fact, avatar_url, instagram_username, instagram_followers")
+        .select("name, age, country, bio, fun_fact, avatar_url, instagram_username, instagram_followers, interests")
         .eq("user_id", user.id)
-        .maybeSingle();
+        .maybeSingle() as any;
 
       if (data) {
         setForm({
@@ -55,6 +55,7 @@ const EditProfile = () => {
           avatar_url: data.avatar_url || "",
           instagram_username: data.instagram_username || "",
           instagram_followers: data.instagram_followers || "",
+          interests: data.interests || [],
         });
         setAvatarPreview(data.avatar_url);
       }
