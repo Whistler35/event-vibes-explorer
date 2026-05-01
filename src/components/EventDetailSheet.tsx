@@ -110,7 +110,7 @@ const EventDetailSheet: React.FC<EventDetailSheetProps> = ({ event, open, onClos
       queryClient.invalidateQueries({ queryKey: ['event-like', eventId] });
       queryClient.invalidateQueries({ queryKey: ['event-like-count', eventId] });
     },
-    onError: () => toast.error('Fehler beim Liken.'),
+    onError: () => toast.error('Error liking event.'),
   });
 
   if (!event) return null;
