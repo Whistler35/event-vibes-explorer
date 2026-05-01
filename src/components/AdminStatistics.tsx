@@ -198,7 +198,7 @@ const AdminStatistics = () => {
     setCategoryData(sorted);
   };
 
-  const chartTitle = timeRange === "7d" ? "Letzte 7 Tage" : timeRange === "30d" ? "Letzte 30 Tage" : timeRange === "12m" ? "Letzte 12 Monate" : "Gesamter Zeitraum";
+  const chartTitle = timeRange === "7d" ? "Last 7 Days" : timeRange === "30d" ? "Last 30 Days" : timeRange === "12m" ? "Last 12 Months" : "Total Period";
 
   const exportCSV = () => {
     if (!stats) return;
