@@ -93,6 +93,7 @@ const Nearby = () => {
     categories: selectedCategories.length > 0 ? selectedCategories : undefined,
     date_from: dateFilter?.from,
     date_to: dateFilter?.to,
+    free_only: activeQuickFilters.has('free') || undefined,
     limit: 200,
   }, !isPrivateMode);
 
