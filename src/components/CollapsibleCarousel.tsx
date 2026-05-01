@@ -10,38 +10,39 @@ interface CollapsibleCarouselProps {
 }
 
 /**
- * Bottom-anchored draggable sheet with two snap points.
- * Exposes the current sheet height via the CSS variable `--carousel-h`
- * on the document root so other map controls (GPS, +) can sit above it.
+ * Bottom-anchored draggable carousel container with two snap points.
+ * Transparent — no card chrome — so the floating EventCarousel cards
+ * appear to sit directly on the map. Exposes `--carousel-h` so the
+ * GPS / + buttons can stay above it.
  */
 const CollapsibleCarousel: React.FC<CollapsibleCarouselProps> = ({
   children,
   expandedHeight = 280,
-  collapsedHeight = 36,
+  collapsedHeight = 28,
 }) => {
   const [expanded, setExpanded] = useState(true);
-  const [dragOffset, setDragOffset] = useState(0); // negative = dragging down (shrink)
+  const [dragOffset, setDragOffset] = useState(0); // negative = shrinking
   const draggingRef = useRef(false);
   const startYRef = useRef(0);
   const startExpandedRef = useRef(true);
+  const movedRef = useRef(false);
 
-  const currentHeight = expanded ? expandedHeight : collapsedHeight;
+  const baseHeight = expanded ? expandedHeight : collapsedHeight;
   const visualHeight = Math.max(
     collapsedHeight,
-    Math.min(expandedHeight, currentHeight + dragOffset)
+    Math.min(expandedHeight, baseHeight + dragOffset)
   );
 
-  // Publish height as CSS var so map controls can stay above the sheet
+  // Publish height as CSS var so map controls (GPS, +) can stay above
   useEffect(() => {
     const root = document.documentElement;
     root.style.setProperty('--carousel-h', `${visualHeight}px`);
-    return () => {
-      root.style.removeProperty('--carousel-h');
-    };
+    return () => { root.style.removeProperty('--carousel-h'); };
   }, [visualHeight]);
 
   const onPointerDown = useCallback((e: React.PointerEvent) => {
     draggingRef.current = true;
+    movedRef.current = false;
     startYRef.current = e.clientY;
     startExpandedRef.current = expanded;
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
@@ -50,7 +51,7 @@ const CollapsibleCarousel: React.FC<CollapsibleCarouselProps> = ({
   const onPointerMove = useCallback((e: React.PointerEvent) => {
     if (!draggingRef.current) return;
     const dy = e.clientY - startYRef.current;
-    // dragging down (positive dy) shrinks the sheet
+    if (Math.abs(dy) > 4) movedRef.current = true;
     setDragOffset(-dy);
   }, []);
 
@@ -58,6 +59,12 @@ const CollapsibleCarousel: React.FC<CollapsibleCarouselProps> = ({
     if (!draggingRef.current) return;
     draggingRef.current = false;
     try { (e.target as HTMLElement).releasePointerCapture(e.pointerId); } catch {}
+    if (!movedRef.current) {
+      // Treat as tap → toggle
+      setExpanded(v => !v);
+      setDragOffset(0);
+      return;
+    }
     const finalH = (startExpandedRef.current ? expandedHeight : collapsedHeight) + dragOffset;
     const mid = (expandedHeight + collapsedHeight) / 2;
     setExpanded(finalH > mid);
@@ -66,39 +73,37 @@ const CollapsibleCarousel: React.FC<CollapsibleCarouselProps> = ({
 
   return (
     <div
-      className="bg-card/95 backdrop-blur-xl border-t border-border/60 rounded-t-3xl shadow-[0_-8px_32px_rgba(0,0,0,0.18)]"
       style={{
         height: visualHeight,
         transition: draggingRef.current ? 'none' : 'height 0.28s cubic-bezier(0.22, 1, 0.36, 1)',
-        overflow: 'hidden',
-        touchAction: 'pan-x',
+        // No background, no border, no shadow — let the cards float on the map
       }}
     >
-      {/* Drag handle area */}
+      {/* Drag handle — floats on the map */}
       <div
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
-        onClick={() => {
-          // Tap toggles when not dragged
-          if (Math.abs(dragOffset) < 4) setExpanded(v => !v);
-        }}
-        className="w-full h-9 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing select-none"
+        className="w-full h-7 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing select-none"
         style={{ touchAction: 'none' }}
         role="button"
         aria-label={expanded ? 'Karusell einklappen' : 'Karusell ausklappen'}
       >
-        <div className="w-12 h-1.5 rounded-full bg-muted-foreground/40" />
-        {!expanded && (
-          <div className="mt-1 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-            <ChevronUp className="w-3 h-3" />
-            Events
-          </div>
-        )}
+        <div className="px-3 py-1.5 rounded-full bg-card/80 backdrop-blur-md shadow-sm border border-border/40 flex items-center gap-1">
+          <div className="w-8 h-1 rounded-full bg-muted-foreground/50" />
+          {!expanded && <ChevronUp className="w-3 h-3 text-muted-foreground" />}
+        </div>
       </div>
-      {/* Content */}
-      <div style={{ opacity: expanded ? 1 : 0, transition: 'opacity 0.2s ease' }}>
+
+      {/* Content — fades out when collapsed */}
+      <div
+        style={{
+          opacity: expanded ? 1 : 0,
+          pointerEvents: expanded ? 'auto' : 'none',
+          transition: 'opacity 0.18s ease',
+        }}
+      >
         {children}
       </div>
     </div>
