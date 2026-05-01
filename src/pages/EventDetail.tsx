@@ -8,11 +8,13 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Calendar, Clock, MapPin, Users, MessageCircle, Pencil, ScanLine, Ticket as TicketIcon } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, MapPin, Users, Pencil, ScanLine } from "lucide-react";
 import { toast } from "sonner";
 import JoinRequestButton from "@/components/JoinRequestButton";
 import JoinRequestList from "@/components/JoinRequestList";
 import EditEventDialog from "@/components/EditEventDialog";
+import EventJoinedConfirmation from "@/components/EventJoinedConfirmation";
+import EventParticipantStatus from "@/components/EventParticipantStatus";
 
 interface Event {
   id: string;
@@ -47,6 +49,7 @@ const EventDetail = () => {
   const [loading, setLoading] = useState(true);
   const [joinLoading, setJoinLoading] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [showJoinedOverlay, setShowJoinedOverlay] = useState(false);
   const { isAdmin } = useIsAdmin();
 
   const isOwner = user && event?.created_by === user.id;
@@ -134,7 +137,7 @@ const EventDetail = () => {
           .eq('event_id', event.id)
           .eq('user_id', user.id);
         if (error) throw error;
-        toast.success('You left the event');
+        toast.success('Du hast das Event verlassen');
         setIsParticipant(false);
       } else {
         const { error } = await supabase
@@ -142,8 +145,8 @@ const EventDetail = () => {
           .insert({ event_id: event.id, user_id: user.id })
           .select();
         if (error) throw error;
-        toast.success('You joined the event! Chat created.');
         setIsParticipant(true);
+        setShowJoinedOverlay(true);
       }
       fetchParticipants();
     } catch (error: any) {
@@ -153,8 +156,11 @@ const EventDetail = () => {
     }
   };
 
-  const handleOpenChat = () => {
-    navigate(`/event/${id}/chat`);
+  const handleConfirmationDone = () => {
+    setShowJoinedOverlay(false);
+    setTimeout(() => {
+      document.getElementById('participant-status-block')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   };
 
   if (loading) {
@@ -295,43 +301,28 @@ const EventDetail = () => {
           </Card>
         )}
 
-        {/* Action Buttons */}
+        {/* Action Section */}
         <div className="space-y-3">
-          {isCommunityEvent && !isOwner ? (
+          {isCommunityEvent && !isOwner && !isParticipant ? (
             <JoinRequestButton eventId={event.id} eventOwnerId={event.created_by} />
           ) : user ? (
             <>
-              <Button
-                onClick={handleJoinEvent}
-                disabled={joinLoading}
-                className={`w-full ${
-                  isParticipant
-                    ? 'bg-muted hover:bg-muted/80 text-foreground'
-                    : 'bg-primary hover:bg-primary/80 text-primary-foreground'
-                }`}
-              >
-                {joinLoading ? 'Loading...' : isParticipant ? 'Leave event' : "I'm in!"}
-              </Button>
-
-              {isParticipant && (
-                <>
-                  <Button
-                    onClick={() => navigate('/tickets')}
-                    variant="outline"
-                    className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-                  >
-                    <TicketIcon className="w-4 h-4 mr-2" />
-                    Show my ticket
-                  </Button>
-                  <Button
-                    onClick={handleOpenChat}
-                    variant="outline"
-                    className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-                  >
-                    <MessageCircle className="w-4 h-4 mr-2" />
-                    Open group chat
-                  </Button>
-                </>
+              {isParticipant ? (
+                <EventParticipantStatus
+                  event={event}
+                  userId={user.id}
+                  participants={participants}
+                  onLeave={handleJoinEvent}
+                  leaveLoading={joinLoading}
+                />
+              ) : (
+                <Button
+                  onClick={handleJoinEvent}
+                  disabled={joinLoading}
+                  className="w-full bg-primary hover:bg-primary/80 text-primary-foreground h-12 text-base font-bold"
+                >
+                  {joinLoading ? 'Lädt...' : "I'm in!"}
+                </Button>
               )}
               {canEdit && (
                 <Button
@@ -340,7 +331,7 @@ const EventDetail = () => {
                   className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
                 >
                   <ScanLine className="w-4 h-4 mr-2" />
-                  Scan tickets (Check-in)
+                  Tickets scannen (Check-in)
                 </Button>
               )}
             </>
@@ -349,7 +340,7 @@ const EventDetail = () => {
               onClick={() => navigate('/auth')}
               className="w-full bg-primary hover:bg-primary/80 text-primary-foreground"
             >
-              Sign in to join
+              Anmelden um teilzunehmen
             </Button>
           )}
         </div>
@@ -362,6 +353,13 @@ const EventDetail = () => {
           />
         )}
       </div>
+      {showJoinedOverlay && event && (
+        <EventJoinedConfirmation
+          eventTitle={event.title}
+          eventDate={event.event_date}
+          onDone={handleConfirmationDone}
+        />
+      )}
     </Layout>
   );
 };
