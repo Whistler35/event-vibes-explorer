@@ -816,7 +816,9 @@ export type Database = {
           id: string
           instagram_followers: string | null
           instagram_username: string | null
+          interests: string[]
           name: string
+          photos: string[]
           updated_at: string
           user_id: string
         }
@@ -830,7 +832,9 @@ export type Database = {
           id?: string
           instagram_followers?: string | null
           instagram_username?: string | null
+          interests?: string[]
           name: string
+          photos?: string[]
           updated_at?: string
           user_id: string
         }
@@ -844,7 +848,9 @@ export type Database = {
           id?: string
           instagram_followers?: string | null
           instagram_username?: string | null
+          interests?: string[]
           name?: string
+          photos?: string[]
           updated_at?: string
           user_id?: string
         }
