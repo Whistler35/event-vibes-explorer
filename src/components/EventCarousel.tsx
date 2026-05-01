@@ -104,9 +104,17 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onSel
         return (
           <button
             key={ev.id}
-            onClick={() => {
-              if (isCenter) onExpand(ev);
-              else onSelect(ev);
+            onClick={(e) => {
+              e.stopPropagation();
+              if (isCenter) {
+                onExpand(ev);
+              } else {
+                // Cancel any pending scroll-debounced select to avoid race
+                if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+                isUserScrollingRef.current = false;
+                setActiveIdx(i);
+                onSelect(ev);
+              }
             }}
             className="shrink-0 snap-center text-left rounded-3xl overflow-hidden bg-card border border-border/60"
             style={{
