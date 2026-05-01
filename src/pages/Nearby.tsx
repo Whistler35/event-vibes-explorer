@@ -98,7 +98,7 @@ const Nearby = () => {
   }, !isPrivateMode);
 
   const { data: privateEvents, isLoading: isLoadingPrivate, refetch: refetchPrivate } = useQuery({
-    queryKey: ['private-events', user?.id, selectedCategories, dateFilter?.from, dateFilter?.to],
+    queryKey: ['private-events', user?.id, selectedCategories, dateFilter?.from, dateFilter?.to, activeQuickFilters.has('free')],
     queryFn: async () => {
       if (!user) return [];
       const { data: friendships } = await supabase
@@ -120,6 +120,7 @@ const Nearby = () => {
       if (dateFilter) {
         query = query.gte('event_date', dateFilter.from).lte('event_date', dateFilter.to + 'T23:59:59');
       }
+      if (activeQuickFilters.has('free')) query = query.eq('price_cents', 0);
       const { data, error } = await query;
       if (error) throw error;
       return data || [];
