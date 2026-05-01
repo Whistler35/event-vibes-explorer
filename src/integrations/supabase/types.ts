@@ -98,6 +98,7 @@ export type Database = {
           id: string
           latitude: number | null
           longitude: number | null
+          radius_km: number
           status: Database["public"]["Enums"]["blitz_status"]
           updated_at: string
         }
@@ -111,6 +112,7 @@ export type Database = {
           id?: string
           latitude?: number | null
           longitude?: number | null
+          radius_km?: number
           status?: Database["public"]["Enums"]["blitz_status"]
           updated_at?: string
         }
@@ -124,6 +126,7 @@ export type Database = {
           id?: string
           latitude?: number | null
           longitude?: number | null
+          radius_km?: number
           status?: Database["public"]["Enums"]["blitz_status"]
           updated_at?: string
         }
