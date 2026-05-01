@@ -37,6 +37,7 @@ export interface SearchEvent {
   created_at: string;
   updated_at: string;
   is_featured: boolean;
+  price_cents: number;
 }
 
 interface SearchResult {
