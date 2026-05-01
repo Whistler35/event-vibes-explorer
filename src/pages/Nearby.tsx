@@ -377,15 +377,11 @@ const Nearby = () => {
               setCarouselExpandTrigger(t => t + 1);
               // Pan to the event so the carousel viewport-filter keeps it in view,
               // and the matching card scrolls to the active center.
-              carouselDrivingRef.current = true;
-              if (carouselDrivingTimerRef.current) clearTimeout(carouselDrivingTimerRef.current);
-              carouselDrivingTimerRef.current = setTimeout(() => {
-                carouselDrivingRef.current = false;
-              }, 1100);
+              lockCarouselDrivenMapMove();
               mapRef.current?.flyTo(event.position[0], event.position[1]);
             }}
             onViewportChange={(b) => {
-              if (carouselDrivingRef.current) return;
+              if (carouselDrivingRef.current || Date.now() < carouselViewportIgnoreUntilRef.current) return;
               // User moved/zoomed the map themselves → unfreeze and refresh the list.
               setFrozenCarousel(null);
               setViewportBounds(b);
