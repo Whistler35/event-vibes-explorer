@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Camera, Upload, User, Building2, Check } from 'lucide-react';
+import { Camera, Upload, User, Building2, Check, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
@@ -189,7 +189,17 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative">
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}
+        className="absolute top-4 left-4 text-muted-foreground hover:text-foreground"
+      >
+        <ArrowLeft className="w-4 h-4 mr-1" />
+        Zurück
+      </Button>
       <div className="w-full max-w-md space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
