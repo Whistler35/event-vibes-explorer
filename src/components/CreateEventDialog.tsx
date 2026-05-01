@@ -38,6 +38,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [maxParticipants, setMaxParticipants] = useState<string>('');
+  const [priceEur, setPriceEur] = useState<string>('');
   const [isPrivate, setIsPrivate] = useState(defaultPrivate);
   const [loading, setLoading] = useState(false);
 
@@ -64,6 +65,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
     setImage(null);
     setImagePreview(null);
     setMaxParticipants('');
+    setPriceEur('');
     setIsPrivate(defaultPrivate);
   };
 
@@ -90,6 +92,8 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
       const eventCategory = isAdmin ? category : 'community';
       const parsedMax = maxParticipants ? parseInt(maxParticipants, 10) : null;
       const eventVisibility = isPrivate ? 'unlisted' : 'public';
+      const parsedPrice = priceEur ? parseFloat(priceEur.replace(',', '.')) : 0;
+      const priceCents = !isNaN(parsedPrice) && parsedPrice > 0 ? Math.round(parsedPrice * 100) : 0;
 
       const { error } = await supabase.from('events').insert({
         title,
@@ -105,6 +109,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
         approval_status: approvalStatus,
         max_participants: !isAdmin && parsedMax && parsedMax >= 2 ? parsedMax : null,
         visibility: eventVisibility,
+        price_cents: priceCents,
       } as any);
 
       if (error) throw error;
@@ -255,6 +260,26 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
               <p className="text-muted-foreground text-xs">At least 2 participants</p>
             </div>
           )}
+
+          {/* Price */}
+          <div className="space-y-2">
+            <Label htmlFor="price" className="text-foreground text-sm">Price (EUR)</Label>
+            <Input
+              id="price"
+              type="number"
+              min={0}
+              step="0.01"
+              value={priceEur}
+              onChange={(e) => setPriceEur(e.target.value)}
+              placeholder="0 = Free"
+              className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12"
+            />
+            <p className="text-muted-foreground text-xs">
+              {priceEur && parseFloat(priceEur.replace(',', '.')) > 0
+                ? `€${parseFloat(priceEur.replace(',', '.')).toFixed(2)} per ticket`
+                : 'Leave empty or 0 for a free event'}
+            </p>
+          </div>
 
           {/* Visibility Toggle */}
           <div className="flex items-center justify-between py-2 px-1">

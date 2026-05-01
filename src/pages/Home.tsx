@@ -61,7 +61,7 @@ const Home = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from('events')
-        .select('id, title, image_url, category, event_date, location_name')
+        .select('id, title, image_url, category, event_date, location_name, price_cents')
         .eq('is_featured', true)
         .eq('approval_status', 'approved')
         .order('featured_order', { ascending: true })
@@ -256,6 +256,7 @@ const Home = () => {
                         time={formattedTime}
                         location={event.location_name}
                         category={categoryLabels[event.category || ''] || event.category || ''}
+                        priceCents={(event as any).price_cents ?? 0}
                         onClick={() => handleEventClick(event.id)}
                       />
                     </CarouselItem>
@@ -417,6 +418,7 @@ const Home = () => {
                           time={formattedTime}
                           location={`${event.location_name} · ${dist < 1 ? `${Math.round(dist * 1000)}m` : `${dist.toFixed(1)}km`}`}
                           category={categoryLabels[event.category || ''] || event.category || ''}
+                          priceCents={event.price_cents ?? 0}
                           onClick={() => handleEventClick(event.id)}
                         />
                       );

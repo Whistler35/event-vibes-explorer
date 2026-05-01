@@ -20,6 +20,7 @@ interface EventDetailSheetProps {
     location_name?: string;
     max_participants?: number;
     current_participants?: number;
+    price_cents?: number;
   } | null;
   open: boolean;
   onClose: () => void;
@@ -190,6 +191,13 @@ const EventDetailSheet: React.FC<EventDetailSheetProps> = ({ event, open, onClos
                 </p>
               </div>
             )}
+
+            <div className="flex items-start gap-3">
+              <span className="w-5 h-5 text-primary mt-0.5 shrink-0 font-bold text-center">€</span>
+              <p className="text-foreground text-sm font-semibold">
+                {!event.price_cents || event.price_cents <= 0 ? 'Free' : `€${(event.price_cents / 100).toFixed(2)}`}
+              </p>
+            </div>
           </div>
 
           {/* Description */}

@@ -14,6 +14,7 @@ interface SearchParams {
   date_from?: string
   date_to?: string
   text?: string
+  free_only?: boolean
   limit?: number
   offset?: number
 }
@@ -126,6 +127,7 @@ Deno.serve(async (req) => {
     if (source) query = query.eq('source', source)
     if (dateFrom) query = query.gte('event_date', dateFrom)
     if (dateTo) query = query.lte('event_date', dateTo)
+    if (params.free_only === true) query = query.eq('price_cents', 0)
     if (safeText) {
       query = query.or(
         `title.ilike.%${safeText}%,description.ilike.%${safeText}%`

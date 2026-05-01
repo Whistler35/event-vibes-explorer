@@ -28,6 +28,7 @@ interface EditEventDialogProps {
     image_url?: string | null;
     max_participants: number | null;
     visibility?: string | null;
+    price_cents?: number | null;
   };
   onEventUpdated?: () => void;
 }
@@ -48,6 +49,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [maxParticipants, setMaxParticipants] = useState<string>('');
+  const [priceEur, setPriceEur] = useState<string>('');
   const [isPrivate, setIsPrivate] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showMapPicker, setShowMapPicker] = useState(false);
@@ -61,6 +63,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
       setLocationName(event.location_name);
       setCategory((event.category as EventCategory) || 'other');
       setMaxParticipants(event.max_participants?.toString() || '');
+      setPriceEur(event.price_cents && event.price_cents > 0 ? (event.price_cents / 100).toFixed(2) : '');
       setIsPrivate(event.visibility === 'unlisted');
       setImagePreview(event.image_url || null);
       setImage(null);
@@ -105,6 +108,8 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
 
       const eventDate = `${date}T${time}:00`;
       const parsedMax = maxParticipants ? parseInt(maxParticipants, 10) : null;
+      const parsedPrice = priceEur ? parseFloat(priceEur.replace(',', '.')) : 0;
+      const priceCents = !isNaN(parsedPrice) && parsedPrice > 0 ? Math.round(parsedPrice * 100) : 0;
 
       const updateData: any = {
         title,
@@ -115,6 +120,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
         image_url: imageUrl,
         max_participants: parsedMax,
         visibility: isPrivate ? 'unlisted' : 'public',
+        price_cents: priceCents,
       };
 
       // Include position update if changed
@@ -130,12 +136,12 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
 
       if (error) throw error;
 
-      toast.success('Event erfolgreich aktualisiert! ✅');
+      toast.success('Event updated successfully! ✅');
       onClose();
       onEventUpdated?.();
     } catch (err: any) {
       console.error('Error updating event:', err);
-      toast.error('Fehler beim Aktualisieren des Events');
+      toast.error('Error updating event');
     } finally {
       setLoading(false);
     }
@@ -154,14 +160,14 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
         <div className="flex items-center justify-between p-4 pb-2">
           <div className="flex items-center gap-2">
             <Pencil className="h-5 w-5 text-primary" />
-            <span className="text-foreground text-lg font-semibold">Event bearbeiten</span>
+            <span className="text-foreground text-lg font-semibold">Edit event</span>
           </div>
         </div>
 
         <div className="p-4 pt-2 space-y-4">
           {/* Image */}
           <div className="space-y-2">
-            <Label className="text-foreground text-sm">Bild</Label>
+            <Label className="text-foreground text-sm">Image</Label>
             <div className="relative">
               {imagePreview ? (
                 <div className="relative">
@@ -173,7 +179,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
               ) : (
                 <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/50 transition-colors bg-transparent">
                   <Camera className="h-8 w-8 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground mt-2">Bild hinzufügen</span>
+                  <span className="text-sm text-muted-foreground mt-2">Add image</span>
                   <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                 </label>
               )}
@@ -182,16 +188,16 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
 
           {/* Title */}
           <div className="space-y-2">
-            <Label htmlFor="edit-title" className="text-foreground text-sm">Titel *</Label>
+            <Label htmlFor="edit-title" className="text-foreground text-sm">Title *</Label>
             <Input id="edit-title" value={title} onChange={(e) => setTitle(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
           </div>
 
           {/* Category */}
           <div className="space-y-2">
-            <Label className="text-foreground text-sm">Kategorie</Label>
+            <Label className="text-foreground text-sm">Category</Label>
             <Select value={category} onValueChange={(val) => setCategory(val as EventCategory)}>
               <SelectTrigger className="bg-transparent border-border text-foreground rounded-xl h-12">
-                <SelectValue placeholder="Kategorie wählen" />
+                <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent className="bg-card border-border">
                 <SelectItem value="sports">⚽ Sport</SelectItem>
@@ -209,20 +215,20 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
 
           {/* Description */}
           <div className="space-y-2">
-            <Label htmlFor="edit-description" className="text-foreground text-sm">Beschreibung</Label>
+            <Label htmlFor="edit-description" className="text-foreground text-sm">Description</Label>
             <Textarea id="edit-description" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className="bg-transparent border-border text-foreground rounded-xl resize-none" />
           </div>
 
           {/* Location Name */}
           <div className="space-y-2">
-            <Label htmlFor="edit-location" className="text-foreground text-sm">Ort</Label>
+            <Label htmlFor="edit-location" className="text-foreground text-sm">Location</Label>
             <Input id="edit-location" value={locationName} onChange={(e) => setLocationName(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
           </div>
 
           {/* Map Position Picker */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-foreground text-sm">Position auf der Karte</Label>
+              <Label className="text-foreground text-sm">Position on the map</Label>
               <Button
                 type="button"
                 variant="ghost"
@@ -231,7 +237,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
                 className="text-primary text-xs h-7 px-2"
               >
                 <MapPin className="h-3 w-3 mr-1" />
-                {showMapPicker ? 'Karte ausblenden' : 'Auf Karte verschieben'}
+                {showMapPicker ? 'Hide map' : 'Move on map'}
               </Button>
             </div>
             {showMapPicker && hasValidPosition && (
@@ -246,34 +252,54 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
               />
             )}
             {!hasValidPosition && showMapPicker && (
-              <p className="text-muted-foreground text-xs">Keine Koordinaten vorhanden.</p>
+              <p className="text-muted-foreground text-xs">No coordinates available.</p>
             )}
           </div>
 
           {/* Date and Time */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-date" className="text-foreground text-sm">Datum *</Label>
+              <Label htmlFor="edit-date" className="text-foreground text-sm">Date *</Label>
               <Input id="edit-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-time" className="text-foreground text-sm">Zeit *</Label>
+              <Label htmlFor="edit-time" className="text-foreground text-sm">Time *</Label>
               <Input id="edit-time" type="time" value={time} onChange={(e) => setTime(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
             </div>
           </div>
 
           {/* Max Participants */}
           <div className="space-y-2">
-            <Label htmlFor="edit-maxParticipants" className="text-foreground text-sm">Max. Teilnehmer</Label>
+            <Label htmlFor="edit-maxParticipants" className="text-foreground text-sm">Max. Participants</Label>
             <Input
               id="edit-maxParticipants"
               type="number"
               min={2}
               value={maxParticipants}
               onChange={(e) => setMaxParticipants(e.target.value)}
-              placeholder="Unbegrenzt"
+              placeholder="Unlimited"
               className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12"
             />
+          </div>
+
+          {/* Price */}
+          <div className="space-y-2">
+            <Label htmlFor="edit-price" className="text-foreground text-sm">Price (EUR)</Label>
+            <Input
+              id="edit-price"
+              type="number"
+              min={0}
+              step="0.01"
+              value={priceEur}
+              onChange={(e) => setPriceEur(e.target.value)}
+              placeholder="0 = Free"
+              className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12"
+            />
+            <p className="text-muted-foreground text-xs">
+              {priceEur && parseFloat(priceEur.replace(',', '.')) > 0
+                ? `€${parseFloat(priceEur.replace(',', '.')).toFixed(2)} per ticket`
+                : 'Leave empty or 0 for a free event'}
+            </p>
           </div>
 
           {/* Visibility Toggle */}
@@ -281,7 +307,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
             <div className="flex items-center gap-2">
               {isPrivate ? <Lock className="h-4 w-4 text-muted-foreground" /> : <Globe className="h-4 w-4 text-primary" />}
               <Label className="text-foreground text-sm">
-                {isPrivate ? 'Privat' : 'Öffentlich'}
+                {isPrivate ? 'Private' : 'Public'}
               </Label>
             </div>
             <Switch checked={isPrivate} onCheckedChange={setIsPrivate} />
@@ -290,10 +316,10 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
           {/* Buttons */}
           <div className="flex gap-3 pt-2">
             <Button variant="outline" onClick={onClose} className="flex-1 h-12 rounded-xl">
-              Abbrechen
+              Cancel
             </Button>
             <Button onClick={handleSubmit} disabled={!title || !date || !time || loading} className="flex-1 h-12 rounded-xl">
-              {loading ? 'Speichern...' : 'Speichern'}
+              {loading ? 'Saving...' : 'Save'}
             </Button>
           </div>
         </div>
