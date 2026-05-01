@@ -197,7 +197,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
 
           {/* Category */}
           <div className="space-y-2">
-            <Label className="text-foreground text-sm">Kategorie *</Label>
+            <Label className="text-foreground text-sm">Category *</Label>
             {isAdmin ?
             <Select value={category} onValueChange={(val) => setCategory(val as EventCategory)}>
                 <SelectTrigger className="bg-transparent border-border text-foreground rounded-xl h-12">
