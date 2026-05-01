@@ -262,7 +262,7 @@ const AdminHostManagement = () => {
                       className="flex-1 text-xs"
                       onClick={() => setActionDialog({ host, action: 'activate' })}
                     >
-                      <CheckCircle className="w-3.5 h-3.5 mr-1" /> Aktivieren
+                      <CheckCircle className="w-3.5 h-3.5 mr-1" /> Activate
                     </Button>
                   )}
                   <Button
