@@ -19,6 +19,9 @@ interface ConversationWithProfile {
   matchId?: string;
   blitzActivity?: string;
   expiresAt?: string;
+  isEventGroup?: boolean;
+  eventId?: string;
+  participantCount?: number;
 }
 
 const isConversationUnread = (convoId: string, lastMessageAt: string | null, userId: string, senderId?: string): boolean => {
