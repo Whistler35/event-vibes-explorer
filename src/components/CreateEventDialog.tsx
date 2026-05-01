@@ -38,6 +38,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [maxParticipants, setMaxParticipants] = useState<string>('');
+  const [priceEur, setPriceEur] = useState<string>('');
   const [isPrivate, setIsPrivate] = useState(defaultPrivate);
   const [loading, setLoading] = useState(false);
 
