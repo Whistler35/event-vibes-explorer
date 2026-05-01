@@ -256,7 +256,7 @@ const AdminStatistics = () => {
           onClick={exportCSV}
           disabled={loading || !stats}
           className="p-2 rounded-xl bg-card border border-border text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
-          title="Als CSV exportieren"
+          title="Export as CSV"
         >
           <Download className="w-4 h-4" />
         </button>
