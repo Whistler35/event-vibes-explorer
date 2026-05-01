@@ -268,14 +268,14 @@ const AdminStatistics = () => {
         <>
           {/* Overview Cards */}
           <div>
-            <h4 className="text-foreground font-semibold text-sm mb-3">Übersicht</h4>
+            <h4 className="text-foreground font-semibold text-sm mb-3">Overview</h4>
             <div className="grid grid-cols-2 gap-3">
-              <StatCard icon={Users} label="Nutzer" value={stats.totalUsers} />
-              <StatCard icon={CalendarDays} label="Events gesamt" value={stats.totalEvents} subtext={`${stats.approvedEvents} genehmigt · ${stats.pendingEvents} offen`} />
-              <StatCard icon={UserPlus} label="Teilnahmen" value={stats.totalParticipants} />
+              <StatCard icon={Users} label="Users" value={stats.totalUsers} />
+              <StatCard icon={CalendarDays} label="Total Events" value={stats.totalEvents} subtext={`${stats.approvedEvents} approved · ${stats.pendingEvents} pending`} />
+              <StatCard icon={UserPlus} label="Participations" value={stats.totalParticipants} />
               <StatCard icon={Heart} label="Likes" value={stats.totalLikes} />
-              <StatCard icon={MessageCircle} label="Nachrichten" value={stats.totalChatMessages + stats.totalDirectMessages} subtext={`${stats.totalChatMessages} Gruppen · ${stats.totalDirectMessages} DMs`} />
-              <StatCard icon={Handshake} label="Freundschaften" value={stats.totalFriendships} />
+              <StatCard icon={MessageCircle} label="Messages" value={stats.totalChatMessages + stats.totalDirectMessages} subtext={`${stats.totalChatMessages} groups · ${stats.totalDirectMessages} DMs`} />
+              <StatCard icon={Handshake} label="Friendships" value={stats.totalFriendships} />
             </div>
           </div>
 
