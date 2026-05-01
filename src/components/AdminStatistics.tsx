@@ -6,10 +6,10 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGri
 type TimeRange = "7d" | "30d" | "12m" | "all";
 
 const TIME_RANGE_LABELS: Record<TimeRange, string> = {
-  "7d": "7 Tage",
-  "30d": "30 Tage",
-  "12m": "12 Monate",
-  "all": "Gesamt",
+  "7d": "7 Days",
+  "30d": "30 Days",
+  "12m": "12 Months",
+  "all": "Total",
 };
 
 const getDateThreshold = (range: TimeRange): string | null => {
