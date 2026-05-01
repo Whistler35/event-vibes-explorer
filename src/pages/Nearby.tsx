@@ -39,6 +39,7 @@ const Nearby = () => {
   // While the carousel drives the map, we ignore viewport-bound updates so the
   // visible card list doesn't reshuffle mid-flight.
   const carouselDrivingRef = useRef(false);
+  const carouselViewportIgnoreUntilRef = useRef(0);
   const carouselDrivingTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const [carouselExpandTrigger, setCarouselExpandTrigger] = useState(0);
   // Frozen snapshot of the carousel list during an active swipe session.
@@ -303,6 +304,15 @@ const Nearby = () => {
     setFrozenCarousel(prev => prev ?? carouselEventsRef.current);
   };
 
+  const lockCarouselDrivenMapMove = () => {
+    carouselDrivingRef.current = true;
+    carouselViewportIgnoreUntilRef.current = Date.now() + 1800;
+    if (carouselDrivingTimerRef.current) clearTimeout(carouselDrivingTimerRef.current);
+    carouselDrivingTimerRef.current = setTimeout(() => {
+      carouselDrivingRef.current = false;
+    }, 1800);
+  };
+
   // Auto-select first carousel item
   useEffect(() => {
     if (displayedCarouselEvents.length > 0 && (selectedEventId == null || !displayedCarouselEvents.find(e => String(e.id) === String(selectedEventId)))) {
@@ -321,11 +331,7 @@ const Nearby = () => {
   const handleCarouselSelect = (ev: MapEvent) => {
     freezeCarouselOrder();
     setSelectedEventId(ev.id);
-    carouselDrivingRef.current = true;
-    if (carouselDrivingTimerRef.current) clearTimeout(carouselDrivingTimerRef.current);
-    carouselDrivingTimerRef.current = setTimeout(() => {
-      carouselDrivingRef.current = false;
-    }, 1100);
+    lockCarouselDrivenMapMove();
     mapRef.current?.flyTo(ev.position[0], ev.position[1]);
   };
 
