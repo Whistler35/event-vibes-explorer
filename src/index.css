@@ -162,3 +162,16 @@ All colors MUST be HSL.
 .mapboxgl-ctrl-top-right .mapboxgl-ctrl-group:has(.mapboxgl-ctrl-geolocate) {
   display: none !important;
 }
+
+/* Move Mapbox top-right controls (zoom / compass) to sit left of the
+   pinned Public/Private switch on the Nearby map. */
+.mapboxgl-ctrl-top-right {
+  top: 58px !important;
+  right: 130px !important;
+}
+.mapboxgl-ctrl-top-right .mapboxgl-ctrl-group {
+  margin: 0 !important;
+  border-radius: 9999px !important;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.10) !important;
+}
