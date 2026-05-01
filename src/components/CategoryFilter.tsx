@@ -7,9 +7,9 @@ import type { EventCategory } from '@/hooks/useSearchEvents';
 import type { DateRange } from 'react-day-picker';
 
 const CATEGORIES: { id: EventCategory; label: string; icon: React.ElementType }[] = [
-  { id: 'music', label: 'Musik', icon: Music },
-  { id: 'sports', label: 'Sport', icon: Dribbble },
-  { id: 'culture', label: 'Kultur', icon: Palette },
+  { id: 'music', label: 'Music', icon: Music },
+  { id: 'sports', label: 'Sports', icon: Dribbble },
+  { id: 'culture', label: 'Culture', icon: Palette },
   { id: 'food', label: 'Food', icon: UtensilsCrossed },
   { id: 'nightlife', label: 'Nightlife', icon: PartyPopper },
   { id: 'outdoor', label: 'Outdoor', icon: TreePine },
