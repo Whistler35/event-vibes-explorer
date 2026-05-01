@@ -26,15 +26,15 @@ interface EventDetailSheetProps {
 }
 
 const categoryLabels: Record<string, string> = {
-  music: "🎵 Musik",
-  sports: "⚽ Sport",
-  culture: "🎭 Kultur",
+  music: "🎵 Music",
+  sports: "⚽ Sports",
+  culture: "🎭 Culture",
   food: "🍕 Food",
   nightlife: "🌙 Nightlife",
   outdoor: "🏔️ Outdoor",
   community: "👥 Community",
   workshop: "🔧 Workshop",
-  other: "📌 Sonstiges",
+  other: "📌 Other",
 };
 
 const formatEventDate = (dateStr: string) => {
