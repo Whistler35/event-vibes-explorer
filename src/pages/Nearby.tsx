@@ -35,6 +35,8 @@ const Nearby = () => {
   const [selectedEventId, setSelectedEventId] = useState<string | number | null>(null);
   const [isPrivateMode, setIsPrivateMode] = useState(false);
   const [viewportBounds, setViewportBounds] = useState<{ west: number; south: number; east: number; north: number } | null>(null);
+  const [lockedBounds, setLockedBounds] = useState<{ west: number; south: number; east: number; north: number } | null>(null);
+  const carouselLockTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   // Search bar
   const [searchOpen, setSearchOpen] = useState(false);
