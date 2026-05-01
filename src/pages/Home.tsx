@@ -156,6 +156,16 @@ const Home = () => {
     navigate(`/event/${eventId}`);
   };
 
+  useEffect(() => {
+    if (shouldScrollRef.current && searchLocation && nearbyEvents !== undefined) {
+      shouldScrollRef.current = false;
+      // Wait for layout
+      requestAnimationFrame(() => {
+        nearbySectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+  }, [nearbyEvents, searchLocation]);
+
   return (
     <Layout>
       <div className="bg-background">
