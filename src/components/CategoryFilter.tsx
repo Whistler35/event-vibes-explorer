@@ -90,13 +90,13 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategories, onC
             {/* Categories */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Kategorie</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Category</p>
                 {selectedCategories.length > 0 && (
                   <button
                     onClick={() => onCategoriesChange([])}
                     className="text-xs text-primary hover:underline"
                   >
-                    Alle abwählen
+                    Deselect all
                   </button>
                 )}
               </div>
