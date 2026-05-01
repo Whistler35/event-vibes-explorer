@@ -418,6 +418,7 @@ const Home = () => {
                           time={formattedTime}
                           location={`${event.location_name} · ${dist < 1 ? `${Math.round(dist * 1000)}m` : `${dist.toFixed(1)}km`}`}
                           category={categoryLabels[event.category || ''] || event.category || ''}
+                          priceCents={event.price_cents ?? 0}
                           onClick={() => handleEventClick(event.id)}
                         />
                       );
