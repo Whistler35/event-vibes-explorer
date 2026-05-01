@@ -39,7 +39,7 @@ const categoryLabels: Record<string, string> = {
 
 const formatEventDate = (dateStr: string) => {
   const d = new Date(dateStr);
-  return d.toLocaleDateString("de-DE", {
+  return d.toLocaleDateString("en-GB", {
     weekday: "long",
     day: "2-digit",
     month: "long",
@@ -49,7 +49,7 @@ const formatEventDate = (dateStr: string) => {
 
 const formatEventTime = (dateStr: string) => {
   const d = new Date(dateStr);
-  return d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }) + " Uhr";
+  return d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 };
 
 const EventDetailSheet: React.FC<EventDetailSheetProps> = ({ event, open, onClose }) => {
