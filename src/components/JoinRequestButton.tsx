@@ -45,7 +45,7 @@ const JoinRequestButton: React.FC<JoinRequestButtonProps> = ({ eventId, eventOwn
       return;
     }
     if (user.id === eventOwnerId) {
-      toast.info('Du bist der Ersteller dieses Events');
+      toast.info('You are the creator of this event');
       return;
     }
 
