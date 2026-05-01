@@ -126,19 +126,53 @@ const Nearby = () => {
   const handleCityInput = (value: string) => {
     setCityQuery(value);
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (value.length < 2) { setCitySuggestions([]); setShowCitySuggestions(false); return; }
+    if (value.length < 2) {
+      setCitySuggestions([]);
+      setEventSuggestions([]);
+      setShowCitySuggestions(false);
+      setSearchLoading(false);
+      return;
+    }
+    setSearchLoading(true);
     debounceRef.current = setTimeout(async () => {
+      // Cancel any in-flight request
+      if (searchAbortRef.current) searchAbortRef.current.abort();
+      const ctrl = new AbortController();
+      searchAbortRef.current = ctrl;
+      const q = value.trim();
+      const escaped = q.replace(/[%,()]/g, ' ');
       try {
-        const res = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(value)}.json?types=place,locality&limit=5&language=de&access_token=${MAPBOX_TOKEN}`
-        );
-        const data = await res.json();
-        const results: GeoResult[] = (data.features || []).map((f: any) => ({
+        const [placesRes, eventsRes] = await Promise.all([
+          fetch(
+            `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?types=place,locality&limit=4&language=de&access_token=${MAPBOX_TOKEN}`,
+            { signal: ctrl.signal }
+          ).then(r => r.json()).catch(() => ({ features: [] })),
+          supabase
+            .from('events')
+            .select('id,title,description,category,event_date,location_name,latitude,longitude,image_url,is_featured,max_participants,current_participants,visibility,source,end_time,created_by,created_at,updated_at')
+            .eq('visibility', 'public')
+            .eq('approval_status', 'approved')
+            .or(`title.ilike.%${escaped}%,location_name.ilike.%${escaped}%,description.ilike.%${escaped}%`)
+            .order('event_date', { ascending: true })
+            .limit(6)
+            .then(r => r),
+        ]);
+        if (ctrl.signal.aborted) return;
+        const places: GeoResult[] = (placesRes.features || []).map((f: any) => ({
           name: f.place_name, lat: f.center[1], lng: f.center[0],
         }));
-        setCitySuggestions(results);
-        setShowCitySuggestions(results.length > 0);
-      } catch { setCitySuggestions([]); }
+        const evs = (eventsRes.data || []) as any as SearchEvent[];
+        setCitySuggestions(places);
+        setEventSuggestions(evs);
+        setShowCitySuggestions(places.length + evs.length > 0);
+      } catch {
+        if (!ctrl.signal.aborted) {
+          setCitySuggestions([]);
+          setEventSuggestions([]);
+        }
+      } finally {
+        if (!ctrl.signal.aborted) setSearchLoading(false);
+      }
     }, 300);
   };
 
@@ -149,8 +183,35 @@ const Nearby = () => {
     localStorage.setItem('selectedCity', JSON.stringify(loc));
   };
 
+  const selectEventSuggestion = (ev: SearchEvent) => {
+    setShowCitySuggestions(false);
+    setCityQuery(ev.title);
+    const mapEv: MapEvent = {
+      id: ev.id,
+      title: ev.title,
+      position: [ev.latitude ?? 47.2692, ev.longitude ?? 11.4041],
+      image: ev.image_url || undefined,
+      category: ev.category || undefined,
+      description: ev.description || undefined,
+      event_date: ev.event_date,
+      location_name: ev.location_name,
+      max_participants: ev.max_participants || undefined,
+      current_participants: ev.current_participants || undefined,
+      is_featured: ev.is_featured || false,
+    };
+    if (ev.latitude != null && ev.longitude != null) {
+      mapRef.current?.flyTo(ev.latitude, ev.longitude, 16);
+    }
+    setSelectedEventId(ev.id);
+    setSelectedEvent(mapEv);
+  };
+
   const clearCitySearch = () => {
-    setCityQuery(""); setCitySuggestions([]); setShowCitySuggestions(false);
+    setCityQuery("");
+    setCitySuggestions([]);
+    setEventSuggestions([]);
+    setShowCitySuggestions(false);
+    setSearchLoading(false);
     localStorage.removeItem('selectedCity');
   };
 
