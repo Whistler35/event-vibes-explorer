@@ -98,7 +98,7 @@ const CollapsibleCarousel: React.FC<CollapsibleCarouselProps> = ({
         role="button"
         aria-label={expanded ? 'Karusell einklappen' : 'Karusell ausklappen'}
       >
-        <div className="px-3 py-1.5 rounded-full bg-card/80 backdrop-blur-md shadow-sm border border-border/40 flex items-center gap-1">
+        <div className="px-3 rounded-full bg-card/80 backdrop-blur-md shadow-sm border border-border/40 items-center py-[6px] my-0 flex flex-row gap-[4px]">
           <div className="w-8 h-1 rounded-full bg-muted-foreground/50" />
           {!expanded && <ChevronUp className="w-3 h-3 text-muted-foreground" />}
         </div>
