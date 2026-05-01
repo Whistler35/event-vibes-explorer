@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import Layout from "@/components/Layout";
-import { MessageCircle, LogIn, Zap } from "lucide-react";
+import { MessageCircle, LogIn, Zap, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ConversationWithProfile {
@@ -336,7 +336,9 @@ const Messenger = () => {
                 onClick={() =>
                   conversation.isBlitz
                     ? navigate(`/blitz/match/${conversation.matchId}`)
-                    : navigate(`/dm/${conversation.id}`)
+                    : conversation.isEventGroup
+                      ? navigate(`/event/${conversation.eventId}/chat`)
+                      : navigate(`/dm/${conversation.id}`)
                 }
                 className={`flex items-center space-x-4 p-3 rounded-2xl cursor-pointer transition-colors ${
                   conversation.isBlitz
@@ -346,18 +348,29 @@ const Messenger = () => {
                       : "hover:bg-card/50"
                 }`}
               >
-                <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
-                  <img
-                    src={getAvatarUrl(conversation.other_name, conversation.other_avatar)}
-                    alt={conversation.other_name}
-                    className="w-full h-full object-cover"
-                  />
+                <div className={`relative w-12 h-12 ${conversation.isEventGroup ? "rounded-2xl" : "rounded-full"} overflow-hidden flex-shrink-0 bg-muted`}>
+                  {conversation.isEventGroup && !conversation.other_avatar ? (
+                    <div className="w-full h-full flex items-center justify-center bg-primary">
+                      <Users className="w-6 h-6 text-primary-foreground" />
+                    </div>
+                  ) : (
+                    <img
+                      src={getAvatarUrl(conversation.other_name, conversation.other_avatar)}
+                      alt={conversation.other_name}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
                   {conversation.isBlitz && (
                     <div className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-[hsl(var(--blitz-pink))] flex items-center justify-center border-2 border-background">
                       <Zap className="w-2.5 h-2.5 text-white fill-white" />
                     </div>
                   )}
-                  {!conversation.isBlitz && conversation.isUnread && (
+                  {conversation.isEventGroup && (
+                    <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-primary flex items-center justify-center border-2 border-background">
+                      <Users className="w-2.5 h-2.5 text-primary-foreground" />
+                    </div>
+                  )}
+                  {!conversation.isBlitz && !conversation.isEventGroup && conversation.isUnread && (
                     <div className="absolute top-0 right-0 w-3 h-3 bg-primary rounded-full border-2 border-background" />
                   )}
                 </div>
@@ -376,7 +389,9 @@ const Messenger = () => {
                         ? "text-[hsl(var(--blitz-pink))] font-bold"
                         : conversation.isUnread ? "text-primary font-semibold" : "text-muted-foreground"
                     }`}>
-                      {formatTime(conversation.last_message_at)}
+                      {conversation.isEventGroup && conversation.participantCount
+                        ? `${conversation.participantCount} 👥`
+                        : formatTime(conversation.last_message_at)}
                     </span>
                   </div>
                   <p className={`text-sm truncate ${conversation.isUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
