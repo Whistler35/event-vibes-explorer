@@ -93,7 +93,7 @@ const AdminHostManagement = () => {
         .from('host_profiles')
         .update({ is_verified: true } as any)
         .eq('id', host.id);
-      toast.success(`${host.profile_name} verifiziert ✅`);
+      toast.success(`${host.profile_name} verified ✅`);
     } else if (action === 'suspend') {
       await supabase
         .from('host_profiles')
