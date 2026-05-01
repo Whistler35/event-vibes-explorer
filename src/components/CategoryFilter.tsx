@@ -38,7 +38,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategories, onC
       const cat = CATEGORIES.find(c => c.id === selectedCategories[0]);
       if (cat) parts.push(cat.label);
     } else if (selectedCategories.length > 1) {
-      parts.push(`${selectedCategories.length} Kategorien`);
+      parts.push(`${selectedCategories.length} Categories`);
     }
     if (selectedDateRange?.from) {
       if (selectedDateRange.to && selectedDateRange.from.getTime() !== selectedDateRange.to.getTime()) {
