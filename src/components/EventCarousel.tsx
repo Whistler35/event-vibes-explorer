@@ -179,7 +179,7 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onSel
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-primary/30 to-primary/5" />
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/0 to-black/0" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/0 to-black/0 my-0" />
               {ev.is_featured && (
                 <span className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-full bg-[hsl(var(--blitz-pink))] text-white text-[10px] font-bold uppercase tracking-wide shadow-md">
                   Top
