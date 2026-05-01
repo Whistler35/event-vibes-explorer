@@ -230,7 +230,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
           {/* Date and Time */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="date" className="text-foreground text-sm">Datum *</Label>
+              <Label htmlFor="date" className="text-foreground text-sm">Date *</Label>
               <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
             </div>
             <div className="space-y-2">
