@@ -80,7 +80,7 @@ const JoinRequestButton: React.FC<JoinRequestButtonProps> = ({ eventId, eventOwn
           .eq('user_id', user.id);
         if (error) throw error;
         setStatus('cancelled');
-        toast.info('Anfrage zurückgezogen');
+        toast.info('Request withdrawn');
       }
     } catch (err: any) {
       toast.error(err.message || 'Fehler');
