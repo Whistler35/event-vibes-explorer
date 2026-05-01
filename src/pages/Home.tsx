@@ -53,6 +53,8 @@ const Home = () => {
   const [suggestions, setSuggestions] = useState<GeocodedLocation[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const nearbySectionRef = useRef<HTMLDivElement>(null);
+  const shouldScrollRef = useRef(false);
 
   const { data: featuredEvents } = useQuery({
     queryKey: ['featured-events-home'],
@@ -133,6 +135,7 @@ const Home = () => {
     setSearchLocation(loc);
     setShowSuggestions(false);
     localStorage.setItem('selectedCity', JSON.stringify(loc));
+    shouldScrollRef.current = true;
   };
 
   const clearSearch = () => {
@@ -152,6 +155,16 @@ const Home = () => {
   const handleEventClick = (eventId: string) => {
     navigate(`/event/${eventId}`);
   };
+
+  useEffect(() => {
+    if (shouldScrollRef.current && searchLocation && nearbyEvents !== undefined) {
+      shouldScrollRef.current = false;
+      // Wait for layout
+      requestAnimationFrame(() => {
+        nearbySectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+  }, [nearbyEvents, searchLocation]);
 
   return (
     <Layout>
@@ -285,7 +298,7 @@ const Home = () => {
           };
 
           return (
-            <div className="px-4 pb-8">
+            <div ref={nearbySectionRef} className="px-4 pb-8 scroll-mt-4">
               <h3 className="text-foreground text-2xl font-bold mb-2">
                 📍 Events near {searchQuery}
               </h3>
@@ -426,7 +439,7 @@ const Home = () => {
         })()}
 
         {searchLocation && nearbyEvents && nearbyEvents.length === 0 && (
-          <div className="px-4 pb-8 text-center">
+          <div ref={nearbySectionRef} className="px-4 pb-8 text-center scroll-mt-4">
             <p className="text-muted-foreground">No events found near {searchQuery}.</p>
           </div>
         )}
