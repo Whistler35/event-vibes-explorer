@@ -110,10 +110,10 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
       if (error) throw error;
 
       if (isAdmin) {
-        toast.success('Event erstellt und sofort veröffentlicht! ✅');
+        toast.success('Event created and published immediately! ✅');
       } else {
-        toast.success('Event eingereicht! ⏳', {
-          description: 'Dein Event wird von einem Admin geprüft und dann freigeschaltet.'
+        toast.success('Event submitted! ⏳', {
+          description: 'Your event will be reviewed by an admin and then published.'
         });
       }
 
