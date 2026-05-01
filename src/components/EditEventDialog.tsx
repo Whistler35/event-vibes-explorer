@@ -108,6 +108,8 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
 
       const eventDate = `${date}T${time}:00`;
       const parsedMax = maxParticipants ? parseInt(maxParticipants, 10) : null;
+      const parsedPrice = priceEur ? parseFloat(priceEur.replace(',', '.')) : 0;
+      const priceCents = !isNaN(parsedPrice) && parsedPrice > 0 ? Math.round(parsedPrice * 100) : 0;
 
       const updateData: any = {
         title,
@@ -118,6 +120,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
         image_url: imageUrl,
         max_participants: parsedMax,
         visibility: isPrivate ? 'unlisted' : 'public',
+        price_cents: priceCents,
       };
 
       // Include position update if changed
@@ -133,12 +136,12 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
 
       if (error) throw error;
 
-      toast.success('Event erfolgreich aktualisiert! ✅');
+      toast.success('Event updated successfully! ✅');
       onClose();
       onEventUpdated?.();
     } catch (err: any) {
       console.error('Error updating event:', err);
-      toast.error('Fehler beim Aktualisieren des Events');
+      toast.error('Error updating event');
     } finally {
       setLoading(false);
     }
