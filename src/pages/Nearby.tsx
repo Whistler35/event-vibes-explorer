@@ -510,7 +510,7 @@ const Nearby = () => {
 
         {/* BOTTOM CAROUSEL — collapsible drawer */}
         <div className="absolute bottom-0 left-0 right-0 z-10">
-          <CollapsibleCarousel expandedHeight={280} collapsedHeight={36}>
+          <CollapsibleCarousel expandedHeight={280} collapsedHeight={36} expandTrigger={carouselExpandTrigger}>
             <EventCarousel
               events={carouselEvents}
               selectedId={selectedEventId}
