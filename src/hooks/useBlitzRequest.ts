@@ -13,6 +13,7 @@ export interface BlitzRequest {
   status: "active" | "expired" | "cancelled" | "matched";
   created_at: string;
   expires_at: string;
+  radius_km: number;
 }
 
 export function useActiveBlitzRequest() {
