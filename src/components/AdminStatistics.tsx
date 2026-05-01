@@ -311,7 +311,7 @@ const AdminStatistics = () => {
           {/* Category Breakdown */}
           {categoryData.length > 0 && (
             <div>
-              <h4 className="text-foreground font-semibold text-sm mb-3">Events nach Kategorie</h4>
+              <h4 className="text-foreground font-semibold text-sm mb-3">Events by Category</h4>
               <div className="bg-card rounded-2xl border border-border p-4 space-y-2">
                 {categoryData.map((cat) => (
                   <div key={cat.category} className="flex items-center justify-between">
