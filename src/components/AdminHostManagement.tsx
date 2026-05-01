@@ -99,7 +99,7 @@ const AdminHostManagement = () => {
         .from('host_profiles')
         .update({ status: 'suspended' } as any)
         .eq('id', host.id);
-      toast.success(`${host.profile_name} gesperrt`);
+      toast.success(`${host.profile_name} suspended`);
     } else if (action === 'activate') {
       await supabase
         .from('host_profiles')
