@@ -35,15 +35,20 @@ const Nearby = () => {
   const [selectedEventId, setSelectedEventId] = useState<string | number | null>(null);
   const [isPrivateMode, setIsPrivateMode] = useState(false);
   const [viewportBounds, setViewportBounds] = useState<{ west: number; south: number; east: number; north: number } | null>(null);
-  const [lockedBounds, setLockedBounds] = useState<{ west: number; south: number; east: number; north: number } | null>(null);
-  const carouselLockTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  // While the carousel drives the map, we ignore viewport-bound updates so the
+  // visible card list doesn't reshuffle mid-flight.
+  const carouselDrivingRef = useRef(false);
+  const carouselDrivingTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
-  // Search bar
+  // Search bar (events + places)
   const [searchOpen, setSearchOpen] = useState(false);
   const [cityQuery, setCityQuery] = useState("");
   const [citySuggestions, setCitySuggestions] = useState<GeoResult[]>([]);
+  const [eventSuggestions, setEventSuggestions] = useState<SearchEvent[]>([]);
   const [showCitySuggestions, setShowCitySuggestions] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const searchAbortRef = useRef<AbortController | null>(null);
   const mapRef = useRef<MapboxMapHandle>(null);
 
   const { isAdmin } = useIsAdmin();
@@ -121,19 +126,53 @@ const Nearby = () => {
   const handleCityInput = (value: string) => {
     setCityQuery(value);
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (value.length < 2) { setCitySuggestions([]); setShowCitySuggestions(false); return; }
+    if (value.length < 2) {
+      setCitySuggestions([]);
+      setEventSuggestions([]);
+      setShowCitySuggestions(false);
+      setSearchLoading(false);
+      return;
+    }
+    setSearchLoading(true);
     debounceRef.current = setTimeout(async () => {
+      // Cancel any in-flight request
+      if (searchAbortRef.current) searchAbortRef.current.abort();
+      const ctrl = new AbortController();
+      searchAbortRef.current = ctrl;
+      const q = value.trim();
+      const escaped = q.replace(/[%,()]/g, ' ');
       try {
-        const res = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(value)}.json?types=place,locality&limit=5&language=de&access_token=${MAPBOX_TOKEN}`
-        );
-        const data = await res.json();
-        const results: GeoResult[] = (data.features || []).map((f: any) => ({
+        const [placesRes, eventsRes] = await Promise.all([
+          fetch(
+            `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?types=place,locality&limit=4&language=de&access_token=${MAPBOX_TOKEN}`,
+            { signal: ctrl.signal }
+          ).then(r => r.json()).catch(() => ({ features: [] })),
+          supabase
+            .from('events')
+            .select('id,title,description,category,event_date,location_name,latitude,longitude,image_url,is_featured,max_participants,current_participants,visibility,source,end_time,created_by,created_at,updated_at')
+            .eq('visibility', 'public')
+            .eq('approval_status', 'approved')
+            .or(`title.ilike.%${escaped}%,location_name.ilike.%${escaped}%,description.ilike.%${escaped}%`)
+            .order('event_date', { ascending: true })
+            .limit(6)
+            .then(r => r),
+        ]);
+        if (ctrl.signal.aborted) return;
+        const places: GeoResult[] = (placesRes.features || []).map((f: any) => ({
           name: f.place_name, lat: f.center[1], lng: f.center[0],
         }));
-        setCitySuggestions(results);
-        setShowCitySuggestions(results.length > 0);
-      } catch { setCitySuggestions([]); }
+        const evs = (eventsRes.data || []) as any as SearchEvent[];
+        setCitySuggestions(places);
+        setEventSuggestions(evs);
+        setShowCitySuggestions(places.length + evs.length > 0);
+      } catch {
+        if (!ctrl.signal.aborted) {
+          setCitySuggestions([]);
+          setEventSuggestions([]);
+        }
+      } finally {
+        if (!ctrl.signal.aborted) setSearchLoading(false);
+      }
     }, 300);
   };
 
@@ -144,8 +183,35 @@ const Nearby = () => {
     localStorage.setItem('selectedCity', JSON.stringify(loc));
   };
 
+  const selectEventSuggestion = (ev: SearchEvent) => {
+    setShowCitySuggestions(false);
+    setCityQuery(ev.title);
+    const mapEv: MapEvent = {
+      id: ev.id,
+      title: ev.title,
+      position: [ev.latitude ?? 47.2692, ev.longitude ?? 11.4041],
+      image: ev.image_url || undefined,
+      category: ev.category || undefined,
+      description: ev.description || undefined,
+      event_date: ev.event_date,
+      location_name: ev.location_name,
+      max_participants: ev.max_participants || undefined,
+      current_participants: ev.current_participants || undefined,
+      is_featured: ev.is_featured || false,
+    };
+    if (ev.latitude != null && ev.longitude != null) {
+      mapRef.current?.flyTo(ev.latitude, ev.longitude, 16);
+    }
+    setSelectedEventId(ev.id);
+    setSelectedEvent(mapEv);
+  };
+
   const clearCitySearch = () => {
-    setCityQuery(""); setCitySuggestions([]); setShowCitySuggestions(false);
+    setCityQuery("");
+    setCitySuggestions([]);
+    setEventSuggestions([]);
+    setShowCitySuggestions(false);
+    setSearchLoading(false);
     localStorage.removeItem('selectedCity');
   };
 
@@ -192,9 +258,9 @@ const Nearby = () => {
     mapEvents = mapEvents.filter(e => e.is_featured);
   }
 
-  // Carousel = events visible in current viewport, featured first then by date, max 10
-  // Use lockedBounds while carousel is driving the map, so the order doesn't shuffle mid-flight
-  const effectiveBounds = lockedBounds ?? viewportBounds;
+  // Carousel = events visible in current viewport, featured first then by date, max 10.
+  // While the carousel drives the map, we freeze the viewport reference so the order stays put.
+  const effectiveBounds = viewportBounds;
   const carouselEvents = useMemo(() => {
     const inView = effectiveBounds
       ? mapEvents.filter(e => {
@@ -203,6 +269,15 @@ const Nearby = () => {
               && lng >= effectiveBounds.west && lng <= effectiveBounds.east;
         })
       : mapEvents;
+    // Always keep the currently selected event in the list, even if it just
+    // scrolled out of bounds during a flyTo — prevents the active card from
+    // vanishing under the user's tap.
+    const selected = selectedEventId != null
+      ? mapEvents.find(e => String(e.id) === String(selectedEventId))
+      : undefined;
+    if (selected && !inView.find(e => String(e.id) === String(selected.id))) {
+      inView.unshift(selected);
+    }
     const featured = inView.filter(e => e.is_featured);
     const others = inView.filter(e => !e.is_featured);
     const sortedOthers = [...others].sort((a, b) => {
@@ -211,7 +286,7 @@ const Nearby = () => {
       return da - db;
     });
     return [...featured, ...sortedOthers].slice(0, 10);
-  }, [mapEvents, effectiveBounds]);
+  }, [mapEvents, effectiveBounds, selectedEventId]);
 
   // Auto-select first carousel item
   useEffect(() => {
@@ -221,13 +296,15 @@ const Nearby = () => {
     if (carouselEvents.length === 0) setSelectedEventId(null);
   }, [carouselEvents]);
 
-  // Sync map when carousel selection changes — always pan to the selected event,
-  // and lock the carousel order for ~1.2s so the map flight doesn't reshuffle cards.
+  // Sync map when carousel selection changes — pan only (no zoom change),
+  // and freeze viewport-driven re-ordering until the flight settles.
   const handleCarouselSelect = (ev: MapEvent) => {
     setSelectedEventId(ev.id);
-    setLockedBounds(effectiveBounds);
-    if (carouselLockTimerRef.current) clearTimeout(carouselLockTimerRef.current);
-    carouselLockTimerRef.current = setTimeout(() => setLockedBounds(null), 1200);
+    carouselDrivingRef.current = true;
+    if (carouselDrivingTimerRef.current) clearTimeout(carouselDrivingTimerRef.current);
+    carouselDrivingTimerRef.current = setTimeout(() => {
+      carouselDrivingRef.current = false;
+    }, 1100);
     mapRef.current?.flyTo(ev.position[0], ev.position[1]);
   };
 
@@ -268,7 +345,7 @@ const Nearby = () => {
             onEventClick={(event) => {
               setSelectedEventId(event.id);
             }}
-            onViewportChange={(b) => setViewportBounds(b)}
+            onViewportChange={(b) => { if (!carouselDrivingRef.current) setViewportBounds(b); }}
             events={mapEvents}
             isAdmin={true}
             center={initialCenter}
@@ -285,28 +362,69 @@ const Nearby = () => {
               <input
                 value={cityQuery}
                 onChange={(e) => handleCityInput(e.target.value)}
-                onFocus={() => { setSearchOpen(true); citySuggestions.length > 0 && setShowCitySuggestions(true); }}
+                onFocus={() => { setSearchOpen(true); (citySuggestions.length + eventSuggestions.length) > 0 && setShowCitySuggestions(true); }}
                 placeholder="Events, Orte suchen..."
                 className="flex-1 bg-transparent border-0 outline-none px-3 text-sm text-foreground placeholder:text-muted-foreground"
               />
-              {cityQuery && (
+              {searchLoading && (
+                <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin shrink-0" />
+              )}
+              {cityQuery && !searchLoading && (
                 <button onClick={clearCitySearch} className="text-muted-foreground hover:text-foreground">
                   <X className="h-4 w-4" />
                 </button>
               )}
             </div>
             {showCitySuggestions && (
-              <div className="mt-1.5 bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-xl overflow-hidden">
-                {citySuggestions.map((s, i) => (
-                  <button
-                    key={i}
-                    onClick={() => selectCity(s)}
-                    className="w-full px-4 py-3 text-left text-sm text-foreground hover:bg-muted/50 flex items-center gap-3"
-                  >
-                    <MapPin className="h-4 w-4 text-primary shrink-0" />
-                    <span className="truncate">{s.name}</span>
-                  </button>
-                ))}
+              <div className="mt-1.5 bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-xl overflow-hidden max-h-[60vh] overflow-y-auto">
+                {eventSuggestions.length > 0 && (
+                  <>
+                    <div className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Events</div>
+                    {eventSuggestions.map((ev) => (
+                      <button
+                        key={`ev-${ev.id}`}
+                        onClick={() => selectEventSuggestion(ev)}
+                        className="w-full px-3 py-2.5 text-left hover:bg-muted/50 flex items-center gap-3"
+                      >
+                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-muted shrink-0">
+                          {ev.image_url
+                            ? <img src={ev.image_url} alt="" className="w-full h-full object-cover" />
+                            : <div className="w-full h-full bg-gradient-to-br from-primary/30 to-primary/5" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-sm font-semibold text-foreground truncate">{ev.title}</span>
+                            {ev.is_featured && (
+                              <span className="px-1.5 py-0.5 rounded-full bg-[hsl(var(--blitz-pink))] text-white text-[9px] font-bold uppercase shrink-0">Top</span>
+                            )}
+                          </div>
+                          <div className="text-[11px] text-muted-foreground truncate">
+                            {ev.event_date && new Date(ev.event_date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
+                            {ev.location_name && ` · ${ev.location_name}`}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </>
+                )}
+                {citySuggestions.length > 0 && (
+                  <>
+                    <div className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Orte</div>
+                    {citySuggestions.map((s, i) => (
+                      <button
+                        key={`pl-${i}`}
+                        onClick={() => selectCity(s)}
+                        className="w-full px-4 py-2.5 text-left text-sm text-foreground hover:bg-muted/50 flex items-center gap-3"
+                      >
+                        <MapPin className="h-4 w-4 text-primary shrink-0" />
+                        <span className="truncate">{s.name}</span>
+                      </button>
+                    ))}
+                  </>
+                )}
+                {!searchLoading && eventSuggestions.length === 0 && citySuggestions.length === 0 && (
+                  <div className="px-4 py-4 text-sm text-muted-foreground text-center">Keine Events oder Orte gefunden</div>
+                )}
               </div>
             )}
           </div>

@@ -1,47 +1,80 @@
-## Problem
+# Nearby: Map-Sync, Filter, Suche
 
-**1. Karussell-Klick-Konflikt:**
-Wenn man auf eine seitliche Karte tippt, passiert Folgendes:
-- `onSelect` feuert → `flyTo` startet auf der Karte
-- Die Karten-Bewegung löst `moveend` aus → `viewportBounds` ändert sich → `carouselEvents` werden neu berechnet → Reihenfolge ändert sich → das Karussell „springt" zu einem anderen Event
-- Außerdem wird beim Scrollen mit 140 ms Debounce ein `onSelect` ausgelöst, das mit dem neuen Viewport kollidiert
+Drei klar abgegrenzte Verbesserungen auf `/nearby`. Marken/Farben bleiben (Forest + Citrus/Lime), kein neues Lib.
 
-**2. Mein Standort:**
-Aktuell triggert nur ein Button die Geolocation. Es gibt zwar einen blauen Punkt von Mapbox (über `GeolocateControl`), aber er erscheint erst nach Tap. Der User möchte ihn dauerhaft sehen.
+---
 
-## Lösung
+## 1) Karte ↔ Karusell – ruhiger Flow
 
-### A) Karussell stabilisieren (`src/pages/Nearby.tsx`)
+**Problem:** Beim Zoomen/Panen ändert sich `viewportBounds` ständig → Karusell-Liste wird neu gefiltert → aktiver Index springt → `flyTo` feuert → wieder neue Bounds → Endlos-Schaukel.
 
-1. **Karussell-Snapshot einfrieren während Interaktion:** Statt `carouselEvents` bei jeder Viewport-Änderung neu zu berechnen, einen „Lock"-Mechanismus einbauen:
-   - Wenn der User gerade durchs Karussell scrollt **oder** das Karussell gerade einen `flyTo` ausgelöst hat (z. B. 800 ms Cooldown), wird `viewportBounds` nicht mehr in `carouselEvents` reingerechnet.
-   - Dadurch bleibt die Karten-Reihenfolge stabil, während die Map fliegt.
+**Lösungen (in `src/pages/Nearby.tsx` + `EventCarousel.tsx`):**
 
-2. **`isCarouselDriving` Flag:** Nach `handleCarouselSelect` für ~900 ms setzen, in dieser Zeit ignoriert das `useMemo` neue Bounds.
+- **Map-Bewegung debouncen**: `viewportBounds` erst nach 250 ms Ruhe in `MapboxMap` emittieren (im `moveend`-Handler `setTimeout` + `clearTimeout`). Dadurch keine Bounds-Updates während aktivem Pan.
+- **Origin-Tracking statt Lock-Timer**: Statt `lockedBounds`+1.2 s Timer einen Ref `lastInteractionOriginRef` einführen mit Werten `'user'` | `'carousel'`. Wird das Karusell zur Quelle einer `flyTo`-Bewegung, ignoriert die Page **alle** Bounds-Änderungen, bis die Map einen `moveend` ohne weitere Folgebewegung hatte (≥ 1 Animationszyklus). Erst dann wieder `viewportBounds` = aktuelle Bounds.
+- **Karusell-Liste stabilisieren**: Memo-Key inkl. `selectedEventId`, sodass das gerade ausgewählte Event **immer** in der Liste bleibt, auch wenn es kurz aus den Bounds rutscht. → keine „Karte verschwindet beim Tap"-Race mehr.
+- **Tap auf Side-Card**: 
+  - `onClick`: sofort `setActiveIdx(i)`, scrollen ins Zentrum, `onSelect(ev)` → `flyTo`.
+  - Während des `scrollTo` den `onScroll`-Debounce-Select unterdrücken (Flag `programmaticScrollRef`), damit nicht parallel ein zweites Select feuert.
+- **Klick auf Center-Card** öffnet weiterhin Detail-Sheet (`onExpand`).
+- **`flyTo` weicher**: nur panen, **nicht zoomen** (Zoom nur beibehalten). Dauer 700 ms, `essential: true`.
 
-3. **Tap auf Seitenkarte = nur selektieren, kein Expand:**
-   - Aktuell ruft das Karussell `onExpand` nur wenn `isCenter`. Das passt — aber die Klicks gehen verloren, weil der Snap-Scroll schon den `activeIdx` verändert. → In `EventCarousel.tsx` sicherstellen, dass `pointer-events` auf allen Karten aktiv sind und der Klick nicht vom Snap-Scroll geschluckt wird. Außerdem `onSelect` direkt aufrufen, ohne auf Debounce zu warten, wenn explizit getippt wurde.
+Resultat: Beim Reinzoomen bleibt das Karusell stehen. Swipen pannt die Karte sanft. Side-Card-Tap funktioniert beim ersten Versuch.
 
-### B) Eigener Standort als blauer Punkt (`src/components/MapboxMap.tsx`)
+---
 
-1. **Geolocation beim Map-Load automatisch triggern**, sobald die Map fertig ist (nicht erst auf Button-Klick warten):
-   ```tsx
-   map.current.on('load', () => {
-     setIsLoaded(true);
-     // Standort einmal automatisch abfragen, ohne die Map zu zentrieren
-     setTimeout(() => geolocateRef.current?.trigger(), 500);
-   });
-   ```
-2. Mapbox' `GeolocateControl` mit `trackUserLocation: true` zeigt dann den klassischen blauen Punkt (mit Genauigkeitskreis und Heading-Cone) dauerhaft an.
-3. Der vorhandene `LocateFixed`-Button bleibt zum erneuten Zentrieren.
-4. CSS in `src/index.css` prüfen: Der versteckte Mapbox-Control darf den blauen Punkt **nicht** mit ausblenden — nur die Button-UI verstecken, nicht den `user-location-dot`-Layer (ist eh schon korrekt, nur sicherstellen).
+## 2) Filter-Dropdown nicht mehr abgeschnitten
 
-### Geänderte Dateien
+**Problem (Screenshot):** `CategoryFilter`-Popover öffnet `absolute left-0` und ragt rechts aus dem Viewport.
 
-- `src/pages/Nearby.tsx` — Lock-Flag für Karussell-Reihenfolge während `flyTo`
-- `src/components/EventCarousel.tsx` — Klick-Handling auf Seitenkarten robust machen
-- `src/components/MapboxMap.tsx` — Geolocation beim Load automatisch starten
+**Fix in `src/components/CategoryFilter.tsx`:**
+- Popover-Positionierung: `right-0` statt `left-0`, plus `max-w-[calc(100vw-1.5rem)]`, Breite auf `w-[18rem]` mit `min(18rem, calc(100vw - 1.5rem))`.
+- Z-Index auf `z-[60]` (über Quick-Pills und Karusell-Top).
+- Sicherheits-Padding `mr-2` damit Schatten nicht beschnitten wirkt.
 
-## Rückfrage
+---
 
-Soll der blaue Standort-Punkt **automatisch beim Öffnen** der Karte erscheinen (= einmalige Berechtigungs-Abfrage des Browsers beim ersten Mal)? Falls du lieber willst, dass der User erst aktiv tippen muss, sag Bescheid — dann lasse ich das Auto-Trigger weg.
+## 3) Globale Suche (Events + Orte)
+
+**Aktuell:** Suchleiste fragt nur Mapbox-Geocoding (Städte/Orte) ab. Events sind nicht findbar.
+
+**Neuer Flow in `src/pages/Nearby.tsx`:**
+- Bei Input-Länge ≥ 2 **parallel** zwei Quellen abfragen:
+  1. **Events** (Supabase): 
+     ```ts
+     supabase.from('events')
+       .select('id,title,category,event_date,location_name,latitude,longitude,image_url,is_featured')
+       .eq('visibility', 'public')
+       .eq('status', 'approved')
+       .or(`title.ilike.%${q}%,description.ilike.%${q}%,location_name.ilike.%${q}%`)
+       .order('event_date', { ascending: true })
+       .limit(6);
+     ```
+  2. **Orte** (Mapbox Geocoding, wie bisher), Limit 4.
+- Suggestions-Dropdown bekommt zwei Sektionen mit Headern „Events" und „Orte":
+  - Event-Eintrag: kleines Bild/Icon nach Kategorie, Titel, Datum + Ort (klein, muted), `Top`-Badge wenn `is_featured`.
+  - Ort-Eintrag: `MapPin`-Icon + Name (wie heute).
+- Klick auf **Event** → `mapRef.current.flyTo(lat, lng, 16)` + `setSelectedEvent(event)` (öffnet `EventDetailSheet`) + Suggestions schließen, Suchfeld auf Event-Titel setzen.
+- Klick auf **Ort** → bestehender `selectCity`-Flow.
+- Loading-State: kleiner Spinner rechts im Suchfeld während Debounce-Fetch.
+- Empty-State: „Keine Events oder Orte gefunden" wenn beide Listen leer.
+
+**Code-Struktur:**
+- Neuer Hook **nicht nötig** — kompakt direkt im Page-Component mit `useState`/`useEffect` + Debounce (300 ms, ein gemeinsamer `AbortController` für beide Requests).
+- Type für gemischte Suggestions:
+  ```ts
+  type Suggestion =
+    | { kind: 'event'; event: SearchEvent }
+    | { kind: 'place'; place: GeoResult };
+  ```
+
+---
+
+## Geänderte Dateien
+
+- `src/pages/Nearby.tsx` — Suchfunktion (Events + Orte), Origin-Tracking statt Lock-Timer, stabile Carousel-Liste
+- `src/components/EventCarousel.tsx` — Programmatic-Scroll-Flag, Side-Card-Tap härten
+- `src/components/MapboxMap.tsx` — Debounce des Viewport-Emits
+- `src/components/CategoryFilter.tsx` — Popover rechts ausrichten + Viewport-Clamp
+
+Keine DB-, RLS- oder Edge-Function-Änderungen nötig (Events-Query nutzt bestehende Spalten und Policies).
