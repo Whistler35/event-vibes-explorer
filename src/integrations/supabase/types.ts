@@ -1969,6 +1969,10 @@ export type Database = {
         }
         Returns: string
       }
+      user_participates_in_event: {
+        Args: { _event_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user" | "professional_host"
