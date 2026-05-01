@@ -253,7 +253,7 @@ const AdminHostManagement = () => {
                       className="flex-1 text-xs text-destructive border-destructive/30"
                       onClick={() => setActionDialog({ host, action: 'suspend' })}
                     >
-                      <Ban className="w-3.5 h-3.5 mr-1" /> Sperren
+                      <Ban className="w-3.5 h-3.5 mr-1" /> Suspend
                     </Button>
                   ) : (
                     <Button
