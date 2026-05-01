@@ -340,7 +340,7 @@ const AdminStatistics = () => {
                 <span className="text-foreground text-sm font-semibold">{stats.totalJoinRequests}</span>
               </div>
               <div className="flex justify-between p-3">
-                <span className="text-muted-foreground text-sm">Abgelehnte Events</span>
+                <span className="text-muted-foreground text-sm">Rejected Events</span>
                 <span className="text-foreground text-sm font-semibold">{stats.rejectedEvents}</span>
               </div>
               <div className="flex justify-between p-3">
