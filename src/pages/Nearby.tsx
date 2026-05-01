@@ -40,6 +40,7 @@ const Nearby = () => {
   // visible card list doesn't reshuffle mid-flight.
   const carouselDrivingRef = useRef(false);
   const carouselDrivingTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const [carouselExpandTrigger, setCarouselExpandTrigger] = useState(0);
 
   // Search bar (events + places)
   const [searchOpen, setSearchOpen] = useState(false);
@@ -345,6 +346,8 @@ const Nearby = () => {
             onCreateEvent={handleCreateEvent}
             onEventClick={(event) => {
               setSelectedEventId(event.id);
+              // Auto-expand the carousel so the matching card is visible
+              setCarouselExpandTrigger(t => t + 1);
               // Pan to the event so the carousel viewport-filter keeps it in view,
               // and the matching card scrolls to the active center.
               carouselDrivingRef.current = true;
@@ -507,7 +510,7 @@ const Nearby = () => {
 
         {/* BOTTOM CAROUSEL — collapsible drawer */}
         <div className="absolute bottom-0 left-0 right-0 z-10">
-          <CollapsibleCarousel expandedHeight={280} collapsedHeight={36}>
+          <CollapsibleCarousel expandedHeight={280} collapsedHeight={36} expandTrigger={carouselExpandTrigger}>
             <EventCarousel
               events={carouselEvents}
               selectedId={selectedEventId}

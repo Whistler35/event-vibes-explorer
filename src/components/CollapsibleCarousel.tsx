@@ -7,6 +7,8 @@ interface CollapsibleCarouselProps {
   expandedHeight?: number;
   /** px height when collapsed — only the handle peeks */
   collapsedHeight?: number;
+  /** Increment to force the carousel to expand (e.g. on marker tap) */
+  expandTrigger?: number;
 }
 
 /**
@@ -19,6 +21,7 @@ const CollapsibleCarousel: React.FC<CollapsibleCarouselProps> = ({
   children,
   expandedHeight = 280,
   collapsedHeight = 28,
+  expandTrigger = 0,
 }) => {
   const [expanded, setExpanded] = useState(true);
   const [dragOffset, setDragOffset] = useState(0); // negative = shrinking
@@ -26,6 +29,11 @@ const CollapsibleCarousel: React.FC<CollapsibleCarouselProps> = ({
   const startYRef = useRef(0);
   const startExpandedRef = useRef(true);
   const movedRef = useRef(false);
+
+  // External force-expand (e.g. user taps a marker on the map)
+  useEffect(() => {
+    if (expandTrigger > 0) setExpanded(true);
+  }, [expandTrigger]);
 
   const baseHeight = expanded ? expandedHeight : collapsedHeight;
   const visualHeight = Math.max(
