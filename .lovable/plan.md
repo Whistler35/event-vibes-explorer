@@ -1,78 +1,107 @@
-## Profile Redesign — "Blitz Lifestyle Dashboard"
 
-A complete visual overhaul of `src/pages/Profile.tsx` to match the dark-forest + electric-pink Blitz aesthetic. We keep the existing backend reads but layer in a richer, card-driven layout, plus add multi-photo support to the profile.
+## "I'm in!" — vom stillen Toast zum echten Erlebnis
 
-### 1. New look & feel
+Aktuell passiert beim "I'm in!" technisch alles richtig (Eintrag in `event_participants`, Auto-Ticket per Trigger, Chat-Zugang per RLS), aber **gefühlt** passiert nichts: kleiner Toast oben, Button wechselt zu "Leave event" — fertig. Wir machen daraus einen Moment, der den User direkt zum **Veranstaltungschat** führt, wo der Austausch mit den anderen Teilnehmern stattfindet.
 
-- Background: deep dark forest green (#1C2B1C) applied as a section gradient on the profile page only (not global theme — preserves rest of app).
-- Accent: existing `--blitz-pink` (#FF2D78 family) for highlights, badges, status text.
-- Bold white sans-serif (Inter, already in stack).
-- Layered cards with subtle inner shadow + rounded-3xl corners.
+---
 
-### 2. Sections (top → bottom)
+### 1. Confirmation-Overlay direkt nach Join (1.5–2s)
 
-1. **Top bar** — kept (logo + Settings/Logout/Tickets/Host/Admin icons), restyled to sit on dark bg.
+Vollbild-Overlay im Forest/Citrus-Stil (kein Pink, kein Dating-Vibe):
+- Großer animierter Check ✓ mit Shockwave-Ring
+- Headline: **"Du bist dabei!"**
+- Subline: Eventname + Datum
+- Kleiner Hinweis unten: *"Gruppenchat ist freigeschaltet 💬"*
+- Auto-Dismiss oder Tap to skip → scrollt zum neuen Status-Block
 
-2. **Immersive header**
-   - Large circular avatar (160px) centered, with a radial dark-green glow ring + soft pink halo behind.
-   - Below: `Name, Age` in 28px bold white. Verified shield kept.
-   - Status line: `Bereit für den nächsten Blitz ⚡` in pink, 14px medium.
-   - **Multi-photo strip:** horizontal scroller of additional photos under the avatar (small 64px rounded squares + "+" tile to add more). Tap a photo to view full; tap "+" to upload.
+Neue Komponente: `src/components/EventJoinedConfirmation.tsx`
+Neue Keyframes in `src/index.css`: `joined-check-pop`, `joined-shockwave`, `joined-fade`
 
-3. **Dynamic stats (3 cards, horizontal)**
-   - Card 1: pink circle with `blitzSent` count → "Blitze gesendet ⚡"
-   - Card 2: pink circle with `participatedCount` → "Teilgenommen 👍"
-   - Card 3: pink circle with ⚡ icon → "Aktivitätslevel: <Niedrig|Mittel|Hoch> 🔥" (computed: <5 niedrig, <20 mittel, ≥20 hoch — based on `blitzSent + participated`)
-   - Tap card 2/3 opens existing `ProfileStatsSheet`.
+---
 
-4. **About — "Was ich mache"**
-   - Colored interest chips. Reads from `profile.bio` parsed by comma OR (preferred) a new `interests text[]` column on `profiles`.
-   - Each chip gets a deterministic color from a palette (green/purple/pink/blue/orange) based on hash of label.
-   - "Edit" pencil opens `/profile/edit` with a new interests field.
+### 2. Neuer Teilnehmer-Status-Block (ersetzt "Leave event"-Button)
 
-5. **Fun-fact sticker card**
-   - Slightly rotated (-2deg) yellow/cream sticker card. "Fun fact!" label in pink bold + the user's `fun_fact` text + 😄 emoji.
+Wenn `isParticipant === true`, zeigt die Event-Detail-Seite einen prominenten Card-Block statt dem aktuellen grauen Leave-Button:
 
-6. **Friends — "Deine Blitz-Community (n)"**
-   - Horizontal scrolling list of small friend cards (avatar 56px, name, short bio snippet "Ich bin 27 u…").
-   - Last tile: "+ Freund finden" → opens existing `FriendSearch` in a sheet.
-   - Replaces the current collapsible `FriendSearch` block.
+```text
+┌─────────────────────────────────────────┐
+│  ✓  Du bist dabei!                      │
+│     Heute · 18:00 · in 2 Std            │
+└─────────────────────────────────────────┘
 
-7. **Letzte Aktivitäten**
-   - Horizontal cards (image + title) for the user's 2 most recent participated/hosted events. Reuses `event_participants` join + events.
-   - Tap → `/event/:id`.
+┌─────────────────────────────────────────┐
+│ 💬  Veranstaltungs-Chat        [3 neu] │  ← prominent, ganze Breite
+│     "Marc: Ich bring noch Bier mit..."  │
+│     Letzte Nachricht vor 5 min          │
+└─────────────────────────────────────────┘
 
-8. **Bottom navigation** — already implemented per spec; no changes needed.
+┌──────────┐ ┌──────────┐ ┌──────────────┐
+│ 🎟Ticket │ │ 📍Route │ │ 📅 Kalender │
+└──────────┘ └──────────┘ └──────────────┘
 
-### 3. Backend changes
+Mitstreiter (5)
+👤 👤 👤 👤 👤  → klickbar → Profile/DM
 
-- **Migration:** add to `profiles`
-  - `interests text[] not null default '{}'`
-  - `photos text[] not null default '{}'` (additional gallery photos, in storage bucket `avatars`)
-- Reuse existing `avatars` storage bucket for additional photos.
-- **Stats query addition:** count rows in `blitz_requests` where `host_id = user.id` for "Blitze gesendet".
+           [Doch absagen] (klein, dezent)
+```
 
-### 4. Files
+**Chat-Card im Detail** (das Herzstück):
+- Volle Breite, Forest-Background, Citrus Akzent
+- Live-Preview: letzte Nachricht + Absendername (Realtime via `chat_messages` Subscription)
+- Unread-Badge: zählt Nachrichten seit `conversation_reads.last_read_at` (System wiederverwendbar)
+- Tap → öffnet `/event/:id/chat` (existierende Seite)
+- Wenn noch keine Nachrichten: Placeholder *"Sei der Erste, der etwas schreibt 👋"*
 
-- `supabase/migrations/<ts>_profile_extend.sql` — new columns
-- `src/pages/Profile.tsx` — full rewrite of layout, keep data fetching, extend with `blitzSent` + photos + interests
-- `src/pages/EditProfile.tsx` — add interests (chip input) + photo gallery upload section
-- `src/components/profile/PhotoStrip.tsx` (new) — horizontal photo strip with add/remove
-- `src/components/profile/InterestChips.tsx` (new) — colored chips component
-- `src/components/profile/FriendsCarousel.tsx` (new) — horizontal friend cards, fetches friends + bios
-- `src/components/profile/RecentActivities.tsx` (new) — last 2 events horizontal cards
-- `src/index.css` — small additions: `.sticker-card` (rotation + shadow), `.profile-bg` (forest gradient)
+**Quick-Ticket** (Sheet, kein Umweg über `/tickets`):
+- Bottom Sheet mit dem QR-Code für genau dieses Event
+- Lädt aus `event_tickets` für aktuellen User+Event
+- QR via `qrcode.react` (bereits im Projekt? → sonst `bun add qrcode.react`)
 
-### 5. Behavior preserved
+**Route**: öffnet `https://www.google.com/maps/dir/?api=1&destination={lat},{lng}` in neuem Tab → Maps-App auf Mobile
 
-- Host view (when `isHost`): keeps company name, verified badge, host links, host rating. The "Blitz" sections (status line, Blitze gesendet, interests, fun-fact sticker) are hidden for hosts since hosts don't use Blitz the same way — host profile retains its professional look.
-- Logged-out and loading states unchanged.
-- Admin shortcut card preserved at top.
+**Kalender**: generiert `.ics` aus Event-Daten und triggert Download (neue Util `src/lib/calendar.ts`)
 
-### 6. Out of scope
+**Countdown**: smarte Anzeige
+- > 7 Tage: "In 12 Tagen · Sa, 14:00"
+- < 7 Tage: "Heute in 2 Std" / "Morgen · 18:00"
+- Läuft: "Läuft jetzt 🔴"
+- Vorbei: "Beendet" + Card greyed out
 
-- No theme-wide color change; only the Profile page gets the dark-forest backdrop.
-- No changes to bottom nav (already matches).
-- No new realtime subscriptions.
+**"Doch absagen"**: als kleiner Text-Button unten, mit Confirm-Dialog (`AlertDialog`)
 
-After approval I'll run the migration, build the components, wire them in, and update EditProfile to manage interests + gallery photos.
+---
+
+### 3. Verhalten
+
+- Nach erfolgreichem Join: Overlay zeigen → nach Dismiss smooth scroll zum Status-Block
+- Wenn User die Event-Detail-Seite bereits als Teilnehmer öffnet: Overlay NICHT zeigen, direkt Status-Block
+- Chat-Preview & Unread-Count updaten via Realtime-Subscription auf `chat_messages`
+
+---
+
+### 4. Technische Details
+
+**Neue Files:**
+- `src/components/EventJoinedConfirmation.tsx` — Vollbild-Overlay
+- `src/components/EventParticipantStatus.tsx` — Status-Block mit allen Action-Cards
+- `src/components/EventChatPreviewCard.tsx` — Chat-Preview-Card mit Live-Update + Unread-Badge
+- `src/components/QuickTicketSheet.tsx` — Bottom Sheet mit QR-Code
+- `src/lib/calendar.ts` — `generateIcsFile(event)` → triggert Download
+
+**Edits:**
+- `src/pages/EventDetail.tsx` — `justJoined`-State, Overlay-Render, `EventParticipantStatus` statt Leave-Button, alte "Show ticket" / "Open chat"-Buttons entfernen (sind jetzt im Status-Block)
+- `src/index.css` — Keyframes für Confirmation-Animation
+
+**Dependency** (falls nicht vorhanden): `bun add qrcode.react`
+
+**Optional Migration** (kann später kommen): Trigger auf `event_participants` INSERT, der eine Row in `notifications` für `events.created_by` einfügt — damit der Veranstalter eine Glocken-Notification bekommt. Lasse ich für diesen Schritt erstmal raus, um den Scope schlank zu halten.
+
+---
+
+### 5. Was außerhalb des Scopes ist
+
+- Kein neues Theme, keine Änderungen am Bottom-Nav
+- Host-Notification beim Join (kann ich auf Wunsch ergänzen)
+- Push-Notifications für neue Chat-Nachrichten (separates Thema)
+
+Nach Approval setze ich Migration (falls nötig — hier keine Schema-Änderung), Komponenten und EventDetail-Rewrite in einem Schritt um.
