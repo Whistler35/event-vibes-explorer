@@ -208,7 +208,7 @@ const EventDetailSheet: React.FC<EventDetailSheetProps> = ({ event, open, onClos
               navigate(`/event/${event.id}`);
             }}
           >
-            Mehr Details ansehen
+            View more details
           </Button>
         </div>
       </SheetContent>
