@@ -369,7 +369,7 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
         <button
           onClick={enterPlaceMode}
           style={{ bottom: `calc(280px + 1rem + env(safe-area-inset-bottom))` }}
-          className="absolute right-5 z-[55] w-12 h-12 bg-primary rounded-full flex items-center justify-center shadow-lg hover:bg-primary/90 transition-all"
+          className="absolute right-5 z-30 w-12 h-12 bg-primary rounded-full flex items-center justify-center shadow-lg hover:bg-primary/90 transition-all"
           aria-label="Event erstellen"
         >
           <Plus className="w-6 h-6 text-primary-foreground" />
