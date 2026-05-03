@@ -31,11 +31,13 @@ const Events = () => {
   const { data: featuredEvents } = useQuery({
     queryKey: ['featured-events'],
     queryFn: async () => {
+      const nowIso = new Date().toISOString();
       const { data } = await supabase
         .from('events')
         .select('id, title, image_url, category, event_date, location_name, source')
         .eq('is_featured', true)
         .eq('approval_status', 'approved')
+        .gte('event_date', nowIso)
         .order('featured_order', { ascending: true })
         .order('event_date', { ascending: true })
         .limit(10);
