@@ -87,8 +87,8 @@ const StatDetailSheet = ({ open, onOpenChange, kind, threshold }: Props) => {
           supabase.from("event_participants").select("id,user_id,event_id,joined_at").order("joined_at", { ascending: false }).limit(200),
           "joined_at"
         );
-        const userIds = [...new Set((data ?? []).map((d: any) => d.user_id))];
-        const eventIds = [...new Set((data ?? []).map((d: any) => d.event_id))];
+        const userIds = [...new Set<string>((data ?? []).map((d: any) => d.user_id))];
+        const eventIds = [...new Set<string>((data ?? []).map((d: any) => d.event_id))];
         const [profilesRes, eventsRes] = await Promise.all([
           supabase.from("profiles").select("user_id,name,avatar_url").in("user_id", userIds),
           supabase.from("events").select("id,title").in("id", eventIds),
@@ -110,8 +110,8 @@ const StatDetailSheet = ({ open, onOpenChange, kind, threshold }: Props) => {
         const { data } = await withThreshold(
           supabase.from("event_likes").select("id,user_id,event_id,created_at").order("created_at", { ascending: false }).limit(200)
         );
-        const userIds = [...new Set((data ?? []).map((d: any) => d.user_id))];
-        const eventIds = [...new Set((data ?? []).map((d: any) => d.event_id))];
+        const userIds = [...new Set<string>((data ?? []).map((d: any) => d.user_id))];
+        const eventIds = [...new Set<string>((data ?? []).map((d: any) => d.event_id))];
         const [profilesRes, eventsRes] = await Promise.all([
           supabase.from("profiles").select("user_id,name,avatar_url").in("user_id", userIds),
           supabase.from("events").select("id,title").in("id", eventIds),
@@ -138,7 +138,7 @@ const StatDetailSheet = ({ open, onOpenChange, kind, threshold }: Props) => {
           ...((chatRes.data ?? []) as any[]).map((m) => ({ ...m, type: "Group", uid: m.user_id })),
           ...((dmRes.data ?? []) as any[]).map((m) => ({ ...m, type: "DM", uid: m.sender_id })),
         ].sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 200);
-        const userIds = [...new Set(combined.map((m) => m.uid))];
+        const userIds = [...new Set<string>(combined.map((m) => m.uid))];
         const { data: profiles } = await supabase.from("profiles").select("user_id,name,avatar_url").in("user_id", userIds);
         const pMap = new Map((profiles ?? []).map((p: any) => [p.user_id, p]));
         setRows(combined.map((m) => {
@@ -155,7 +155,7 @@ const StatDetailSheet = ({ open, onOpenChange, kind, threshold }: Props) => {
         const { data } = await withThreshold(
           supabase.from("friendships").select("id,requester_id,addressee_id,status,created_at").eq("status", "accepted").order("created_at", { ascending: false }).limit(200)
         );
-        const userIds = [...new Set((data ?? []).flatMap((d: any) => [d.requester_id, d.addressee_id]))];
+        const userIds = [...new Set<string>((data ?? []).flatMap((d: any) => [d.requester_id, d.addressee_id]))];
         const { data: profiles } = await supabase.from("profiles").select("user_id,name,avatar_url").in("user_id", userIds);
         const pMap = new Map((profiles ?? []).map((p: any) => [p.user_id, p]));
         setRows((data ?? []).map((d: any) => {
@@ -172,8 +172,8 @@ const StatDetailSheet = ({ open, onOpenChange, kind, threshold }: Props) => {
         const { data } = await withThreshold(
           supabase.from("join_requests").select("id,user_id,event_id,status,message,created_at").order("created_at", { ascending: false }).limit(200)
         );
-        const userIds = [...new Set((data ?? []).map((d: any) => d.user_id))];
-        const eventIds = [...new Set((data ?? []).map((d: any) => d.event_id))];
+        const userIds = [...new Set<string>((data ?? []).map((d: any) => d.user_id))];
+        const eventIds = [...new Set<string>((data ?? []).map((d: any) => d.event_id))];
         const [profilesRes, eventsRes] = await Promise.all([
           supabase.from("profiles").select("user_id,name,avatar_url").in("user_id", userIds),
           supabase.from("events").select("id,title").in("id", eventIds),
