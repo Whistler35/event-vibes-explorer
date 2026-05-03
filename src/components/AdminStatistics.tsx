@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Users, CalendarDays, UserPlus, MessageCircle, Heart, Handshake, TrendingUp, Download } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import StatDetailSheet, { StatKind } from "@/components/admin/StatDetailSheet";
 
 type TimeRange = "7d" | "30d" | "12m" | "all";
 
@@ -58,15 +59,20 @@ const CATEGORY_LABELS: Record<string, string> = {
   other: "Other",
 };
 
-const StatCard = ({ icon: Icon, label, value, subtext }: { icon: any; label: string; value: number | string; subtext?: string }) => (
-  <div className="bg-card rounded-2xl border border-border p-4 space-y-1">
+const StatCard = ({ icon: Icon, label, value, subtext, onClick }: { icon: any; label: string; value: number | string; subtext?: string; onClick?: () => void }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    disabled={!onClick}
+    className="bg-card rounded-2xl border border-border p-4 space-y-1 text-left transition-colors enabled:hover:border-primary/50 enabled:active:scale-[0.98] disabled:cursor-default"
+  >
     <div className="flex items-center gap-2 text-muted-foreground">
       <Icon className="w-4 h-4" />
       <span className="text-xs font-medium">{label}</span>
     </div>
     <p className="text-foreground text-2xl font-bold">{value}</p>
     {subtext && <p className="text-muted-foreground text-xs">{subtext}</p>}
-  </div>
+  </button>
 );
 
 const AdminStatistics = () => {
@@ -75,6 +81,7 @@ const AdminStatistics = () => {
   const [categoryData, setCategoryData] = useState<CategoryData[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState<TimeRange>("all");
+  const [detailKind, setDetailKind] = useState<StatKind | null>(null);
 
   useEffect(() => {
     fetchAllStats();
@@ -270,12 +277,12 @@ const AdminStatistics = () => {
           <div>
             <h4 className="text-foreground font-semibold text-sm mb-3">Overview</h4>
             <div className="grid grid-cols-2 gap-3">
-              <StatCard icon={Users} label="Users" value={stats.totalUsers} />
-              <StatCard icon={CalendarDays} label="Total Events" value={stats.totalEvents} subtext={`${stats.approvedEvents} approved · ${stats.pendingEvents} pending`} />
-              <StatCard icon={UserPlus} label="Participations" value={stats.totalParticipants} />
-              <StatCard icon={Heart} label="Likes" value={stats.totalLikes} />
-              <StatCard icon={MessageCircle} label="Messages" value={stats.totalChatMessages + stats.totalDirectMessages} subtext={`${stats.totalChatMessages} groups · ${stats.totalDirectMessages} DMs`} />
-              <StatCard icon={Handshake} label="Friendships" value={stats.totalFriendships} />
+              <StatCard icon={Users} label="Users" value={stats.totalUsers} onClick={() => setDetailKind("users")} />
+              <StatCard icon={CalendarDays} label="Total Events" value={stats.totalEvents} subtext={`${stats.approvedEvents} approved · ${stats.pendingEvents} pending`} onClick={() => setDetailKind("events")} />
+              <StatCard icon={UserPlus} label="Participations" value={stats.totalParticipants} onClick={() => setDetailKind("participations")} />
+              <StatCard icon={Heart} label="Likes" value={stats.totalLikes} onClick={() => setDetailKind("likes")} />
+              <StatCard icon={MessageCircle} label="Messages" value={stats.totalChatMessages + stats.totalDirectMessages} subtext={`${stats.totalChatMessages} groups · ${stats.totalDirectMessages} DMs`} onClick={() => setDetailKind("messages")} />
+              <StatCard icon={Handshake} label="Friendships" value={stats.totalFriendships} onClick={() => setDetailKind("friendships")} />
             </div>
           </div>
 
@@ -335,14 +342,14 @@ const AdminStatistics = () => {
           <div>
             <h4 className="text-foreground font-semibold text-sm mb-3">Further Details</h4>
             <div className="bg-card rounded-2xl border border-border divide-y divide-border">
-              <div className="flex justify-between p-3">
+              <button onClick={() => setDetailKind("joinRequests")} className="w-full flex justify-between p-3 text-left hover:bg-muted/30 transition-colors">
                 <span className="text-muted-foreground text-sm">Join Requests</span>
-                <span className="text-foreground text-sm font-semibold">{stats.totalJoinRequests}</span>
-              </div>
-              <div className="flex justify-between p-3">
+                <span className="text-foreground text-sm font-semibold">{stats.totalJoinRequests} ›</span>
+              </button>
+              <button onClick={() => setDetailKind("rejectedEvents")} className="w-full flex justify-between p-3 text-left hover:bg-muted/30 transition-colors">
                 <span className="text-muted-foreground text-sm">Rejected Events</span>
-                <span className="text-foreground text-sm font-semibold">{stats.rejectedEvents}</span>
-              </div>
+                <span className="text-foreground text-sm font-semibold">{stats.rejectedEvents} ›</span>
+              </button>
               <div className="flex justify-between p-3">
                 <span className="text-muted-foreground text-sm">Ø Participations per Event</span>
                 <span className="text-foreground text-sm font-semibold">
@@ -359,6 +366,13 @@ const AdminStatistics = () => {
           </div>
         </>
       )}
+
+      <StatDetailSheet
+        open={detailKind !== null}
+        onOpenChange={(v) => !v && setDetailKind(null)}
+        kind={detailKind}
+        threshold={getDateThreshold(timeRange)}
+      />
     </div>
   );
 };
