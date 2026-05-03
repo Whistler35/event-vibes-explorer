@@ -81,8 +81,17 @@ Deno.serve(async (req) => {
         ? params.source
         : undefined
 
-    const dateFrom = isValidIsoDate(params.date_from) ? params.date_from : undefined
-    const dateTo = isValidIsoDate(params.date_to) ? params.date_to : undefined
+    let dateFrom = isValidIsoDate(params.date_from) ? params.date_from : undefined
+    let dateTo = isValidIsoDate(params.date_to) ? params.date_to : undefined
+    // Default: if no date filter provided at all, restrict to events happening today.
+    // This prevents past + future events from being shown together by default.
+    if (!dateFrom && !dateTo) {
+      const now = new Date()
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0)
+      const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59)
+      dateFrom = startOfToday.toISOString()
+      dateTo = endOfToday.toISOString()
+    }
 
     // Sanitize free-text search: strip PostgREST filter syntax chars and cap length
     let safeText: string | undefined
