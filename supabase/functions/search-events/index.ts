@@ -83,14 +83,16 @@ Deno.serve(async (req) => {
 
     let dateFrom = isValidIsoDate(params.date_from) ? params.date_from : undefined
     let dateTo = isValidIsoDate(params.date_to) ? params.date_to : undefined
-    // Default: if no date filter provided at all, restrict to events happening today.
-    // This prevents past + future events from being shown together by default.
+    // Default: if no date filter provided at all, restrict to events of the current
+    // calendar week (Monday 00:00 to Sunday 23:59:59).
     if (!dateFrom && !dateTo) {
       const now = new Date()
-      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0)
-      const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59)
-      dateFrom = startOfToday.toISOString()
-      dateTo = endOfToday.toISOString()
+      const day = now.getDay() // 0=Sun..6=Sat
+      const diffToMonday = (day + 6) % 7
+      const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday, 0, 0, 0)
+      const sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6, 23, 59, 59)
+      dateFrom = monday.toISOString()
+      dateTo = sunday.toISOString()
     }
 
     // Sanitize free-text search: strip PostgREST filter syntax chars and cap length
@@ -125,6 +127,7 @@ Deno.serve(async (req) => {
       .select('*', { count: 'exact' })
       .eq('visibility', 'public')
       .eq('approval_status', 'approved')
+      .eq('archived', false)
       .order('event_date', { ascending: true })
       .range(offset, offset + limit - 1)
 
