@@ -22,7 +22,7 @@ const Events = () => {
   const { data: searchResult, isLoading } = useSearchEvents({
     categories: selectedCategories.length > 0 ? selectedCategories : undefined,
     text: searchQuery || undefined,
-    date_from: selectedFilter === 'today' ? today : undefined,
+    date_from: selectedFilter === 'today' ? today : today,
     date_to: selectedFilter === 'today' ? today + 'T23:59:59' : undefined,
     limit: 50,
   });
@@ -31,11 +31,13 @@ const Events = () => {
   const { data: featuredEvents } = useQuery({
     queryKey: ['featured-events'],
     queryFn: async () => {
+      const nowIso = new Date().toISOString();
       const { data } = await supabase
         .from('events')
         .select('id, title, image_url, category, event_date, location_name, source')
         .eq('is_featured', true)
         .eq('approval_status', 'approved')
+        .gte('event_date', nowIso)
         .order('featured_order', { ascending: true })
         .order('event_date', { ascending: true })
         .limit(10);
