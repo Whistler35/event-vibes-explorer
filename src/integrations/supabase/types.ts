@@ -445,6 +445,7 @@ export type Database = {
       events: {
         Row: {
           approval_status: Database["public"]["Enums"]["approval_status"]
+          archived: boolean
           category: Database["public"]["Enums"]["event_category"] | null
           created_at: string
           created_by: string | null
@@ -469,6 +470,7 @@ export type Database = {
         }
         Insert: {
           approval_status?: Database["public"]["Enums"]["approval_status"]
+          archived?: boolean
           category?: Database["public"]["Enums"]["event_category"] | null
           created_at?: string
           created_by?: string | null
@@ -493,6 +495,7 @@ export type Database = {
         }
         Update: {
           approval_status?: Database["public"]["Enums"]["approval_status"]
+          archived?: boolean
           category?: Database["public"]["Enums"]["event_category"] | null
           created_at?: string
           created_by?: string | null
@@ -1315,6 +1318,7 @@ export type Database = {
         Args: { ne_lat: number; ne_lng: number; sw_lat: number; sw_lng: number }
         Returns: {
           approval_status: Database["public"]["Enums"]["approval_status"]
+          archived: boolean
           category: Database["public"]["Enums"]["event_category"] | null
           created_at: string
           created_by: string | null
@@ -1348,6 +1352,7 @@ export type Database = {
         Args: { center_lat: number; center_lng: number; radius_meters: number }
         Returns: {
           approval_status: Database["public"]["Enums"]["approval_status"]
+          archived: boolean
           category: Database["public"]["Enums"]["event_category"] | null
           created_at: string
           created_by: string | null
