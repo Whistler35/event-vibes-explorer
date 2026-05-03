@@ -17,13 +17,19 @@ const Events = () => {
   const [selectedCategories, setSelectedCategories] = useState<EventCategory[]>([]);
   const navigate = useNavigate();
 
+  // Current calendar week (Monday – Sunday)
+  const now = new Date();
+  const day = now.getDay();
+  const diffToMonday = (day + 6) % 7;
+  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday, 0, 0, 0);
+  const sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6, 23, 59, 59);
   const today = new Date().toISOString().split('T')[0];
 
   const { data: searchResult, isLoading } = useSearchEvents({
     categories: selectedCategories.length > 0 ? selectedCategories : undefined,
     text: searchQuery || undefined,
-    date_from: selectedFilter === 'today' ? today : today,
-    date_to: selectedFilter === 'today' ? today + 'T23:59:59' : undefined,
+    date_from: selectedFilter === 'today' ? today : monday.toISOString(),
+    date_to: selectedFilter === 'today' ? today + 'T23:59:59' : sunday.toISOString(),
     limit: 50,
   });
 
@@ -37,6 +43,7 @@ const Events = () => {
         .select('id, title, image_url, category, event_date, location_name, source')
         .eq('is_featured', true)
         .eq('approval_status', 'approved')
+        .eq('archived', false)
         .gte('event_date', nowIso)
         .order('featured_order', { ascending: true })
         .order('event_date', { ascending: true })

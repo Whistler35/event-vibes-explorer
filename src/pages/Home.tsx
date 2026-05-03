@@ -65,6 +65,7 @@ const Home = () => {
         .select('id, title, image_url, category, event_date, location_name, price_cents')
         .eq('is_featured', true)
         .eq('approval_status', 'approved')
+        .eq('archived', false)
         .gte('event_date', nowIso)
         .order('featured_order', { ascending: true })
         .order('event_date', { ascending: true })
