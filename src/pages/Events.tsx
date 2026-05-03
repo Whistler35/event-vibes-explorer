@@ -22,7 +22,7 @@ const Events = () => {
   const { data: searchResult, isLoading } = useSearchEvents({
     categories: selectedCategories.length > 0 ? selectedCategories : undefined,
     text: searchQuery || undefined,
-    date_from: selectedFilter === 'today' ? today : undefined,
+    date_from: selectedFilter === 'today' ? today : today,
     date_to: selectedFilter === 'today' ? today + 'T23:59:59' : undefined,
     limit: 50,
   });
