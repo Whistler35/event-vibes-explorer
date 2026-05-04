@@ -1,30 +1,60 @@
 /// <reference types="npm:@types/react@18.3.1" />
-import * as React from 'npm:react@18.3.1'
-import { Button, Section, Text } from 'npm:@react-email/components@0.0.22'
-import { EvendleLayout, styles } from './_layout.tsx'
 
-interface Props {
+import * as React from 'npm:react@18.3.1'
+
+import {
+  Body,
+  Button,
+  Container,
+  Head,
+  Heading,
+  Html,
+  Preview,
+  Section,
+  Text,
+} from 'npm:@react-email/components@0.0.22'
+
+import { styles } from './_brand.ts'
+
+interface InviteEmailProps {
+  siteName: string
+  siteUrl: string
   confirmationUrl: string
 }
 
-export const InviteEmail = ({ confirmationUrl }: Props) => (
-  <EvendleLayout preview="Du wurdest zu EVENDLE eingeladen">
-    <Text style={styles.h1}>Du bist eingeladen! 🎊</Text>
-    <Text style={styles.text}>
-      Jemand hat dich zu EVENDLE eingeladen — der App, mit der du Events in
-      deiner Stadt entdeckst und neue Leute triffst.
-    </Text>
-    <Section style={styles.buttonWrap}>
-      <Button href={confirmationUrl} style={styles.button}>
-        Einladung annehmen
-      </Button>
-    </Section>
-    <Text style={styles.hint}>
-      Falls du nicht weißt, wovon hier die Rede ist, ignoriere diese E-Mail
-      einfach.
-    </Text>
-    <Text style={styles.linkFallback}>{confirmationUrl}</Text>
-  </EvendleLayout>
+export const InviteEmail = ({ confirmationUrl }: InviteEmailProps) => (
+  <Html lang="de" dir="ltr">
+    <Head />
+    <Preview>Du wurdest zu EVENDLE eingeladen</Preview>
+    <Body style={styles.main}>
+      <Section style={styles.outer}>
+        <Container style={styles.container}>
+          <Section style={styles.header}>
+            <Text style={styles.wordmark}>EVENDLE</Text>
+          </Section>
+          <Section style={styles.accentBar}>&nbsp;</Section>
+          <Section style={styles.body}>
+            <Heading style={styles.h1}>Du bist eingeladen 🎉</Heading>
+            <Text style={styles.text}>
+              Du wurdest eingeladen, EVENDLE beizutreten. Klicke auf den Button,
+              um die Einladung anzunehmen und dein Konto zu erstellen.
+            </Text>
+            <Button style={styles.button} href={confirmationUrl}>
+              Einladung annehmen
+            </Button>
+            <Section style={styles.divider}>&nbsp;</Section>
+            <Text style={styles.text}>
+              Falls du keine Einladung erwartet hast, kannst du diese E-Mail
+              ignorieren.
+            </Text>
+          </Section>
+          <Text style={styles.footer}>
+            EVENDLE — Entdecke Events in deiner Nähe
+          </Text>
+        </Container>
+      </Section>
+    </Body>
+  </Html>
 )
 
-export const subject = 'Du wurdest zu EVENDLE eingeladen'
+export default InviteEmail
