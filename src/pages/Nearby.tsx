@@ -21,6 +21,17 @@ import { toast } from "sonner";
 import type { MapboxMapHandle } from "@/components/MapboxMap";
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiZXZlbmRsZSIsImEiOiJjbWs0aHc2eWQwN2hqM2RyMjI4ZTY0N2F6In0.gMPP_wAbSR4Esz7WlB4Z4Q';
+const MAP_EVENT_RADIUS_KM = 30;
+
+function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const radius = 6371;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2
+    + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return radius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
 
 interface GeoResult { name: string; lat: number; lng: number; }
 
@@ -70,6 +81,7 @@ const Nearby = () => {
   const initialCenter: [number, number] = storedCity
     ? [storedCity.lat, storedCity.lng]
     : [47.2692, 11.4041];
+  const [mapFocusCenter, setMapFocusCenter] = useState<[number, number]>(initialCenter);
 
   useEffect(() => {
     if (storedCity) setCityQuery(storedCity.name?.split(',')[0] || '');
@@ -188,6 +200,7 @@ const Nearby = () => {
   const selectCity = (loc: GeoResult) => {
     setCityQuery(loc.name.split(',')[0]);
     setShowCitySuggestions(false);
+    setMapFocusCenter([loc.lat, loc.lng]);
     // Clear any previously selected event from the prior city so the carousel
     // doesn't keep showing an out-of-area event after the user switches cities.
     setSelectedEventId(null);
@@ -200,10 +213,11 @@ const Nearby = () => {
   const selectEventSuggestion = (ev: SearchEvent) => {
     setShowCitySuggestions(false);
     setCityQuery(ev.title);
+    const eventPosition: [number, number] = [ev.latitude ?? 47.2692, ev.longitude ?? 11.4041];
     const mapEv: MapEvent = {
       id: ev.id,
       title: ev.title,
-      position: [ev.latitude ?? 47.2692, ev.longitude ?? 11.4041],
+      position: eventPosition,
       image: ev.image_url || undefined,
       category: ev.category || undefined,
       description: ev.description || undefined,
@@ -214,6 +228,7 @@ const Nearby = () => {
       is_featured: ev.is_featured || false,
     };
     if (ev.latitude != null && ev.longitude != null) {
+      setMapFocusCenter(eventPosition);
       mapRef.current?.flyTo(ev.latitude, ev.longitude, 16);
     }
     setSelectedEventId(ev.id);
@@ -267,12 +282,17 @@ const Nearby = () => {
 
   let mapEvents = isPrivateMode ? privateMapEvents : publicMapEvents;
 
+  mapEvents = mapEvents.filter(e => (
+    haversineDistance(mapFocusCenter[0], mapFocusCenter[1], e.position[0], e.position[1]) <= MAP_EVENT_RADIUS_KM
+  ));
+
   // "Popular" filter: only featured
   if (activeQuickFilters.has('popular')) {
     mapEvents = mapEvents.filter(e => e.is_featured);
   }
 
-  // Carousel = events visible in current viewport, featured first then by date, max 10.
+  // Carousel = events within 30km of the current map focus, visible in viewport,
+  // featured first then by date, max 10.
   // While the carousel drives the map, we freeze the viewport reference so the order stays put.
   const effectiveBounds = viewportBounds;
   const carouselEvents = useMemo(() => {
@@ -283,9 +303,7 @@ const Nearby = () => {
               && lng >= effectiveBounds.west && lng <= effectiveBounds.east;
         })
       : mapEvents;
-    // Always keep the currently selected event in the list, even if it just
-    // scrolled out of bounds during a flyTo — prevents the active card from
-    // vanishing under the user's tap.
+    // Keep the selected event only while it is still inside the current 30km map area.
     const selected = selectedEventId != null
       ? mapEvents.find(e => String(e.id) === String(selectedEventId))
       : undefined;
@@ -379,6 +397,7 @@ const Nearby = () => {
             onEventClick={(event) => {
               // User tapped a marker on the map → fresh list around that marker.
               setFrozenCarousel(null);
+              setMapFocusCenter(event.position);
               setSelectedEventId(event.id);
               // Auto-expand the carousel so the matching card is visible
               setCarouselExpandTrigger(t => t + 1);
@@ -391,6 +410,7 @@ const Nearby = () => {
               if (carouselDrivingRef.current || Date.now() < carouselViewportIgnoreUntilRef.current) return;
               // User moved/zoomed the map themselves → unfreeze and refresh the list.
               setFrozenCarousel(null);
+              setMapFocusCenter([(b.south + b.north) / 2, (b.west + b.east) / 2]);
               setViewportBounds(b);
             }}
             events={mapEvents}
