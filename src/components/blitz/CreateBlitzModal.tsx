@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Zap, MapPin, Loader2 } from "lucide-react";
-import { createBlitzRequest } from "@/hooks/useBlitzRequest";
+import { Zap, MapPin, Loader2, Globe2, Users } from "lucide-react";
+import { createBlitzRequest, BlitzAudience } from "@/hooks/useBlitzRequest";
 import { toast } from "sonner";
 
 interface CreateBlitzModalProps {
@@ -24,6 +24,7 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
   const [activity, setActivity] = useState("");
   const [duration, setDuration] = useState(60);
   const [radius, setRadius] = useState(10);
+  const [audience, setAudience] = useState<BlitzAudience>("public");
   const [submitting, setSubmitting] = useState(false);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [locating, setLocating] = useState(false);
@@ -60,6 +61,7 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
       setActivity("");
       setDuration(60);
       setRadius(10);
+      setAudience("public");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -86,8 +88,9 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
         latitude: coords.lat,
         longitude: coords.lng,
         radiusKm: radius,
+        audience,
       });
-      toast.success("⚡ Blitzed!");
+      toast.success(audience === "friends" ? "⚡ Blitzed! (nur Freunde)" : "⚡ Blitzed!");
       onOpenChange(false);
       onCreated?.();
     } catch (e: any) {
@@ -174,6 +177,40 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
             <div className="flex justify-between text-[10px] uppercase tracking-widest text-white/40 font-bold">
               <span>{RADIUS_MIN} km</span>
               <span>{RADIUS_MAX} km</span>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <label className="text-sm font-bold uppercase tracking-wide text-white/70">
+              Sichtbarkeit
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {([
+                { value: "public", label: "Öffentlich", desc: "Alle in der Nähe", Icon: Globe2 },
+                { value: "friends", label: "Nur Freunde", desc: "Nur deine Freunde", Icon: Users },
+              ] as const).map(({ value, label, desc, Icon }) => {
+                const active = audience === value;
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setAudience(value)}
+                    className={`p-3 rounded-xl text-left transition border-2 ${
+                      active
+                        ? "bg-[hsl(var(--blitz-pink))] border-[hsl(var(--blitz-pink))] text-white shadow-[0_0_20px_hsl(var(--blitz-pink)/0.5)]"
+                        : "bg-white/5 border-white/10 text-white/80 hover:border-white/30"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Icon className="w-4 h-4" />
+                      <span className="font-black text-sm uppercase tracking-wide">{label}</span>
+                    </div>
+                    <p className={`text-[11px] mt-1 ${active ? "text-white/80" : "text-white/50"}`}>
+                      {desc}
+                    </p>
+                  </button>
+                );
+              })}
             </div>
           </div>
 

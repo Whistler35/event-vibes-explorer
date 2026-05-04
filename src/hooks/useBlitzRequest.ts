@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
+export type BlitzAudience = "public" | "friends";
+
 export interface BlitzRequest {
   id: string;
   host_id: string;
@@ -14,6 +16,7 @@ export interface BlitzRequest {
   created_at: string;
   expires_at: string;
   radius_km: number;
+  audience: BlitzAudience;
 }
 
 export function useActiveBlitzRequest() {
@@ -67,6 +70,7 @@ export async function createBlitzRequest(params: {
   latitude: number;
   longitude: number;
   radiusKm: number;
+  audience?: BlitzAudience;
 }) {
   const {
     data: { user },
@@ -86,6 +90,7 @@ export async function createBlitzRequest(params: {
       longitude: params.longitude,
       radius_km: params.radiusKm,
       expires_at: expiresAt,
+      audience: params.audience ?? "public",
     })
     .select()
     .single();

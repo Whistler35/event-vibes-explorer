@@ -90,6 +90,7 @@ export type Database = {
       blitz_requests: {
         Row: {
           activity: string
+          audience: Database["public"]["Enums"]["blitz_audience"]
           city: string | null
           created_at: string
           duration_minutes: number
@@ -104,6 +105,7 @@ export type Database = {
         }
         Insert: {
           activity: string
+          audience?: Database["public"]["Enums"]["blitz_audience"]
           city?: string | null
           created_at?: string
           duration_minutes?: number
@@ -118,6 +120,7 @@ export type Database = {
         }
         Update: {
           activity?: string
+          audience?: Database["public"]["Enums"]["blitz_audience"]
           city?: string | null
           created_at?: string
           duration_minutes?: number
@@ -2118,6 +2121,7 @@ export type Database = {
     Enums: {
       app_role: "admin" | "moderator" | "user" | "professional_host"
       approval_status: "pending" | "approved" | "rejected"
+      blitz_audience: "public" | "friends"
       blitz_match_status: "active" | "expired" | "closed"
       blitz_status: "active" | "expired" | "cancelled" | "matched"
       blitz_swipe_direction: "left" | "right"
@@ -2271,6 +2275,7 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "moderator", "user", "professional_host"],
       approval_status: ["pending", "approved", "rejected"],
+      blitz_audience: ["public", "friends"],
       blitz_match_status: ["active", "expired", "closed"],
       blitz_status: ["active", "expired", "cancelled", "matched"],
       blitz_swipe_direction: ["left", "right"],
