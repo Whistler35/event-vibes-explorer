@@ -188,6 +188,11 @@ const Nearby = () => {
   const selectCity = (loc: GeoResult) => {
     setCityQuery(loc.name.split(',')[0]);
     setShowCitySuggestions(false);
+    // Clear any previously selected event from the prior city so the carousel
+    // doesn't keep showing an out-of-area event after the user switches cities.
+    setSelectedEventId(null);
+    setSelectedEvent(null);
+    setFrozenCarousel(null);
     mapRef.current?.flyTo(loc.lat, loc.lng, 13);
     localStorage.setItem('selectedCity', JSON.stringify(loc));
   };
