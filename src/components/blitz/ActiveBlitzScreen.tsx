@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Zap, X } from "lucide-react";
 import { BlitzRequest, cancelBlitzRequest } from "@/hooks/useBlitzRequest";
+import { getActivityFontClass } from "@/lib/blitzText";
 import { toast } from "sonner";
 
 interface ActiveBlitzScreenProps {
@@ -61,7 +62,7 @@ const ActiveBlitzScreen = ({ request, onEnded }: ActiveBlitzScreenProps) => {
         </div>
 
         <div className="space-y-6 my-auto">
-          <h1 className="text-6xl font-black uppercase leading-none tracking-tight break-words">
+          <h1 className={`${getActivityFontClass(request.activity)} font-black uppercase leading-tight tracking-tight break-words max-w-full px-2`}>
             {request.activity}?
           </h1>
 

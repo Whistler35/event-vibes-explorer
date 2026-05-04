@@ -1,6 +1,7 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import evendleLogo from "@/assets/evendle-logo.jpeg";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import Layout from "@/components/Layout";
@@ -34,6 +35,34 @@ const isConversationUnread = (convoId: string, lastMessageAt: string | null, use
 const Messenger = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  // Realtime: refresh conversation list as soon as a new Blitz match (or new
+  // direct message) appears, so the chat shows up instantly for both users.
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(`messenger-rt-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "blitz_matches" },
+        () => queryClient.invalidateQueries({ queryKey: ["dm-conversations", user.id] })
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "direct_messages" },
+        () => queryClient.invalidateQueries({ queryKey: ["dm-conversations", user.id] })
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "blitz_chat_messages" },
+        () => queryClient.invalidateQueries({ queryKey: ["dm-conversations", user.id] })
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, queryClient]);
 
   const isEvenldeUnread = !localStorage.getItem("dm_last_read_evendle-welcome");
 
