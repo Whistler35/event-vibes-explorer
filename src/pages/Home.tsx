@@ -56,24 +56,34 @@ const Home = () => {
   const nearbySectionRef = useRef<HTMLDivElement>(null);
   const shouldScrollRef = useRef(false);
 
-  const { data: featuredEvents } = useQuery({
+  const { data: featuredEventsRaw } = useQuery({
     queryKey: ['featured-events-home'],
     queryFn: async () => {
       const nowIso = new Date().toISOString();
       const { data } = await supabase
         .from('events')
-        .select('id, title, image_url, category, event_date, location_name, price_cents')
+        .select('id, title, image_url, category, event_date, location_name, price_cents, latitude, longitude')
         .eq('is_featured', true)
         .eq('approval_status', 'approved')
         .eq('archived', false)
         .gte('event_date', nowIso)
         .order('featured_order', { ascending: true })
         .order('event_date', { ascending: true })
-        .limit(10);
+        .limit(50);
       return data || [];
     },
     staleTime: 60_000,
   });
+
+  // Filter top events by 30km radius when a location is selected
+  const featuredEvents = (() => {
+    const all = featuredEventsRaw || [];
+    if (!searchLocation) return all.slice(0, 10);
+    return all
+      .filter((e: any) => e.latitude != null && e.longitude != null)
+      .filter((e: any) => haversineDistance(searchLocation.lat, searchLocation.lng, e.latitude, e.longitude) <= 30)
+      .slice(0, 10);
+  })();
 
   // Fetch nearby events when a location is selected
   const { data: nearbyEvents } = useQuery({
