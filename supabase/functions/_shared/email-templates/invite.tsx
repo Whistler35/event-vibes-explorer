@@ -1,30 +1,79 @@
 /// <reference types="npm:@types/react@18.3.1" />
-import * as React from 'npm:react@18.3.1'
-import { Button, Section, Text } from 'npm:@react-email/components@0.0.22'
-import { EvendleLayout, styles } from './_layout.tsx'
 
-interface Props {
+import * as React from 'npm:react@18.3.1'
+
+import {
+  Body,
+  Button,
+  Container,
+  Head,
+  Heading,
+  Html,
+  Link,
+  Preview,
+  Text,
+} from 'npm:@react-email/components@0.0.22'
+
+interface InviteEmailProps {
+  siteName: string
+  siteUrl: string
   confirmationUrl: string
 }
 
-export const InviteEmail = ({ confirmationUrl }: Props) => (
-  <EvendleLayout preview="Du wurdest zu EVENDLE eingeladen">
-    <Text style={styles.h1}>Du bist eingeladen! 🎊</Text>
-    <Text style={styles.text}>
-      Jemand hat dich zu EVENDLE eingeladen — der App, mit der du Events in
-      deiner Stadt entdeckst und neue Leute triffst.
-    </Text>
-    <Section style={styles.buttonWrap}>
-      <Button href={confirmationUrl} style={styles.button}>
-        Einladung annehmen
-      </Button>
-    </Section>
-    <Text style={styles.hint}>
-      Falls du nicht weißt, wovon hier die Rede ist, ignoriere diese E-Mail
-      einfach.
-    </Text>
-    <Text style={styles.linkFallback}>{confirmationUrl}</Text>
-  </EvendleLayout>
+export const InviteEmail = ({
+  siteName,
+  siteUrl,
+  confirmationUrl,
+}: InviteEmailProps) => (
+  <Html lang="en" dir="ltr">
+    <Head />
+    <Preview>You've been invited to join {siteName}</Preview>
+    <Body style={main}>
+      <Container style={container}>
+        <Heading style={h1}>You've been invited</Heading>
+        <Text style={text}>
+          You've been invited to join{' '}
+          <Link href={siteUrl} style={link}>
+            <strong>{siteName}</strong>
+          </Link>
+          . Click the button below to accept the invitation and create your
+          account.
+        </Text>
+        <Button style={button} href={confirmationUrl}>
+          Accept Invitation
+        </Button>
+        <Text style={footer}>
+          If you weren't expecting this invitation, you can safely ignore this
+          email.
+        </Text>
+      </Container>
+    </Body>
+  </Html>
 )
 
-export const subject = 'Du wurdest zu EVENDLE eingeladen'
+export default InviteEmail
+
+const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
+const container = { padding: '20px 25px' }
+const h1 = {
+  fontSize: '22px',
+  fontWeight: 'bold' as const,
+  color: '#000000',
+  margin: '0 0 20px',
+}
+const text = {
+  fontSize: '14px',
+  color: '#55575d',
+  lineHeight: '1.5',
+  margin: '0 0 25px',
+}
+const link = { color: 'inherit', textDecoration: 'underline' }
+const button = {
+  backgroundColor: '#000000',
+  color: '#ffffff',
+  fontSize: '14px',
+  borderRadius: '8px',
+  padding: '12px 20px',
+  textDecoration: 'none',
+}
+const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
