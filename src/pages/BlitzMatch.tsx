@@ -144,6 +144,21 @@ const BlitzMatch = () => {
     if (error) toast.error(error.message);
   };
 
+  const handleAdminDelete = async () => {
+    if (!match) return;
+    if (!confirm("Diesen Blitz und den zugehörigen Chat als Admin löschen?")) return;
+    const { error } = await supabase
+      .from("blitz_requests")
+      .delete()
+      .eq("id", match.blitz_request_id);
+    if (error) {
+      toast.error(error.message || "Löschen fehlgeschlagen");
+      return;
+    }
+    toast.success("Blitz gelöscht");
+    navigate("/messenger");
+  };
+
   if (showMatchSplash) {
     return (
       <div className="fixed inset-0 z-50 bg-[hsl(var(--blitz-forest))] text-white overflow-hidden flex flex-col">
