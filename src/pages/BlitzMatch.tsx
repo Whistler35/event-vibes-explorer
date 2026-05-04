@@ -289,14 +289,25 @@ const BlitzMatch = () => {
             <p className="text-[10px] uppercase tracking-wider text-white/60">{activity}</p>
           </div>
         </div>
-        <div
-          className={`px-3 py-1.5 rounded-full font-black tabular-nums text-sm ${
-            expired
-              ? "bg-white/10 text-white/40"
-              : "bg-[hsl(var(--blitz-pink))] text-white shadow-[0_0_20px_hsl(var(--blitz-pink)/0.5)]"
-          }`}
-        >
-          {String(m).padStart(2, "0")}:{String(s).padStart(2, "0")}
+        <div className="flex items-center gap-2">
+          {isAdmin && (
+            <button
+              onClick={handleAdminDelete}
+              aria-label="Blitz als Admin löschen"
+              className="w-9 h-9 rounded-full bg-red-500/90 hover:bg-red-500 flex items-center justify-center transition"
+            >
+              <Trash2 className="w-4 h-4 text-white" />
+            </button>
+          )}
+          <div
+            className={`px-3 py-1.5 rounded-full font-black tabular-nums text-sm ${
+              expired
+                ? "bg-white/10 text-white/40"
+                : "bg-[hsl(var(--blitz-pink))] text-white shadow-[0_0_20px_hsl(var(--blitz-pink)/0.5)]"
+            }`}
+          >
+            {String(m).padStart(2, "0")}:{String(s).padStart(2, "0")}
+          </div>
         </div>
       </div>
 
