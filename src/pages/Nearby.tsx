@@ -200,6 +200,7 @@ const Nearby = () => {
   const selectCity = (loc: GeoResult) => {
     setCityQuery(loc.name.split(',')[0]);
     setShowCitySuggestions(false);
+    setMapFocusCenter([loc.lat, loc.lng]);
     // Clear any previously selected event from the prior city so the carousel
     // doesn't keep showing an out-of-area event after the user switches cities.
     setSelectedEventId(null);
@@ -394,6 +395,7 @@ const Nearby = () => {
             onEventClick={(event) => {
               // User tapped a marker on the map → fresh list around that marker.
               setFrozenCarousel(null);
+              setMapFocusCenter(event.position);
               setSelectedEventId(event.id);
               // Auto-expand the carousel so the matching card is visible
               setCarouselExpandTrigger(t => t + 1);
@@ -406,6 +408,7 @@ const Nearby = () => {
               if (carouselDrivingRef.current || Date.now() < carouselViewportIgnoreUntilRef.current) return;
               // User moved/zoomed the map themselves → unfreeze and refresh the list.
               setFrozenCarousel(null);
+              setMapFocusCenter([(b.south + b.north) / 2, (b.west + b.east) / 2]);
               setViewportBounds(b);
             }}
             events={mapEvents}
