@@ -357,7 +357,8 @@ const Nearby = () => {
     freezeCarouselOrder();
     setSelectedEventId(ev.id);
     lockCarouselDrivenMapMove();
-    mapRef.current?.flyTo(ev.position[0], ev.position[1]);
+    setMapFocusCenter(ev.position);
+    mapRef.current?.flyTo(ev.position[0], ev.position[1], 15);
   };
 
   const handleRefetch = () => {
