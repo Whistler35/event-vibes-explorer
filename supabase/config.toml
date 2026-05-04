@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.ingest-scraped-events]
 verify_jwt = false
+
+[functions.auth-email-hook]
+verify_jwt = false
