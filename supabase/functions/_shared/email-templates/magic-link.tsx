@@ -10,61 +10,50 @@ import {
   Heading,
   Html,
   Preview,
+  Section,
   Text,
 } from 'npm:@react-email/components@0.0.22'
+
+import { styles } from './_brand.ts'
 
 interface MagicLinkEmailProps {
   siteName: string
   confirmationUrl: string
 }
 
-export const MagicLinkEmail = ({
-  siteName,
-  confirmationUrl,
-}: MagicLinkEmailProps) => (
-  <Html lang="en" dir="ltr">
+export const MagicLinkEmail = ({ confirmationUrl }: MagicLinkEmailProps) => (
+  <Html lang="de" dir="ltr">
     <Head />
-    <Preview>Your login link for {siteName}</Preview>
-    <Body style={main}>
-      <Container style={container}>
-        <Heading style={h1}>Your login link</Heading>
-        <Text style={text}>
-          Click the button below to log in to {siteName}. This link will expire
-          shortly.
-        </Text>
-        <Button style={button} href={confirmationUrl}>
-          Log In
-        </Button>
-        <Text style={footer}>
-          If you didn't request this link, you can safely ignore this email.
-        </Text>
-      </Container>
+    <Preview>Dein Login-Link für EVENDLE</Preview>
+    <Body style={styles.main}>
+      <Section style={styles.outer}>
+        <Container style={styles.container}>
+          <Section style={styles.header}>
+            <Text style={styles.wordmark}>EVENDLE</Text>
+          </Section>
+          <Section style={styles.accentBar}>&nbsp;</Section>
+          <Section style={styles.body}>
+            <Heading style={styles.h1}>Dein Login-Link</Heading>
+            <Text style={styles.text}>
+              Klicke auf den Button, um dich bei EVENDLE anzumelden. Der Link
+              ist nur kurze Zeit gültig.
+            </Text>
+            <Button style={styles.button} href={confirmationUrl}>
+              Jetzt anmelden
+            </Button>
+            <Section style={styles.divider}>&nbsp;</Section>
+            <Text style={styles.text}>
+              Falls du diesen Link nicht angefordert hast, kannst du diese
+              E-Mail ignorieren.
+            </Text>
+          </Section>
+          <Text style={styles.footer}>
+            EVENDLE — Entdecke Events in deiner Nähe
+          </Text>
+        </Container>
+      </Section>
     </Body>
   </Html>
 )
 
 export default MagicLinkEmail
-
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { padding: '20px 25px' }
-const h1 = {
-  fontSize: '22px',
-  fontWeight: 'bold' as const,
-  color: '#000000',
-  margin: '0 0 20px',
-}
-const text = {
-  fontSize: '14px',
-  color: '#55575d',
-  lineHeight: '1.5',
-  margin: '0 0 25px',
-}
-const button = {
-  backgroundColor: '#000000',
-  color: '#ffffff',
-  fontSize: '14px',
-  borderRadius: '8px',
-  padding: '12px 20px',
-  textDecoration: 'none',
-}
-const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
