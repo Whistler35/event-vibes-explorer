@@ -381,18 +381,6 @@ const Auth = () => {
                         />
                       </div>
                     </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="country" className="text-foreground">Country *</Label>
-                        <Input
-                          id="country"
-                          type="text"
-                          value={country}
-                          onChange={(e) => setCountry(e.target.value)}
-                          required
-                          className="bg-card border-border text-foreground"
-                        />
-                      </div>
-                    </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="bio" className="text-foreground">About me</Label>
