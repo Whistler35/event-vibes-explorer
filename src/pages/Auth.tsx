@@ -357,18 +357,30 @@ const Auth = () => {
                   <>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="age" className="text-foreground">Age *</Label>
+                        <Label htmlFor="birthday" className="text-foreground">Geburtstag *</Label>
                         <Input
-                          id="age"
-                          type="number"
-                          value={age}
-                          onChange={(e) => setAge(e.target.value)}
+                          id="birthday"
+                          type="date"
+                          value={birthday}
+                          onChange={(e) => setBirthday(e.target.value)}
                           required
-                          min="16"
-                          max="100"
+                          max={new Date(new Date().setFullYear(new Date().getFullYear() - 16)).toISOString().split('T')[0]}
+                          min="1900-01-01"
                           className="bg-card border-border text-foreground"
                         />
                       </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="country" className="text-foreground">Country *</Label>
+                        <Input
+                          id="country"
+                          type="text"
+                          value={country}
+                          onChange={(e) => setCountry(e.target.value)}
+                          required
+                          className="bg-card border-border text-foreground"
+                        />
+                      </div>
+                    </div>
                       <div className="space-y-2">
                         <Label htmlFor="country" className="text-foreground">Country *</Label>
                         <Input
