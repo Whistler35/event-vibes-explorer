@@ -180,6 +180,40 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
             </div>
           </div>
 
+          <div className="space-y-3">
+            <label className="text-sm font-bold uppercase tracking-wide text-white/70">
+              Sichtbarkeit
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {([
+                { value: "public", label: "Öffentlich", desc: "Alle in der Nähe", Icon: Globe2 },
+                { value: "friends", label: "Nur Freunde", desc: "Nur deine Freunde", Icon: Users },
+              ] as const).map(({ value, label, desc, Icon }) => {
+                const active = audience === value;
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setAudience(value)}
+                    className={`p-3 rounded-xl text-left transition border-2 ${
+                      active
+                        ? "bg-[hsl(var(--blitz-pink))] border-[hsl(var(--blitz-pink))] text-white shadow-[0_0_20px_hsl(var(--blitz-pink)/0.5)]"
+                        : "bg-white/5 border-white/10 text-white/80 hover:border-white/30"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Icon className="w-4 h-4" />
+                      <span className="font-black text-sm uppercase tracking-wide">{label}</span>
+                    </div>
+                    <p className={`text-[11px] mt-1 ${active ? "text-white/80" : "text-white/50"}`}>
+                      {desc}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 flex items-center gap-3">
             {locating ? (
               <>
