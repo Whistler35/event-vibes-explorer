@@ -1,0 +1,1 @@
+ALTER TABLE public.blitz_matches ALTER COLUMN chat_expires_at SET DEFAULT (now() + interval '1 hour');
