@@ -165,7 +165,7 @@ const Nearby = () => {
       try {
         const [placesRes, eventsRes] = await Promise.all([
           fetch(
-            `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?types=place,locality&limit=4&language=en&access_token=${MAPBOX_TOKEN}`,
+            `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?types=place,locality&limit=4&language=de&country=at,de,ch,it,li&access_token=${MAPBOX_TOKEN}`,
             { signal: ctrl.signal }
           ).then(r => r.json()).catch(() => ({ features: [] })),
           supabase
