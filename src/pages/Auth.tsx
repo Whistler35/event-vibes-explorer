@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Camera, Upload, User, Building2, Check, ArrowLeft } from 'lucide-react';
+import { Camera, Upload, User, Building2, Check, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
@@ -21,7 +21,9 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
-  const [age, setAge] = useState('');
+  const [birthday, setBirthday] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [country, setCountry] = useState('');
   const [bio, setBio] = useState('');
   const [funFact, setFunFact] = useState('');
@@ -116,7 +118,7 @@ const Auth = () => {
             return;
           }
         } else {
-          if (!name || !age || !country) {
+          if (!name || !birthday || !country) {
             toast.error('Please fill in all required fields');
             setLoading(false);
             return;
@@ -142,7 +144,15 @@ const Auth = () => {
           if (hostWebsite) metadata.website_url = hostWebsite;
           if (hostInstagram) metadata.instagram_username = hostInstagram;
         } else {
-          metadata.age = parseInt(age);
+          const birthDate = new Date(birthday);
+          const today = new Date();
+          let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+          const m = today.getMonth() - birthDate.getMonth();
+          if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            calculatedAge--;
+          }
+          metadata.birthday = birthday;
+          metadata.age = calculatedAge;
           metadata.country = country;
           metadata.bio = bio;
           metadata.fun_fact = funFact;
@@ -270,28 +280,48 @@ const Auth = () => {
 
             <div className="space-y-2">
               <Label htmlFor="password" className="text-foreground">Password *</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="bg-card border-border text-foreground"
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="bg-card border-border text-foreground pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((s) => !s)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
+                  aria-label={showPassword ? 'Passwort verbergen' : 'Passwort anzeigen'}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             {!isLogin && (
               <>
                 <div className="space-y-2">
                   <Label htmlFor="confirmPassword" className="text-foreground">Confirm password *</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    className="bg-card border-border text-foreground"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      className="bg-card border-border text-foreground pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword((s) => !s)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
+                      aria-label={showConfirmPassword ? 'Passwort verbergen' : 'Passwort anzeigen'}
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-foreground">Name *</Label>
@@ -347,15 +377,15 @@ const Auth = () => {
                   <>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="age" className="text-foreground">Age *</Label>
+                        <Label htmlFor="birthday" className="text-foreground">Geburtstag *</Label>
                         <Input
-                          id="age"
-                          type="number"
-                          value={age}
-                          onChange={(e) => setAge(e.target.value)}
+                          id="birthday"
+                          type="date"
+                          value={birthday}
+                          onChange={(e) => setBirthday(e.target.value)}
                           required
-                          min="16"
-                          max="100"
+                          max={new Date(new Date().setFullYear(new Date().getFullYear() - 16)).toISOString().split('T')[0]}
+                          min="1900-01-01"
                           className="bg-card border-border text-foreground"
                         />
                       </div>
