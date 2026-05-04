@@ -118,7 +118,7 @@ const Auth = () => {
             return;
           }
         } else {
-          if (!name || !age || !country) {
+          if (!name || !birthday || !country) {
             toast.error('Please fill in all required fields');
             setLoading(false);
             return;
@@ -144,7 +144,15 @@ const Auth = () => {
           if (hostWebsite) metadata.website_url = hostWebsite;
           if (hostInstagram) metadata.instagram_username = hostInstagram;
         } else {
-          metadata.age = parseInt(age);
+          const birthDate = new Date(birthday);
+          const today = new Date();
+          let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+          const m = today.getMonth() - birthDate.getMonth();
+          if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            calculatedAge--;
+          }
+          metadata.birthday = birthday;
+          metadata.age = calculatedAge;
           metadata.country = country;
           metadata.bio = bio;
           metadata.fun_fact = funFact;
