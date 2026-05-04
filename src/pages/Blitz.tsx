@@ -125,8 +125,8 @@ const Blitz = () => {
             <div className="h-[70vh] rounded-3xl bg-muted animate-pulse" />
           ) : request ? (
             <div className="space-y-4">
-              <ActiveBlitzScreen request={request} onEnded={reload} />
               <IncomingRequestsList blitzRequestId={request.id} />
+              <ActiveBlitzScreen request={request} onEnded={reload} />
             </div>
           ) : (
             <div className="relative overflow-hidden rounded-3xl bg-[hsl(var(--blitz-forest))] text-white p-8 min-h-[65vh] flex flex-col items-center justify-between text-center">

@@ -1,107 +1,79 @@
+## Plan: Three Blitz & Auth-Email Improvements
 
-## "I'm in!" — vom stillen Toast zum echten Erlebnis
+### 1) Branded Auth Email (EVENDLE Corporate Design)
 
-Aktuell passiert beim "I'm in!" technisch alles richtig (Eintrag in `event_participants`, Auto-Ticket per Trigger, Chat-Zugang per RLS), aber **gefühlt** passiert nichts: kleiner Toast oben, Button wechselt zu "Leave event" — fertig. Wir machen daraus einen Moment, der den User direkt zum **Veranstaltungschat** führt, wo der Austausch mit den anderen Teilnehmern stattfindet.
+Currently the user sees the default Lovable signup confirmation email (black button, "Verify Email", generic styling). We'll replace it with a branded version using EVENDLE colors:
+- **Forest** `#173518` (background accent / button)
+- **Citrus** `#f4f4bb` and **Lime** `#d8d87a` (highlights)
+- White email body background (email best practice)
+- German copy ("Willkommen bei EVENDLE", "E-Mail bestätigen")
+- EVENDLE wordmark/logo at top
 
----
+Steps:
+- Scaffold all 6 auth email templates (signup, magic-link, recovery, invite, email-change, reauthentication) via Lovable's auth email system.
+- Apply EVENDLE brand styling: Forest button, Citrus accent, white card on light background, friendly German copy.
+- Deploy `auth-email-hook` so it goes live.
+- Note: emails activate automatically once DNS verification finishes; in the meantime default templates are sent.
 
-### 1. Confirmation-Overlay direkt nach Join (1.5–2s)
+### 2) Move Incoming Requests Above + Badge on Blitz Tab
 
-Vollbild-Overlay im Forest/Citrus-Stil (kein Pink, kein Dating-Vibe):
-- Großer animierter Check ✓ mit Shockwave-Ring
-- Headline: **"Du bist dabei!"**
-- Subline: Eventname + Datum
-- Kleiner Hinweis unten: *"Gruppenchat ist freigeschaltet 💬"*
-- Auto-Dismiss oder Tap to skip → scrollt zum neuen Status-Block
+**Problem:** When the user has an active Blitz, incoming match requests render *below* the active screen (per screenshot). They should be on top so the user sees them immediately. Also: the BLITZ icon in the bottom nav should show a count badge for pending incoming requests.
 
-Neue Komponente: `src/components/EventJoinedConfirmation.tsx`
-Neue Keyframes in `src/index.css`: `joined-check-pop`, `joined-shockwave`, `joined-fade`
+Changes:
+- **`src/pages/Blitz.tsx`**: Reorder so `<IncomingRequestsList />` renders **above** `<ActiveBlitzScreen />` when there's an active request.
+- **New hook `src/hooks/useIncomingBlitzCount.ts`**: Counts pending right-swipes targeting the current user's active blitz request (subscribes to `blitz_swipes` realtime, filtered by host's active request).
+- **`src/components/BottomNavigation.tsx`**: Add a pink count badge (same style as messenger unread badge) on the BLITZ icon when count > 0, using the new hook.
 
----
+### 3) Extend Blitz Times to 1 Hour
 
-### 2. Neuer Teilnehmer-Status-Block (ersetzt "Leave event"-Button)
+Currently:
+- Match chat expires after **5 minutes** (`chat_expires_at DEFAULT now() + interval '5 minutes'`)
+- Request durations are 30 / 60 / 120 min (request expiry — used for accepting incoming swipes)
 
-Wenn `isParticipant === true`, zeigt die Event-Detail-Seite einen prominenten Card-Block statt dem aktuellen grauen Leave-Button:
+Changes:
+- **New migration**: `ALTER TABLE blitz_matches ALTER COLUMN chat_expires_at SET DEFAULT (now() + interval '1 hour');`
+- **`useBlitzMatching.ts` `acceptBlitzRequest`**: explicitly set `chat_expires_at` to `now + 1h` on insert (so existing default isn't relied on for fresh matches).
+- **CreateBlitzModal `DURATIONS`**: keep options but ensure default is 1h. Already 60 min default — no change needed for request duration since 60 min = 1h is already an option. Confirm default selection is `60`.
+
+### Technical Details
 
 ```text
-┌─────────────────────────────────────────┐
-│  ✓  Du bist dabei!                      │
-│     Heute · 18:00 · in 2 Std            │
-└─────────────────────────────────────────┘
+Blitz.tsx render order (active state):
+  ┌─────────────────────────────┐
+  │ IncomingRequestsList (NEW)  │  ← moved above
+  ├─────────────────────────────┤
+  │ ActiveBlitzScreen           │
+  └─────────────────────────────┘
 
-┌─────────────────────────────────────────┐
-│ 💬  Veranstaltungs-Chat        [3 neu] │  ← prominent, ganze Breite
-│     "Marc: Ich bring noch Bier mit..."  │
-│     Letzte Nachricht vor 5 min          │
-└─────────────────────────────────────────┘
-
-┌──────────┐ ┌──────────┐ ┌──────────────┐
-│ 🎟Ticket │ │ 📍Route │ │ 📅 Kalender │
-└──────────┘ └──────────┘ └──────────────┘
-
-Mitstreiter (5)
-👤 👤 👤 👤 👤  → klickbar → Profile/DM
-
-           [Doch absagen] (klein, dezent)
+BottomNav BLITZ icon:
+  ⚡  ←  badge with pendingCount (top-right, pink)
 ```
 
-**Chat-Card im Detail** (das Herzstück):
-- Volle Breite, Forest-Background, Citrus Akzent
-- Live-Preview: letzte Nachricht + Absendername (Realtime via `chat_messages` Subscription)
-- Unread-Badge: zählt Nachrichten seit `conversation_reads.last_read_at` (System wiederverwendbar)
-- Tap → öffnet `/event/:id/chat` (existierende Seite)
-- Wenn noch keine Nachrichten: Placeholder *"Sei der Erste, der etwas schreibt 👋"*
+New hook signature:
+```ts
+useIncomingBlitzCount(): { count: number }
+// queries blitz_swipes where:
+//   blitz_request_id IN (user's active requests)
+//   direction='right' AND status='pending'
+// subscribes to realtime changes
+```
 
-**Quick-Ticket** (Sheet, kein Umweg über `/tickets`):
-- Bottom Sheet mit dem QR-Code für genau dieses Event
-- Lädt aus `event_tickets` für aktuellen User+Event
-- QR via `qrcode.react` (bereits im Projekt? → sonst `bun add qrcode.react`)
+Migration:
+```sql
+ALTER TABLE public.blitz_matches
+  ALTER COLUMN chat_expires_at SET DEFAULT (now() + interval '1 hour');
+```
 
-**Route**: öffnet `https://www.google.com/maps/dir/?api=1&destination={lat},{lng}` in neuem Tab → Maps-App auf Mobile
+### Files Touched
 
-**Kalender**: generiert `.ics` aus Event-Daten und triggert Download (neue Util `src/lib/calendar.ts`)
+- `supabase/functions/auth-email-hook/` (new, scaffolded)
+- `supabase/functions/_shared/email-templates/*.tsx` (new, scaffolded + branded)
+- `src/pages/Blitz.tsx` (reorder)
+- `src/components/BottomNavigation.tsx` (badge)
+- `src/hooks/useIncomingBlitzCount.ts` (new)
+- `src/hooks/useBlitzMatching.ts` (set 1h chat_expires_at on accept)
+- New migration for `chat_expires_at` default
 
-**Countdown**: smarte Anzeige
-- > 7 Tage: "In 12 Tagen · Sa, 14:00"
-- < 7 Tage: "Heute in 2 Std" / "Morgen · 18:00"
-- Läuft: "Läuft jetzt 🔴"
-- Vorbei: "Beendet" + Card greyed out
+### Open Questions
 
-**"Doch absagen"**: als kleiner Text-Button unten, mit Confirm-Dialog (`AlertDialog`)
-
----
-
-### 3. Verhalten
-
-- Nach erfolgreichem Join: Overlay zeigen → nach Dismiss smooth scroll zum Status-Block
-- Wenn User die Event-Detail-Seite bereits als Teilnehmer öffnet: Overlay NICHT zeigen, direkt Status-Block
-- Chat-Preview & Unread-Count updaten via Realtime-Subscription auf `chat_messages`
-
----
-
-### 4. Technische Details
-
-**Neue Files:**
-- `src/components/EventJoinedConfirmation.tsx` — Vollbild-Overlay
-- `src/components/EventParticipantStatus.tsx` — Status-Block mit allen Action-Cards
-- `src/components/EventChatPreviewCard.tsx` — Chat-Preview-Card mit Live-Update + Unread-Badge
-- `src/components/QuickTicketSheet.tsx` — Bottom Sheet mit QR-Code
-- `src/lib/calendar.ts` — `generateIcsFile(event)` → triggert Download
-
-**Edits:**
-- `src/pages/EventDetail.tsx` — `justJoined`-State, Overlay-Render, `EventParticipantStatus` statt Leave-Button, alte "Show ticket" / "Open chat"-Buttons entfernen (sind jetzt im Status-Block)
-- `src/index.css` — Keyframes für Confirmation-Animation
-
-**Dependency** (falls nicht vorhanden): `bun add qrcode.react`
-
-**Optional Migration** (kann später kommen): Trigger auf `event_participants` INSERT, der eine Row in `notifications` für `events.created_by` einfügt — damit der Veranstalter eine Glocken-Notification bekommt. Lasse ich für diesen Schritt erstmal raus, um den Scope schlank zu halten.
-
----
-
-### 5. Was außerhalb des Scopes ist
-
-- Kein neues Theme, keine Änderungen am Bottom-Nav
-- Host-Notification beim Join (kann ich auf Wunsch ergänzen)
-- Push-Notifications für neue Chat-Nachrichten (separates Thema)
-
-Nach Approval setze ich Migration (falls nötig — hier keine Schema-Änderung), Komponenten und EventDetail-Rewrite in einem Schritt um.
+None — proceeding with German copy for emails (matches app), Forest+Citrus brand palette, and 1h chat duration as requested.

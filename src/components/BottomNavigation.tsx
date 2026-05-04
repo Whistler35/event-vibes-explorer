@@ -2,12 +2,14 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { MapPin, Calendar, User, MessageCircle, Building2, Zap } from "lucide-react";
 import { useUnreadDMCount } from "@/hooks/useUnreadDMCount";
 import { useIsHost } from "@/hooks/useIsHost";
+import { useIncomingBlitzCount } from "@/hooks/useIncomingBlitzCount";
 
 const BottomNavigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { unreadCount } = useUnreadDMCount();
   const { isHost } = useIsHost();
+  const { count: blitzIncoming } = useIncomingBlitzCount();
 
   const navItems = [
     { id: "events", label: "EVENTS", icon: Calendar, path: "/" },
@@ -40,6 +42,11 @@ const BottomNavigation = () => {
                     : "shadow-[0_6px_22px_hsl(var(--blitz-pink)/0.55)] animate-blitz-pulse"
                 }`}>
                   <Icon size={22} className="text-white fill-white" strokeWidth={2.5} />
+                  {blitzIncoming > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-white text-[hsl(var(--blitz-pink))] text-[10px] font-black rounded-full min-w-[20px] h-[20px] px-1 flex items-center justify-center shadow-md ring-2 ring-[hsl(var(--blitz-pink))]">
+                      {blitzIncoming > 9 ? "9+" : blitzIncoming}
+                    </span>
+                  )}
                 </div>
                 <span className={`text-[10px] font-bold tracking-wide ${isActive ? "text-[hsl(var(--blitz-pink))]" : "text-[hsl(var(--blitz-pink))]/70"}`}>
                   {item.label}
