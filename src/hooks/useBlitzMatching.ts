@@ -100,12 +100,14 @@ export async function acceptBlitzRequest(swipe: IncomingBlitzRequest) {
     .eq("id", swipe.swipe_id);
   if (swErr) throw swErr;
 
+  const chatExpiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
   const { data: match, error: mErr } = await supabase
     .from("blitz_matches")
     .insert({
       blitz_request_id: swipe.blitz_request_id,
       host_id: user.id,
       participant_id: swipe.swiper_id,
+      chat_expires_at: chatExpiresAt,
     })
     .select()
     .single();
