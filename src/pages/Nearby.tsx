@@ -21,6 +21,17 @@ import { toast } from "sonner";
 import type { MapboxMapHandle } from "@/components/MapboxMap";
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiZXZlbmRsZSIsImEiOiJjbWs0aHc2eWQwN2hqM2RyMjI4ZTY0N2F6In0.gMPP_wAbSR4Esz7WlB4Z4Q';
+const MAP_EVENT_RADIUS_KM = 30;
+
+function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const radius = 6371;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2
+    + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return radius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
 
 interface GeoResult { name: string; lat: number; lng: number; }
 
@@ -70,6 +81,7 @@ const Nearby = () => {
   const initialCenter: [number, number] = storedCity
     ? [storedCity.lat, storedCity.lng]
     : [47.2692, 11.4041];
+  const [mapFocusCenter, setMapFocusCenter] = useState<[number, number]>(initialCenter);
 
   useEffect(() => {
     if (storedCity) setCityQuery(storedCity.name?.split(',')[0] || '');
