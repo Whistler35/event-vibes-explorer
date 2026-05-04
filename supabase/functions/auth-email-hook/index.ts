@@ -137,9 +137,9 @@ Deno.serve(async (req) => {
 
     // Verify webhook signature (Standard Webhooks spec)
     // Supabase stores the secret as "v1,whsec_<base64>". The standardwebhooks
-    // library expects the secret WITH the "whsec_" prefix (it strips it internally).
-    const secretForLib = hookSecret.replace(/^v1,/, '')
-    const wh = new Webhook(secretForLib)
+    // library expects the RAW base64 portion (no "v1," and no "whsec_" prefix).
+    const secretBase64 = hookSecret.replace(/^v1,/, '').replace(/^whsec_/, '')
+    const wh = new Webhook(secretBase64)
     const payload = wh.verify(body, headers) as AuthEmailPayload
 
     console.log('Auth email hook:', {
