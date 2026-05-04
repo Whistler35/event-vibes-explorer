@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Send, Zap } from "lucide-react";
+import { ArrowLeft, Send, Zap, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -34,6 +35,7 @@ const BlitzMatch = () => {
   const { matchId } = useParams<{ matchId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isAdmin } = useIsAdmin();
   const [match, setMatch] = useState<Match | null>(null);
   const [activity, setActivity] = useState<string>("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -140,6 +142,21 @@ const BlitzMatch = () => {
       message: text,
     });
     if (error) toast.error(error.message);
+  };
+
+  const handleAdminDelete = async () => {
+    if (!match) return;
+    if (!confirm("Diesen Blitz und den zugehörigen Chat als Admin löschen?")) return;
+    const { error } = await supabase
+      .from("blitz_requests")
+      .delete()
+      .eq("id", match.blitz_request_id);
+    if (error) {
+      toast.error(error.message || "Löschen fehlgeschlagen");
+      return;
+    }
+    toast.success("Blitz gelöscht");
+    navigate("/messenger");
   };
 
   if (showMatchSplash) {
@@ -272,14 +289,25 @@ const BlitzMatch = () => {
             <p className="text-[10px] uppercase tracking-wider text-white/60">{activity}</p>
           </div>
         </div>
-        <div
-          className={`px-3 py-1.5 rounded-full font-black tabular-nums text-sm ${
-            expired
-              ? "bg-white/10 text-white/40"
-              : "bg-[hsl(var(--blitz-pink))] text-white shadow-[0_0_20px_hsl(var(--blitz-pink)/0.5)]"
-          }`}
-        >
-          {String(m).padStart(2, "0")}:{String(s).padStart(2, "0")}
+        <div className="flex items-center gap-2">
+          {isAdmin && (
+            <button
+              onClick={handleAdminDelete}
+              aria-label="Blitz als Admin löschen"
+              className="w-9 h-9 rounded-full bg-red-500/90 hover:bg-red-500 flex items-center justify-center transition"
+            >
+              <Trash2 className="w-4 h-4 text-white" />
+            </button>
+          )}
+          <div
+            className={`px-3 py-1.5 rounded-full font-black tabular-nums text-sm ${
+              expired
+                ? "bg-white/10 text-white/40"
+                : "bg-[hsl(var(--blitz-pink))] text-white shadow-[0_0_20px_hsl(var(--blitz-pink)/0.5)]"
+            }`}
+          >
+            {String(m).padStart(2, "0")}:{String(s).padStart(2, "0")}
+          </div>
         </div>
       </div>
 

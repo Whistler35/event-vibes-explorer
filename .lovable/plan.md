@@ -1,79 +1,45 @@
-## Plan: Three Blitz & Auth-Email Improvements
+## Blitzmodus — Quick Fixes
 
-### 1) Branded Auth Email (EVENDLE Corporate Design)
+### 1. Admins können Blitzes löschen
+Die beiden Konten `jakob.pfeifer@holztechnikum.at` und `benjamin.maxwald@holztechnikum.at` haben bereits die Rolle `admin` in `user_roles`. Korrekte Domain ist `holztechnikum.at` (in deiner Anfrage stand teilweise `holztechikum`).
 
-Currently the user sees the default Lovable signup confirmation email (black button, "Verify Email", generic styling). We'll replace it with a branded version using EVENDLE colors:
-- **Forest** `#173518` (background accent / button)
-- **Citrus** `#f4f4bb` and **Lime** `#d8d87a` (highlights)
-- White email body background (email best practice)
-- German copy ("Willkommen bei EVENDLE", "E-Mail bestätigen")
-- EVENDLE wordmark/logo at top
+**DB-Migration:**
+- RLS-Policy auf `public.blitz_requests` ergänzen: zusätzlich zu „Hosts can delete own blitz requests" eine neue Policy `Admins can delete any blitz request` mit `USING (public.has_role(auth.uid(),'admin'))`.
+- Optional dieselbe DELETE-Policy für `blitz_matches`, `blitz_swipes`, `blitz_chat_messages`, damit beim Löschen eines Blitzes keine Waisen-Datensätze stehen bleiben (alternativ Cascade prüfen — wir setzen Admin-DELETE-Policies auf alle 4 Tabellen).
 
-Steps:
-- Scaffold all 6 auth email templates (signup, magic-link, recovery, invite, email-change, reauthentication) via Lovable's auth email system.
-- Apply EVENDLE brand styling: Forest button, Citrus accent, white card on light background, friendly German copy.
-- Deploy `auth-email-hook` so it goes live.
-- Note: emails activate automatically once DNS verification finishes; in the meantime default templates are sent.
+**UI:**
+- In `DiscoveryDeck.tsx` (SwipeCard) für Admins ein kleines Mülleimer-Icon oben rechts an der Karte einblenden (`useIsAdmin` Hook bereits vorhanden). Klick → Bestätigungs-Toast → `supabase.from('blitz_requests').delete().eq('id', item.id)` → Karte aus dem Deck entfernen.
+- Außerdem im Blitz-Chat-Header (`/blitz/match/:id`, `BlitzMatch.tsx`) für Admins denselben Lösch-Button anbieten, der den zugehörigen `blitz_request` löscht und zum Messenger zurücknavigiert.
 
-### 2) Move Incoming Requests Above + Badge on Blitz Tab
+### 2. Blitz-Chat erscheint sofort bei beiden Usern
+Aktueller Code in `Messenger.tsx` lädt `blitz_matches` korrekt für Host UND Participant. Die Anzeige hängt jedoch davon ab, dass der Messenger-Tab neu lädt. Maßnahmen:
+- **Realtime-Subscription** in `Messenger.tsx` auf `blitz_matches` (INSERT/UPDATE) für `host_id = me OR participant_id = me` ergänzen → Liste sofort refreshen, sobald ein Match entsteht.
+- Sicherstellen, dass `blitz_matches` in `supabase_realtime` Publication ist (Migration: `ALTER PUBLICATION supabase_realtime ADD TABLE public.blitz_matches;` falls nicht vorhanden — idempotent prüfen).
+- In `useBlitzMatching.ts` (Match-Erkennungslogik): nach Match-Erstellung sofortige Toast + optional Auto-Navigate für den Swiper bleibt; für den Host Realtime-Toast „⚡ Neuer Blitz-Match!" einblenden mit Link zum Chat.
 
-**Problem:** When the user has an active Blitz, incoming match requests render *below* the active screen (per screenshot). They should be on top so the user sees them immediately. Also: the BLITZ icon in the bottom nav should show a count badge for pending incoming requests.
+### 3. Profil-Klick auf Blitz-Karte in Discovery
+- In `DiscoveryDeck.tsx` SwipeCard: Avatar + Hostname-Bereich klickbar machen → `navigate(`/user/${item.host_id}`)`. Klick darf den Swipe nicht auslösen → `e.stopPropagation()` und Drag-Logik nur starten, wenn nicht auf Profil-Bereich geklickt wurde (z.B. via `data-no-drag` Attribut & Check in `handleStart`).
 
-Changes:
-- **`src/pages/Blitz.tsx`**: Reorder so `<IncomingRequestsList />` renders **above** `<ActiveBlitzScreen />` when there's an active request.
-- **New hook `src/hooks/useIncomingBlitzCount.ts`**: Counts pending right-swipes targeting the current user's active blitz request (subscribes to `blitz_swipes` realtime, filtered by host's active request).
-- **`src/components/BottomNavigation.tsx`**: Add a pink count badge (same style as messenger unread badge) on the BLITZ icon when count > 0, using the new hook.
+### 4. Dynamische Schriftgröße für Aktivitäts-Text
+Aktuell hartkodiert `text-6xl` in `DiscoveryDeck.tsx` und `ActiveBlitzScreen.tsx` → langer Text wird abgeschnitten.
+- Schriftgröße abhängig von `activity.length` berechnen:
+  - ≤ 12 Zeichen → `text-6xl`
+  - ≤ 20 → `text-5xl`
+  - ≤ 32 → `text-4xl`
+  - ≤ 48 → `text-3xl`
+  - sonst → `text-2xl`
+- Helper-Funktion `getActivityFontClass(len: number)` in einer kleinen Util-Datei (`src/lib/blitzText.ts`) ablegen und in beiden Komponenten nutzen.
+- Container weiter mit `break-words` und `leading-tight` lassen, damit auch lange Wörter umbrechen.
 
-### 3) Extend Blitz Times to 1 Hour
-
-Currently:
-- Match chat expires after **5 minutes** (`chat_expires_at DEFAULT now() + interval '5 minutes'`)
-- Request durations are 30 / 60 / 120 min (request expiry — used for accepting incoming swipes)
-
-Changes:
-- **New migration**: `ALTER TABLE blitz_matches ALTER COLUMN chat_expires_at SET DEFAULT (now() + interval '1 hour');`
-- **`useBlitzMatching.ts` `acceptBlitzRequest`**: explicitly set `chat_expires_at` to `now + 1h` on insert (so existing default isn't relied on for fresh matches).
-- **CreateBlitzModal `DURATIONS`**: keep options but ensure default is 1h. Already 60 min default — no change needed for request duration since 60 min = 1h is already an option. Confirm default selection is `60`.
-
-### Technical Details
-
+### Technische Übersicht (Files)
 ```text
-Blitz.tsx render order (active state):
-  ┌─────────────────────────────┐
-  │ IncomingRequestsList (NEW)  │  ← moved above
-  ├─────────────────────────────┤
-  │ ActiveBlitzScreen           │
-  └─────────────────────────────┘
-
-BottomNav BLITZ icon:
-  ⚡  ←  badge with pendingCount (top-right, pink)
+supabase/migrations/<new>.sql           # Admin-DELETE policies + Realtime publication
+src/lib/blitzText.ts                    # neuer Font-Size-Helper
+src/components/blitz/DiscoveryDeck.tsx  # Admin-Delete, Profil-Klick, dyn. Font
+src/components/blitz/ActiveBlitzScreen.tsx # dyn. Font
+src/pages/BlitzMatch.tsx                # Admin-Delete-Button im Header
+src/pages/Messenger.tsx                 # Realtime-Subscription auf blitz_matches
+src/hooks/useBlitzMatching.ts           # ggf. Toast für Host bei neuem Match
 ```
 
-New hook signature:
-```ts
-useIncomingBlitzCount(): { count: number }
-// queries blitz_swipes where:
-//   blitz_request_id IN (user's active requests)
-//   direction='right' AND status='pending'
-// subscribes to realtime changes
-```
-
-Migration:
-```sql
-ALTER TABLE public.blitz_matches
-  ALTER COLUMN chat_expires_at SET DEFAULT (now() + interval '1 hour');
-```
-
-### Files Touched
-
-- `supabase/functions/auth-email-hook/` (new, scaffolded)
-- `supabase/functions/_shared/email-templates/*.tsx` (new, scaffolded + branded)
-- `src/pages/Blitz.tsx` (reorder)
-- `src/components/BottomNavigation.tsx` (badge)
-- `src/hooks/useIncomingBlitzCount.ts` (new)
-- `src/hooks/useBlitzMatching.ts` (set 1h chat_expires_at on accept)
-- New migration for `chat_expires_at` default
-
-### Open Questions
-
-None — proceeding with German copy for emails (matches app), Forest+Citrus brand palette, and 1h chat duration as requested.
+Keine neuen Secrets, keine neuen Dependencies. Sobald du bestätigst, setze ich alles um.
