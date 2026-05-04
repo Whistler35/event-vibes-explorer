@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { Zap, X, Check, MapPin, Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Zap, X, Check, MapPin, Loader2, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useBlitzDiscovery, swipeBlitz, DiscoveryBlitz } from "@/hooks/useBlitzDiscovery";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { supabase } from "@/integrations/supabase/client";
+import { getActivityFontClass } from "@/lib/blitzText";
 import { toast } from "sonner";
 
 const SWIPE_THRESHOLD = 100;
@@ -9,7 +13,9 @@ const SWIPE_THRESHOLD = 100;
 interface CardProps {
   item: DiscoveryBlitz;
   onSwipe: (dir: "left" | "right") => void;
+  onAdminDelete: (id: string) => void;
   isTop: boolean;
+  isAdmin: boolean;
 }
 
 const Countdown = ({ expiresAt }: { expiresAt: string }) => {
@@ -28,14 +34,19 @@ const Countdown = ({ expiresAt }: { expiresAt: string }) => {
   );
 };
 
-const SwipeCard = ({ item, onSwipe, isTop }: CardProps) => {
+const SwipeCard = ({ item, onSwipe, onAdminDelete, isTop, isAdmin }: CardProps) => {
+  const navigate = useNavigate();
   const [drag, setDrag] = useState({ x: 0, y: 0 });
   const [animating, setAnimating] = useState(false);
   const startRef = useRef({ x: 0, y: 0 });
   const isDownRef = useRef(false);
 
-  const handleStart = (clientX: number, clientY: number) => {
+  const isOnNoDrag = (target: EventTarget | null) =>
+    target instanceof HTMLElement && !!target.closest("[data-no-drag]");
+
+  const handleStart = (clientX: number, clientY: number, target: EventTarget | null) => {
     if (!isTop || animating) return;
+    if (isOnNoDrag(target)) return;
     isDownRef.current = true;
     startRef.current = { x: clientX, y: clientY };
   };
@@ -59,6 +70,18 @@ const SwipeCard = ({ item, onSwipe, isTop }: CardProps) => {
   const rotate = drag.x / 20;
   const likeOpacity = Math.max(0, Math.min(1, drag.x / SWIPE_THRESHOLD));
   const nopeOpacity = Math.max(0, Math.min(1, -drag.x / SWIPE_THRESHOLD));
+  const fontClass = getActivityFontClass(item.activity);
+
+  const handleProfile = () => {
+    if (item.host_id) navigate(`/user/${item.host_id}`);
+  };
+
+  const handleDelete = () => {
+    if (!confirm(`Diesen Blitz wirklich löschen?\n\n„${item.activity}" von ${item.host_name ?? "Unbekannt"}`)) {
+      return;
+    }
+    onAdminDelete(item.id);
+  };
 
   return (
     <div
@@ -69,11 +92,11 @@ const SwipeCard = ({ item, onSwipe, isTop }: CardProps) => {
         zIndex: isTop ? 10 : 1,
         cursor: isTop ? "grab" : "default",
       }}
-      onMouseDown={(e) => handleStart(e.clientX, e.clientY)}
+      onMouseDown={(e) => handleStart(e.clientX, e.clientY, e.target)}
       onMouseMove={(e) => handleMove(e.clientX, e.clientY)}
       onMouseUp={handleEnd}
       onMouseLeave={handleEnd}
-      onTouchStart={(e) => handleStart(e.touches[0].clientX, e.touches[0].clientY)}
+      onTouchStart={(e) => handleStart(e.touches[0].clientX, e.touches[0].clientY, e.target)}
       onTouchMove={(e) => handleMove(e.touches[0].clientX, e.touches[0].clientY)}
       onTouchEnd={handleEnd}
     >
@@ -94,8 +117,25 @@ const SwipeCard = ({ item, onSwipe, isTop }: CardProps) => {
           Nope
         </div>
 
+        {isAdmin && isTop && (
+          <button
+            data-no-drag
+            onClick={handleDelete}
+            aria-label="Blitz als Admin löschen"
+            className="absolute top-4 right-4 z-30 w-10 h-10 rounded-full bg-red-500/90 hover:bg-red-500 flex items-center justify-center shadow-lg backdrop-blur-sm border border-white/20 transition"
+          >
+            <Trash2 className="w-4 h-4 text-white" />
+          </button>
+        )}
+
         <div className="relative z-10 flex flex-col h-full p-8">
-          <div className="flex items-center gap-3">
+          <button
+            type="button"
+            data-no-drag
+            onClick={handleProfile}
+            className="flex items-center gap-3 text-left rounded-xl -mx-2 -my-1 px-2 py-1 hover:bg-white/5 active:bg-white/10 transition"
+            aria-label={`Profil von ${item.host_name ?? "Host"} öffnen`}
+          >
             <Avatar className="w-14 h-14 border-2 border-[hsl(var(--blitz-pink))]">
               <AvatarImage src={item.host_avatar ?? undefined} />
               <AvatarFallback className="bg-[hsl(var(--blitz-pink))] text-white font-black">
@@ -103,19 +143,20 @@ const SwipeCard = ({ item, onSwipe, isTop }: CardProps) => {
               </AvatarFallback>
             </Avatar>
             <div>
-              <p className="font-bold text-lg leading-tight">{item.host_name ?? "Anonymous"}</p>
+              <p className="font-bold text-lg leading-tight underline decoration-[hsl(var(--blitz-pink))]/40 underline-offset-4">
+                {item.host_name ?? "Anonymous"}
+              </p>
               <p className="text-xs text-white/60 flex items-center gap-1">
                 <MapPin className="w-3 h-3" />
                 {item.distance_km < 1
                   ? `${Math.round(item.distance_km * 1000)} m`
                   : `${item.distance_km.toFixed(1)} km`} away
               </p>
-
             </div>
-          </div>
+          </button>
 
-          <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
-            <h2 className="text-6xl font-black uppercase leading-none tracking-tight break-words">
+          <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6 min-h-0">
+            <h2 className={`${fontClass} font-black uppercase leading-tight tracking-tight break-words max-w-full`}>
               {item.activity}?
             </h2>
             <div className="space-y-1">
@@ -144,14 +185,19 @@ interface DiscoveryDeckProps {
 
 const DiscoveryDeck = ({ city }: DiscoveryDeckProps) => {
   const { items, loading, reload, locError, hasLocation } = useBlitzDiscovery(city);
+  const { isAdmin } = useIsAdmin();
   const [index, setIndex] = useState(0);
+  const [removedIds, setRemovedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     setIndex(0);
+    setRemovedIds(new Set());
   }, [items.length]);
 
+  const visibleItems = items.filter((it) => !removedIds.has(it.id));
+
   const handleSwipe = async (dir: "left" | "right") => {
-    const item = items[index];
+    const item = visibleItems[index];
     if (!item) return;
     try {
       await swipeBlitz(item.id, dir);
@@ -162,6 +208,20 @@ const DiscoveryDeck = ({ city }: DiscoveryDeckProps) => {
       toast.error(e.message || "Swipe failed");
     }
     setIndex((i) => i + 1);
+  };
+
+  const handleAdminDelete = async (id: string) => {
+    const { error } = await supabase.from("blitz_requests").delete().eq("id", id);
+    if (error) {
+      toast.error(error.message || "Löschen fehlgeschlagen");
+      return;
+    }
+    setRemovedIds((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+    toast.success("Blitz gelöscht");
   };
 
   if (!hasLocation && locError) {
@@ -182,7 +242,7 @@ const DiscoveryDeck = ({ city }: DiscoveryDeckProps) => {
     );
   }
 
-  const remaining = items.slice(index, index + 2);
+  const remaining = visibleItems.slice(index, index + 2);
 
   if (remaining.length === 0) {
     return (
@@ -211,7 +271,9 @@ const DiscoveryDeck = ({ city }: DiscoveryDeckProps) => {
               key={item.id}
               item={item}
               isTop={i === 0}
+              isAdmin={isAdmin}
               onSwipe={handleSwipe}
+              onAdminDelete={handleAdminDelete}
             />
           ))
           .reverse()}
