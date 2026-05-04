@@ -279,12 +279,17 @@ const Nearby = () => {
 
   let mapEvents = isPrivateMode ? privateMapEvents : publicMapEvents;
 
+  mapEvents = mapEvents.filter(e => (
+    haversineDistance(mapFocusCenter[0], mapFocusCenter[1], e.position[0], e.position[1]) <= MAP_EVENT_RADIUS_KM
+  ));
+
   // "Popular" filter: only featured
   if (activeQuickFilters.has('popular')) {
     mapEvents = mapEvents.filter(e => e.is_featured);
   }
 
-  // Carousel = events visible in current viewport, featured first then by date, max 10.
+  // Carousel = events within 30km of the current map focus, visible in viewport,
+  // featured first then by date, max 10.
   // While the carousel drives the map, we freeze the viewport reference so the order stays put.
   const effectiveBounds = viewportBounds;
   const carouselEvents = useMemo(() => {
@@ -295,9 +300,7 @@ const Nearby = () => {
               && lng >= effectiveBounds.west && lng <= effectiveBounds.east;
         })
       : mapEvents;
-    // Always keep the currently selected event in the list, even if it just
-    // scrolled out of bounds during a flyTo — prevents the active card from
-    // vanishing under the user's tap.
+    // Keep the selected event only while it is still inside the current 30km map area.
     const selected = selectedEventId != null
       ? mapEvents.find(e => String(e.id) === String(selectedEventId))
       : undefined;
