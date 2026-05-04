@@ -262,7 +262,7 @@ const Profile = () => {
                 </div>
 
                 <h1 className="text-white text-3xl font-extrabold mt-5 tracking-tight">
-                  {displayName}{profile?.age ? `, ${profile.age}` : ""}
+                  {displayName}
                 </h1>
                 <p className="text-[hsl(var(--blitz-pink))] font-semibold text-sm mt-1">
                   Bereit für den nächsten Blitz ⚡
