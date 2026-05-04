@@ -213,10 +213,11 @@ const Nearby = () => {
   const selectEventSuggestion = (ev: SearchEvent) => {
     setShowCitySuggestions(false);
     setCityQuery(ev.title);
+    const eventPosition: [number, number] = [ev.latitude ?? 47.2692, ev.longitude ?? 11.4041];
     const mapEv: MapEvent = {
       id: ev.id,
       title: ev.title,
-      position: [ev.latitude ?? 47.2692, ev.longitude ?? 11.4041],
+      position: eventPosition,
       image: ev.image_url || undefined,
       category: ev.category || undefined,
       description: ev.description || undefined,
@@ -227,6 +228,7 @@ const Nearby = () => {
       is_featured: ev.is_featured || false,
     };
     if (ev.latitude != null && ev.longitude != null) {
+      setMapFocusCenter(eventPosition);
       mapRef.current?.flyTo(ev.latitude, ev.longitude, 16);
     }
     setSelectedEventId(ev.id);
