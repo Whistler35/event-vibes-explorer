@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Camera, X, ShieldCheck, Clock, Globe, Lock } from 'lucide-react';
+import { Camera, X, ShieldCheck, Clock, Globe, Lock, MapPin as MapPinIcon } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -39,9 +39,40 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [maxParticipants, setMaxParticipants] = useState<string>('');
   const [address, setAddress] = useState<string>('');
+  const [addressSuggestions, setAddressSuggestions] = useState<Array<{ name: string; lat: number; lng: number }>>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [addressCoords, setAddressCoords] = useState<[number, number] | null>(null);
   const [priceEur, setPriceEur] = useState<string>('');
   const [isPrivate, setIsPrivate] = useState(defaultPrivate);
   const [loading, setLoading] = useState(false);
+
+  const MAPBOX_TOKEN = 'pk.eyJ1IjoiZXZlbmRsZSIsImEiOiJjbWs0aHc2eWQwN2hqM2RyMjI4ZTY0N2F6In0.gMPP_wAbSR4Esz7WlB4Z4Q';
+
+  useEffect(() => {
+    if (!address || address.length < 3) {
+      setAddressSuggestions([]);
+      return;
+    }
+    const handle = setTimeout(async () => {
+      try {
+        const proximity = position ? `&proximity=${position[1]},${position[0]}` : '';
+        const res = await fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json?access_token=${MAPBOX_TOKEN}&autocomplete=true&limit=5&language=de${proximity}`
+        );
+        const data = await res.json();
+        const feats = (data.features || []).map((f: any) => ({
+          name: f.place_name as string,
+          lng: f.center[0] as number,
+          lat: f.center[1] as number,
+        }));
+        setAddressSuggestions(feats);
+      } catch (e) {
+        console.error('Geocoding error', e);
+      }
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [address, position]);
+
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -67,6 +98,9 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
     setImagePreview(null);
     setMaxParticipants('');
     setAddress('');
+    setAddressSuggestions([]);
+    setShowSuggestions(false);
+    setAddressCoords(null);
     setPriceEur('');
     setIsPrivate(defaultPrivate);
   };
@@ -101,8 +135,8 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
         title,
         description,
         event_date: eventDate,
-        latitude: position[0],
-        longitude: position[1],
+        latitude: addressCoords ? addressCoords[0] : position[0],
+        longitude: addressCoords ? addressCoords[1] : position[1],
         location_name: address.trim() || `${position[0].toFixed(4)}, ${position[1].toFixed(4)}`,
         category: eventCategory,
         source: isAdmin ? 'curated' : 'community',
@@ -237,14 +271,48 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
           {/* Address */}
           <div className="space-y-2">
             <Label htmlFor="address" className="text-foreground text-sm">Address (optional)</Label>
-            <Input
-              id="address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="e.g. Maria-Theresien-Straße 1, Innsbruck"
-              className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12"
-            />
-            <p className="text-muted-foreground text-xs">The pin location is used by default. Add an address to display it instead.</p>
+            <div className="relative">
+              <Input
+                id="address"
+                value={address}
+                onChange={(e) => {
+                  setAddress(e.target.value);
+                  setAddressCoords(null);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                placeholder="e.g. Maria-Theresien-Straße 1, Innsbruck"
+                className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12"
+                autoComplete="off"
+              />
+              {showSuggestions && addressSuggestions.length > 0 && (
+                <div className="absolute z-50 left-0 right-0 mt-1 bg-card border border-border rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                  {addressSuggestions.map((s, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        setAddress(s.name);
+                        setAddressCoords([s.lat, s.lng]);
+                        setShowSuggestions(false);
+                        setAddressSuggestions([]);
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-muted flex items-start gap-2"
+                    >
+                      <MapPinIcon className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                      <span>{s.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <p className="text-muted-foreground text-xs">
+              {addressCoords
+                ? '✓ Address selected — event will appear at this location.'
+                : 'Pin location is used by default. Pick a suggestion to use a real address.'}
+            </p>
           </div>
 
           {/* Date and Time */}
