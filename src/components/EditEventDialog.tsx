@@ -55,6 +55,41 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
   const [showMapPicker, setShowMapPicker] = useState(false);
   const [newLatitude, setNewLatitude] = useState<number | null>(null);
   const [newLongitude, setNewLongitude] = useState<number | null>(null);
+  const [locationSuggestions, setLocationSuggestions] = useState<Array<{ name: string; lat: number; lng: number }>>([]);
+  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
+  const [skipNextSearch, setSkipNextSearch] = useState(false);
+
+  const MAPBOX_TOKEN = 'pk.eyJ1IjoiZXZlbmRsZSIsImEiOiJjbWs0aHc2eWQwN2hqM2RyMjI4ZTY0N2F6In0.gMPP_wAbSR4Esz7WlB4Z4Q';
+
+  useEffect(() => {
+    if (skipNextSearch) {
+      setSkipNextSearch(false);
+      return;
+    }
+    if (!locationName || locationName.length < 2) {
+      setLocationSuggestions([]);
+      return;
+    }
+    const handle = setTimeout(async () => {
+      try {
+        const lat = newLatitude ?? event.latitude ?? 47.2692;
+        const lng = newLongitude ?? event.longitude ?? 11.4041;
+        const res = await fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(locationName)}.json?access_token=${MAPBOX_TOKEN}&autocomplete=true&limit=5&language=de&proximity=${lng},${lat}`
+        );
+        const data = await res.json();
+        const feats = (data.features || []).map((f: any) => ({
+          name: f.place_name as string,
+          lng: f.center[0] as number,
+          lat: f.center[1] as number,
+        }));
+        setLocationSuggestions(feats);
+      } catch (e) {
+        console.error('Geocoding error', e);
+      }
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [locationName]);
 
   useEffect(() => {
     if (open && event) {
@@ -225,7 +260,40 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
           {/* Location Name */}
           <div className="space-y-2">
             <Label htmlFor="edit-location" className="text-foreground text-sm">Location</Label>
-            <Input id="edit-location" value={locationName} onChange={(e) => setLocationName(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
+            <div className="relative">
+              <Input
+                id="edit-location"
+                value={locationName}
+                onChange={(e) => { setLocationName(e.target.value); setShowLocationSuggestions(true); }}
+                onFocus={() => setShowLocationSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowLocationSuggestions(false), 150)}
+                autoComplete="off"
+                className="bg-transparent border-border text-foreground rounded-xl h-12"
+              />
+              {showLocationSuggestions && locationSuggestions.length > 0 && (
+                <div className="absolute z-50 left-0 right-0 mt-1 bg-card border border-border rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                  {locationSuggestions.map((s, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        setSkipNextSearch(true);
+                        setLocationName(s.name);
+                        setNewLatitude(s.lat);
+                        setNewLongitude(s.lng);
+                        setShowLocationSuggestions(false);
+                        setLocationSuggestions([]);
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-muted flex items-start gap-2"
+                    >
+                      <MapPin className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                      <span>{s.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Map Position Picker */}
