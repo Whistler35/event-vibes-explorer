@@ -89,8 +89,8 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
       rafRef.current = null;
       const container = scrollRef.current;
       if (!container) return;
-      const center = container.scrollLeft + containerWidth / 2;
-      const idx = Math.round((center - CARD_WIDTH / 2) / STEP);
+      // sidePad makes scrollLeft == idx * STEP when card idx is centered.
+      const idx = Math.round(container.scrollLeft / STEP);
       const clamped = Math.max(0, Math.min(events.length - 1, idx));
       setActiveIdx(prev => (prev === clamped ? prev : clamped));
     });
