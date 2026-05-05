@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Camera, Upload, User, Building2, Check, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { Camera, Upload, User, Building2, Check, ArrowLeft, Eye, EyeOff, Mail } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
@@ -31,6 +31,7 @@ const Auth = () => {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState(false);
+  const [signupSuccessEmail, setSignupSuccessEmail] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState<UserRole>('private');
   const [companyName, setCompanyName] = useState('');
   const [hostWebsite, setHostWebsite] = useState('');
@@ -189,7 +190,7 @@ const Auth = () => {
 
         // Host profile is created automatically via DB trigger on email confirmation
 
-        toast.success('Sign up successful! Please confirm your email.');
+        setSignupSuccessEmail(email);
       }
     } catch (error: any) {
       toast.error('An error occurred');
@@ -197,6 +198,71 @@ const Auth = () => {
 
     setLoading(false);
   };
+
+  if (signupSuccessEmail) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4 relative">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate('/')}
+          className="absolute top-4 left-4 text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="w-4 h-4 mr-1" />
+          Zurück zur Startseite
+        </Button>
+        <div className="w-full max-w-md space-y-6 text-center">
+          <div className="flex items-center justify-center space-x-2">
+            <img src={evendleLogo} alt="Evendle" className="w-9 h-9 object-contain" />
+            <span className="text-foreground text-2xl font-bold">EVENDLE</span>
+          </div>
+
+          <div className="mx-auto w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
+            <Mail className="w-10 h-10 text-primary" />
+          </div>
+
+          <div className="space-y-3">
+            <h1 className="text-2xl font-bold text-foreground">
+              Danke für deine Registrierung!
+            </h1>
+            <p className="text-muted-foreground">
+              Wir haben dir eine Bestätigungs-E-Mail an{' '}
+              <span className="font-semibold text-foreground">{signupSuccessEmail}</span>{' '}
+              geschickt.
+            </p>
+            <p className="text-muted-foreground">
+              Bitte öffne dein E-Mail-Postfach und klicke auf den Bestätigungslink, um deine Registrierung abzuschließen.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Tipp: Schau auch in deinen Spam-Ordner, falls du die E-Mail nicht findest.
+            </p>
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <Button
+              type="button"
+              className="w-full"
+              onClick={() => {
+                setSignupSuccessEmail(null);
+                setIsLogin(true);
+              }}
+            >
+              Zurück zur Anmeldung
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => navigate('/')}
+            >
+              Zur Startseite
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 relative">
