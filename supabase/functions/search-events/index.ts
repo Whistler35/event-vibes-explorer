@@ -83,16 +83,10 @@ Deno.serve(async (req) => {
 
     let dateFrom = isValidIsoDate(params.date_from) ? params.date_from : undefined
     let dateTo = isValidIsoDate(params.date_to) ? params.date_to : undefined
-    // Default: if no date filter provided at all, restrict to events of the current
-    // calendar week (Monday 00:00 to Sunday 23:59:59).
+    // Default: if no date filter is provided, only return events from now onwards
+    // (no upper bound). This avoids hiding upcoming events outside the current week.
     if (!dateFrom && !dateTo) {
-      const now = new Date()
-      const day = now.getDay() // 0=Sun..6=Sat
-      const diffToMonday = (day + 6) % 7
-      const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday, 0, 0, 0)
-      const sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6, 23, 59, 59)
-      dateFrom = monday.toISOString()
-      dateTo = sunday.toISOString()
+      dateFrom = new Date().toISOString()
     }
 
     // Sanitize free-text search: strip PostgREST filter syntax chars and cap length
