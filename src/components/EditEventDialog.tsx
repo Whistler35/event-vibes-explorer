@@ -106,7 +106,10 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
         }
       }
 
-      const eventDate = `${date}T${time}:00`;
+      // Treat the form values as the user's LOCAL time and convert to a
+      // UTC ISO string. Otherwise Postgres parses the offset-less string as
+      // UTC and the displayed time drifts by the local timezone offset.
+      const eventDate = new Date(`${date}T${time}:00`).toISOString();
       const parsedMax = maxParticipants ? parseInt(maxParticipants, 10) : null;
       const parsedPrice = priceEur ? parseFloat(priceEur.replace(',', '.')) : 0;
       const priceCents = !isNaN(parsedPrice) && parsedPrice > 0 ? Math.round(parsedPrice * 100) : 0;
