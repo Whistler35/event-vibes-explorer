@@ -22,6 +22,7 @@ import type { MapboxMapHandle } from "@/components/MapboxMap";
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiZXZlbmRsZSIsImEiOiJjbWs0aHc2eWQwN2hqM2RyMjI4ZTY0N2F6In0.gMPP_wAbSR4Esz7WlB4Z4Q';
 const MAP_EVENT_RADIUS_KM = 30;
+const LOCATION_OVERVIEW_ZOOM = 11;
 
 function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const radius = 6371;
@@ -88,6 +89,7 @@ const Nearby = () => {
   const [searchLoading, setSearchLoading] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const searchAbortRef = useRef<AbortController | null>(null);
+  const cityOverviewTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const mapRef = useRef<MapboxMapHandle>(null);
 
   const { isAdmin } = useIsAdmin();
@@ -243,6 +245,7 @@ const Nearby = () => {
   };
 
   const selectCity = (loc: GeoResult) => {
+    if (cityOverviewTimerRef.current) clearTimeout(cityOverviewTimerRef.current);
     setCityQuery(loc.name.split(',')[0]);
     setShowCitySuggestions(false);
     setMapFocusCenter([loc.lat, loc.lng]);
@@ -251,7 +254,10 @@ const Nearby = () => {
     setSelectedEventId(null);
     setSelectedEvent(null);
     setFrozenCarousel(null);
-    mapRef.current?.flyTo(loc.lat, loc.lng, 11);
+    mapRef.current?.setOverview(loc.lat, loc.lng, LOCATION_OVERVIEW_ZOOM);
+    cityOverviewTimerRef.current = setTimeout(() => {
+      mapRef.current?.setOverview(loc.lat, loc.lng, LOCATION_OVERVIEW_ZOOM);
+    }, 350);
     localStorage.setItem('selectedCity', JSON.stringify(loc));
   };
 
