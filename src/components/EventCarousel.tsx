@@ -111,15 +111,39 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
       setActiveIdx(prev => (prev === idx ? prev : idx));
     });
 
-    // Settle detection: when scroll stops for 140ms → fire onSelect, re-enable transitions
+    // Settle detection: when scroll stops for 140ms → snap precisely, fire onSelect
     if (settleTimeoutRef.current) clearTimeout(settleTimeoutRef.current);
     settleTimeoutRef.current = setTimeout(() => {
+      const container = scrollRef.current;
+      if (!container) return;
+      const idx = computeCenterIdx();
+      const cards = container.querySelectorAll<HTMLElement>('[data-carousel-card]');
+      const card = cards[idx];
+      if (card) {
+        const target = card.offsetLeft + card.offsetWidth / 2 - container.clientWidth / 2;
+        const delta = Math.abs(container.scrollLeft - target);
+        if (delta > 0.5) {
+          // Precise snap to true center of nearest card
+          programmaticScrollRef.current = true;
+          if (programmaticTimerRef.current) clearTimeout(programmaticTimerRef.current);
+          container.scrollTo({ left: target, behavior: 'smooth' });
+          programmaticTimerRef.current = setTimeout(() => {
+            programmaticScrollRef.current = false;
+            isScrollingRef.current = false;
+            setIsScrolling(false);
+            setActiveIdx(idx);
+            const ev = events[idx];
+            if (ev && String(ev.id) !== String(selectedId)) onSelect(ev);
+          }, 320);
+          return;
+        }
+      }
       isScrollingRef.current = false;
       setIsScrolling(false);
-      const idx = computeCenterIdx();
+      setActiveIdx(idx);
       const ev = events[idx];
       if (ev && String(ev.id) !== String(selectedId)) onSelect(ev);
-    }, 140);
+    }, 120);
   }, [events, computeCenterIdx, selectedId, onInteractionStart, onSelect]);
 
   useEffect(() => () => {
