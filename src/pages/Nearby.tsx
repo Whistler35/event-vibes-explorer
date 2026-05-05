@@ -110,6 +110,10 @@ const Nearby = () => {
     if (storedCity) setCityQuery(storedCity.name?.split(',')[0] || '');
   }, []);
 
+  useEffect(() => () => {
+    if (cityOverviewTimerRef.current) clearTimeout(cityOverviewTimerRef.current);
+  }, []);
+
   // Persist filters across navigation (e.g. opening an event detail and coming back)
   useEffect(() => {
     try {
