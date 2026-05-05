@@ -100,6 +100,11 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
     setDescription('');
     setDate('');
     setTime('');
+    setEndDate('');
+    setEndTime('');
+    setIsRecurring(false);
+    setRecurringSlots([{ weekday: 1, startTime: '', endTime: '' }]);
+    setRecurringUntil('');
     setCategory('community');
     setImage(null);
     setImagePreview(null);
@@ -113,7 +118,9 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
   };
 
   const handleSubmit = async () => {
-    if (!position || !title || !date || !time || !user) return;
+    if (!position || !title || !user) return;
+    if (!isRecurring && (!date || !time)) return;
+    if (isRecurring && (!recurringUntil || recurringSlots.some(s => !s.startTime))) return;
 
     setLoading(true);
     try {
