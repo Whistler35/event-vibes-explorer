@@ -126,7 +126,8 @@ const Nearby = () => {
     } catch { /* ignore quota errors */ }
   }, [selectedCategories, selectedDateRange, activeQuickFilters, isPrivateMode]);
 
-  // Build date filter from quick "tonight" or explicit range
+  // Build date filter — default to the next 14 days unless a quick filter or
+  // explicit date range overrides it.
   const dateFilter = useMemo(() => {
     if (activeQuickFilters.has('tonight')) {
       const today = new Date().toISOString().split('T')[0];
@@ -137,7 +138,12 @@ const Nearby = () => {
       const to = (selectedDateRange.to || selectedDateRange.from).toISOString().split('T')[0];
       return { from, to };
     }
-    return undefined;
+    const now = new Date();
+    const in14 = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 14);
+    return {
+      from: now.toISOString().split('T')[0],
+      to: in14.toISOString().split('T')[0],
+    };
   }, [activeQuickFilters, selectedDateRange]);
 
   const { data: searchResult, isLoading: isLoadingPublic, refetch: refetchPublic } = useSearchEvents({
@@ -413,8 +419,12 @@ const Nearby = () => {
     });
     if (f === 'nearby' && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => mapRef.current?.flyTo(pos.coords.latitude, pos.coords.longitude, 15),
-        () => {}
+        (pos) => {
+          setMapFocusCenter([pos.coords.latitude, pos.coords.longitude]);
+          setFrozenCarousel(null);
+          mapRef.current?.flyTo(pos.coords.latitude, pos.coords.longitude, 14);
+        },
+        () => toast.error('Standort konnte nicht ermittelt werden')
       );
     }
   };
