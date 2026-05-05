@@ -31,6 +31,7 @@ const Auth = () => {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState(false);
+  const [signupSuccessEmail, setSignupSuccessEmail] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState<UserRole>('private');
   const [companyName, setCompanyName] = useState('');
   const [hostWebsite, setHostWebsite] = useState('');
