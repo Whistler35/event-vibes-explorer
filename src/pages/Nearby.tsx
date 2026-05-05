@@ -251,7 +251,7 @@ const Nearby = () => {
     setSelectedEventId(null);
     setSelectedEvent(null);
     setFrozenCarousel(null);
-    mapRef.current?.flyTo(loc.lat, loc.lng, 13);
+    mapRef.current?.flyTo(loc.lat, loc.lng, 11);
     localStorage.setItem('selectedCity', JSON.stringify(loc));
   };
 
