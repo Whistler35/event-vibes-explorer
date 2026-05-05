@@ -73,6 +73,24 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
     scrollToIndex(idx);
   }, [selectedId, events, scrollToIndex, activeIdx]);
 
+  // Find the card whose center is closest to the container's center.
+  // More reliable than math based on STEP because it tolerates padding/gap drift.
+  const computeCenterIdx = useCallback((): number => {
+    const container = scrollRef.current;
+    if (!container) return 0;
+    const containerCenter = container.scrollLeft + container.clientWidth / 2;
+    let bestIdx = 0;
+    let bestDist = Infinity;
+    const children = container.children;
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i] as HTMLElement;
+      const childCenter = child.offsetLeft + child.offsetWidth / 2;
+      const dist = Math.abs(childCenter - containerCenter);
+      if (dist < bestDist) { bestDist = dist; bestIdx = i; }
+    }
+    return Math.max(0, Math.min(events.length - 1, bestIdx));
+  }, [events.length]);
+
   // High-performance scroll handler: rAF-throttled, no React state churn per frame
   const handleScroll = useCallback(() => {
     if (!scrollRef.current) return;
@@ -87,12 +105,8 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
     if (rafRef.current != null) return;
     rafRef.current = requestAnimationFrame(() => {
       rafRef.current = null;
-      const container = scrollRef.current;
-      if (!container) return;
-      // sidePad makes scrollLeft == idx * STEP when card idx is centered.
-      const idx = Math.round(container.scrollLeft / STEP);
-      const clamped = Math.max(0, Math.min(events.length - 1, idx));
-      setActiveIdx(prev => (prev === clamped ? prev : clamped));
+      const idx = computeCenterIdx();
+      setActiveIdx(prev => (prev === idx ? prev : idx));
     });
 
     // Settle detection: when scroll stops for 140ms → fire onSelect, re-enable transitions
@@ -100,14 +114,11 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
     settleTimeoutRef.current = setTimeout(() => {
       isScrollingRef.current = false;
       setIsScrolling(false);
-      const container = scrollRef.current;
-      if (!container) return;
-      const idx = Math.round(container.scrollLeft / STEP);
-      const clamped = Math.max(0, Math.min(events.length - 1, idx));
-      const ev = events[clamped];
+      const idx = computeCenterIdx();
+      const ev = events[idx];
       if (ev && String(ev.id) !== String(selectedId)) onSelect(ev);
     }, 140);
-  }, [events, containerWidth, selectedId, onInteractionStart, onSelect]);
+  }, [events, computeCenterIdx, selectedId, onInteractionStart, onSelect]);
 
   useEffect(() => () => {
     if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
