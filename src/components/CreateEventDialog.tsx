@@ -38,6 +38,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [maxParticipants, setMaxParticipants] = useState<string>('');
+  const [address, setAddress] = useState<string>('');
   const [priceEur, setPriceEur] = useState<string>('');
   const [isPrivate, setIsPrivate] = useState(defaultPrivate);
   const [loading, setLoading] = useState(false);
@@ -65,6 +66,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
     setImage(null);
     setImagePreview(null);
     setMaxParticipants('');
+    setAddress('');
     setPriceEur('');
     setIsPrivate(defaultPrivate);
   };
@@ -101,7 +103,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
         event_date: eventDate,
         latitude: position[0],
         longitude: position[1],
-        location_name: `${position[0].toFixed(4)}, ${position[1].toFixed(4)}`,
+        location_name: address.trim() || `${position[0].toFixed(4)}, ${position[1].toFixed(4)}`,
         category: eventCategory,
         source: isAdmin ? 'curated' : 'community',
         created_by: user.id,
@@ -230,6 +232,19 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
           <div className="space-y-2">
             <Label htmlFor="description" className="text-foreground text-sm">Description</Label>
             <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe your event..." rows={3} className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl resize-none" />
+          </div>
+
+          {/* Address */}
+          <div className="space-y-2">
+            <Label htmlFor="address" className="text-foreground text-sm">Address (optional)</Label>
+            <Input
+              id="address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="e.g. Maria-Theresien-Straße 1, Innsbruck"
+              className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12"
+            />
+            <p className="text-muted-foreground text-xs">The pin location is used by default. Add an address to display it instead.</p>
           </div>
 
           {/* Date and Time */}
