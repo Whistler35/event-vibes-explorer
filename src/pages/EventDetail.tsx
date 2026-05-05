@@ -247,16 +247,27 @@ const EventDetail = () => {
               </Badge>
             )}
           </div>
-          {canEdit && (
+          <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="icon"
-              onClick={() => setEditOpen(true)}
+              onClick={handleShare}
               className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+              aria-label="Event teilen"
             >
-              <Pencil className="w-4 h-4" />
+              <Share2 className="w-4 h-4" />
             </Button>
-          )}
+            {canEdit && (
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setEditOpen(true)}
+                className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+              >
+                <Pencil className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Event Image */}
