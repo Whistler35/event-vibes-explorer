@@ -83,6 +83,14 @@ Deno.serve(async (req) => {
 
     let dateFrom = isValidIsoDate(params.date_from) ? params.date_from : undefined
     let dateTo = isValidIsoDate(params.date_to) ? params.date_to : undefined
+    // If a date-only string (YYYY-MM-DD) is provided, expand to full day boundaries
+    // so that "to" includes events later that same day.
+    if (dateFrom && /^\d{4}-\d{2}-\d{2}$/.test(dateFrom)) {
+      dateFrom = `${dateFrom}T00:00:00.000Z`
+    }
+    if (dateTo && /^\d{4}-\d{2}-\d{2}$/.test(dateTo)) {
+      dateTo = `${dateTo}T23:59:59.999Z`
+    }
     // Default: if no date filter provided at all, restrict to events of the current
     // calendar week (Monday 00:00 to Sunday 23:59:59).
     if (!dateFrom && !dateTo) {
