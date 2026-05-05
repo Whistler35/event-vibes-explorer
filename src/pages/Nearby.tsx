@@ -37,15 +37,36 @@ interface GeoResult { name: string; lat: number; lng: number; }
 
 type QuickFilter = 'tonight' | 'free' | 'nearby' | 'popular';
 
+const FILTERS_STORAGE_KEY = 'nearbyFilters';
+
+type StoredFilters = {
+  selectedCategories?: EventCategory[];
+  selectedDateRange?: { from?: string; to?: string };
+  activeQuickFilters?: QuickFilter[];
+  isPrivateMode?: boolean;
+};
+
+const loadStoredFilters = (): StoredFilters => {
+  try {
+    const raw = localStorage.getItem(FILTERS_STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as StoredFilters) : {};
+  } catch { return {}; }
+};
+
 const Nearby = () => {
+  const stored = loadStoredFilters();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<[number, number] | null>(null);
-  const [selectedCategories, setSelectedCategories] = useState<EventCategory[]>([]);
-  const [selectedDateRange, setSelectedDateRange] = useState<DateRange | undefined>(undefined);
-  const [activeQuickFilters, setActiveQuickFilters] = useState<Set<QuickFilter>>(new Set());
+  const [selectedCategories, setSelectedCategories] = useState<EventCategory[]>(stored.selectedCategories || []);
+  const [selectedDateRange, setSelectedDateRange] = useState<DateRange | undefined>(
+    stored.selectedDateRange?.from
+      ? { from: new Date(stored.selectedDateRange.from), to: stored.selectedDateRange.to ? new Date(stored.selectedDateRange.to) : undefined }
+      : undefined
+  );
+  const [activeQuickFilters, setActiveQuickFilters] = useState<Set<QuickFilter>>(new Set(stored.activeQuickFilters || []));
   const [selectedEvent, setSelectedEvent] = useState<MapEvent | null>(null);
   const [selectedEventId, setSelectedEventId] = useState<string | number | null>(null);
-  const [isPrivateMode, setIsPrivateMode] = useState(false);
+  const [isPrivateMode, setIsPrivateMode] = useState(stored.isPrivateMode || false);
   const [viewportBounds, setViewportBounds] = useState<{ west: number; south: number; east: number; north: number } | null>(null);
   // While the carousel drives the map, we ignore viewport-bound updates so the
   // visible card list doesn't reshuffle mid-flight.
@@ -86,6 +107,24 @@ const Nearby = () => {
   useEffect(() => {
     if (storedCity) setCityQuery(storedCity.name?.split(',')[0] || '');
   }, []);
+
+  // Persist filters across navigation (e.g. opening an event detail and coming back)
+  useEffect(() => {
+    try {
+      const payload: StoredFilters = {
+        selectedCategories,
+        selectedDateRange: selectedDateRange?.from
+          ? {
+              from: selectedDateRange.from.toISOString(),
+              to: selectedDateRange.to ? selectedDateRange.to.toISOString() : undefined,
+            }
+          : undefined,
+        activeQuickFilters: Array.from(activeQuickFilters),
+        isPrivateMode,
+      };
+      localStorage.setItem(FILTERS_STORAGE_KEY, JSON.stringify(payload));
+    } catch { /* ignore quota errors */ }
+  }, [selectedCategories, selectedDateRange, activeQuickFilters, isPrivateMode]);
 
   // Build date filter from quick "tonight" or explicit range
   const dateFilter = useMemo(() => {
