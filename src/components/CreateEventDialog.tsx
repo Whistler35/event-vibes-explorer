@@ -542,7 +542,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
             <Button variant="outline" onClick={handleClose} className="flex-1 h-12 rounded-xl">
               Cancel
             </Button>
-            <Button onClick={handleSubmit} disabled={!title || !date || !time || loading || (!isAdmin && (!maxParticipants || parseInt(maxParticipants) < 2))} className="flex-1 h-12 rounded-xl">
+            <Button onClick={handleSubmit} disabled={!title || loading || (!isRecurring && (!date || !time)) || (isRecurring && (!recurringUntil || recurringSlots.some(s => !s.startTime))) || (!isAdmin && (!maxParticipants || parseInt(maxParticipants) < 2))} className="flex-1 h-12 rounded-xl">
               {loading ? 'Creating...' : 'Create Event'}
             </Button>
           </div>
