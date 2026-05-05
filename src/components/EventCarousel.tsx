@@ -56,7 +56,8 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
     if (!scrollRef.current || containerWidth === 0) return;
     programmaticScrollRef.current = true;
     if (programmaticTimerRef.current) clearTimeout(programmaticTimerRef.current);
-    const target = idx * STEP - (containerWidth / 2 - CARD_WIDTH / 2);
+    // With sidePad applied, scrollLeft = idx * STEP centers card idx exactly.
+    const target = idx * STEP;
     scrollRef.current.scrollTo({ left: target, behavior });
     programmaticTimerRef.current = setTimeout(() => {
       programmaticScrollRef.current = false;
