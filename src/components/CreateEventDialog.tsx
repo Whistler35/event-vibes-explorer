@@ -137,7 +137,6 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
         }
       }
 
-      const eventDate = `${date}T${time}:00`;
       const approvalStatus = isAdmin ? 'approved' : 'pending';
       const eventCategory = isAdmin ? category : 'community';
       const parsedMax = maxParticipants ? parseInt(maxParticipants, 10) : null;
@@ -145,10 +144,9 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
       const parsedPrice = priceEur ? parseFloat(priceEur.replace(',', '.')) : 0;
       const priceCents = !isNaN(parsedPrice) && parsedPrice > 0 ? Math.round(parsedPrice * 100) : 0;
 
-      const { error } = await supabase.from('events').insert({
+      const baseRow = {
         title,
         description,
-        event_date: eventDate,
         latitude: addressCoords ? addressCoords[0] : position[0],
         longitude: addressCoords ? addressCoords[1] : position[1],
         location_name: address.trim() || `${position[0].toFixed(4)}, ${position[1].toFixed(4)}`,
@@ -160,15 +158,53 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
         max_participants: !isAdmin && parsedMax && parsedMax >= 2 ? parsedMax : null,
         visibility: eventVisibility,
         price_cents: priceCents,
-      } as any);
+      };
+
+      // Build list of (start, end) datetime pairs
+      const occurrences: Array<{ start: string; end: string | null }> = [];
+      if (isRecurring) {
+        const untilDate = new Date(`${recurringUntil}T23:59:59`);
+        const startFrom = new Date();
+        startFrom.setHours(0, 0, 0, 0);
+        // Iterate day by day from today to untilDate, match weekdays
+        for (let d = new Date(startFrom); d <= untilDate; d.setDate(d.getDate() + 1)) {
+          const wd = d.getDay(); // 0=Sun..6=Sat
+          for (const slot of recurringSlots) {
+            if (slot.weekday !== wd) continue;
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            const startIso = `${yyyy}-${mm}-${dd}T${slot.startTime}:00`;
+            const endIso = slot.endTime ? `${yyyy}-${mm}-${dd}T${slot.endTime}:00` : null;
+            occurrences.push({ start: startIso, end: endIso });
+          }
+        }
+        if (occurrences.length === 0) {
+          toast.error('Keine passenden Wochentage im Zeitraum gefunden');
+          setLoading(false);
+          return;
+        }
+      } else {
+        const startIso = `${date}T${time}:00`;
+        const endIso = endDate && endTime ? `${endDate}T${endTime}:00` : null;
+        occurrences.push({ start: startIso, end: endIso });
+      }
+
+      const rows = occurrences.map(o => ({
+        ...baseRow,
+        event_date: o.start,
+        end_time: o.end,
+      }));
+
+      const { error } = await supabase.from('events').insert(rows as any);
 
       if (error) throw error;
 
       if (isAdmin) {
-        toast.success('Event created and published immediately! ✅');
+        toast.success(`${rows.length} Event(s) erstellt und veröffentlicht ✅`);
       } else {
-        toast.success('Event submitted! ⏳', {
-          description: 'Your event will be reviewed by an admin and then published.'
+        toast.success(`${rows.length} Event(s) eingereicht ⏳`, {
+          description: 'Werden nach Admin-Freigabe veröffentlicht.'
         });
       }
 
