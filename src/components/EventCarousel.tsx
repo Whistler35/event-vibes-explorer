@@ -138,14 +138,14 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
       className="flex items-end overflow-x-auto scrollbar-hide snap-x snap-mandatory touch-pan-x overscroll-x-contain"
       style={{
         WebkitOverflowScrolling: 'touch',
-        paddingLeft: sidePad,
-        paddingRight: sidePad,
         paddingTop: 32,
         paddingBottom: 8,
         gap: `${CARD_GAP}px`,
         contain: 'layout paint',
       }}
     >
+      {/* Left spacer so first card can reach center */}
+      <div aria-hidden style={{ flex: `0 0 ${sidePad}px` }} />
       {events.map((ev, i) => {
         const offset = i - activeIdx;
         const abs = Math.abs(offset);
