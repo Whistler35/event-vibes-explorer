@@ -157,6 +157,7 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
         return (
           <button
             key={ev.id}
+            data-carousel-card
             onClick={(e) => {
               e.stopPropagation();
               if (isCenter) {
