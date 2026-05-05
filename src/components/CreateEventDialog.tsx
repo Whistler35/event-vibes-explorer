@@ -34,6 +34,13 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [endTime, setEndTime] = useState('');
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurringSlots, setRecurringSlots] = useState<Array<{ weekday: number; startTime: string; endTime: string }>>([
+    { weekday: 1, startTime: '', endTime: '' },
+  ]);
+  const [recurringUntil, setRecurringUntil] = useState('');
   const [category, setCategory] = useState<EventCategory>('community');
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
