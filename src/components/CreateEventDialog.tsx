@@ -365,17 +365,126 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
             </p>
           </div>
 
-          {/* Date and Time */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="date" className="text-foreground text-sm">Date *</Label>
-              <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="time" className="text-foreground text-sm">Time *</Label>
-              <Input id="time" type="time" value={time} onChange={(e) => setTime(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
-            </div>
+          {/* Recurring toggle */}
+          <div className="flex items-center justify-between py-2 px-1">
+            <Label className="text-foreground text-sm">Wiederkehrendes Event</Label>
+            <Switch checked={isRecurring} onCheckedChange={setIsRecurring} />
           </div>
+
+          {!isRecurring ? (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="date" className="text-foreground text-sm">Start-Datum *</Label>
+                  <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="time" className="text-foreground text-sm">Start-Zeit *</Label>
+                  <Input id="time" type="time" value={time} onChange={(e) => setTime(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="endDate" className="text-foreground text-sm">End-Datum (optional)</Label>
+                  <Input id="endDate" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} min={date || undefined} className="bg-transparent border-border text-foreground rounded-xl h-12" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="endTime" className="text-foreground text-sm">End-Zeit (optional)</Label>
+                  <Input id="endTime" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
+                </div>
+              </div>
+              <p className="text-muted-foreground text-xs -mt-2">Endzeit ist optional.</p>
+            </>
+          ) : (
+            <div className="space-y-3">
+              <Label className="text-foreground text-sm">Wochentag-Slots *</Label>
+              {recurringSlots.map((slot, i) => (
+                <div key={i} className="grid grid-cols-[1fr_auto_auto_auto] gap-2 items-end">
+                  <div className="space-y-1">
+                    <Label className="text-muted-foreground text-xs">Tag</Label>
+                    <Select
+                      value={String(slot.weekday)}
+                      onValueChange={(v) => {
+                        const next = [...recurringSlots];
+                        next[i] = { ...next[i], weekday: parseInt(v, 10) };
+                        setRecurringSlots(next);
+                      }}
+                    >
+                      <SelectTrigger className="bg-transparent border-border text-foreground rounded-xl h-10">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-card border-border">
+                        <SelectItem value="1">Montag</SelectItem>
+                        <SelectItem value="2">Dienstag</SelectItem>
+                        <SelectItem value="3">Mittwoch</SelectItem>
+                        <SelectItem value="4">Donnerstag</SelectItem>
+                        <SelectItem value="5">Freitag</SelectItem>
+                        <SelectItem value="6">Samstag</SelectItem>
+                        <SelectItem value="0">Sonntag</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-muted-foreground text-xs">Start</Label>
+                    <Input
+                      type="time"
+                      value={slot.startTime}
+                      onChange={(e) => {
+                        const next = [...recurringSlots];
+                        next[i] = { ...next[i], startTime: e.target.value };
+                        setRecurringSlots(next);
+                      }}
+                      className="bg-transparent border-border text-foreground rounded-xl h-10 w-[110px]"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-muted-foreground text-xs">Ende</Label>
+                    <Input
+                      type="time"
+                      value={slot.endTime}
+                      onChange={(e) => {
+                        const next = [...recurringSlots];
+                        next[i] = { ...next[i], endTime: e.target.value };
+                        setRecurringSlots(next);
+                      }}
+                      className="bg-transparent border-border text-foreground rounded-xl h-10 w-[110px]"
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setRecurringSlots(recurringSlots.filter((_, idx) => idx !== i))}
+                    disabled={recurringSlots.length === 1}
+                    className="h-10 w-10"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setRecurringSlots([...recurringSlots, { weekday: 1, startTime: '', endTime: '' }])}
+                className="rounded-xl"
+              >
+                + Slot hinzufügen
+              </Button>
+              <div className="space-y-2">
+                <Label htmlFor="recurringUntil" className="text-foreground text-sm">Wiederholen bis *</Label>
+                <Input
+                  id="recurringUntil"
+                  type="date"
+                  value={recurringUntil}
+                  onChange={(e) => setRecurringUntil(e.target.value)}
+                  min={new Date().toISOString().slice(0, 10)}
+                  className="bg-transparent border-border text-foreground rounded-xl h-12"
+                />
+                <p className="text-muted-foreground text-xs">Ein Event wird pro passendem Wochentag im Zeitraum erstellt.</p>
+              </div>
+            </div>
+          )}
 
           {/* Max Participants */}
           {!isAdmin && (
