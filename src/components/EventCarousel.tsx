@@ -53,12 +53,15 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
   }, []);
 
   const scrollToIndex = useCallback((idx: number, behavior: ScrollBehavior = 'smooth') => {
-    if (!scrollRef.current || containerWidth === 0) return;
+    const container = scrollRef.current;
+    if (!container || containerWidth === 0) return;
+    const cards = container.querySelectorAll<HTMLElement>('[data-carousel-card]');
+    const card = cards[idx];
+    if (!card) return;
     programmaticScrollRef.current = true;
     if (programmaticTimerRef.current) clearTimeout(programmaticTimerRef.current);
-    // With sidePad applied, scrollLeft = idx * STEP centers card idx exactly.
-    const target = idx * STEP;
-    scrollRef.current.scrollTo({ left: target, behavior });
+    const target = card.offsetLeft + card.offsetWidth / 2 - container.clientWidth / 2;
+    container.scrollTo({ left: target, behavior });
     programmaticTimerRef.current = setTimeout(() => {
       programmaticScrollRef.current = false;
     }, behavior === 'smooth' ? 500 : 50);
