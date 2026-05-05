@@ -39,9 +39,40 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [maxParticipants, setMaxParticipants] = useState<string>('');
   const [address, setAddress] = useState<string>('');
+  const [addressSuggestions, setAddressSuggestions] = useState<Array<{ name: string; lat: number; lng: number }>>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [addressCoords, setAddressCoords] = useState<[number, number] | null>(null);
   const [priceEur, setPriceEur] = useState<string>('');
   const [isPrivate, setIsPrivate] = useState(defaultPrivate);
   const [loading, setLoading] = useState(false);
+
+  const MAPBOX_TOKEN = 'pk.eyJ1IjoiZXZlbmRsZSIsImEiOiJjbWs0aHc2eWQwN2hqM2RyMjI4ZTY0N2F6In0.gMPP_wAbSR4Esz7WlB4Z4Q';
+
+  useEffect(() => {
+    if (!address || address.length < 3) {
+      setAddressSuggestions([]);
+      return;
+    }
+    const handle = setTimeout(async () => {
+      try {
+        const proximity = position ? `&proximity=${position[1]},${position[0]}` : '';
+        const res = await fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json?access_token=${MAPBOX_TOKEN}&autocomplete=true&limit=5&language=de${proximity}`
+        );
+        const data = await res.json();
+        const feats = (data.features || []).map((f: any) => ({
+          name: f.place_name as string,
+          lng: f.center[0] as number,
+          lat: f.center[1] as number,
+        }));
+        setAddressSuggestions(feats);
+      } catch (e) {
+        console.error('Geocoding error', e);
+      }
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [address, position]);
+
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
