@@ -271,14 +271,48 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
           {/* Address */}
           <div className="space-y-2">
             <Label htmlFor="address" className="text-foreground text-sm">Address (optional)</Label>
-            <Input
-              id="address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="e.g. Maria-Theresien-Straße 1, Innsbruck"
-              className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12"
-            />
-            <p className="text-muted-foreground text-xs">The pin location is used by default. Add an address to display it instead.</p>
+            <div className="relative">
+              <Input
+                id="address"
+                value={address}
+                onChange={(e) => {
+                  setAddress(e.target.value);
+                  setAddressCoords(null);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                placeholder="e.g. Maria-Theresien-Straße 1, Innsbruck"
+                className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12"
+                autoComplete="off"
+              />
+              {showSuggestions && addressSuggestions.length > 0 && (
+                <div className="absolute z-50 left-0 right-0 mt-1 bg-card border border-border rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                  {addressSuggestions.map((s, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        setAddress(s.name);
+                        setAddressCoords([s.lat, s.lng]);
+                        setShowSuggestions(false);
+                        setAddressSuggestions([]);
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-muted flex items-start gap-2"
+                    >
+                      <MapPinIcon className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                      <span>{s.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <p className="text-muted-foreground text-xs">
+              {addressCoords
+                ? '✓ Address selected — event will appear at this location.'
+                : 'Pin location is used by default. Pick a suggestion to use a real address.'}
+            </p>
           </div>
 
           {/* Date and Time */}
