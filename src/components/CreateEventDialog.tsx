@@ -234,6 +234,19 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
             <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe your event..." rows={3} className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl resize-none" />
           </div>
 
+          {/* Address */}
+          <div className="space-y-2">
+            <Label htmlFor="address" className="text-foreground text-sm">Address (optional)</Label>
+            <Input
+              id="address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="e.g. Maria-Theresien-Straße 1, Innsbruck"
+              className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12"
+            />
+            <p className="text-muted-foreground text-xs">The pin location is used by default. Add an address to display it instead.</p>
+          </div>
+
           {/* Date and Time */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
