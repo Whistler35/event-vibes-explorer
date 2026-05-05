@@ -98,6 +98,9 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
     setImagePreview(null);
     setMaxParticipants('');
     setAddress('');
+    setAddressSuggestions([]);
+    setShowSuggestions(false);
+    setAddressCoords(null);
     setPriceEur('');
     setIsPrivate(defaultPrivate);
   };
