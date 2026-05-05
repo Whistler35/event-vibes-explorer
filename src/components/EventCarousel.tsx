@@ -102,8 +102,7 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
       setIsScrolling(false);
       const container = scrollRef.current;
       if (!container) return;
-      const center = container.scrollLeft + containerWidth / 2;
-      const idx = Math.round((center - CARD_WIDTH / 2) / STEP);
+      const idx = Math.round(container.scrollLeft / STEP);
       const clamped = Math.max(0, Math.min(events.length - 1, idx));
       const ev = events[clamped];
       if (ev && String(ev.id) !== String(selectedId)) onSelect(ev);
