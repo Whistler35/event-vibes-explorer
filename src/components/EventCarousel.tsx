@@ -79,15 +79,14 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
     const container = scrollRef.current;
     if (!container) return 0;
     const containerCenter = container.scrollLeft + container.clientWidth / 2;
+    const cards = container.querySelectorAll<HTMLElement>('[data-carousel-card]');
     let bestIdx = 0;
     let bestDist = Infinity;
-    const children = container.children;
-    for (let i = 0; i < children.length; i++) {
-      const child = children[i] as HTMLElement;
+    cards.forEach((child, i) => {
       const childCenter = child.offsetLeft + child.offsetWidth / 2;
       const dist = Math.abs(childCenter - containerCenter);
       if (dist < bestDist) { bestDist = dist; bestIdx = i; }
-    }
+    });
     return Math.max(0, Math.min(events.length - 1, bestIdx));
   }, [events.length]);
 
