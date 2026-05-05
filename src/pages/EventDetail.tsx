@@ -8,7 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Calendar, Clock, MapPin, Users, Pencil, ScanLine } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, MapPin, Users, Pencil, ScanLine, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import JoinRequestButton from "@/components/JoinRequestButton";
 import JoinRequestList from "@/components/JoinRequestList";
