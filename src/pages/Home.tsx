@@ -102,7 +102,9 @@ const Home = () => {
       );
       if (!res.ok) return [];
       const result = await res.json();
-      const events = (result.data || []).filter((e: any) => e.latitude != null && e.longitude != null);
+      const events = (result.data || [])
+        .filter((e: any) => e.latitude != null && e.longitude != null)
+        .filter((e: any) => haversineDistance(searchLocation.lat, searchLocation.lng, e.latitude, e.longitude) <= 30);
       // Sort by distance
       return events.sort((a: any, b: any) => {
         const distA = haversineDistance(searchLocation.lat, searchLocation.lng, a.latitude, a.longitude);
