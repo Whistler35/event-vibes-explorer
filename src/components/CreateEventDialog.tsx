@@ -34,6 +34,13 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [endTime, setEndTime] = useState('');
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurringSlots, setRecurringSlots] = useState<Array<{ weekday: number; startTime: string; endTime: string }>>([
+    { weekday: 1, startTime: '', endTime: '' },
+  ]);
+  const [recurringUntil, setRecurringUntil] = useState('');
   const [category, setCategory] = useState<EventCategory>('community');
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -93,6 +100,11 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
     setDescription('');
     setDate('');
     setTime('');
+    setEndDate('');
+    setEndTime('');
+    setIsRecurring(false);
+    setRecurringSlots([{ weekday: 1, startTime: '', endTime: '' }]);
+    setRecurringUntil('');
     setCategory('community');
     setImage(null);
     setImagePreview(null);
@@ -106,7 +118,9 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
   };
 
   const handleSubmit = async () => {
-    if (!position || !title || !date || !time || !user) return;
+    if (!position || !title || !user) return;
+    if (!isRecurring && (!date || !time)) return;
+    if (isRecurring && (!recurringUntil || recurringSlots.some(s => !s.startTime))) return;
 
     setLoading(true);
     try {
@@ -123,7 +137,6 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
         }
       }
 
-      const eventDate = `${date}T${time}:00`;
       const approvalStatus = isAdmin ? 'approved' : 'pending';
       const eventCategory = isAdmin ? category : 'community';
       const parsedMax = maxParticipants ? parseInt(maxParticipants, 10) : null;
@@ -131,10 +144,9 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
       const parsedPrice = priceEur ? parseFloat(priceEur.replace(',', '.')) : 0;
       const priceCents = !isNaN(parsedPrice) && parsedPrice > 0 ? Math.round(parsedPrice * 100) : 0;
 
-      const { error } = await supabase.from('events').insert({
+      const baseRow = {
         title,
         description,
-        event_date: eventDate,
         latitude: addressCoords ? addressCoords[0] : position[0],
         longitude: addressCoords ? addressCoords[1] : position[1],
         location_name: address.trim() || `${position[0].toFixed(4)}, ${position[1].toFixed(4)}`,
@@ -146,15 +158,53 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
         max_participants: !isAdmin && parsedMax && parsedMax >= 2 ? parsedMax : null,
         visibility: eventVisibility,
         price_cents: priceCents,
-      } as any);
+      };
+
+      // Build list of (start, end) datetime pairs
+      const occurrences: Array<{ start: string; end: string | null }> = [];
+      if (isRecurring) {
+        const untilDate = new Date(`${recurringUntil}T23:59:59`);
+        const startFrom = new Date();
+        startFrom.setHours(0, 0, 0, 0);
+        // Iterate day by day from today to untilDate, match weekdays
+        for (let d = new Date(startFrom); d <= untilDate; d.setDate(d.getDate() + 1)) {
+          const wd = d.getDay(); // 0=Sun..6=Sat
+          for (const slot of recurringSlots) {
+            if (slot.weekday !== wd) continue;
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            const startIso = `${yyyy}-${mm}-${dd}T${slot.startTime}:00`;
+            const endIso = slot.endTime ? `${yyyy}-${mm}-${dd}T${slot.endTime}:00` : null;
+            occurrences.push({ start: startIso, end: endIso });
+          }
+        }
+        if (occurrences.length === 0) {
+          toast.error('Keine passenden Wochentage im Zeitraum gefunden');
+          setLoading(false);
+          return;
+        }
+      } else {
+        const startIso = `${date}T${time}:00`;
+        const endIso = endDate && endTime ? `${endDate}T${endTime}:00` : null;
+        occurrences.push({ start: startIso, end: endIso });
+      }
+
+      const rows = occurrences.map(o => ({
+        ...baseRow,
+        event_date: o.start,
+        end_time: o.end,
+      }));
+
+      const { error } = await supabase.from('events').insert(rows as any);
 
       if (error) throw error;
 
       if (isAdmin) {
-        toast.success('Event created and published immediately! ✅');
+        toast.success(`${rows.length} Event(s) erstellt und veröffentlicht ✅`);
       } else {
-        toast.success('Event submitted! ⏳', {
-          description: 'Your event will be reviewed by an admin and then published.'
+        toast.success(`${rows.length} Event(s) eingereicht ⏳`, {
+          description: 'Werden nach Admin-Freigabe veröffentlicht.'
         });
       }
 
@@ -315,17 +365,126 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
             </p>
           </div>
 
-          {/* Date and Time */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="date" className="text-foreground text-sm">Date *</Label>
-              <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="time" className="text-foreground text-sm">Time *</Label>
-              <Input id="time" type="time" value={time} onChange={(e) => setTime(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
-            </div>
+          {/* Recurring toggle */}
+          <div className="flex items-center justify-between py-2 px-1">
+            <Label className="text-foreground text-sm">Wiederkehrendes Event</Label>
+            <Switch checked={isRecurring} onCheckedChange={setIsRecurring} />
           </div>
+
+          {!isRecurring ? (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="date" className="text-foreground text-sm">Start-Datum *</Label>
+                  <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="time" className="text-foreground text-sm">Start-Zeit *</Label>
+                  <Input id="time" type="time" value={time} onChange={(e) => setTime(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="endDate" className="text-foreground text-sm">End-Datum (optional)</Label>
+                  <Input id="endDate" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} min={date || undefined} className="bg-transparent border-border text-foreground rounded-xl h-12" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="endTime" className="text-foreground text-sm">End-Zeit (optional)</Label>
+                  <Input id="endTime" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
+                </div>
+              </div>
+              <p className="text-muted-foreground text-xs -mt-2">Endzeit ist optional.</p>
+            </>
+          ) : (
+            <div className="space-y-3">
+              <Label className="text-foreground text-sm">Wochentag-Slots *</Label>
+              {recurringSlots.map((slot, i) => (
+                <div key={i} className="grid grid-cols-[1fr_auto_auto_auto] gap-2 items-end">
+                  <div className="space-y-1">
+                    <Label className="text-muted-foreground text-xs">Tag</Label>
+                    <Select
+                      value={String(slot.weekday)}
+                      onValueChange={(v) => {
+                        const next = [...recurringSlots];
+                        next[i] = { ...next[i], weekday: parseInt(v, 10) };
+                        setRecurringSlots(next);
+                      }}
+                    >
+                      <SelectTrigger className="bg-transparent border-border text-foreground rounded-xl h-10">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-card border-border">
+                        <SelectItem value="1">Montag</SelectItem>
+                        <SelectItem value="2">Dienstag</SelectItem>
+                        <SelectItem value="3">Mittwoch</SelectItem>
+                        <SelectItem value="4">Donnerstag</SelectItem>
+                        <SelectItem value="5">Freitag</SelectItem>
+                        <SelectItem value="6">Samstag</SelectItem>
+                        <SelectItem value="0">Sonntag</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-muted-foreground text-xs">Start</Label>
+                    <Input
+                      type="time"
+                      value={slot.startTime}
+                      onChange={(e) => {
+                        const next = [...recurringSlots];
+                        next[i] = { ...next[i], startTime: e.target.value };
+                        setRecurringSlots(next);
+                      }}
+                      className="bg-transparent border-border text-foreground rounded-xl h-10 w-[110px]"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-muted-foreground text-xs">Ende</Label>
+                    <Input
+                      type="time"
+                      value={slot.endTime}
+                      onChange={(e) => {
+                        const next = [...recurringSlots];
+                        next[i] = { ...next[i], endTime: e.target.value };
+                        setRecurringSlots(next);
+                      }}
+                      className="bg-transparent border-border text-foreground rounded-xl h-10 w-[110px]"
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setRecurringSlots(recurringSlots.filter((_, idx) => idx !== i))}
+                    disabled={recurringSlots.length === 1}
+                    className="h-10 w-10"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setRecurringSlots([...recurringSlots, { weekday: 1, startTime: '', endTime: '' }])}
+                className="rounded-xl"
+              >
+                + Slot hinzufügen
+              </Button>
+              <div className="space-y-2">
+                <Label htmlFor="recurringUntil" className="text-foreground text-sm">Wiederholen bis *</Label>
+                <Input
+                  id="recurringUntil"
+                  type="date"
+                  value={recurringUntil}
+                  onChange={(e) => setRecurringUntil(e.target.value)}
+                  min={new Date().toISOString().slice(0, 10)}
+                  className="bg-transparent border-border text-foreground rounded-xl h-12"
+                />
+                <p className="text-muted-foreground text-xs">Ein Event wird pro passendem Wochentag im Zeitraum erstellt.</p>
+              </div>
+            </div>
+          )}
 
           {/* Max Participants */}
           {!isAdmin && (
@@ -383,7 +542,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
             <Button variant="outline" onClick={handleClose} className="flex-1 h-12 rounded-xl">
               Cancel
             </Button>
-            <Button onClick={handleSubmit} disabled={!title || !date || !time || loading || (!isAdmin && (!maxParticipants || parseInt(maxParticipants) < 2))} className="flex-1 h-12 rounded-xl">
+            <Button onClick={handleSubmit} disabled={!title || loading || (!isRecurring && (!date || !time)) || (isRecurring && (!recurringUntil || recurringSlots.some(s => !s.startTime))) || (!isAdmin && (!maxParticipants || parseInt(maxParticipants) < 2))} className="flex-1 h-12 rounded-xl">
               {loading ? 'Creating...' : 'Create Event'}
             </Button>
           </div>
