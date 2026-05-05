@@ -103,7 +103,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
         event_date: eventDate,
         latitude: position[0],
         longitude: position[1],
-        location_name: `${position[0].toFixed(4)}, ${position[1].toFixed(4)}`,
+        location_name: address.trim() || `${position[0].toFixed(4)}, ${position[1].toFixed(4)}`,
         category: eventCategory,
         source: isAdmin ? 'curated' : 'community',
         created_by: user.id,
