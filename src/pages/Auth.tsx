@@ -190,7 +190,7 @@ const Auth = () => {
 
         // Host profile is created automatically via DB trigger on email confirmation
 
-        toast.success('Sign up successful! Please confirm your email.');
+        setSignupSuccessEmail(email);
       }
     } catch (error: any) {
       toast.error('An error occurred');
