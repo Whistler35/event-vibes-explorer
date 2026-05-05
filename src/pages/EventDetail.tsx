@@ -8,7 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Calendar, Clock, MapPin, Users, Pencil, ScanLine } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, MapPin, Users, Pencil, ScanLine, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import JoinRequestButton from "@/components/JoinRequestButton";
 import JoinRequestList from "@/components/JoinRequestList";
@@ -163,6 +163,31 @@ const EventDetail = () => {
     }, 100);
   };
 
+  const handleShare = async () => {
+    if (!event) return;
+    const url = `${window.location.origin}/event/${event.id}`;
+    const dateStr = new Date(event.event_date).toLocaleString('de-DE', {
+      day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+    const text = `${event.title}\n📅 ${dateStr}\n📍 ${event.location_name}\n\n${url}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: event.title, text, url });
+      } else {
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+      }
+    } catch (err: any) {
+      if (err?.name !== 'AbortError') {
+        try {
+          await navigator.clipboard.writeText(text);
+          toast.success('Link kopiert');
+        } catch {
+          toast.error('Teilen nicht möglich');
+        }
+      }
+    }
+  };
+
   if (loading) {
     return (
       <Layout>
@@ -222,16 +247,27 @@ const EventDetail = () => {
               </Badge>
             )}
           </div>
-          {canEdit && (
+          <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="icon"
-              onClick={() => setEditOpen(true)}
+              onClick={handleShare}
               className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+              aria-label="Event teilen"
             >
-              <Pencil className="w-4 h-4" />
+              <Share2 className="w-4 h-4" />
             </Button>
-          )}
+            {canEdit && (
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setEditOpen(true)}
+                className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+              >
+                <Pencil className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Event Image */}
