@@ -108,6 +108,24 @@ const Nearby = () => {
     if (storedCity) setCityQuery(storedCity.name?.split(',')[0] || '');
   }, []);
 
+  // Persist filters across navigation (e.g. opening an event detail and coming back)
+  useEffect(() => {
+    try {
+      const payload: StoredFilters = {
+        selectedCategories,
+        selectedDateRange: selectedDateRange?.from
+          ? {
+              from: selectedDateRange.from.toISOString(),
+              to: selectedDateRange.to ? selectedDateRange.to.toISOString() : undefined,
+            }
+          : undefined,
+        activeQuickFilters: Array.from(activeQuickFilters),
+        isPrivateMode,
+      };
+      localStorage.setItem(FILTERS_STORAGE_KEY, JSON.stringify(payload));
+    } catch { /* ignore quota errors */ }
+  }, [selectedCategories, selectedDateRange, activeQuickFilters, isPrivateMode]);
+
   // Build date filter from quick "tonight" or explicit range
   const dateFilter = useMemo(() => {
     if (activeQuickFilters.has('tonight')) {
