@@ -55,6 +55,41 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
   const [showMapPicker, setShowMapPicker] = useState(false);
   const [newLatitude, setNewLatitude] = useState<number | null>(null);
   const [newLongitude, setNewLongitude] = useState<number | null>(null);
+  const [locationSuggestions, setLocationSuggestions] = useState<Array<{ name: string; lat: number; lng: number }>>([]);
+  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
+  const [skipNextSearch, setSkipNextSearch] = useState(false);
+
+  const MAPBOX_TOKEN = 'pk.eyJ1IjoiZXZlbmRsZSIsImEiOiJjbWs0aHc2eWQwN2hqM2RyMjI4ZTY0N2F6In0.gMPP_wAbSR4Esz7WlB4Z4Q';
+
+  useEffect(() => {
+    if (skipNextSearch) {
+      setSkipNextSearch(false);
+      return;
+    }
+    if (!locationName || locationName.length < 2) {
+      setLocationSuggestions([]);
+      return;
+    }
+    const handle = setTimeout(async () => {
+      try {
+        const lat = newLatitude ?? event.latitude ?? 47.2692;
+        const lng = newLongitude ?? event.longitude ?? 11.4041;
+        const res = await fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(locationName)}.json?access_token=${MAPBOX_TOKEN}&autocomplete=true&limit=5&language=de&proximity=${lng},${lat}`
+        );
+        const data = await res.json();
+        const feats = (data.features || []).map((f: any) => ({
+          name: f.place_name as string,
+          lng: f.center[0] as number,
+          lat: f.center[1] as number,
+        }));
+        setLocationSuggestions(feats);
+      } catch (e) {
+        console.error('Geocoding error', e);
+      }
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [locationName]);
 
   useEffect(() => {
     if (open && event) {
