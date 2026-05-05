@@ -260,7 +260,40 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
           {/* Location Name */}
           <div className="space-y-2">
             <Label htmlFor="edit-location" className="text-foreground text-sm">Location</Label>
-            <Input id="edit-location" value={locationName} onChange={(e) => setLocationName(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
+            <div className="relative">
+              <Input
+                id="edit-location"
+                value={locationName}
+                onChange={(e) => { setLocationName(e.target.value); setShowLocationSuggestions(true); }}
+                onFocus={() => setShowLocationSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowLocationSuggestions(false), 150)}
+                autoComplete="off"
+                className="bg-transparent border-border text-foreground rounded-xl h-12"
+              />
+              {showLocationSuggestions && locationSuggestions.length > 0 && (
+                <div className="absolute z-50 left-0 right-0 mt-1 bg-card border border-border rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                  {locationSuggestions.map((s, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        setSkipNextSearch(true);
+                        setLocationName(s.name);
+                        setNewLatitude(s.lat);
+                        setNewLongitude(s.lng);
+                        setShowLocationSuggestions(false);
+                        setLocationSuggestions([]);
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-muted flex items-start gap-2"
+                    >
+                      <MapPin className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                      <span>{s.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Map Position Picker */}
