@@ -53,12 +53,15 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
   }, []);
 
   const scrollToIndex = useCallback((idx: number, behavior: ScrollBehavior = 'smooth') => {
-    if (!scrollRef.current || containerWidth === 0) return;
+    const container = scrollRef.current;
+    if (!container || containerWidth === 0) return;
+    const cards = container.querySelectorAll<HTMLElement>('[data-carousel-card]');
+    const card = cards[idx];
+    if (!card) return;
     programmaticScrollRef.current = true;
     if (programmaticTimerRef.current) clearTimeout(programmaticTimerRef.current);
-    // With sidePad applied, scrollLeft = idx * STEP centers card idx exactly.
-    const target = idx * STEP;
-    scrollRef.current.scrollTo({ left: target, behavior });
+    const target = card.offsetLeft + card.offsetWidth / 2 - container.clientWidth / 2;
+    container.scrollTo({ left: target, behavior });
     programmaticTimerRef.current = setTimeout(() => {
       programmaticScrollRef.current = false;
     }, behavior === 'smooth' ? 500 : 50);
@@ -79,15 +82,14 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
     const container = scrollRef.current;
     if (!container) return 0;
     const containerCenter = container.scrollLeft + container.clientWidth / 2;
+    const cards = container.querySelectorAll<HTMLElement>('[data-carousel-card]');
     let bestIdx = 0;
     let bestDist = Infinity;
-    const children = container.children;
-    for (let i = 0; i < children.length; i++) {
-      const child = children[i] as HTMLElement;
+    cards.forEach((child, i) => {
       const childCenter = child.offsetLeft + child.offsetWidth / 2;
       const dist = Math.abs(childCenter - containerCenter);
       if (dist < bestDist) { bestDist = dist; bestIdx = i; }
-    }
+    });
     return Math.max(0, Math.min(events.length - 1, bestIdx));
   }, [events.length]);
 
@@ -138,14 +140,14 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
       className="flex items-end overflow-x-auto scrollbar-hide snap-x snap-mandatory touch-pan-x overscroll-x-contain"
       style={{
         WebkitOverflowScrolling: 'touch',
-        paddingLeft: sidePad,
-        paddingRight: sidePad,
         paddingTop: 32,
         paddingBottom: 8,
         gap: `${CARD_GAP}px`,
         contain: 'layout paint',
       }}
     >
+      {/* Left spacer so first card can reach center */}
+      <div aria-hidden style={{ flex: `0 0 ${sidePad}px` }} />
       {events.map((ev, i) => {
         const offset = i - activeIdx;
         const abs = Math.abs(offset);
@@ -158,6 +160,7 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
         return (
           <button
             key={ev.id}
+            data-carousel-card
             onClick={(e) => {
               e.stopPropagation();
               if (isCenter) {
@@ -221,6 +224,8 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
           </button>
         );
       })}
+      {/* Right spacer so last card can reach center */}
+      <div aria-hidden style={{ flex: `0 0 ${sidePad}px` }} />
     </div>
   );
 };
