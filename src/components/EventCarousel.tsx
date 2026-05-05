@@ -56,7 +56,8 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
     if (!scrollRef.current || containerWidth === 0) return;
     programmaticScrollRef.current = true;
     if (programmaticTimerRef.current) clearTimeout(programmaticTimerRef.current);
-    const target = idx * STEP - (containerWidth / 2 - CARD_WIDTH / 2);
+    // With sidePad applied, scrollLeft = idx * STEP centers card idx exactly.
+    const target = idx * STEP;
     scrollRef.current.scrollTo({ left: target, behavior });
     programmaticTimerRef.current = setTimeout(() => {
       programmaticScrollRef.current = false;
@@ -88,8 +89,8 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
       rafRef.current = null;
       const container = scrollRef.current;
       if (!container) return;
-      const center = container.scrollLeft + containerWidth / 2;
-      const idx = Math.round((center - CARD_WIDTH / 2) / STEP);
+      // sidePad makes scrollLeft == idx * STEP when card idx is centered.
+      const idx = Math.round(container.scrollLeft / STEP);
       const clamped = Math.max(0, Math.min(events.length - 1, idx));
       setActiveIdx(prev => (prev === clamped ? prev : clamped));
     });
@@ -101,8 +102,7 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
       setIsScrolling(false);
       const container = scrollRef.current;
       if (!container) return;
-      const center = container.scrollLeft + containerWidth / 2;
-      const idx = Math.round((center - CARD_WIDTH / 2) / STEP);
+      const idx = Math.round(container.scrollLeft / STEP);
       const clamped = Math.max(0, Math.min(events.length - 1, idx));
       const ev = events[clamped];
       if (ev && String(ev.id) !== String(selectedId)) onSelect(ev);
