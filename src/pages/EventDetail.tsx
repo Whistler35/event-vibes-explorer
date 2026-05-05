@@ -163,6 +163,31 @@ const EventDetail = () => {
     }, 100);
   };
 
+  const handleShare = async () => {
+    if (!event) return;
+    const url = `${window.location.origin}/event/${event.id}`;
+    const dateStr = new Date(event.event_date).toLocaleString('de-DE', {
+      day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+    const text = `${event.title}\n📅 ${dateStr}\n📍 ${event.location_name}\n\n${url}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: event.title, text, url });
+      } else {
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+      }
+    } catch (err: any) {
+      if (err?.name !== 'AbortError') {
+        try {
+          await navigator.clipboard.writeText(text);
+          toast.success('Link kopiert');
+        } catch {
+          toast.error('Teilen nicht möglich');
+        }
+      }
+    }
+  };
+
   if (loading) {
     return (
       <Layout>
