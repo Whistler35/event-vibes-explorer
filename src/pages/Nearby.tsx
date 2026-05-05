@@ -419,8 +419,12 @@ const Nearby = () => {
     });
     if (f === 'nearby' && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => mapRef.current?.flyTo(pos.coords.latitude, pos.coords.longitude, 15),
-        () => {}
+        (pos) => {
+          setMapFocusCenter([pos.coords.latitude, pos.coords.longitude]);
+          setFrozenCarousel(null);
+          mapRef.current?.flyTo(pos.coords.latitude, pos.coords.longitude, 14);
+        },
+        () => toast.error('Standort konnte nicht ermittelt werden')
       );
     }
   };
