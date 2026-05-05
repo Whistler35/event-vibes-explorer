@@ -221,6 +221,8 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
           </button>
         );
       })}
+      {/* Right spacer so last card can reach center */}
+      <div aria-hidden style={{ flex: `0 0 ${sidePad}px` }} />
     </div>
   );
 };
