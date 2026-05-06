@@ -167,6 +167,10 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
         max_participants: !isAdmin && parsedMax && parsedMax >= 2 ? parsedMax : null,
         visibility: eventVisibility,
         price_cents: priceCents,
+        tickets_enabled: canManageTickets ? ticketsEnabled : false,
+        external_ticket_url: canManageTickets && ticketsEnabled && ticketMode === 'link' && externalTicketUrl.trim()
+          ? externalTicketUrl.trim()
+          : null,
       };
 
       // Build list of (start, end) datetime pairs
