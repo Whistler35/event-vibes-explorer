@@ -27,7 +27,7 @@ const EventChatPage = () => {
 
   return (
     <Layout showBottomNav={false}>
-      <div className="flex flex-col h-screen">
+      <div className="flex flex-col h-[100dvh]" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {/* Header */}
         <div className="flex items-center gap-3 p-4 border-b border-border shrink-0">
           <button onClick={() => navigate(-1)} className="p-1">

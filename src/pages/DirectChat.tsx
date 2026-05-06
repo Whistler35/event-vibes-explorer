@@ -140,9 +140,9 @@ const DirectChat = () => {
 
   return (
     <Layout showBottomNav={false}>
-      <div className="flex flex-col h-screen">
+      <div className="flex flex-col h-[100dvh]" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {/* Header */}
-        <div className="flex items-center gap-3 p-4 border-b border-border bg-card">
+        <div className="flex items-center gap-3 p-4 border-b border-border bg-card shrink-0">
           <Button
             variant="ghost"
             size="icon"
