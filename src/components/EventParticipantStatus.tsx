@@ -175,6 +175,8 @@ const EventParticipantStatus = ({ event, userId, participants, onLeave, leaveLoa
         eventId={event.id}
         userId={userId}
         eventTitle={event.title}
+        externalUrl={event.external_ticket_url}
+        ticketsEnabled={!!event.tickets_enabled}
       />
 
       <AlertDialog open={confirmLeaveOpen} onOpenChange={setConfirmLeaveOpen}>
