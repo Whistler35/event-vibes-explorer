@@ -110,6 +110,9 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
       setMaxParticipants(event.max_participants?.toString() || '');
       setPriceEur(event.price_cents && event.price_cents > 0 ? (event.price_cents / 100).toFixed(2) : '');
       setIsPrivate(event.visibility === 'unlisted');
+      setTicketsEnabled(!!event.tickets_enabled);
+      setExternalTicketUrl(event.external_ticket_url || '');
+      setTicketMode(event.external_ticket_url ? 'link' : 'qr');
       setImagePreview(event.image_url || null);
       setImage(null);
       setNewLatitude(event.latitude);
