@@ -31,6 +31,8 @@ interface EditEventDialogProps {
     max_participants: number | null;
     visibility?: string | null;
     price_cents?: number | null;
+    tickets_enabled?: boolean | null;
+    external_ticket_url?: string | null;
   };
   onEventUpdated?: () => void;
 }
