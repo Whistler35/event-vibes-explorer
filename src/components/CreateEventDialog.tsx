@@ -121,6 +121,9 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
     setAddressCoords(null);
     setPriceEur('');
     setIsPrivate(defaultPrivate);
+    setTicketsEnabled(false);
+    setTicketMode('qr');
+    setExternalTicketUrl('');
   };
 
   const handleSubmit = async () => {
