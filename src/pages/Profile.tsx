@@ -230,6 +230,10 @@ const Profile = () => {
                 <div className="text-center">
                   <HostRating hostUserId={user.id} size="sm" />
                 </div>
+                <button onClick={() => setStatsSheet({ open: true, tab: "friends" })} className="text-center">
+                  <p className="text-foreground text-xl font-bold">{stats.friendsCount}</p>
+                  <p className="text-muted-foreground text-xs">Freunde</p>
+                </button>
               </div>
               {(hostProfile?.website_url || hostInstagramUrl) && (
                 <div className="flex flex-wrap justify-center gap-3">

@@ -272,8 +272,8 @@ const BlitzMatch = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--blitz-forest))] text-white flex flex-col">
-      <div className="flex items-center justify-between p-4 border-b border-white/10">
+    <div className="h-[100dvh] bg-[hsl(var(--blitz-forest))] text-white flex flex-col" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <div className="flex items-center justify-between p-4 border-b border-white/10 shrink-0">
         <button onClick={() => navigate("/blitz")} className="p-2 -ml-2">
           <ArrowLeft className="w-5 h-5" />
         </button>
