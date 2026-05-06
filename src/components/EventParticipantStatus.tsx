@@ -33,6 +33,8 @@ interface EventLite {
   location_name: string;
   latitude: number | null;
   longitude: number | null;
+  tickets_enabled?: boolean | null;
+  external_ticket_url?: string | null;
 }
 
 interface Props {
