@@ -172,6 +172,10 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
         max_participants: parsedMax,
         visibility: isPrivate ? 'unlisted' : 'public',
         price_cents: priceCents,
+        ...(canManageTickets ? {
+          tickets_enabled: ticketsEnabled,
+          external_ticket_url: ticketsEnabled && ticketMode === 'link' && externalTicketUrl.trim() ? externalTicketUrl.trim() : null,
+        } : {}),
       };
 
       // Include position update if changed
