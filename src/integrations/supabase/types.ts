@@ -543,6 +543,7 @@ export type Database = {
           description: string | null
           end_time: string | null
           event_date: string
+          external_ticket_url: string | null
           featured_order: number | null
           id: string
           image_url: string | null
@@ -554,6 +555,7 @@ export type Database = {
           max_participants: number | null
           price_cents: number
           source: Database["public"]["Enums"]["event_source"] | null
+          tickets_enabled: boolean
           title: string
           updated_at: string
           visibility: Database["public"]["Enums"]["event_visibility"] | null
@@ -568,6 +570,7 @@ export type Database = {
           description?: string | null
           end_time?: string | null
           event_date: string
+          external_ticket_url?: string | null
           featured_order?: number | null
           id?: string
           image_url?: string | null
@@ -579,6 +582,7 @@ export type Database = {
           max_participants?: number | null
           price_cents?: number
           source?: Database["public"]["Enums"]["event_source"] | null
+          tickets_enabled?: boolean
           title: string
           updated_at?: string
           visibility?: Database["public"]["Enums"]["event_visibility"] | null
@@ -593,6 +597,7 @@ export type Database = {
           description?: string | null
           end_time?: string | null
           event_date?: string
+          external_ticket_url?: string | null
           featured_order?: number | null
           id?: string
           image_url?: string | null
@@ -604,6 +609,7 @@ export type Database = {
           max_participants?: number | null
           price_cents?: number
           source?: Database["public"]["Enums"]["event_source"] | null
+          tickets_enabled?: boolean
           title?: string
           updated_at?: string
           visibility?: Database["public"]["Enums"]["event_visibility"] | null
@@ -1465,6 +1471,7 @@ export type Database = {
           description: string | null
           end_time: string | null
           event_date: string
+          external_ticket_url: string | null
           featured_order: number | null
           id: string
           image_url: string | null
@@ -1476,6 +1483,7 @@ export type Database = {
           max_participants: number | null
           price_cents: number
           source: Database["public"]["Enums"]["event_source"] | null
+          tickets_enabled: boolean
           title: string
           updated_at: string
           visibility: Database["public"]["Enums"]["event_visibility"] | null
@@ -1499,6 +1507,7 @@ export type Database = {
           description: string | null
           end_time: string | null
           event_date: string
+          external_ticket_url: string | null
           featured_order: number | null
           id: string
           image_url: string | null
@@ -1510,6 +1519,7 @@ export type Database = {
           max_participants: number | null
           price_cents: number
           source: Database["public"]["Enums"]["event_source"] | null
+          tickets_enabled: boolean
           title: string
           updated_at: string
           visibility: Database["public"]["Enums"]["event_visibility"] | null
