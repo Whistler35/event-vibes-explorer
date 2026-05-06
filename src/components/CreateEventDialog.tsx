@@ -5,10 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Camera, X, ShieldCheck, Clock, Globe, Lock, MapPin as MapPinIcon } from 'lucide-react';
+import { Camera, X, ShieldCheck, Clock, Globe, Lock, MapPin as MapPinIcon, Ticket } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsHost } from '@/hooks/useIsHost';
 import { toast } from 'sonner';
 import type { EventCategory } from '@/hooks/useSearchEvents';
 
