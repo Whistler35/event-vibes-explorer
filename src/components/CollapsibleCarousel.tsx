@@ -81,12 +81,14 @@ const CollapsibleCarousel: React.FC<CollapsibleCarouselProps> = ({
     try { (e.target as HTMLElement).releasePointerCapture(e.pointerId); } catch {}
     if (!movedRef.current) {
       // Treat as tap → toggle
+      userOverrideRef.current = true;
       setExpanded(v => !v);
       setDragOffset(0);
       return;
     }
     const finalH = (startExpandedRef.current ? expandedHeight : collapsedHeight) + dragOffset;
     const mid = (expandedHeight + collapsedHeight) / 2;
+    userOverrideRef.current = true;
     setExpanded(finalH > mid);
     setDragOffset(0);
   }, [dragOffset, expandedHeight, collapsedHeight]);
