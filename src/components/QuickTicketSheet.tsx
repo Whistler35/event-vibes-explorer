@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { QRCodeSVG } from "qrcode.react";
-import { Ticket as TicketIcon } from "lucide-react";
+import { Ticket as TicketIcon, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   open: boolean;
@@ -10,14 +11,20 @@ interface Props {
   eventId: string;
   userId: string;
   eventTitle: string;
+  externalUrl?: string | null;
+  ticketsEnabled?: boolean;
 }
 
-const QuickTicketSheet = ({ open, onClose, eventId, userId, eventTitle }: Props) => {
+const QuickTicketSheet = ({ open, onClose, eventId, userId, eventTitle, externalUrl, ticketsEnabled }: Props) => {
   const [ticket, setTicket] = useState<{ qr_token: string; ticket_code: string; checked_in_at: string | null } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!open) return;
+    if (externalUrl) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     supabase
       .from('event_tickets')
@@ -29,7 +36,7 @@ const QuickTicketSheet = ({ open, onClose, eventId, userId, eventTitle }: Props)
         setTicket(data);
         setLoading(false);
       });
-  }, [open, eventId, userId]);
+  }, [open, eventId, userId, externalUrl]);
 
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
@@ -41,7 +48,25 @@ const QuickTicketSheet = ({ open, onClose, eventId, userId, eventTitle }: Props)
           </SheetTitle>
         </SheetHeader>
         <div className="flex flex-col items-center py-6 space-y-4">
-          {loading ? (
+          {externalUrl ? (
+            <>
+              <p className="text-center text-sm text-muted-foreground px-4">{eventTitle}</p>
+              <p className="text-center text-sm text-foreground px-6">
+                Tickets für dieses Event werden extern verwaltet.
+              </p>
+              <Button
+                onClick={() => window.open(externalUrl, '_blank', 'noopener,noreferrer')}
+                className="bg-primary text-primary-foreground"
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Zum Ticket
+              </Button>
+            </>
+          ) : !ticketsEnabled ? (
+            <div className="text-center text-muted-foreground py-8 px-6">
+              Für dieses Event sind keine Tickets nötig.
+            </div>
+          ) : loading ? (
             <div className="text-muted-foreground">Lade Ticket...</div>
           ) : ticket ? (
             <>

@@ -21,6 +21,7 @@ interface Event {
   title: string;
   description: string | null;
   event_date: string;
+  end_time?: string | null;
   location_name: string;
   latitude: number | null;
   longitude: number | null;
@@ -30,6 +31,10 @@ interface Event {
   category: string | null;
   source: string | null;
   created_by: string | null;
+  visibility?: string | null;
+  price_cents?: number | null;
+  tickets_enabled?: boolean | null;
+  external_ticket_url?: string | null;
 }
 
 interface Participant {

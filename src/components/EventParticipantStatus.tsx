@@ -33,6 +33,8 @@ interface EventLite {
   location_name: string;
   latitude: number | null;
   longitude: number | null;
+  tickets_enabled?: boolean | null;
+  external_ticket_url?: string | null;
 }
 
 interface Props {
@@ -94,29 +96,37 @@ const EventParticipantStatus = ({ event, userId, participants, onLeave, leaveLoa
       <EventChatPreviewCard eventId={event.id} />
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-3 gap-2">
-        <button
-          onClick={() => setTicketOpen(true)}
-          className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl bg-card border border-border hover:bg-accent transition-colors active:scale-95"
-        >
-          <TicketIcon className="w-5 h-5 text-primary" />
-          <span className="text-xs font-semibold text-foreground">Ticket</span>
-        </button>
-        <button
-          onClick={handleRoute}
-          className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl bg-card border border-border hover:bg-accent transition-colors active:scale-95"
-        >
-          <MapPin className="w-5 h-5 text-primary" />
-          <span className="text-xs font-semibold text-foreground">Route</span>
-        </button>
-        <button
-          onClick={handleCalendar}
-          className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl bg-card border border-border hover:bg-accent transition-colors active:scale-95"
-        >
-          <CalendarIcon className="w-5 h-5 text-primary" />
-          <span className="text-xs font-semibold text-foreground">Kalender</span>
-        </button>
-      </div>
+      {(() => {
+        const showTicket = !!event.tickets_enabled || !!event.external_ticket_url;
+        const cols = showTicket ? 'grid-cols-3' : 'grid-cols-2';
+        return (
+          <div className={`grid ${cols} gap-2`}>
+            {showTicket && (
+              <button
+                onClick={() => setTicketOpen(true)}
+                className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl bg-card border border-border hover:bg-accent transition-colors active:scale-95"
+              >
+                <TicketIcon className="w-5 h-5 text-primary" />
+                <span className="text-xs font-semibold text-foreground">Ticket</span>
+              </button>
+            )}
+            <button
+              onClick={handleRoute}
+              className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl bg-card border border-border hover:bg-accent transition-colors active:scale-95"
+            >
+              <MapPin className="w-5 h-5 text-primary" />
+              <span className="text-xs font-semibold text-foreground">Route</span>
+            </button>
+            <button
+              onClick={handleCalendar}
+              className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl bg-card border border-border hover:bg-accent transition-colors active:scale-95"
+            >
+              <CalendarIcon className="w-5 h-5 text-primary" />
+              <span className="text-xs font-semibold text-foreground">Kalender</span>
+            </button>
+          </div>
+        );
+      })()}
 
       {/* Mitstreiter */}
       {otherParticipants.length > 0 && (
@@ -165,6 +175,8 @@ const EventParticipantStatus = ({ event, userId, participants, onLeave, leaveLoa
         eventId={event.id}
         userId={userId}
         eventTitle={event.title}
+        externalUrl={event.external_ticket_url}
+        ticketsEnabled={!!event.tickets_enabled}
       />
 
       <AlertDialog open={confirmLeaveOpen} onOpenChange={setConfirmLeaveOpen}>

@@ -5,10 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Camera, X, ShieldCheck, Clock, Globe, Lock, MapPin as MapPinIcon } from 'lucide-react';
+import { Camera, X, ShieldCheck, Clock, Globe, Lock, MapPin as MapPinIcon, Ticket } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsHost } from '@/hooks/useIsHost';
 import { toast } from 'sonner';
 import type { EventCategory } from '@/hooks/useSearchEvents';
 
@@ -30,6 +31,8 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
   defaultPrivate = false,
 }) => {
   const { user } = useAuth();
+  const { isHost } = useIsHost();
+  const canManageTickets = isAdmin || isHost;
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
@@ -51,6 +54,9 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
   const [addressCoords, setAddressCoords] = useState<[number, number] | null>(null);
   const [priceEur, setPriceEur] = useState<string>('');
   const [isPrivate, setIsPrivate] = useState(defaultPrivate);
+  const [ticketsEnabled, setTicketsEnabled] = useState(false);
+  const [ticketMode, setTicketMode] = useState<'qr' | 'link'>('qr');
+  const [externalTicketUrl, setExternalTicketUrl] = useState('');
   const [loading, setLoading] = useState(false);
 
   const MAPBOX_TOKEN = 'pk.eyJ1IjoiZXZlbmRsZSIsImEiOiJjbWs0aHc2eWQwN2hqM2RyMjI4ZTY0N2F6In0.gMPP_wAbSR4Esz7WlB4Z4Q';
@@ -115,6 +121,9 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
     setAddressCoords(null);
     setPriceEur('');
     setIsPrivate(defaultPrivate);
+    setTicketsEnabled(false);
+    setTicketMode('qr');
+    setExternalTicketUrl('');
   };
 
   const handleSubmit = async () => {
@@ -158,6 +167,10 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
         max_participants: !isAdmin && parsedMax && parsedMax >= 2 ? parsedMax : null,
         visibility: eventVisibility,
         price_cents: priceCents,
+        tickets_enabled: canManageTickets ? ticketsEnabled : false,
+        external_ticket_url: canManageTickets && ticketsEnabled && ticketMode === 'link' && externalTicketUrl.trim()
+          ? externalTicketUrl.trim()
+          : null,
       };
 
       // Build list of (start, end) datetime pairs
@@ -522,6 +535,53 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
                 : 'Leave empty or 0 for a free event'}
             </p>
           </div>
+
+          {/* Tickets (Pro Hosts & Admins only) */}
+          {canManageTickets && (
+            <div className="space-y-2 rounded-xl border border-border p-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Ticket className="h-4 w-4 text-primary" />
+                  <Label className="text-foreground text-sm">Tickets aktivieren</Label>
+                </div>
+                <Switch checked={ticketsEnabled} onCheckedChange={setTicketsEnabled} />
+              </div>
+              {ticketsEnabled && (
+                <div className="space-y-2 pt-1">
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setTicketMode('qr')}
+                      className={`flex-1 h-10 rounded-xl text-xs font-semibold border ${ticketMode === 'qr' ? 'bg-primary text-primary-foreground border-primary' : 'bg-transparent text-foreground border-border'}`}
+                    >
+                      QR-Code generieren
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTicketMode('link')}
+                      className={`flex-1 h-10 rounded-xl text-xs font-semibold border ${ticketMode === 'link' ? 'bg-primary text-primary-foreground border-primary' : 'bg-transparent text-foreground border-border'}`}
+                    >
+                      Externer Link
+                    </button>
+                  </div>
+                  {ticketMode === 'link' && (
+                    <Input
+                      type="url"
+                      value={externalTicketUrl}
+                      onChange={(e) => setExternalTicketUrl(e.target.value)}
+                      placeholder="https://..."
+                      className="bg-transparent border-border text-foreground rounded-xl h-12"
+                    />
+                  )}
+                  <p className="text-muted-foreground text-xs">
+                    {ticketMode === 'qr'
+                      ? 'Teilnehmer erhalten automatisch ein QR-Ticket beim Beitritt.'
+                      : 'Teilnehmer werden zu deinem Ticket-Link weitergeleitet.'}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Visibility Toggle */}
           <div className="flex items-center justify-between py-2 px-1">
