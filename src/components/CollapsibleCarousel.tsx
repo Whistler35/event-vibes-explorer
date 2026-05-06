@@ -9,19 +9,20 @@ interface CollapsibleCarouselProps {
   collapsedHeight?: number;
   /** Increment to force the carousel to expand (e.g. on marker tap) */
   expandTrigger?: number;
+  /** When true, automatically collapse the carousel until set false again.
+   *  User can still manually drag it back open. */
+  autoCollapse?: boolean;
 }
 
 /**
  * Bottom-anchored draggable carousel container with two snap points.
- * Transparent — no card chrome — so the floating EventCarousel cards
- * appear to sit directly on the map. Exposes `--carousel-h` so the
- * GPS / + buttons can stay above it.
  */
 const CollapsibleCarousel: React.FC<CollapsibleCarouselProps> = ({
   children,
   expandedHeight = 280,
   collapsedHeight = 28,
   expandTrigger = 0,
+  autoCollapse = false,
 }) => {
   const [expanded, setExpanded] = useState(true);
   const [dragOffset, setDragOffset] = useState(0); // negative = shrinking
@@ -29,11 +30,22 @@ const CollapsibleCarousel: React.FC<CollapsibleCarouselProps> = ({
   const startYRef = useRef(0);
   const startExpandedRef = useRef(true);
   const movedRef = useRef(false);
+  const userOverrideRef = useRef(false);
 
   // External force-expand (e.g. user taps a marker on the map)
   useEffect(() => {
-    if (expandTrigger > 0) setExpanded(true);
+    if (expandTrigger > 0) {
+      userOverrideRef.current = false;
+      setExpanded(true);
+    }
   }, [expandTrigger]);
+
+  // Auto-collapse / auto-expand based on availability of carousel items.
+  // Skip if user has manually overridden in the current empty/full session.
+  useEffect(() => {
+    if (userOverrideRef.current) return;
+    setExpanded(!autoCollapse);
+  }, [autoCollapse]);
 
   const baseHeight = expanded ? expandedHeight : collapsedHeight;
   const visualHeight = Math.max(
