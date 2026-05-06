@@ -359,9 +359,7 @@ const UserProfile = () => {
                   <p className="text-muted-foreground text-xs">Freunde</p>
                 </button>
               </div>
-
               {friendActions}
-
               {(hostProfile?.website_url || hostInstagramUrl) && (
                 <div className="flex flex-wrap justify-center gap-3">
                   {hostProfile?.website_url && (

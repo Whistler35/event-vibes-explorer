@@ -284,7 +284,12 @@ const Nearby = () => {
     };
     if (ev.latitude != null && ev.longitude != null) {
       setMapFocusCenter(eventPosition);
+      // Briefly fly in to confirm location, then zoom back to overview so the
+      // user can navigate the map without being stuck zoomed in.
       mapRef.current?.flyTo(ev.latitude, ev.longitude, 16);
+      setTimeout(() => {
+        mapRef.current?.flyTo(ev.latitude!, ev.longitude!, LOCATION_OVERVIEW_ZOOM);
+      }, 1400);
     }
     setSelectedEventId(ev.id);
     setSelectedEvent(mapEv);
