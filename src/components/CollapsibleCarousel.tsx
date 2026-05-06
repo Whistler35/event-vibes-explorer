@@ -41,9 +41,9 @@ const CollapsibleCarousel: React.FC<CollapsibleCarouselProps> = ({
   }, [expandTrigger]);
 
   // Auto-collapse / auto-expand based on availability of carousel items.
-  // Skip if user has manually overridden in the current empty/full session.
+  // Reset user override on every flip so behavior is responsive.
   useEffect(() => {
-    if (userOverrideRef.current) return;
+    userOverrideRef.current = false;
     setExpanded(!autoCollapse);
   }, [autoCollapse]);
 
