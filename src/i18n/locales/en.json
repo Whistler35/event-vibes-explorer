@@ -1,7 +1,7 @@
 {
   "nav": {
     "events": "EVENTS",
-    "nearby": "NEAR BY",
+    "nearby": "NEARBY",
     "blitz": "BLITZ",
     "chat": "CHAT",
     "host": "HOST",
@@ -176,7 +176,7 @@
     "notLoggedInSub": "Sign in to send messages.",
     "signIn": "Sign in",
     "team": "Team",
-    "welcome": "Welcome to Evendle! 🎉",
+    "welcome": "Welcome to EVENDLE! 🎉",
     "loading": "Loading...",
     "yesterday": "Yesterday",
     "noMessage": "No messages yet",
