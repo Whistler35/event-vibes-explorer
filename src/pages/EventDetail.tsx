@@ -159,7 +159,7 @@ const EventDetail = () => {
       }
       fetchParticipants();
     } catch (error: any) {
-      toast.error(error.message || 'Error joining/leaving');
+      toast.error(error.message || t('eventDetails.joinError'));
     } finally {
       setJoinLoading(false);
     }
