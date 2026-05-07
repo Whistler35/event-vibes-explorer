@@ -21,6 +21,7 @@ import Chat from "./pages/Chat";
 import CityEvents from "./pages/CityEvents";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import UserProfile from "./pages/UserProfile";
 import EditProfile from "./pages/EditProfile";
 import NotFound from "./pages/NotFound";
