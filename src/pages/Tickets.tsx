@@ -116,7 +116,7 @@ const Tickets = () => {
                 <div>
                   <h3 className="font-bold text-lg">{selectedTicket.events?.title}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {selectedTicket.events && new Date(selectedTicket.events.event_date).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}
+                    {selectedTicket.events && new Date(selectedTicket.events.event_date).toLocaleString(locale, { dateStyle: "medium", timeStyle: "short" })}
                   </p>
                 </div>
                 <div className="bg-white p-6 rounded-2xl flex items-center justify-center">
