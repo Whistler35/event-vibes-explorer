@@ -308,8 +308,8 @@ const Nearby = () => {
 
   const handleCreateEvent = (coordinates: [number, number]) => {
     if (!user) {
-      toast.info('Please sign in to create events.', {
-        action: { label: 'Sign in', onClick: () => navigate('/auth') },
+      toast.info(t('nearby.signInCreate'), {
+        action: { label: t('nearby.signIn'), onClick: () => navigate('/auth') },
       });
       return;
     }
