@@ -55,7 +55,7 @@ const Tickets = () => {
       if (error) throw error;
       setTickets((data as any) || []);
     } catch (e: any) {
-      toast.error("Could not load tickets");
+      toast.error(t('tickets.loadError'));
     } finally {
       setLoading(false);
     }
