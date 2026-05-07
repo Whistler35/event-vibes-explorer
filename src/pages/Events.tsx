@@ -190,7 +190,7 @@ const Events = () => {
                         )}
                         {event.source === 'community' && (
                           <Badge variant="outline" className="border-primary/50 text-primary text-xs">
-                            Community
+                            {t('categories.community')}
                           </Badge>
                         )}
                       </div>
