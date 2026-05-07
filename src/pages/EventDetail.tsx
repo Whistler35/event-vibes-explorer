@@ -146,7 +146,7 @@ const EventDetail = () => {
           .eq('event_id', event.id)
           .eq('user_id', user.id);
         if (error) throw error;
-        toast.success('Du hast das Event verlassen');
+        toast.success(t('eventDetails.leftEvent'));
         setIsParticipant(false);
       } else {
         const { error } = await supabase
