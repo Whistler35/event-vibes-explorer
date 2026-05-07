@@ -166,8 +166,8 @@ const Events = () => {
           <div className="space-y-4">
             {events.map((event) => {
               const eventDate = new Date(event.event_date);
-              const formattedDate = eventDate.toLocaleDateString('de-DE');
-              const formattedTime = eventDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+              const formattedDate = eventDate.toLocaleDateString(locale);
+              const formattedTime = eventDate.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 
               return (
                 <div key={event.id} className="flex space-x-4 cursor-pointer" onClick={() => handleEventClick(event.id)}>
