@@ -145,7 +145,7 @@ const Tickets = () => {
   );
 };
 
-const TicketCard = ({ ticket, onOpen, past }: { ticket: Ticket; onOpen: () => void; past?: boolean }) => {
+const TicketCard = ({ ticket, onOpen, past, locale, t }: { ticket: Ticket; onOpen: () => void; past?: boolean; locale: string; t: (k: string) => string }) => {
   if (!ticket.events) return null;
   const date = new Date(ticket.events.event_date);
   return (
@@ -159,7 +159,7 @@ const TicketCard = ({ ticket, onOpen, past }: { ticket: Ticket; onOpen: () => vo
           <div className="text-sm text-muted-foreground space-y-0.5 mt-1">
             <div className="flex items-center gap-1">
               <Calendar className="w-3 h-3" />
-              {date.toLocaleDateString("en-GB")} · {date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
+              {date.toLocaleDateString(locale)} · {date.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })}
             </div>
             <div className="flex items-center gap-1 truncate">
               <MapPin className="w-3 h-3 shrink-0" />
@@ -170,7 +170,7 @@ const TicketCard = ({ ticket, onOpen, past }: { ticket: Ticket; onOpen: () => vo
             <Badge variant="outline" className="font-mono text-xs">{ticket.ticket_code}</Badge>
             {ticket.checked_in_at && (
               <Badge className="bg-primary text-primary-foreground text-xs gap-1">
-                <CheckCircle2 className="w-3 h-3" /> Check-in
+                <CheckCircle2 className="w-3 h-3" /> {t('tickets.checkin')}
               </Badge>
             )}
           </div>
