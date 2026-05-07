@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import evendleLogo from "@/assets/evendle-logo.jpeg";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
