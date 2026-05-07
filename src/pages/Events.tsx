@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import evendleLogo from "@/assets/evendle-logo.jpeg";
 import { Search } from "lucide-react";
 import Layout from "@/components/Layout";
