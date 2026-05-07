@@ -47,6 +47,8 @@ interface Participant {
 }
 
 const EventDetail = () => {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'de' ? 'de-DE' : 'en-GB';
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
