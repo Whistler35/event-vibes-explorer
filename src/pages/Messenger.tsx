@@ -34,6 +34,7 @@ const isConversationUnread = (convoId: string, lastMessageAt: string | null, use
 };
 
 const Messenger = () => {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const queryClient = useQueryClient();
