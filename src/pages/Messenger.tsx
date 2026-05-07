@@ -302,15 +302,16 @@ const Messenger = () => {
     if (!dateStr) return "";
     const date = new Date(dateStr);
     const now = new Date();
+    const locale = i18n.language === 'de' ? 'de-DE' : 'en-GB';
     const diffDays = Math.floor(
       (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
     );
     if (diffDays === 0)
-      return date.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
-    if (diffDays === 1) return "Gestern";
+      return date.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
+    if (diffDays === 1) return t('messenger.yesterday');
     if (diffDays < 7)
-      return date.toLocaleDateString("de-DE", { weekday: "long" });
-    return date.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" });
+      return date.toLocaleDateString(locale, { weekday: "long" });
+    return date.toLocaleDateString(locale, { day: "2-digit", month: "2-digit" });
   };
 
   const getAvatarUrl = (name: string, avatar: string | null) =>
