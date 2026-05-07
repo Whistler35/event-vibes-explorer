@@ -105,7 +105,7 @@ const Blitz = () => {
                 : "text-muted-foreground"
             }`}
           >
-            My Blitz
+            {t('blitz.myBlitz')}
           </button>
           <button
             onClick={() => setTab("discover")}
@@ -115,7 +115,7 @@ const Blitz = () => {
                 : "text-muted-foreground"
             }`}
           >
-            Discover
+            {t('blitz.discover')}
           </button>
         </div>
 
