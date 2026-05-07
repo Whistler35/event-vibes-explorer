@@ -49,7 +49,7 @@ const Blitz = () => {
     );
     if (fresh) {
       seenMatchIds.current.add(fresh.id);
-      toast("⚡ Match!", { description: `${fresh.other_name ?? "Someone"} accepted.` });
+      toast(t('blitz.matchToast'), { description: t('blitz.matchAccepted', { name: fresh.other_name ?? t('blitz.someone') }) });
       navigate(`/blitz/match/${fresh.id}`);
     } else {
       matches.forEach((m) => seenMatchIds.current.add(m.id));
