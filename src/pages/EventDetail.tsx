@@ -84,7 +84,7 @@ const EventDetail = () => {
       setEvent(data);
     } catch (error) {
       console.error('Error fetching event:', error);
-      toast.error('Could not load event');
+      toast.error(t('eventDetails.loadError'));
     } finally {
       setLoading(false);
     }
