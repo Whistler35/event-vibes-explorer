@@ -16,6 +16,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "react-i18next";
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiZXZlbmRsZSIsImEiOiJjbWs0aHc2eWQwN2hqM2RyMjI4ZTY0N2F6In0.gMPP_wAbSR4Esz7WlB4Z4Q';
 
@@ -36,6 +37,7 @@ function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
 
 const Home = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [showAllNearby, setShowAllNearby] = useState(false);
   const [nearbyCategories, setNearbyCategories] = useState<string[]>([]);
   const [nearbyDateRange, setNearbyDateRange] = useState<DateRange | undefined>(undefined);
@@ -202,8 +204,8 @@ const Home = () => {
         {/* Hero Section */}
         <div className="px-4 space-y-6">
           <div className="text-center space-y-2">
-            <h1 className="text-foreground text-5xl font-bold leading-tight">your city</h1>
-            <h2 className="text-foreground text-5xl font-bold leading-tight">your events</h2>
+            <h1 className="text-foreground text-5xl font-bold leading-tight">{t('home.headline1')}</h1>
+            <h2 className="text-foreground text-5xl font-bold leading-tight">{t('home.headline2')}</h2>
           </div>
 
           <div className="flex justify-center">
@@ -224,7 +226,7 @@ const Home = () => {
                 value={searchQuery}
                 onChange={(e) => handleSearchInput(e.target.value)}
                 onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-                placeholder="Enter a city or place..."
+                placeholder={t('home.searchPlaceholder')}
                 className="pl-11 pr-16 h-14 rounded-full bg-muted/50 border-border text-foreground text-lg"
               />
               <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
@@ -257,7 +259,7 @@ const Home = () => {
 
         {/* Top Events Section */}
         <div className="px-4 mt-12 pb-8">
-          <h3 className="text-foreground text-2xl font-bold mb-6"> top events this week</h3>
+          <h3 className="text-foreground text-2xl font-bold mb-6">{t('home.topEventsWeek')}</h3>
 
           {featuredEvents && featuredEvents.length > 0 ? (
             <Carousel className="w-full">
@@ -286,7 +288,7 @@ const Home = () => {
               <CarouselNext className="hidden md:flex right-2" />
             </Carousel>
           ) : (
-            <p className="text-muted-foreground text-sm">No top events right now.</p>
+            <p className="text-muted-foreground text-sm">{t('home.topNone')}</p>
           )}
         </div>
 
@@ -309,7 +311,7 @@ const Home = () => {
           const hasActiveFilters = nearbyCategories.length > 0 || !!nearbyDateRange?.from;
 
           const formatDateLabel = () => {
-            if (!nearbyDateRange?.from) return 'Date';
+            if (!nearbyDateRange?.from) return t('home.date');
             const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' });
             if (!nearbyDateRange.to || nearbyDateRange.from.getTime() === nearbyDateRange.to.getTime()) {
               return fmt(nearbyDateRange.from);
@@ -320,7 +322,7 @@ const Home = () => {
           return (
             <div ref={nearbySectionRef} className="px-4 pb-8 scroll-mt-4">
               <h3 className="text-foreground text-2xl font-bold mb-2">
-                Events near {searchQuery}
+                {t('home.nearTitle', { city: searchQuery })}
               </h3>
 
               {/* Filter toggle */}
@@ -334,14 +336,14 @@ const Home = () => {
                   }`}
                 >
                   <SlidersHorizontal className="h-3.5 w-3.5" />
-                  Filter{hasActiveFilters ? ' active' : ''}
+                  {t('home.filter')}{hasActiveFilters ? ` ${t('home.filterActive').replace(t('home.filter')+' ', '')}` : ''}
                 </button>
                 {hasActiveFilters && (
                   <button
                     onClick={() => { setNearbyCategories([]); setNearbyDateRange(undefined); setShowAllNearby(false); }}
                     className="text-xs text-muted-foreground hover:text-foreground"
                   >
-                    Reset
+                    {t('common.reset')}
                   </button>
                 )}
               </div>
@@ -405,14 +407,14 @@ const Home = () => {
                           className="flex-1"
                           onClick={() => { setNearbyDateRange(undefined); setDatePickerOpen(false); setShowAllNearby(false); }}
                         >
-                          Clear
+                          {t('common.clear')}
                         </Button>
                         <Button
                           size="sm"
                           className="flex-1"
                           onClick={() => setDatePickerOpen(false)}
                         >
-                          Apply
+                          {t('common.apply')}
                         </Button>
                       </div>
                     </PopoverContent>
@@ -448,12 +450,12 @@ const Home = () => {
                       onClick={() => setShowAllNearby(!showAllNearby)}
                       className="mt-4 w-full py-2.5 text-sm font-medium text-primary border border-border rounded-full hover:bg-muted/50 transition-colors"
                     >
-                      {showAllNearby ? 'Show less' : `Show all ${filteredNearby.length} events`}
+                      {showAllNearby ? t('home.showLess') : t('home.showAllN', { count: filteredNearby.length })}
                     </button>
                   )}
                 </>
               ) : (
-                <p className="text-muted-foreground text-sm">No events match these filters.</p>
+                <p className="text-muted-foreground text-sm">{t('home.noMatch')}</p>
               )}
             </div>
           );
@@ -461,7 +463,7 @@ const Home = () => {
 
         {searchLocation && nearbyEvents && nearbyEvents.length === 0 && (
           <div ref={nearbySectionRef} className="px-4 pb-8 text-center scroll-mt-4">
-            <p className="text-muted-foreground">No events found near {searchQuery}.</p>
+            <p className="text-muted-foreground">{t('home.noNear', { city: searchQuery })}</p>
           </div>
         )}
 

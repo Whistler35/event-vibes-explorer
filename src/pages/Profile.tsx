@@ -19,6 +19,7 @@ import InterestChips from "@/components/profile/InterestChips";
 import PhotoStrip from "@/components/profile/PhotoStrip";
 import FriendsCarousel from "@/components/profile/FriendsCarousel";
 import RecentActivities from "@/components/profile/RecentActivities";
+import { useTranslation } from "react-i18next";
 
 interface ProfileData {
   name: string;
@@ -47,14 +48,19 @@ interface Stats {
   blitzSent: number;
 }
 
-const activityLevel = (score: number) => {
-  if (score >= 20) return "Hoch";
-  if (score >= 5) return "Mittel";
-  return "Niedrig";
+const useActivityLevel = () => {
+  const { t } = useTranslation();
+  return (score: number) => {
+    if (score >= 20) return t("profile.activityHigh");
+    if (score >= 5) return t("profile.activityMid");
+    return t("profile.activityLow");
+  };
 };
 
 const Profile = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
+  const activityLevel = useActivityLevel();
   const { isAdmin, count: pendingCount } = usePendingEventsCount();
   const { isHost } = useIsHost();
   const navigate = useNavigate();
@@ -111,7 +117,7 @@ const Profile = () => {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    toast.success("Erfolgreich ausgeloggt");
+    toast.success(t("profile.loggedOut"));
     navigate("/");
   };
 
@@ -123,11 +129,11 @@ const Profile = () => {
             <LogIn className="w-10 h-10 text-muted-foreground" />
           </div>
           <div className="text-center space-y-2">
-            <h2 className="text-foreground text-xl font-bold">Nicht eingeloggt</h2>
-            <p className="text-muted-foreground text-sm">Melde dich an, um dein Profil zu sehen und Events zu erstellen.</p>
+            <h2 className="text-foreground text-xl font-bold">{t("profile.notLoggedIn")}</h2>
+            <p className="text-muted-foreground text-sm">{t("profile.notLoggedInSub")}</p>
           </div>
           <Button onClick={() => navigate("/auth")} className="w-full max-w-xs">
-            Anmelden
+            {t("profile.signIn")}
           </Button>
         </div>
       </Layout>
@@ -138,7 +144,7 @@ const Profile = () => {
     return (
       <Layout>
         <div className="flex items-center justify-center h-[70vh]">
-          <p className="text-muted-foreground">Laden...</p>
+          <p className="text-muted-foreground">{t("profile.loading")}</p>
         </div>
       </Layout>
     );
@@ -169,7 +175,7 @@ const Profile = () => {
                   <Building2 className="w-5 h-5" />
                 </Button>
               )}
-              <Button variant="ghost" size="icon" className={isHost ? "text-primary" : "text-white/80 hover:text-white hover:bg-white/10"} onClick={() => navigate("/tickets")} title="Meine Tickets">
+              <Button variant="ghost" size="icon" className={isHost ? "text-primary" : "text-white/80 hover:text-white hover:bg-white/10"} onClick={() => navigate("/tickets")} title={t("profile.myTickets")}>
                 <Ticket className="w-5 h-5" />
               </Button>
               <Button variant="ghost" size="icon" className={isHost ? "text-muted-foreground" : "text-white/80 hover:text-white hover:bg-white/10"} onClick={() => navigate("/profile/edit")}>
@@ -191,8 +197,8 @@ const Profile = () => {
                   <ShieldCheck className="w-5 h-5" />
                 </div>
                 <div className="text-left">
-                  <p className="font-bold text-sm">Admin Bereich</p>
-                  <p className="text-xs opacity-90">Events moderieren &amp; verwalten</p>
+                  <p className="font-bold text-sm">{t("profile.adminArea")}</p>
+                  <p className="text-xs opacity-90">{t("profile.adminAreaSub")}</p>
                 </div>
               </div>
               {pendingCount > 0 && (
@@ -225,14 +231,14 @@ const Profile = () => {
               <div className="flex justify-center gap-8">
                 <button onClick={() => setStatsSheet({ open: true, tab: "hosted" })} className="text-center">
                   <p className="text-foreground text-xl font-bold">{stats.hostedCount}</p>
-                  <p className="text-muted-foreground text-xs">Gehostet</p>
+                  <p className="text-muted-foreground text-xs">{t("profile.hosted")}</p>
                 </button>
                 <div className="text-center">
                   <HostRating hostUserId={user.id} size="sm" />
                 </div>
                 <button onClick={() => setStatsSheet({ open: true, tab: "friends" })} className="text-center">
                   <p className="text-foreground text-xl font-bold">{stats.friendsCount}</p>
-                  <p className="text-muted-foreground text-xs">Freunde</p>
+                  <p className="text-muted-foreground text-xs">{t("profile.friends")}</p>
                 </button>
               </div>
               {(hostProfile?.website_url || hostInstagramUrl) && (
@@ -269,7 +275,7 @@ const Profile = () => {
                   {displayName}
                 </h1>
                 <p className="text-[hsl(var(--blitz-pink))] font-semibold text-sm mt-1">
-                  Bereit für den nächsten Blitz ⚡
+                  {t("profile.blitzReady")}
                 </p>
               </div>
 
@@ -290,7 +296,7 @@ const Profile = () => {
                   <div className="w-11 h-11 rounded-full bg-[hsl(var(--blitz-pink))] text-white flex items-center justify-center font-extrabold text-lg shadow-lg">
                     {stats.blitzSent}
                   </div>
-                  <p className="text-white/85 text-[11px] font-semibold leading-tight">Blitze gesendet ⚡</p>
+                  <p className="text-white/85 text-[11px] font-semibold leading-tight">{t("profile.blitzSent")} ⚡</p>
                 </button>
                 <button
                   onClick={() => setStatsSheet({ open: true, tab: "participated" })}
@@ -299,14 +305,14 @@ const Profile = () => {
                   <div className="w-11 h-11 rounded-full bg-[hsl(var(--blitz-pink))] text-white flex items-center justify-center font-extrabold text-lg shadow-lg">
                     {stats.participatedCount}
                   </div>
-                  <p className="text-white/85 text-[11px] font-semibold leading-tight">Teilgenommen <ThumbsUp className="inline w-3 h-3 -mt-0.5" /></p>
+                  <p className="text-white/85 text-[11px] font-semibold leading-tight">{t("profile.participated")} <ThumbsUp className="inline w-3 h-3 -mt-0.5" /></p>
                 </button>
                 <div className="blitz-stat-card rounded-2xl p-3 flex flex-col items-center gap-1.5 text-center">
                   <div className="w-11 h-11 rounded-full bg-[hsl(var(--blitz-pink))] text-white flex items-center justify-center shadow-lg">
                     <Zap className="w-5 h-5 fill-white" />
                   </div>
                   <p className="text-white/85 text-[11px] font-semibold leading-tight">
-                    Aktivität: {level} <Flame className="inline w-3 h-3 -mt-0.5 text-orange-400" />
+                    {t("profile.activity")}: {level} <Flame className="inline w-3 h-3 -mt-0.5 text-orange-400" />
                   </p>
                 </div>
               </div>
@@ -314,8 +320,8 @@ const Profile = () => {
               {/* About / Interests */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-white font-bold text-lg">Was ich mache</h3>
-                  <button onClick={() => navigate("/profile/edit")} className="text-white/60 text-xs underline">Bearbeiten</button>
+                  <h3 className="text-white font-bold text-lg">{t("profile.whatIDo")}</h3>
+                  <button onClick={() => navigate("/profile/edit")} className="text-white/60 text-xs underline">{t("profile.edit")}</button>
                 </div>
                 <InterestChips interests={interests} onEdit={() => navigate("/profile/edit")} />
                 {profile?.bio && (
@@ -328,7 +334,7 @@ const Profile = () => {
                 <div className="flex justify-center pt-2">
                   <div className="fun-fact-sticker rounded-2xl px-5 py-4 max-w-[88%]">
                     <p className="text-[hsl(var(--blitz-pink))] font-extrabold text-sm uppercase tracking-wider">
-                      Fun fact!
+                      {t("profile.funFact")}
                     </p>
                     <p className="text-[#2a1a00] font-semibold mt-1 text-base leading-snug">
                       {profile.fun_fact}
@@ -383,7 +389,7 @@ const Profile = () => {
       <Sheet open={showFriendsSheet} onOpenChange={setShowFriendsSheet}>
         <SheetContent side="bottom" className="h-[80vh] rounded-t-3xl">
           <SheetHeader>
-            <SheetTitle>Freunde finden</SheetTitle>
+            <SheetTitle>{t("profile.findFriends")}</SheetTitle>
           </SheetHeader>
           <div className="mt-4">
             <FriendSearch />
