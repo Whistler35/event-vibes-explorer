@@ -84,7 +84,7 @@ const Events = () => {
           <div className="bg-muted rounded-full px-6 py-4 flex items-center space-x-3">
             <input
               type="text"
-              placeholder="Event suchen..."
+              placeholder={t('events.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="flex-1 bg-transparent text-foreground placeholder-muted-foreground text-lg focus:outline-none"
