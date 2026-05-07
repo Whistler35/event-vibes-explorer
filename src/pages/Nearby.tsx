@@ -621,7 +621,7 @@ const Nearby = () => {
 
         {isLoading && (
           <div className="absolute top-[110px] left-1/2 -translate-x-1/2 z-10 bg-card/95 backdrop-blur rounded-full px-3 py-1 text-xs text-foreground shadow">
-            Loading events...
+            {t('nearby.loadingEvents')}
           </div>
         )}
 
