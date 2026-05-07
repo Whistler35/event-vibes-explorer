@@ -529,7 +529,7 @@ const Nearby = () => {
                           <div className="flex items-center gap-1.5">
                             <span className="text-sm font-semibold text-foreground truncate">{ev.title}</span>
                             {ev.is_featured && (
-                              <span className="px-1.5 py-0.5 rounded-full bg-[hsl(var(--blitz-pink))] text-white text-[9px] font-bold uppercase shrink-0">Top</span>
+                              <span className="px-1.5 py-0.5 rounded-full bg-[hsl(var(--blitz-pink))] text-white text-[9px] font-bold uppercase shrink-0">{t('nearby.top')}</span>
                             )}
                           </div>
                           <div className="text-[11px] text-muted-foreground truncate">
