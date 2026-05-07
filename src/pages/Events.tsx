@@ -63,9 +63,9 @@ const Events = () => {
   };
 
   const categoryLabels: Record<string, string> = {
-    music: 'Musik', sports: 'Sport', culture: 'Kultur', food: 'Food',
-    nightlife: 'Nightlife', outdoor: 'Outdoor', community: 'Community',
-    workshop: 'Workshop', other: 'Sonstiges',
+    music: t('categories.music'), sports: t('categories.sports'), culture: t('categories.culture'), food: t('categories.food'),
+    nightlife: t('categories.nightlife'), outdoor: t('categories.outdoor'), community: t('categories.community'),
+    workshop: t('categories.workshop'), other: t('categories.other'),
   };
 
   return (
