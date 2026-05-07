@@ -74,9 +74,9 @@ const Tickets = () => {
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <TicketIcon className="w-6 h-6 text-primary" />
-              My Tickets
+              {t('tickets.title')}
             </h1>
-            <p className="text-sm text-muted-foreground">Show QR code at the entrance</p>
+            <p className="text-sm text-muted-foreground">{t('tickets.subtitle')}</p>
           </div>
         </div>
 
