@@ -513,7 +513,7 @@ const Nearby = () => {
               <div className="mt-1.5 bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-xl overflow-hidden max-h-[60vh] overflow-y-auto">
                 {eventSuggestions.length > 0 && (
                   <>
-                    <div className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Events</div>
+                    <div className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t('nearby.events')}</div>
                     {eventSuggestions.map((ev) => (
                       <button
                         key={`ev-${ev.id}`}
