@@ -128,13 +128,13 @@ const DirectChat = () => {
     setSending(false);
   };
 
-  const displayName = otherProfile?.name || "Chat";
+  const displayName = otherProfile?.name || t('directChat.chat');
   const avatarUrl =
     otherProfile?.avatar_url ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=ff5722&color=fff&size=100`;
 
   const formatTime = (dateStr: string) => {
-    return new Date(dateStr).toLocaleTimeString("de-DE", {
+    return new Date(dateStr).toLocaleTimeString(i18n.language === 'de' ? "de-DE" : "en-GB", {
       hour: "2-digit",
       minute: "2-digit",
     });
