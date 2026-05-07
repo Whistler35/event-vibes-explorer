@@ -17,6 +17,7 @@ import { toast } from "sonner";
 type Tab = "request" | "discover";
 
 const Blitz = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { request, loading, reload } = useActiveBlitzRequest();
