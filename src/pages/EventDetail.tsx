@@ -15,6 +15,7 @@ import JoinRequestList from "@/components/JoinRequestList";
 import EditEventDialog from "@/components/EditEventDialog";
 import EventJoinedConfirmation from "@/components/EventJoinedConfirmation";
 import EventParticipantStatus from "@/components/EventParticipantStatus";
+import TranslatedDescription from "@/components/TranslatedDescription";
 
 interface Event {
   id: string;
@@ -287,7 +288,8 @@ const EventDetail = () => {
           <CardContent className="p-6 space-y-4">
             <div>
               <h2 className="text-foreground text-2xl font-bold mb-2">{event.title}</h2>
-              <p className="text-muted-foreground">{event.description}</p>
+              <TranslatedDescription event={event} />
+
             </div>
 
             <div className="space-y-3">

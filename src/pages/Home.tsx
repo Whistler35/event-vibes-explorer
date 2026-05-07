@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import type { DateRange } from "react-day-picker";
 
 import NotificationBell from "@/components/NotificationBell";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import Layout from "@/components/Layout";
 import EventCard from "@/components/EventCard";
 import { useNavigate } from "react-router-dom";
@@ -191,7 +192,10 @@ const Home = () => {
               <img src={evendleLogo} alt="Evendle" className="w-9 h-9 object-contain" />
               <span className="text-foreground text-xl font-bold">EVENDLE</span>
             </div>
-            <NotificationBell />
+            <div className="flex items-center gap-1">
+              <LanguageSwitcher />
+              <NotificationBell />
+            </div>
           </div>
         </div>
 

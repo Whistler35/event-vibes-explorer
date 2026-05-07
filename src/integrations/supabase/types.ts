@@ -500,6 +500,44 @@ export type Database = {
         }
         Relationships: []
       }
+      event_translations: {
+        Row: {
+          created_at: string
+          description: string | null
+          event_id: string
+          id: string
+          language: string
+          source_hash: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          event_id: string
+          id?: string
+          language: string
+          source_hash: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          event_id?: string
+          id?: string
+          language?: string
+          source_hash?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_translations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_views: {
         Row: {
           event_id: string

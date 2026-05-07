@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { applyLanguageFromCountry } from '@/i18n';
 
 interface AuthContextType {
   user: User | null;
@@ -27,12 +28,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const applyLangForUser = async (uid?: string) => {
+      if (!uid) return;
+      try {
+        const { data } = await supabase
+          .from('profiles')
+          .select('country')
+          .eq('user_id', uid)
+          .maybeSingle();
+        applyLanguageFromCountry(data?.country);
+      } catch { /* noop */ }
+    };
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        if (session?.user) {
+          // defer to avoid deadlocks
+          setTimeout(() => applyLangForUser(session.user.id), 0);
+        }
       }
     );
 
@@ -41,6 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      if (session?.user) setTimeout(() => applyLangForUser(session.user.id), 0);
     });
 
     return () => subscription.unsubscribe();

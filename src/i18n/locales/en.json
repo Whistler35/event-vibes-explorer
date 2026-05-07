@@ -1,0 +1,73 @@
+{
+  "nav": {
+    "events": "EVENTS",
+    "nearby": "NEAR BY",
+    "blitz": "BLITZ",
+    "chat": "CHAT",
+    "host": "HOST",
+    "profile": "PROFILE"
+  },
+  "common": {
+    "loading": "Loading…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "search": "Search",
+    "apply": "Apply",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No",
+    "confirm": "Confirm",
+    "error": "Error",
+    "success": "Success",
+    "translating": "Translating…"
+  },
+  "auth": {
+    "loginTitle": "Sign In",
+    "registerTitle": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "country": "Country",
+    "forgotPassword": "Forgot password?",
+    "resetPassword": "Reset password",
+    "sendResetLink": "Send reset link",
+    "newPassword": "New password",
+    "loginCta": "Sign In",
+    "registerCta": "Create account",
+    "switchToRegister": "No account yet? Sign up",
+    "switchToLogin": "Already have an account? Sign in",
+    "googleLogin": "Continue with Google",
+    "appleLogin": "Continue with Apple",
+    "backToLogin": "Back to sign in"
+  },
+  "home": {
+    "searchPlaceholder": "Search city or place…",
+    "topEvents": "Top Events",
+    "nearbyEvents": "Nearby Events",
+    "showAll": "Show all",
+    "noEvents": "No events found",
+    "filters": "Filters",
+    "selectDate": "Select date"
+  },
+  "event": {
+    "join": "Join",
+    "leave": "Leave",
+    "requestJoin": "Request to join",
+    "viewDetails": "View details",
+    "participants": "Participants",
+    "free": "Free",
+    "ticket": "Ticket",
+    "description": "Description",
+    "location": "Location",
+    "date": "Date",
+    "time": "Time"
+  },
+  "language": {
+    "label": "Language",
+    "de": "German",
+    "en": "English"
+  }
+}

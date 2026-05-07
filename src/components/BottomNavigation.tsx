@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { MapPin, Calendar, User, MessageCircle, Building2, Zap } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useUnreadDMCount } from "@/hooks/useUnreadDMCount";
 import { useIsHost } from "@/hooks/useIsHost";
 import { useIncomingBlitzCount } from "@/hooks/useIncomingBlitzCount";
@@ -7,17 +8,18 @@ import { useIncomingBlitzCount } from "@/hooks/useIncomingBlitzCount";
 const BottomNavigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const { unreadCount } = useUnreadDMCount();
   const { isHost } = useIsHost();
   const { count: blitzIncoming } = useIncomingBlitzCount();
 
   const navItems = [
-    { id: "events", label: "EVENTS", icon: Calendar, path: "/" },
-    { id: "nearby", label: "NEAR BY", icon: MapPin, path: "/nearby" },
-    { id: "blitz", label: "BLITZ", icon: Zap, path: "/blitz", isBlitz: true },
-    { id: "messenger", label: "CHAT", icon: MessageCircle, path: "/messenger" },
-    ...(isHost ? [{ id: "host", label: "Host", icon: Building2, path: "/host/dashboard" }] : []),
-    { id: "profile", label: "PROFILE", icon: User, path: "/profile" },
+    { id: "events", label: t("nav.events"), icon: Calendar, path: "/" },
+    { id: "nearby", label: t("nav.nearby"), icon: MapPin, path: "/nearby" },
+    { id: "blitz", label: t("nav.blitz"), icon: Zap, path: "/blitz", isBlitz: true },
+    { id: "messenger", label: t("nav.chat"), icon: MessageCircle, path: "/messenger" },
+    ...(isHost ? [{ id: "host", label: t("nav.host"), icon: Building2, path: "/host/dashboard" }] : []),
+    { id: "profile", label: t("nav.profile"), icon: User, path: "/profile" },
   ];
 
   return (
