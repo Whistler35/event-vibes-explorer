@@ -206,7 +206,7 @@ const Events = () => {
 
             {!isLoading && events.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
-                Keine Events gefunden
+                {t('events.noEvents')}
               </div>
             )}
           </div>
