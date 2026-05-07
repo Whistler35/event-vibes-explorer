@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +17,7 @@ interface Message {
 }
 
 const DirectChat = () => {
+  const { t, i18n } = useTranslation();
   const { conversationId } = useParams<{ conversationId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -126,13 +128,13 @@ const DirectChat = () => {
     setSending(false);
   };
 
-  const displayName = otherProfile?.name || "Chat";
+  const displayName = otherProfile?.name || t('directChat.chat');
   const avatarUrl =
     otherProfile?.avatar_url ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=ff5722&color=fff&size=100`;
 
   const formatTime = (dateStr: string) => {
-    return new Date(dateStr).toLocaleTimeString("de-DE", {
+    return new Date(dateStr).toLocaleTimeString(i18n.language === 'de' ? "de-DE" : "en-GB", {
       hour: "2-digit",
       minute: "2-digit",
     });
@@ -172,7 +174,7 @@ const DirectChat = () => {
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {messages.length === 0 && (
             <p className="text-muted-foreground text-center text-sm py-8">
-              Noch keine Nachrichten. Sag Hallo! 👋
+              {t('directChat.noMessages')}
             </p>
           )}
           {messages.map((msg) => {
@@ -213,7 +215,7 @@ const DirectChat = () => {
               type="text"
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Nachricht..."
+              placeholder={t('directChat.messagePlaceholder')}
               className="flex-1 bg-card rounded-full px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary border border-border"
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
             />

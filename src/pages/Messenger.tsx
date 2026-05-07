@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import evendleLogo from "@/assets/evendle-logo.jpeg";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -33,6 +34,7 @@ const isConversationUnread = (convoId: string, lastMessageAt: string | null, use
 };
 
 const Messenger = () => {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -116,7 +118,7 @@ const Messenger = () => {
         results.push({
           id: (convo as any).id,
           other_user_id: otherId,
-          other_name: profile?.name || "Unbekannt",
+          other_name: profile?.name || t('messenger.unknown'),
           other_avatar: profile?.avatar_url || null,
           last_message: lastMsg?.message || null,
           last_message_at: lastMessageAt,
@@ -165,9 +167,9 @@ const Messenger = () => {
             id: `blitz_${m.id}`,
             matchId: m.id,
             other_user_id: otherId,
-            other_name: profile?.name || "Match",
+            other_name: profile?.name || t('messenger.match'),
             other_avatar: profile?.avatar_url || null,
-            last_message: lastMsg?.message || `⚡ ${activity || "Blitz Match"}`,
+            last_message: lastMsg?.message || `⚡ ${activity || t('messenger.match')}`,
             last_message_at: lastAt,
             isUnread: unread,
             isBlitz: true,
@@ -234,7 +236,7 @@ const Messenger = () => {
           const last = (lastMsgs || []).find((m: any) => m.chat_id === (chat as any).id);
           const lastAt = last?.created_at || null;
           const senderName = last
-            ? senderProfiles?.find((p: any) => p.user_id === last.user_id)?.name?.split(" ")[0] || "Jemand"
+            ? senderProfiles?.find((p: any) => p.user_id === last.user_id)?.name?.split(" ")[0] || t('messenger.someone')
             : null;
           const lastReadEntry = (reads || []).find(
             (r: any) => r.conversation_id === (chat as any).id
@@ -253,7 +255,7 @@ const Messenger = () => {
             other_avatar: (ev as any).image_url || null,
             last_message: last
               ? `${senderName}: ${last.message}`
-              : "Noch keine Nachricht — sag Hallo 👋",
+              : t('messenger.noMessageHint'),
             last_message_at: lastAt,
             isUnread: unread,
             isEventGroup: true,
@@ -283,13 +285,13 @@ const Messenger = () => {
             <LogIn className="w-10 h-10 text-muted-foreground" />
           </div>
           <div className="text-center space-y-2">
-            <h2 className="text-foreground text-xl font-bold">Nicht eingeloggt</h2>
+            <h2 className="text-foreground text-xl font-bold">{t('messenger.notLoggedIn')}</h2>
             <p className="text-muted-foreground text-sm">
-              Melde dich an, um Nachrichten zu senden.
+              {t('messenger.notLoggedInSub')}
             </p>
           </div>
           <Button onClick={() => navigate("/auth")} className="w-full max-w-xs">
-            Anmelden
+            {t('messenger.signIn')}
           </Button>
         </div>
       </Layout>
@@ -300,15 +302,16 @@ const Messenger = () => {
     if (!dateStr) return "";
     const date = new Date(dateStr);
     const now = new Date();
+    const locale = i18n.language === 'de' ? 'de-DE' : 'en-GB';
     const diffDays = Math.floor(
       (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
     );
     if (diffDays === 0)
-      return date.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
-    if (diffDays === 1) return "Gestern";
+      return date.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
+    if (diffDays === 1) return t('messenger.yesterday');
     if (diffDays < 7)
-      return date.toLocaleDateString("de-DE", { weekday: "long" });
-    return date.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" });
+      return date.toLocaleDateString(locale, { weekday: "long" });
+    return date.toLocaleDateString(locale, { day: "2-digit", month: "2-digit" });
   };
 
   const getAvatarUrl = (name: string, avatar: string | null) =>
@@ -347,17 +350,17 @@ const Messenger = () => {
                 <h3 className={`text-lg truncate ${isEvenldeUnread ? "text-foreground font-bold" : "text-foreground font-semibold"}`}>
                   EVENDLE
                 </h3>
-                <span className="text-muted-foreground text-sm flex-shrink-0 ml-2">Team</span>
+                <span className="text-muted-foreground text-sm flex-shrink-0 ml-2">{t('messenger.team')}</span>
               </div>
               <p className={`text-sm truncate ${isEvenldeUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
-                Willkommen bei Evendle! 🎉
+                {t('messenger.welcome')}
               </p>
             </div>
           </div>
 
           {/* Real conversations */}
           {isLoading ? (
-            <p className="text-muted-foreground text-center py-8">Laden...</p>
+            <p className="text-muted-foreground text-center py-8">{t('messenger.loading')}</p>
           ) : (
             conversations.map((conversation) => (
               <div
@@ -409,7 +412,7 @@ const Messenger = () => {
                       {conversation.other_name}
                       {conversation.isBlitz && (
                         <span className="ml-2 text-[10px] font-black uppercase tracking-wider text-[hsl(var(--blitz-pink))]">
-                          Blitz
+                          {t('messenger.blitz')}
                         </span>
                       )}
                     </h3>
@@ -424,7 +427,7 @@ const Messenger = () => {
                     </span>
                   </div>
                   <p className={`text-sm truncate ${conversation.isUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
-                    {conversation.last_message || "Noch keine Nachricht"}
+                    {conversation.last_message || t('messenger.noMessage')}
                   </p>
                 </div>
               </div>

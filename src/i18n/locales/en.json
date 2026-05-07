@@ -154,5 +154,71 @@
     "leave": "Leave event",
     "share": "Share",
     "scanTickets": "Scan tickets"
+  },
+  "nearby": {
+    "searchPlaceholder": "Search events, places...",
+    "events": "Events",
+    "places": "Places",
+    "noResults": "No events or places found",
+    "loadingEvents": "Loading events...",
+    "tonight": "Tonight",
+    "free": "Free",
+    "nearbyFilter": "Nearby",
+    "popular": "Popular",
+    "top": "Top",
+    "signInCreate": "Please sign in to create events.",
+    "signInPrivate": "Please sign in to see private events.",
+    "signIn": "Sign in",
+    "locationError": "Location could not be determined"
+  },
+  "messenger": {
+    "notLoggedIn": "Not signed in",
+    "notLoggedInSub": "Sign in to send messages.",
+    "signIn": "Sign in",
+    "team": "Team",
+    "welcome": "Welcome to Evendle! 🎉",
+    "loading": "Loading...",
+    "yesterday": "Yesterday",
+    "noMessage": "No messages yet",
+    "noMessageHint": "No messages yet — say hi 👋",
+    "someone": "Someone",
+    "unknown": "Unknown",
+    "match": "Match",
+    "blitz": "Blitz"
+  },
+  "directChat": {
+    "noMessages": "No messages yet. Say hi! 👋",
+    "messagePlaceholder": "Message...",
+    "chat": "Chat"
+  },
+  "tickets": {
+    "title": "My Tickets",
+    "subtitle": "Show QR code at the entrance",
+    "loadError": "Could not load tickets",
+    "loading": "Loading...",
+    "empty": "You don't have any tickets yet.",
+    "discover": "Discover events",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "qrTitle": "Ticket QR code",
+    "qrDescription": "Show at the entrance",
+    "checkedInOn": "Checked in on {{date}}",
+    "showHint": "Show this code to the host at the entrance.",
+    "checkin": "Check-in"
+  },
+  "blitz": {
+    "tagline": "EVENDLE Blitz",
+    "spontaneousNow": "Spontaneous?\nRight now!",
+    "spontaneousFeeling": "Feeling\nSpontaneous?",
+    "teaser": "Blitz your activity out there, swipe through others and match in minutes.",
+    "teaserAlt": "Tell the city — and make it happen in the next few minutes.",
+    "loginToBlitz": "LOG IN TO BLITZ",
+    "tapToBlitz": "Tap to Blitz",
+    "createNew": "Create new Blitz",
+    "myBlitz": "My Blitz",
+    "discover": "Discover",
+    "matchToast": "⚡ Match!",
+    "matchAccepted": "{{name}} accepted.",
+    "someone": "Someone"
   }
 }

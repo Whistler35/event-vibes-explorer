@@ -154,5 +154,71 @@
     "leave": "Event verlassen",
     "share": "Teilen",
     "scanTickets": "Tickets scannen"
+  },
+  "nearby": {
+    "searchPlaceholder": "Events, Orte suchen...",
+    "events": "Events",
+    "places": "Orte",
+    "noResults": "Keine Events oder Orte gefunden",
+    "loadingEvents": "Events werden geladen...",
+    "tonight": "Heute Abend",
+    "free": "Kostenlos",
+    "nearbyFilter": "In der Nähe",
+    "popular": "Beliebt",
+    "top": "Top",
+    "signInCreate": "Bitte melde dich an, um Events zu erstellen.",
+    "signInPrivate": "Bitte melde dich an, um private Events zu sehen.",
+    "signIn": "Anmelden",
+    "locationError": "Standort konnte nicht ermittelt werden"
+  },
+  "messenger": {
+    "notLoggedIn": "Nicht eingeloggt",
+    "notLoggedInSub": "Melde dich an, um Nachrichten zu senden.",
+    "signIn": "Anmelden",
+    "team": "Team",
+    "welcome": "Willkommen bei Evendle! 🎉",
+    "loading": "Laden...",
+    "yesterday": "Gestern",
+    "noMessage": "Noch keine Nachricht",
+    "noMessageHint": "Noch keine Nachricht — sag Hallo 👋",
+    "someone": "Jemand",
+    "unknown": "Unbekannt",
+    "match": "Match",
+    "blitz": "Blitz"
+  },
+  "directChat": {
+    "noMessages": "Noch keine Nachrichten. Sag Hallo! 👋",
+    "messagePlaceholder": "Nachricht...",
+    "chat": "Chat"
+  },
+  "tickets": {
+    "title": "Meine Tickets",
+    "subtitle": "QR-Code am Eingang vorzeigen",
+    "loadError": "Tickets konnten nicht geladen werden",
+    "loading": "Lädt...",
+    "empty": "Du hast noch keine Tickets.",
+    "discover": "Events entdecken",
+    "upcoming": "Bevorstehend",
+    "past": "Vergangen",
+    "qrTitle": "Ticket QR-Code",
+    "qrDescription": "Am Eingang vorzeigen",
+    "checkedInOn": "Eingecheckt am {{date}}",
+    "showHint": "Zeige diesen Code dem Host am Eingang.",
+    "checkin": "Check-in"
+  },
+  "blitz": {
+    "tagline": "EVENDLE Blitz",
+    "spontaneousNow": "Spontan?\nGenau jetzt!",
+    "spontaneousFeeling": "Fühlst du dich\nspontan?",
+    "teaser": "Schicke deine Aktivität raus, swipe durch andere und matche in Minuten.",
+    "teaserAlt": "Sag es der Stadt — und mach es in den nächsten Minuten möglich.",
+    "loginToBlitz": "ANMELDEN ZUM BLITZEN",
+    "tapToBlitz": "Tippen zum Blitzen",
+    "createNew": "Neuen Blitz erstellen",
+    "myBlitz": "Mein Blitz",
+    "discover": "Entdecken",
+    "matchToast": "⚡ Match!",
+    "matchAccepted": "{{name}} hat angenommen.",
+    "someone": "Jemand"
   }
 }

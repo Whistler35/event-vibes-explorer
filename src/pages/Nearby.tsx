@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import type { DateRange } from "react-day-picker";
 import evendleLogo from "@/assets/evendle-logo.jpeg";
 import { useNavigate } from "react-router-dom";
@@ -55,6 +56,7 @@ const loadStoredFilters = (): StoredFilters => {
 };
 
 const Nearby = () => {
+  const { t } = useTranslation();
   const stored = loadStoredFilters();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<[number, number] | null>(null);
@@ -306,8 +308,8 @@ const Nearby = () => {
 
   const handleCreateEvent = (coordinates: [number, number]) => {
     if (!user) {
-      toast.info('Please sign in to create events.', {
-        action: { label: 'Sign in', onClick: () => navigate('/auth') },
+      toast.info(t('nearby.signInCreate'), {
+        action: { label: t('nearby.signIn'), onClick: () => navigate('/auth') },
       });
       return;
     }
@@ -439,16 +441,16 @@ const Nearby = () => {
           setFrozenCarousel(null);
           mapRef.current?.flyTo(pos.coords.latitude, pos.coords.longitude, 14);
         },
-        () => toast.error('Standort konnte nicht ermittelt werden')
+        () => toast.error(t('nearby.locationError'))
       );
     }
   };
 
   const quickPills: { id: QuickFilter; label: string; icon: React.ElementType }[] = [
-    { id: 'tonight', label: 'Tonight', icon: Moon },
-    { id: 'free', label: 'Free', icon: Tag },
-    { id: 'nearby', label: 'Nearby', icon: Navigation },
-    { id: 'popular', label: 'Popular', icon: Flame },
+    { id: 'tonight', label: t('nearby.tonight'), icon: Moon },
+    { id: 'free', label: t('nearby.free'), icon: Tag },
+    { id: 'nearby', label: t('nearby.nearbyFilter'), icon: Navigation },
+    { id: 'popular', label: t('nearby.popular'), icon: Flame },
   ];
 
   return (
@@ -495,7 +497,7 @@ const Nearby = () => {
                 value={cityQuery}
                 onChange={(e) => handleCityInput(e.target.value)}
                 onFocus={() => { setSearchOpen(true); (citySuggestions.length + eventSuggestions.length) > 0 && setShowCitySuggestions(true); }}
-                placeholder="Search events, places..."
+                placeholder={t('nearby.searchPlaceholder')}
                 className="flex-1 bg-transparent border-0 outline-none px-3 text-sm text-foreground placeholder:text-muted-foreground"
               />
               {searchLoading && (
@@ -511,7 +513,7 @@ const Nearby = () => {
               <div className="mt-1.5 bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-xl overflow-hidden max-h-[60vh] overflow-y-auto">
                 {eventSuggestions.length > 0 && (
                   <>
-                    <div className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Events</div>
+                    <div className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t('nearby.events')}</div>
                     {eventSuggestions.map((ev) => (
                       <button
                         key={`ev-${ev.id}`}
@@ -527,7 +529,7 @@ const Nearby = () => {
                           <div className="flex items-center gap-1.5">
                             <span className="text-sm font-semibold text-foreground truncate">{ev.title}</span>
                             {ev.is_featured && (
-                              <span className="px-1.5 py-0.5 rounded-full bg-[hsl(var(--blitz-pink))] text-white text-[9px] font-bold uppercase shrink-0">Top</span>
+                              <span className="px-1.5 py-0.5 rounded-full bg-[hsl(var(--blitz-pink))] text-white text-[9px] font-bold uppercase shrink-0">{t('nearby.top')}</span>
                             )}
                           </div>
                           <div className="text-[11px] text-muted-foreground truncate">
@@ -541,7 +543,7 @@ const Nearby = () => {
                 )}
                 {citySuggestions.length > 0 && (
                   <>
-                    <div className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Places</div>
+                    <div className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t('nearby.places')}</div>
                     {citySuggestions.map((s, i) => (
                       <button
                         key={`pl-${i}`}
@@ -555,7 +557,7 @@ const Nearby = () => {
                   </>
                 )}
                 {!searchLoading && eventSuggestions.length === 0 && citySuggestions.length === 0 && (
-                  <div className="px-4 py-4 text-sm text-muted-foreground text-center">No events or places found</div>
+                  <div className="px-4 py-4 text-sm text-muted-foreground text-center">{t('nearby.noResults')}</div>
                 )}
               </div>
             )}
@@ -580,8 +582,8 @@ const Nearby = () => {
               checked={isPrivateMode}
               onCheckedChange={(checked) => {
                 if (checked && !user) {
-                  toast.info('Please sign in to see private events.', {
-                    action: { label: 'Sign in', onClick: () => navigate('/auth') },
+                  toast.info(t('nearby.signInPrivate'), {
+                    action: { label: t('nearby.signIn'), onClick: () => navigate('/auth') },
                   });
                   return;
                 }
@@ -619,7 +621,7 @@ const Nearby = () => {
 
         {isLoading && (
           <div className="absolute top-[110px] left-1/2 -translate-x-1/2 z-10 bg-card/95 backdrop-blur rounded-full px-3 py-1 text-xs text-foreground shadow">
-            Loading events...
+            {t('nearby.loadingEvents')}
           </div>
         )}
 

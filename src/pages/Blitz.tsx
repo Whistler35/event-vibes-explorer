@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Zap } from "lucide-react";
 import BottomNavigation from "@/components/BottomNavigation";
@@ -16,6 +17,7 @@ import { toast } from "sonner";
 type Tab = "request" | "discover";
 
 const Blitz = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { request, loading, reload } = useActiveBlitzRequest();
@@ -47,7 +49,7 @@ const Blitz = () => {
     );
     if (fresh) {
       seenMatchIds.current.add(fresh.id);
-      toast("⚡ Match!", { description: `${fresh.other_name ?? "Someone"} accepted.` });
+      toast(t('blitz.matchToast'), { description: t('blitz.matchAccepted', { name: fresh.other_name ?? t('blitz.someone') }) });
       navigate(`/blitz/match/${fresh.id}`);
     } else {
       matches.forEach((m) => seenMatchIds.current.add(m.id));
@@ -68,12 +70,12 @@ const Blitz = () => {
             </div>
 
             <div className="relative space-y-3">
-              <p className="text-xs uppercase tracking-[0.3em] text-white/60 font-bold">EVENDLE Blitz</p>
-              <h1 className="text-5xl font-black uppercase leading-none">
-                Spontaneous?<br />Right now!
+              <p className="text-xs uppercase tracking-[0.3em] text-white/60 font-bold">{t('blitz.tagline')}</p>
+              <h1 className="text-5xl font-black uppercase leading-none whitespace-pre-line">
+                {t('blitz.spontaneousNow')}
               </h1>
               <p className="text-white/80 max-w-xs mx-auto text-base">
-                Blitz your activity out there, swipe through others and match in minutes.
+                {t('blitz.teaser')}
               </p>
             </div>
 
@@ -81,7 +83,7 @@ const Blitz = () => {
               onClick={() => navigate("/auth")}
               className="relative px-8 py-4 rounded-2xl bg-[hsl(var(--blitz-pink))] text-white font-black uppercase tracking-wider shadow-[0_8px_32px_hsl(var(--blitz-pink)/0.5)] hover:scale-105 transition"
             >
-              LOG IN TO BLITZ
+              {t('blitz.loginToBlitz')}
             </button>
           </div>
         </div>
@@ -103,7 +105,7 @@ const Blitz = () => {
                 : "text-muted-foreground"
             }`}
           >
-            My Blitz
+            {t('blitz.myBlitz')}
           </button>
           <button
             onClick={() => setTab("discover")}
@@ -113,7 +115,7 @@ const Blitz = () => {
                 : "text-muted-foreground"
             }`}
           >
-            Discover
+            {t('blitz.discover')}
           </button>
         </div>
 
@@ -134,25 +136,25 @@ const Blitz = () => {
               <div className="absolute -bottom-10 -left-10 w-60 h-60 rounded-full bg-[hsl(var(--blitz-pink))] blur-3xl opacity-25" />
 
               <div className="relative pt-6 space-y-2">
-                <p className="text-xs uppercase tracking-[0.3em] text-white/60 font-bold">EVENDLE Blitz</p>
-                <h1 className="text-5xl font-black uppercase leading-none">
-                  Feeling<br />Spontaneous?
+                <p className="text-xs uppercase tracking-[0.3em] text-white/60 font-bold">{t('blitz.tagline')}</p>
+                <h1 className="text-5xl font-black uppercase leading-none whitespace-pre-line">
+                  {t('blitz.spontaneousFeeling')}
                 </h1>
                 <p className="text-white/70 mt-3 max-w-xs mx-auto">
-                  Tell the city — and make it happen in the next few minutes.
+                  {t('blitz.teaserAlt')}
                 </p>
               </div>
 
               <button
                 onClick={() => setCreateOpen(true)}
                 className="relative w-32 h-32 rounded-full bg-[hsl(var(--blitz-pink))] flex items-center justify-center shadow-[0_0_60px_hsl(var(--blitz-pink)/0.6)] hover:scale-105 active:scale-95 transition animate-blitz-pulse"
-                aria-label="Create new Blitz"
+                aria-label={t('blitz.createNew')}
               >
                 <Zap className="w-16 h-16 text-white fill-white" />
               </button>
 
               <p className="relative text-sm font-black uppercase tracking-[0.25em] pb-4">
-                Tap to Blitz
+                {t('blitz.tapToBlitz')}
               </p>
             </div>
           )

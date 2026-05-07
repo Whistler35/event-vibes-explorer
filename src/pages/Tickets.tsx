@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 import Layout from "@/components/Layout";
@@ -27,6 +28,8 @@ interface Ticket {
 }
 
 const Tickets = () => {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'de' ? 'de-DE' : 'en-GB';
   const { user } = useAuth();
   const navigate = useNavigate();
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -52,7 +55,7 @@ const Tickets = () => {
       if (error) throw error;
       setTickets((data as any) || []);
     } catch (e: any) {
-      toast.error("Could not load tickets");
+      toast.error(t('tickets.loadError'));
     } finally {
       setLoading(false);
     }
@@ -71,34 +74,34 @@ const Tickets = () => {
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <TicketIcon className="w-6 h-6 text-primary" />
-              My Tickets
+              {t('tickets.title')}
             </h1>
-            <p className="text-sm text-muted-foreground">Show QR code at the entrance</p>
+            <p className="text-sm text-muted-foreground">{t('tickets.subtitle')}</p>
           </div>
         </div>
 
         {loading ? (
-          <div className="text-center text-muted-foreground py-12">Loading...</div>
+          <div className="text-center text-muted-foreground py-12">{t('tickets.loading')}</div>
         ) : tickets.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center space-y-3">
               <TicketIcon className="w-12 h-12 mx-auto text-muted-foreground" />
-              <p className="text-muted-foreground">You don't have any tickets yet.</p>
-              <Button onClick={() => navigate("/")}>Discover events</Button>
+              <p className="text-muted-foreground">{t('tickets.empty')}</p>
+              <Button onClick={() => navigate("/")}>{t('tickets.discover')}</Button>
             </CardContent>
           </Card>
         ) : (
           <>
             {upcoming.length > 0 && (
               <section className="space-y-3">
-                <h2 className="font-bold text-lg">Upcoming</h2>
-                {upcoming.map(t => <TicketCard key={t.id} ticket={t} onOpen={() => setSelectedTicket(t)} />)}
+                <h2 className="font-bold text-lg">{t('tickets.upcoming')}</h2>
+                {upcoming.map(t2 => <TicketCard key={t2.id} ticket={t2} onOpen={() => setSelectedTicket(t2)} locale={locale} t={t} />)}
               </section>
             )}
             {past.length > 0 && (
               <section className="space-y-3">
-                <h2 className="font-bold text-lg text-muted-foreground">Past</h2>
-                {past.map(t => <TicketCard key={t.id} ticket={t} onOpen={() => setSelectedTicket(t)} past />)}
+                <h2 className="font-bold text-lg text-muted-foreground">{t('tickets.past')}</h2>
+                {past.map(t2 => <TicketCard key={t2.id} ticket={t2} onOpen={() => setSelectedTicket(t2)} past locale={locale} t={t} />)}
               </section>
             )}
           </>
@@ -106,14 +109,14 @@ const Tickets = () => {
 
         <Dialog open={!!selectedTicket} onOpenChange={(o) => !o && setSelectedTicket(null)}>
           <DialogContent className="max-w-sm">
-            <DialogTitle className="sr-only">Ticket QR code</DialogTitle>
-            <DialogDescription className="sr-only">Show at the entrance</DialogDescription>
+            <DialogTitle className="sr-only">{t('tickets.qrTitle')}</DialogTitle>
+            <DialogDescription className="sr-only">{t('tickets.qrDescription')}</DialogDescription>
             {selectedTicket && (
               <div className="space-y-4 text-center">
                 <div>
                   <h3 className="font-bold text-lg">{selectedTicket.events?.title}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {selectedTicket.events && new Date(selectedTicket.events.event_date).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}
+                    {selectedTicket.events && new Date(selectedTicket.events.event_date).toLocaleString(locale, { dateStyle: "medium", timeStyle: "short" })}
                   </p>
                 </div>
                 <div className="bg-white p-6 rounded-2xl flex items-center justify-center">
@@ -126,12 +129,12 @@ const Tickets = () => {
                   {selectedTicket.checked_in_at && (
                     <div className="flex items-center justify-center gap-1 text-sm text-primary font-semibold">
                       <CheckCircle2 className="w-4 h-4" />
-                      Checked in on {new Date(selectedTicket.checked_in_at).toLocaleString("en-GB")}
+                      {t('tickets.checkedInOn', { date: new Date(selectedTicket.checked_in_at).toLocaleString(locale) })}
                     </div>
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Show this code to the host at the entrance.
+                  {t('tickets.showHint')}
                 </p>
               </div>
             )}
@@ -142,7 +145,7 @@ const Tickets = () => {
   );
 };
 
-const TicketCard = ({ ticket, onOpen, past }: { ticket: Ticket; onOpen: () => void; past?: boolean }) => {
+const TicketCard = ({ ticket, onOpen, past, locale, t }: { ticket: Ticket; onOpen: () => void; past?: boolean; locale: string; t: (k: string) => string }) => {
   if (!ticket.events) return null;
   const date = new Date(ticket.events.event_date);
   return (
@@ -156,7 +159,7 @@ const TicketCard = ({ ticket, onOpen, past }: { ticket: Ticket; onOpen: () => vo
           <div className="text-sm text-muted-foreground space-y-0.5 mt-1">
             <div className="flex items-center gap-1">
               <Calendar className="w-3 h-3" />
-              {date.toLocaleDateString("en-GB")} · {date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
+              {date.toLocaleDateString(locale)} · {date.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })}
             </div>
             <div className="flex items-center gap-1 truncate">
               <MapPin className="w-3 h-3 shrink-0" />
@@ -167,7 +170,7 @@ const TicketCard = ({ ticket, onOpen, past }: { ticket: Ticket; onOpen: () => vo
             <Badge variant="outline" className="font-mono text-xs">{ticket.ticket_code}</Badge>
             {ticket.checked_in_at && (
               <Badge className="bg-primary text-primary-foreground text-xs gap-1">
-                <CheckCircle2 className="w-3 h-3" /> Check-in
+                <CheckCircle2 className="w-3 h-3" /> {t('tickets.checkin')}
               </Badge>
             )}
           </div>
