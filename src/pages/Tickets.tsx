@@ -81,13 +81,13 @@ const Tickets = () => {
         </div>
 
         {loading ? (
-          <div className="text-center text-muted-foreground py-12">Loading...</div>
+          <div className="text-center text-muted-foreground py-12">{t('tickets.loading')}</div>
         ) : tickets.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center space-y-3">
               <TicketIcon className="w-12 h-12 mx-auto text-muted-foreground" />
-              <p className="text-muted-foreground">You don't have any tickets yet.</p>
-              <Button onClick={() => navigate("/")}>Discover events</Button>
+              <p className="text-muted-foreground">{t('tickets.empty')}</p>
+              <Button onClick={() => navigate("/")}>{t('tickets.discover')}</Button>
             </CardContent>
           </Card>
         ) : (
