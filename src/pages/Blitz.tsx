@@ -70,12 +70,12 @@ const Blitz = () => {
             </div>
 
             <div className="relative space-y-3">
-              <p className="text-xs uppercase tracking-[0.3em] text-white/60 font-bold">EVENDLE Blitz</p>
-              <h1 className="text-5xl font-black uppercase leading-none">
-                Spontaneous?<br />Right now!
+              <p className="text-xs uppercase tracking-[0.3em] text-white/60 font-bold">{t('blitz.tagline')}</p>
+              <h1 className="text-5xl font-black uppercase leading-none whitespace-pre-line">
+                {t('blitz.spontaneousNow')}
               </h1>
               <p className="text-white/80 max-w-xs mx-auto text-base">
-                Blitz your activity out there, swipe through others and match in minutes.
+                {t('blitz.teaser')}
               </p>
             </div>
 
@@ -83,7 +83,7 @@ const Blitz = () => {
               onClick={() => navigate("/auth")}
               className="relative px-8 py-4 rounded-2xl bg-[hsl(var(--blitz-pink))] text-white font-black uppercase tracking-wider shadow-[0_8px_32px_hsl(var(--blitz-pink)/0.5)] hover:scale-105 transition"
             >
-              LOG IN TO BLITZ
+              {t('blitz.loginToBlitz')}
             </button>
           </div>
         </div>
