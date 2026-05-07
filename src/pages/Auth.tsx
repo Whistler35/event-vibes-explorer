@@ -266,6 +266,70 @@ const Auth = () => {
     );
   }
 
+  if (isForgotPassword) {
+    const handleResetSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!email) {
+        toast.error('Bitte E-Mail eingeben');
+        return;
+      }
+      setResetLoading(true);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      setResetLoading(false);
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success('E-Mail zum Zurücksetzen wurde gesendet');
+        setIsForgotPassword(false);
+      }
+    };
+
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4 relative">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsForgotPassword(false)}
+          className="absolute top-4 left-4 text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="w-4 h-4 mr-1" />
+          Zurück
+        </Button>
+        <div className="w-full max-w-md space-y-6">
+          <div className="text-center space-y-2">
+            <div className="flex items-center justify-center space-x-2">
+              <img src={evendleLogo} alt="Evendle" className="w-9 h-9 object-contain" />
+              <span className="text-foreground text-2xl font-bold">EVENDLE</span>
+            </div>
+            <h1 className="text-xl font-bold text-foreground pt-2">Passwort vergessen?</h1>
+            <p className="text-muted-foreground text-sm">
+              Gib deine E-Mail ein und wir senden dir einen Link zum Zurücksetzen.
+            </p>
+          </div>
+          <form onSubmit={handleResetSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="reset-email" className="text-foreground">E-Mail *</Label>
+              <Input
+                id="reset-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="bg-card border-border text-foreground"
+              />
+            </div>
+            <Button type="submit" disabled={resetLoading} className="w-full">
+              {resetLoading ? 'Sende...' : 'Link zum Zurücksetzen senden'}
+            </Button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 relative">
       <Button
