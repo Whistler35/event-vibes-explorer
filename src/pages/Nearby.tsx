@@ -497,7 +497,7 @@ const Nearby = () => {
                 value={cityQuery}
                 onChange={(e) => handleCityInput(e.target.value)}
                 onFocus={() => { setSearchOpen(true); (citySuggestions.length + eventSuggestions.length) > 0 && setShowCitySuggestions(true); }}
-                placeholder="Search events, places..."
+                placeholder={t('nearby.searchPlaceholder')}
                 className="flex-1 bg-transparent border-0 outline-none px-3 text-sm text-foreground placeholder:text-muted-foreground"
               />
               {searchLoading && (
