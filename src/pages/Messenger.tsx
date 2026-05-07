@@ -360,7 +360,7 @@ const Messenger = () => {
 
           {/* Real conversations */}
           {isLoading ? (
-            <p className="text-muted-foreground text-center py-8">Laden...</p>
+            <p className="text-muted-foreground text-center py-8">{t('messenger.loading')}</p>
           ) : (
             conversations.map((conversation) => (
               <div
