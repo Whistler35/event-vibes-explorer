@@ -350,10 +350,10 @@ const Messenger = () => {
                 <h3 className={`text-lg truncate ${isEvenldeUnread ? "text-foreground font-bold" : "text-foreground font-semibold"}`}>
                   EVENDLE
                 </h3>
-                <span className="text-muted-foreground text-sm flex-shrink-0 ml-2">Team</span>
+                <span className="text-muted-foreground text-sm flex-shrink-0 ml-2">{t('messenger.team')}</span>
               </div>
               <p className={`text-sm truncate ${isEvenldeUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
-                Willkommen bei Evendle! 🎉
+                {t('messenger.welcome')}
               </p>
             </div>
           </div>
