@@ -60,6 +60,7 @@ const App = () => (
               <Route path="/profile" element={<Profile />} />
               <Route path="/profile/edit" element={<EditProfile />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/admin/events" element={<AdminEvents />} />
               <Route path="/host/dashboard" element={<HostDashboard />} />
               <Route path="/host/stats" element={<HostStats />} />
