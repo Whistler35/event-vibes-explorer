@@ -17,6 +17,8 @@ type UserRole = 'private' | 'professional_host';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
