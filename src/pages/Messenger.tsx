@@ -427,7 +427,7 @@ const Messenger = () => {
                     </span>
                   </div>
                   <p className={`text-sm truncate ${conversation.isUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
-                    {conversation.last_message || "Noch keine Nachricht"}
+                    {conversation.last_message || t('messenger.noMessage')}
                   </p>
                 </div>
               </div>
