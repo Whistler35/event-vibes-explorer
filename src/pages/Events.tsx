@@ -132,7 +132,7 @@ const Events = () => {
         {/* Filter Buttons */}
         <div className="space-y-4">
           <div className="flex items-center space-x-4">
-            <h3 className="text-foreground text-2xl font-bold">alle events</h3>
+            <h3 className="text-foreground text-2xl font-bold">{t('events.allEvents')}</h3>
             <div className="flex space-x-3">
               <Button
                 onClick={() => setSelectedFilter("today")}
@@ -142,7 +142,7 @@ const Events = () => {
                     : 'bg-muted hover:bg-muted/80 text-foreground'
                 }`}
               >
-                today
+                {t('events.today')}
               </Button>
               <Button
                 onClick={() => setSelectedFilter("all")}
@@ -152,7 +152,7 @@ const Events = () => {
                     : 'bg-muted hover:bg-muted/80 text-foreground'
                 }`}
               >
-                alle
+                {t('events.all')}
               </Button>
             </div>
           </div>
