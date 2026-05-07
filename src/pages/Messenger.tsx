@@ -118,7 +118,7 @@ const Messenger = () => {
         results.push({
           id: (convo as any).id,
           other_user_id: otherId,
-          other_name: profile?.name || "Unbekannt",
+          other_name: profile?.name || t('messenger.unknown'),
           other_avatar: profile?.avatar_url || null,
           last_message: lastMsg?.message || null,
           last_message_at: lastMessageAt,
