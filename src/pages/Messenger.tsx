@@ -285,13 +285,13 @@ const Messenger = () => {
             <LogIn className="w-10 h-10 text-muted-foreground" />
           </div>
           <div className="text-center space-y-2">
-            <h2 className="text-foreground text-xl font-bold">Nicht eingeloggt</h2>
+            <h2 className="text-foreground text-xl font-bold">{t('messenger.notLoggedIn')}</h2>
             <p className="text-muted-foreground text-sm">
-              Melde dich an, um Nachrichten zu senden.
+              {t('messenger.notLoggedInSub')}
             </p>
           </div>
           <Button onClick={() => navigate("/auth")} className="w-full max-w-xs">
-            Anmelden
+            {t('messenger.signIn')}
           </Button>
         </div>
       </Layout>
