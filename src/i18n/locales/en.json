@@ -125,5 +125,34 @@
     "label": "Language",
     "de": "German",
     "en": "English"
+  },
+  "profile": {
+    "loggedOut": "Signed out successfully",
+    "notLoggedIn": "Not signed in",
+    "notLoggedInSub": "Sign in to view your profile and create events.",
+    "signIn": "Sign in",
+    "loading": "Loading…",
+    "myTickets": "My tickets",
+    "adminArea": "Admin area",
+    "adminAreaSub": "Moderate & manage events",
+    "hosted": "Hosted",
+    "friends": "Friends",
+    "blitzSent": "Blitzes sent",
+    "participated": "Joined",
+    "activity": "Activity",
+    "activityHigh": "High",
+    "activityMid": "Medium",
+    "activityLow": "Low",
+    "whatIDo": "What I do",
+    "edit": "Edit",
+    "blitzReady": "Ready for the next Blitz ⚡",
+    "funFact": "Fun fact!",
+    "findFriends": "Find friends"
+  },
+  "eventDetail": {
+    "join": "Join",
+    "leave": "Leave event",
+    "share": "Share",
+    "scanTickets": "Scan tickets"
   }
 }

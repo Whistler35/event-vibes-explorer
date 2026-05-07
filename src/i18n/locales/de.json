@@ -125,5 +125,34 @@
     "label": "Sprache",
     "de": "Deutsch",
     "en": "Englisch"
+  },
+  "profile": {
+    "loggedOut": "Erfolgreich ausgeloggt",
+    "notLoggedIn": "Nicht eingeloggt",
+    "notLoggedInSub": "Melde dich an, um dein Profil zu sehen und Events zu erstellen.",
+    "signIn": "Anmelden",
+    "loading": "Lädt…",
+    "myTickets": "Meine Tickets",
+    "adminArea": "Admin-Bereich",
+    "adminAreaSub": "Events moderieren & verwalten",
+    "hosted": "Gehostet",
+    "friends": "Freunde",
+    "blitzSent": "Blitze gesendet",
+    "participated": "Teilgenommen",
+    "activity": "Aktivität",
+    "activityHigh": "Hoch",
+    "activityMid": "Mittel",
+    "activityLow": "Niedrig",
+    "whatIDo": "Was ich mache",
+    "edit": "Bearbeiten",
+    "blitzReady": "Bereit für den nächsten Blitz ⚡",
+    "funFact": "Fun Fact!",
+    "findFriends": "Freunde finden"
+  },
+  "eventDetail": {
+    "join": "Teilnehmen",
+    "leave": "Event verlassen",
+    "share": "Teilen",
+    "scanTickets": "Tickets scannen"
   }
 }
