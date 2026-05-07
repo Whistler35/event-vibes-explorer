@@ -56,6 +56,7 @@ const loadStoredFilters = (): StoredFilters => {
 };
 
 const Nearby = () => {
+  const { t } = useTranslation();
   const stored = loadStoredFilters();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<[number, number] | null>(null);
