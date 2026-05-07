@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,8 @@ interface Participant {
 }
 
 const EventDetail = () => {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'de' ? 'de-DE' : 'en-GB';
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -81,7 +84,7 @@ const EventDetail = () => {
       setEvent(data);
     } catch (error) {
       console.error('Error fetching event:', error);
-      toast.error('Could not load event');
+      toast.error(t('eventDetails.loadError'));
     } finally {
       setLoading(false);
     }
@@ -128,7 +131,7 @@ const EventDetail = () => {
 
   const handleJoinEvent = async () => {
     if (!user) {
-      toast.error('You must be signed in to join events');
+      toast.error(t('eventDetails.mustSignIn'));
       navigate('/auth');
       return;
     }
@@ -143,7 +146,7 @@ const EventDetail = () => {
           .eq('event_id', event.id)
           .eq('user_id', user.id);
         if (error) throw error;
-        toast.success('Du hast das Event verlassen');
+        toast.success(t('eventDetails.leftEvent'));
         setIsParticipant(false);
       } else {
         const { error } = await supabase
@@ -156,7 +159,7 @@ const EventDetail = () => {
       }
       fetchParticipants();
     } catch (error: any) {
-      toast.error(error.message || 'Error joining/leaving');
+      toast.error(error.message || t('eventDetails.joinError'));
     } finally {
       setJoinLoading(false);
     }

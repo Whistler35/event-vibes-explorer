@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import evendleLogo from "@/assets/evendle-logo.jpeg";
 import { Search } from "lucide-react";
 import Layout from "@/components/Layout";
@@ -12,6 +13,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 const Events = () => {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'de' ? 'de-DE' : 'en-GB';
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("today");
   const [selectedCategories, setSelectedCategories] = useState<EventCategory[]>([]);
@@ -60,9 +63,9 @@ const Events = () => {
   };
 
   const categoryLabels: Record<string, string> = {
-    music: 'Musik', sports: 'Sport', culture: 'Kultur', food: 'Food',
-    nightlife: 'Nightlife', outdoor: 'Outdoor', community: 'Community',
-    workshop: 'Workshop', other: 'Sonstiges',
+    music: t('categories.music'), sports: t('categories.sports'), culture: t('categories.culture'), food: t('categories.food'),
+    nightlife: t('categories.nightlife'), outdoor: t('categories.outdoor'), community: t('categories.community'),
+    workshop: t('categories.workshop'), other: t('categories.other'),
   };
 
   return (
@@ -81,7 +84,7 @@ const Events = () => {
           <div className="bg-muted rounded-full px-6 py-4 flex items-center space-x-3">
             <input
               type="text"
-              placeholder="Event suchen..."
+              placeholder={t('events.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="flex-1 bg-transparent text-foreground placeholder-muted-foreground text-lg focus:outline-none"
@@ -96,11 +99,11 @@ const Events = () => {
         {/* Top Events Section */}
         {featuredEvents && featuredEvents.length > 0 && (
           <div className="space-y-3">
-            <h3 className="text-foreground text-2xl font-bold">⭐ top events</h3>
+            <h3 className="text-foreground text-2xl font-bold">{t('events.topEvents')}</h3>
             <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
               {featuredEvents.map((event: any) => {
                 const eventDate = new Date(event.event_date);
-                const formattedDate = eventDate.toLocaleDateString('de-DE', { day: '2-digit', month: 'short' });
+                const formattedDate = eventDate.toLocaleDateString(locale, { day: '2-digit', month: 'short' });
                 return (
                   <div
                     key={event.id}
@@ -129,7 +132,7 @@ const Events = () => {
         {/* Filter Buttons */}
         <div className="space-y-4">
           <div className="flex items-center space-x-4">
-            <h3 className="text-foreground text-2xl font-bold">alle events</h3>
+            <h3 className="text-foreground text-2xl font-bold">{t('events.allEvents')}</h3>
             <div className="flex space-x-3">
               <Button
                 onClick={() => setSelectedFilter("today")}
@@ -139,7 +142,7 @@ const Events = () => {
                     : 'bg-muted hover:bg-muted/80 text-foreground'
                 }`}
               >
-                today
+                {t('events.today')}
               </Button>
               <Button
                 onClick={() => setSelectedFilter("all")}
@@ -149,22 +152,22 @@ const Events = () => {
                     : 'bg-muted hover:bg-muted/80 text-foreground'
                 }`}
               >
-                alle
+                {t('events.all')}
               </Button>
             </div>
           </div>
 
           {/* Loading */}
           {isLoading && (
-            <div className="text-center py-8 text-muted-foreground">Events laden...</div>
+            <div className="text-center py-8 text-muted-foreground">{t('events.loadingEvents')}</div>
           )}
 
           {/* Events List */}
           <div className="space-y-4">
             {events.map((event) => {
               const eventDate = new Date(event.event_date);
-              const formattedDate = eventDate.toLocaleDateString('de-DE');
-              const formattedTime = eventDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+              const formattedDate = eventDate.toLocaleDateString(locale);
+              const formattedTime = eventDate.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 
               return (
                 <div key={event.id} className="flex space-x-4 cursor-pointer" onClick={() => handleEventClick(event.id)}>
@@ -187,7 +190,7 @@ const Events = () => {
                         )}
                         {event.source === 'community' && (
                           <Badge variant="outline" className="border-primary/50 text-primary text-xs">
-                            Community
+                            {t('categories.community')}
                           </Badge>
                         )}
                       </div>
@@ -203,7 +206,7 @@ const Events = () => {
 
             {!isLoading && events.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
-                Keine Events gefunden
+                {t('events.noEvents')}
               </div>
             )}
           </div>
