@@ -94,14 +94,14 @@ const Tickets = () => {
           <>
             {upcoming.length > 0 && (
               <section className="space-y-3">
-                <h2 className="font-bold text-lg">Upcoming</h2>
-                {upcoming.map(t => <TicketCard key={t.id} ticket={t} onOpen={() => setSelectedTicket(t)} />)}
+                <h2 className="font-bold text-lg">{t('tickets.upcoming')}</h2>
+                {upcoming.map(t2 => <TicketCard key={t2.id} ticket={t2} onOpen={() => setSelectedTicket(t2)} locale={locale} t={t} />)}
               </section>
             )}
             {past.length > 0 && (
               <section className="space-y-3">
-                <h2 className="font-bold text-lg text-muted-foreground">Past</h2>
-                {past.map(t => <TicketCard key={t.id} ticket={t} onOpen={() => setSelectedTicket(t)} past />)}
+                <h2 className="font-bold text-lg text-muted-foreground">{t('tickets.past')}</h2>
+                {past.map(t2 => <TicketCard key={t2.id} ticket={t2} onOpen={() => setSelectedTicket(t2)} past locale={locale} t={t} />)}
               </section>
             )}
           </>
