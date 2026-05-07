@@ -412,7 +412,7 @@ const Messenger = () => {
                       {conversation.other_name}
                       {conversation.isBlitz && (
                         <span className="ml-2 text-[10px] font-black uppercase tracking-wider text-[hsl(var(--blitz-pink))]">
-                          Blitz
+                          {t('messenger.blitz')}
                         </span>
                       )}
                     </h3>
