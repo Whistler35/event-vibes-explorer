@@ -131,7 +131,7 @@ const EventDetail = () => {
 
   const handleJoinEvent = async () => {
     if (!user) {
-      toast.error('You must be signed in to join events');
+      toast.error(t('eventDetails.mustSignIn'));
       navigate('/auth');
       return;
     }
