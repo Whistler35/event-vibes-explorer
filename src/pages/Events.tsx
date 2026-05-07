@@ -159,7 +159,7 @@ const Events = () => {
 
           {/* Loading */}
           {isLoading && (
-            <div className="text-center py-8 text-muted-foreground">Events laden...</div>
+            <div className="text-center py-8 text-muted-foreground">{t('events.loadingEvents')}</div>
           )}
 
           {/* Events List */}
