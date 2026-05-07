@@ -174,7 +174,7 @@ const DirectChat = () => {
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {messages.length === 0 && (
             <p className="text-muted-foreground text-center text-sm py-8">
-              Noch keine Nachrichten. Sag Hallo! 👋
+              {t('directChat.noMessages')}
             </p>
           )}
           {messages.map((msg) => {
