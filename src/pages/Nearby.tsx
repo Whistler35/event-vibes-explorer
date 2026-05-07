@@ -557,7 +557,7 @@ const Nearby = () => {
                   </>
                 )}
                 {!searchLoading && eventSuggestions.length === 0 && citySuggestions.length === 0 && (
-                  <div className="px-4 py-4 text-sm text-muted-foreground text-center">No events or places found</div>
+                  <div className="px-4 py-4 text-sm text-muted-foreground text-center">{t('nearby.noResults')}</div>
                 )}
               </div>
             )}
