@@ -136,25 +136,25 @@ const Blitz = () => {
               <div className="absolute -bottom-10 -left-10 w-60 h-60 rounded-full bg-[hsl(var(--blitz-pink))] blur-3xl opacity-25" />
 
               <div className="relative pt-6 space-y-2">
-                <p className="text-xs uppercase tracking-[0.3em] text-white/60 font-bold">EVENDLE Blitz</p>
-                <h1 className="text-5xl font-black uppercase leading-none">
-                  Feeling<br />Spontaneous?
+                <p className="text-xs uppercase tracking-[0.3em] text-white/60 font-bold">{t('blitz.tagline')}</p>
+                <h1 className="text-5xl font-black uppercase leading-none whitespace-pre-line">
+                  {t('blitz.spontaneousFeeling')}
                 </h1>
                 <p className="text-white/70 mt-3 max-w-xs mx-auto">
-                  Tell the city — and make it happen in the next few minutes.
+                  {t('blitz.teaserAlt')}
                 </p>
               </div>
 
               <button
                 onClick={() => setCreateOpen(true)}
                 className="relative w-32 h-32 rounded-full bg-[hsl(var(--blitz-pink))] flex items-center justify-center shadow-[0_0_60px_hsl(var(--blitz-pink)/0.6)] hover:scale-105 active:scale-95 transition animate-blitz-pulse"
-                aria-label="Create new Blitz"
+                aria-label={t('blitz.createNew')}
               >
                 <Zap className="w-16 h-16 text-white fill-white" />
               </button>
 
               <p className="relative text-sm font-black uppercase tracking-[0.25em] pb-4">
-                Tap to Blitz
+                {t('blitz.tapToBlitz')}
               </p>
             </div>
           )
