@@ -255,7 +255,7 @@ const Messenger = () => {
             other_avatar: (ev as any).image_url || null,
             last_message: last
               ? `${senderName}: ${last.message}`
-              : "Noch keine Nachricht — sag Hallo 👋",
+              : t('messenger.noMessageHint'),
             last_message_at: lastAt,
             isUnread: unread,
             isEventGroup: true,
