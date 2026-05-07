@@ -109,8 +109,8 @@ const Tickets = () => {
 
         <Dialog open={!!selectedTicket} onOpenChange={(o) => !o && setSelectedTicket(null)}>
           <DialogContent className="max-w-sm">
-            <DialogTitle className="sr-only">Ticket QR code</DialogTitle>
-            <DialogDescription className="sr-only">Show at the entrance</DialogDescription>
+            <DialogTitle className="sr-only">{t('tickets.qrTitle')}</DialogTitle>
+            <DialogDescription className="sr-only">{t('tickets.qrDescription')}</DialogDescription>
             {selectedTicket && (
               <div className="space-y-4 text-center">
                 <div>
