@@ -17,6 +17,7 @@ interface Message {
 }
 
 const DirectChat = () => {
+  const { t, i18n } = useTranslation();
   const { conversationId } = useParams<{ conversationId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
