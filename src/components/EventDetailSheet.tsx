@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import TranslatedDescription from "@/components/TranslatedDescription";
 
 interface EventDetailSheetProps {
   event: {
@@ -204,7 +205,7 @@ const EventDetailSheet: React.FC<EventDetailSheetProps> = ({ event, open, onClos
           {event.description && (
             <div>
               <h3 className="text-foreground text-sm font-semibold mb-1">Description</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">{event.description}</p>
+              <TranslatedDescription event={{ id: String(event.id), description: event.description }} />
             </div>
           )}
 
