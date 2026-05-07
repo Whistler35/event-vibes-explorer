@@ -215,7 +215,7 @@ const DirectChat = () => {
               type="text"
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Nachricht..."
+              placeholder={t('directChat.messagePlaceholder')}
               className="flex-1 bg-card rounded-full px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary border border-border"
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
             />
