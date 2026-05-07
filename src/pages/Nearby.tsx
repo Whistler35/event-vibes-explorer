@@ -441,16 +441,16 @@ const Nearby = () => {
           setFrozenCarousel(null);
           mapRef.current?.flyTo(pos.coords.latitude, pos.coords.longitude, 14);
         },
-        () => toast.error('Standort konnte nicht ermittelt werden')
+        () => toast.error(t('nearby.locationError'))
       );
     }
   };
 
   const quickPills: { id: QuickFilter; label: string; icon: React.ElementType }[] = [
-    { id: 'tonight', label: 'Tonight', icon: Moon },
-    { id: 'free', label: 'Free', icon: Tag },
-    { id: 'nearby', label: 'Nearby', icon: Navigation },
-    { id: 'popular', label: 'Popular', icon: Flame },
+    { id: 'tonight', label: t('nearby.tonight'), icon: Moon },
+    { id: 'free', label: t('nearby.free'), icon: Tag },
+    { id: 'nearby', label: t('nearby.nearbyFilter'), icon: Navigation },
+    { id: 'popular', label: t('nearby.popular'), icon: Flame },
   ];
 
   return (
