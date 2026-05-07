@@ -582,8 +582,8 @@ const Nearby = () => {
               checked={isPrivateMode}
               onCheckedChange={(checked) => {
                 if (checked && !user) {
-                  toast.info('Please sign in to see private events.', {
-                    action: { label: 'Sign in', onClick: () => navigate('/auth') },
+                  toast.info(t('nearby.signInPrivate'), {
+                    action: { label: t('nearby.signIn'), onClick: () => navigate('/auth') },
                   });
                   return;
                 }
