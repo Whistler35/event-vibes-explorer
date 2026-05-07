@@ -543,7 +543,7 @@ const Nearby = () => {
                 )}
                 {citySuggestions.length > 0 && (
                   <>
-                    <div className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Places</div>
+                    <div className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t('nearby.places')}</div>
                     {citySuggestions.map((s, i) => (
                       <button
                         key={`pl-${i}`}
