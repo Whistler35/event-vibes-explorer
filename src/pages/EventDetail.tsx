@@ -15,6 +15,7 @@ import JoinRequestList from "@/components/JoinRequestList";
 import EditEventDialog from "@/components/EditEventDialog";
 import EventJoinedConfirmation from "@/components/EventJoinedConfirmation";
 import EventParticipantStatus from "@/components/EventParticipantStatus";
+import TranslatedDescription from "@/components/TranslatedDescription";
 
 interface Event {
   id: string;
