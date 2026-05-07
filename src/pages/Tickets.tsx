@@ -129,12 +129,12 @@ const Tickets = () => {
                   {selectedTicket.checked_in_at && (
                     <div className="flex items-center justify-center gap-1 text-sm text-primary font-semibold">
                       <CheckCircle2 className="w-4 h-4" />
-                      Checked in on {new Date(selectedTicket.checked_in_at).toLocaleString("en-GB")}
+                      {t('tickets.checkedInOn', { date: new Date(selectedTicket.checked_in_at).toLocaleString(locale) })}
                     </div>
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Show this code to the host at the entrance.
+                  {t('tickets.showHint')}
                 </p>
               </div>
             )}
