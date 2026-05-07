@@ -236,7 +236,7 @@ const Messenger = () => {
           const last = (lastMsgs || []).find((m: any) => m.chat_id === (chat as any).id);
           const lastAt = last?.created_at || null;
           const senderName = last
-            ? senderProfiles?.find((p: any) => p.user_id === last.user_id)?.name?.split(" ")[0] || "Jemand"
+            ? senderProfiles?.find((p: any) => p.user_id === last.user_id)?.name?.split(" ")[0] || t('messenger.someone')
             : null;
           const lastReadEntry = (reads || []).find(
             (r: any) => r.conversation_id === (chat as any).id
