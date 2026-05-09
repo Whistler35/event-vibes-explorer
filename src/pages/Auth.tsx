@@ -163,18 +163,19 @@ const Auth = () => {
 
   if (signupSuccessEmail) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4 relative">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4 relative" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}>
         <Button
           type="button"
           variant="ghost"
           size="sm"
           onClick={() => navigate('/')}
-          className="absolute top-4 left-4 text-muted-foreground hover:text-foreground"
+          className="absolute left-4 text-muted-foreground hover:text-foreground"
+          style={{ top: 'calc(1rem + env(safe-area-inset-top))' }}
         >
           <ArrowLeft className="w-4 h-4 mr-1" />
           {t('auth.backToHome')}
         </Button>
-        <div className="absolute top-4 right-4"><LanguageSwitcher /></div>
+        <div className="absolute right-4" style={{ top: 'calc(1rem + env(safe-area-inset-top))' }}><LanguageSwitcher /></div>
         <div className="w-full max-w-md space-y-6 text-center">
           <div className="flex items-center justify-center space-x-2">
             <img src={evendleLogo} alt="Evendle" className="w-9 h-9 object-contain" />
@@ -216,11 +217,11 @@ const Auth = () => {
     };
 
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4 relative">
-        <Button type="button" variant="ghost" size="sm" onClick={() => setIsForgotPassword(false)} className="absolute top-4 left-4 text-muted-foreground hover:text-foreground">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4 relative" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}>
+        <Button type="button" variant="ghost" size="sm" onClick={() => setIsForgotPassword(false)} className="absolute left-4 text-muted-foreground hover:text-foreground" style={{ top: 'calc(1rem + env(safe-area-inset-top))' }}>
           <ArrowLeft className="w-4 h-4 mr-1" />{t('common.back')}
         </Button>
-        <div className="absolute top-4 right-4"><LanguageSwitcher /></div>
+        <div className="absolute right-4" style={{ top: 'calc(1rem + env(safe-area-inset-top))' }}><LanguageSwitcher /></div>
         <div className="w-full max-w-md space-y-6">
           <div className="text-center space-y-2">
             <div className="flex items-center justify-center space-x-2">
@@ -245,11 +246,11 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative">
-      <Button type="button" variant="ghost" size="sm" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))} className="absolute top-4 left-4 text-muted-foreground hover:text-foreground">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}>
+      <Button type="button" variant="ghost" size="sm" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))} className="absolute left-4 text-muted-foreground hover:text-foreground" style={{ top: 'calc(1rem + env(safe-area-inset-top))' }}>
         <ArrowLeft className="w-4 h-4 mr-1" />{t('common.back')}
       </Button>
-      <div className="absolute top-4 right-4"><LanguageSwitcher /></div>
+      <div className="absolute right-4" style={{ top: 'calc(1rem + env(safe-area-inset-top))' }}><LanguageSwitcher /></div>
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2">
           <div className="flex items-center justify-center space-x-2">

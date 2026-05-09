@@ -59,7 +59,7 @@ const Blitz = () => {
   // Logged-out teaser
   if (!authLoading && !user) {
     return (
-      <div className="min-h-screen bg-background pb-24">
+      <div className="min-h-screen bg-background pb-24" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="px-4 pt-6">
           <div className="relative overflow-hidden rounded-3xl bg-[hsl(var(--blitz-forest))] text-white p-8 min-h-[70vh] flex flex-col items-center justify-center text-center space-y-6">
             <div className="absolute -top-10 -right-10 w-60 h-60 rounded-full bg-[hsl(var(--blitz-pink))] blur-3xl opacity-40" />
@@ -93,7 +93,7 @@ const Blitz = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-24" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
       <div className="px-4 pt-4 space-y-4">
         {/* Tab Switcher */}
         <div className="flex p-1 rounded-full bg-muted">
