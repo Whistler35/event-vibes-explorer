@@ -56,7 +56,7 @@ const BlitzMatch = () => {
         .eq("id", matchId)
         .maybeSingle();
       if (!m) {
-        toast.error("Match not found");
+        toast.error(t("blitzMatch.matchNotFound"));
         navigate("/blitz");
         return;
       }
