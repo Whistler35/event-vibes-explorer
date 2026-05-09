@@ -117,11 +117,17 @@ const FriendSearch: React.FC = () => {
 
   const respondRequest = useMutation({
     mutationFn: async ({ friendshipId, status }: { friendshipId: string; status: string }) => {
-      const { error } = await supabase
-        .from('friendships')
-        .update({ status, updated_at: new Date().toISOString() } as any)
-        .eq('id', friendshipId);
-      if (error) throw error;
+      if (status === 'rejected') {
+        // Reject = delete the row, so the requester can send a new request later
+        const { error } = await supabase.from('friendships').delete().eq('id', friendshipId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('friendships')
+          .update({ status, updated_at: new Date().toISOString() } as any)
+          .eq('id', friendshipId);
+        if (error) throw error;
+      }
     },
     onSuccess: (_, vars) => {
       toast.success(vars.status === 'accepted' ? 'Freund hinzugefügt! 🎉' : 'Anfrage abgelehnt.');

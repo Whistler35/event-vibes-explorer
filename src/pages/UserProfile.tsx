@@ -127,12 +127,19 @@ const UserProfile = () => {
   const respondToRequest = async (status: "accepted" | "rejected") => {
     if (!friendship) return;
     setFriendActionLoading(true);
-    const { error } = await supabase
-      .from("friendships")
-      .update({ status, updated_at: new Date().toISOString() } as any)
-      .eq("id", friendship.id);
-    if (error) toast.error("Fehler beim Aktualisieren.");
-    else toast.success(status === "accepted" ? "Freund hinzugefügt! 🎉" : "Anfrage abgelehnt.");
+    if (status === "rejected") {
+      // Reject = delete the row, so the requester can send a new request later
+      const { error } = await supabase.from("friendships").delete().eq("id", friendship.id);
+      if (error) toast.error("Fehler beim Aktualisieren.");
+      else toast.success("Anfrage abgelehnt.");
+    } else {
+      const { error } = await supabase
+        .from("friendships")
+        .update({ status, updated_at: new Date().toISOString() } as any)
+        .eq("id", friendship.id);
+      if (error) toast.error("Fehler beim Aktualisieren.");
+      else toast.success("Freund hinzugefügt! 🎉");
+    }
     await fetchFriendship();
     setFriendActionLoading(false);
   };
