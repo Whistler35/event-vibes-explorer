@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, CalendarDays, UserPlus, MessageCircle, Heart, Handshake, TrendingUp, Download } from "lucide-react";
+import { Users, CalendarDays, UserPlus, MessageCircle, Heart, Handshake, TrendingUp, Download, Eye } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import StatDetailSheet, { StatKind } from "@/components/admin/StatDetailSheet";
 
