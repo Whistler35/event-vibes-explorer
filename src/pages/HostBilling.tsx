@@ -165,7 +165,7 @@ const HostBilling = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate('/host/dashboard')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h1 className="text-foreground text-xl font-bold">Abrechnung</h1>
+          <h1 className="text-foreground text-xl font-bold">{t('host.billingTitle')}</h1>
         </div>
 
         {/* Current Plan */}
