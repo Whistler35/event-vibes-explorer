@@ -378,17 +378,17 @@ const HostBilling = () => {
       <Dialog open={confirmDialog} onOpenChange={setConfirmDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Plan wechseln bestätigen</DialogTitle>
+            <DialogTitle>{t('host.confirmChangeTitle')}</DialogTitle>
             <DialogDescription>
-              Möchtest du zu <strong>{selectedNewPlan?.name}</strong> wechseln?
+              {t('host.confirmChangeBody', { plan: selectedNewPlan?.name })}
               {selectedNewPlan && selectedNewPlan.price_cents > 0 && (
-                <> Der neue Preis beträgt <strong>€{(selectedNewPlan.price_cents / 100).toFixed(0)}/Monat</strong>.</>
+                <> {t('host.newPriceInfo', { price: (selectedNewPlan.price_cents / 100).toFixed(0) })}</>
               )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setConfirmDialog(false)}>Abbrechen</Button>
-            <Button onClick={confirmPlanChange}>Bestätigen</Button>
+            <Button variant="outline" onClick={() => setConfirmDialog(false)}>{t('host.cancel')}</Button>
+            <Button onClick={confirmPlanChange}>{t('host.confirm')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
