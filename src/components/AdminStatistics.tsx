@@ -216,6 +216,7 @@ const AdminStatistics = () => {
       ["Metric", "Value"],
       ["Period", chartTitle],
       ["Users", stats.totalUsers],
+      ["Visits", stats.totalVisits],
       ["Total Events", stats.totalEvents],
       ["Events Approved", stats.approvedEvents],
       ["Events Pending", stats.pendingEvents],
