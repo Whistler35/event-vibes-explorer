@@ -6,10 +6,42 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+type FilterKey = "all" | "unread" | "messages" | "events" | "friends" | "blitz";
+
+const FILTERS: { key: FilterKey; label: string }[] = [
+  { key: "all", label: "Alle" },
+  { key: "unread", label: "Ungelesen" },
+  { key: "messages", label: "Nachrichten" },
+  { key: "events", label: "Events" },
+  { key: "friends", label: "Freunde" },
+  { key: "blitz", label: "Blitz" },
+];
+
+const TYPE_GROUPS: Record<Exclude<FilterKey, "all" | "unread">, string[]> = {
+  messages: ["new_dm"],
+  events: [
+    "friend_event_created",
+    "friend_joined_event",
+    "new_event_pending",
+    "event_approved",
+    "event_rejected",
+    "join_request_accepted",
+  ],
+  friends: ["friend_request", "friend_accepted"],
+  blitz: ["blitz_match", "blitz_request"],
+};
+
 const NotificationBell = () => {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [open, setOpen] = useState(false);
+  const [filter, setFilter] = useState<FilterKey>("all");
   const navigate = useNavigate();
+
+  const filtered = notifications.filter((n) => {
+    if (filter === "all") return true;
+    if (filter === "unread") return !n.is_read;
+    return TYPE_GROUPS[filter]?.includes(n.type);
+  });
 
   const getIcon = (type: string) => {
     switch (type) {
