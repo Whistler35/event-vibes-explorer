@@ -134,11 +134,11 @@ const CityEvents = () => {
             <div>
               <label className="text-muted-foreground text-sm mb-2 block flex items-center">
                 <Calendar className="mr-1 h-4 w-4" />
-                Date
+                {t("cityEvents.date")}
               </label>
               <Select value={selectedDate} onValueChange={setSelectedDate}>
                 <SelectTrigger className="bg-card border-border text-foreground">
-                  <SelectValue placeholder="Select date" />
+                  <SelectValue placeholder={t("cityEvents.selectDate")} />
                 </SelectTrigger>
                 <SelectContent className="bg-card border-border z-50">
                   {dates.map((date) => (
@@ -147,7 +147,7 @@ const CityEvents = () => {
                       value={date}
                       className="text-foreground hover:bg-primary/10"
                     >
-                      {date === "all" ? "All Dates" : date}
+                      {date === "all" ? t("cityEvents.allDates") : date}
                     </SelectItem>
                   ))}
                 </SelectContent>
