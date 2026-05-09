@@ -89,17 +89,13 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
       }
       map.current?.flyTo(opts);
     },
-    setOverview: (lat: number, lng: number, zoomLevel = 11) => {
+    setOverview: (lat: number, lng: number, zoomLevel?: number) => {
       const m = map.current;
       if (!m) return;
       m.stop();
-      m.jumpTo({ center: [lng, lat], zoom: zoomLevel, pitch: 0, bearing: 0 });
-      m.once('idle', () => {
-        const currentZoom = m.getZoom();
-        if (Math.abs(currentZoom - zoomLevel) > 0.05) {
-          m.jumpTo({ center: [lng, lat], zoom: zoomLevel, pitch: 0, bearing: 0 });
-        }
-      });
+      // Preserve current zoom when no zoom level is provided (city search → pan only).
+      const targetZoom = typeof zoomLevel === 'number' ? zoomLevel : m.getZoom();
+      m.jumpTo({ center: [lng, lat], zoom: targetZoom, pitch: 0, bearing: 0 });
     },
     getBounds: () => {
       if (!map.current) return null;
