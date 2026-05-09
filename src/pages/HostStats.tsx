@@ -225,7 +225,7 @@ const HostStats = () => {
 
                       {/* Views over time chart */}
                       <div>
-                        <h4 className="text-foreground text-xs font-semibold mb-2">Views & Anmeldungen (14 Tage)</h4>
+                        <h4 className="text-foreground text-xs font-semibold mb-2">{t('host.viewsAndRegs')}</h4>
                         <div className="h-40">
                           <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={stats.viewsOverTime}>
