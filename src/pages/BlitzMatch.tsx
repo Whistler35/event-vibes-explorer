@@ -179,7 +179,7 @@ const BlitzMatch = () => {
         {/* Top label */}
         <div className="relative z-10 pt-12 text-center">
           <p className="text-[10px] font-black uppercase tracking-[0.5em] text-[hsl(var(--blitz-pink))]">
-            ⚡ Activation
+            {t("blitzMatch.activation")}
           </p>
         </div>
 
