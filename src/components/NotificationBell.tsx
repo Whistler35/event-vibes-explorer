@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, MessageCircle, Calendar, Users, UserPlus, UserCheck, ShieldCheck, CheckCircle, XCircle, Zap } from "lucide-react";
+import { Bell, MessageCircle, Calendar, Users, UserPlus, UserCheck, ShieldCheck, CheckCircle, XCircle, Zap, Check, X } from "lucide-react";
 import { useNotifications, AppNotification } from "@/hooks/useNotifications";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 type FilterKey = "all" | "unread" | "messages" | "events" | "friends" | "blitz";
 
