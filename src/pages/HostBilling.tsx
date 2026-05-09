@@ -16,9 +16,10 @@ import {
   Star, Download, Loader2, CalendarDays, ArrowUpRight
 } from 'lucide-react';
 import { format, addMonths } from 'date-fns';
-import { de } from 'date-fns/locale';
+import { de, enGB } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface Plan {
   id: string;
