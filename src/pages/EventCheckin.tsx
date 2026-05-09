@@ -155,7 +155,7 @@ const EventCheckin = () => {
                 <>
                   <CheckCircle2 className="w-16 h-16 mx-auto text-primary" />
                   <div>
-                    <h3 className="font-bold text-xl">Eingecheckt!</h3>
+                    <h3 className="font-bold text-xl">{t("eventCheckin.checkedIn")}</h3>
                     <p className="text-muted-foreground">{lastResult.participantName}</p>
                     <Badge variant="outline" className="font-mono mt-2">{lastResult.ticketCode}</Badge>
                   </div>
