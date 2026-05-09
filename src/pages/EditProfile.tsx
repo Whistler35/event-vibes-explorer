@@ -139,10 +139,10 @@ const EditProfile = () => {
       }
 
       if (error) throw error;
-      toast.success("Profile saved!");
+      toast.success(t('editProfile.saveSuccess'));
       navigate("/profile");
     } catch (err: any) {
-      toast.error(err.message || "Error saving");
+      toast.error(err.message || t('editProfile.saveError'));
     } finally {
       setSaving(false);
     }
