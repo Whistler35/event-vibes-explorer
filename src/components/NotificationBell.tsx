@@ -6,10 +6,42 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+type FilterKey = "all" | "unread" | "messages" | "events" | "friends" | "blitz";
+
+const FILTERS: { key: FilterKey; label: string }[] = [
+  { key: "all", label: "Alle" },
+  { key: "unread", label: "Ungelesen" },
+  { key: "messages", label: "Nachrichten" },
+  { key: "events", label: "Events" },
+  { key: "friends", label: "Freunde" },
+  { key: "blitz", label: "Blitz" },
+];
+
+const TYPE_GROUPS: Record<Exclude<FilterKey, "all" | "unread">, string[]> = {
+  messages: ["new_dm"],
+  events: [
+    "friend_event_created",
+    "friend_joined_event",
+    "new_event_pending",
+    "event_approved",
+    "event_rejected",
+    "join_request_accepted",
+  ],
+  friends: ["friend_request", "friend_accepted"],
+  blitz: ["blitz_match", "blitz_request"],
+};
+
 const NotificationBell = () => {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [open, setOpen] = useState(false);
+  const [filter, setFilter] = useState<FilterKey>("all");
   const navigate = useNavigate();
+
+  const filtered = notifications.filter((n) => {
+    if (filter === "all") return true;
+    if (filter === "unread") return !n.is_read;
+    return TYPE_GROUPS[filter]?.includes(n.type);
+  });
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -40,9 +72,10 @@ const NotificationBell = () => {
       else navigate("/profile");
     } else if (notif.type === "friend_accepted" && notif.data?.friend_id) {
       navigate(`/user/${notif.data.friend_id}`);
-    } else if ((notif.type === "event_approved" || notif.type === "event_rejected") && notif.data?.event_id) {
+    } else if ((notif.type === "event_approved" || notif.type === "event_rejected" || notif.type === "join_request_accepted") && notif.data?.event_id) {
       navigate(`/event/${notif.data.event_id}`);
     } else if (notif.type === "new_event_pending") {
+      navigate("/admin/events");
       navigate("/admin/events");
     } else if (notif.type === "blitz_match" && notif.data?.match_id) {
       navigate(`/blitz/match/${notif.data.match_id}`);
@@ -88,15 +121,33 @@ const NotificationBell = () => {
             )}
           </div>
         </SheetHeader>
-        <ScrollArea className="h-[calc(100vh-80px)]">
-          {notifications.length === 0 ? (
+        <div className="flex gap-1.5 px-3 py-2 border-b border-border overflow-x-auto scrollbar-hide">
+          {FILTERS.map((f) => {
+            const active = filter === f.key;
+            return (
+              <button
+                key={f.key}
+                onClick={() => setFilter(f.key)}
+                className={`text-xs whitespace-nowrap px-3 py-1.5 rounded-full transition-colors ${
+                  active
+                    ? "bg-primary text-primary-foreground font-semibold"
+                    : "bg-muted text-muted-foreground hover:bg-muted/70"
+                }`}
+              >
+                {f.label}
+              </button>
+            );
+          })}
+        </div>
+        <ScrollArea className="h-[calc(100vh-140px)]">
+          {filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
               <Bell className="w-10 h-10 mb-3 opacity-40" />
               <p className="text-sm">Keine Benachrichtigungen</p>
             </div>
           ) : (
             <div className="divide-y divide-border">
-              {notifications.map((notif) => (
+              {filtered.map((notif) => (
                 <button
                   key={notif.id}
                   onClick={() => handleClick(notif)}
