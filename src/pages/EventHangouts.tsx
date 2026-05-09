@@ -99,7 +99,7 @@ const EventHangouts = () => {
                     </p>
                     <div className="flex items-center space-x-1 text-evendle-gray text-sm">
                       <Users size={16} />
-                      <span>{hangout.members} members</span>
+                      <span>{hangout.members} {t("eventHangouts.members")}</span>
                     </div>
                   </div>
                 </div>
