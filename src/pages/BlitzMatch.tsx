@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Send, Zap, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -34,6 +35,7 @@ interface Profile {
 const BlitzMatch = () => {
   const { matchId } = useParams<{ matchId: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { isAdmin } = useIsAdmin();
   const [match, setMatch] = useState<Match | null>(null);
@@ -54,7 +56,7 @@ const BlitzMatch = () => {
         .eq("id", matchId)
         .maybeSingle();
       if (!m) {
-        toast.error("Match not found");
+        toast.error(t("blitzMatch.matchNotFound"));
         navigate("/blitz");
         return;
       }
@@ -146,16 +148,16 @@ const BlitzMatch = () => {
 
   const handleAdminDelete = async () => {
     if (!match) return;
-    if (!confirm("Diesen Blitz und den zugehörigen Chat als Admin löschen?")) return;
+    if (!confirm(t("blitzMatch.confirmDelete"))) return;
     const { error } = await supabase
       .from("blitz_requests")
       .delete()
       .eq("id", match.blitz_request_id);
     if (error) {
-      toast.error(error.message || "Löschen fehlgeschlagen");
+      toast.error(error.message || t("blitzMatch.deleteFailed"));
       return;
     }
-    toast.success("Blitz gelöscht");
+    toast.success(t("blitzMatch.deleted"));
     navigate("/messenger");
   };
 
@@ -177,7 +179,7 @@ const BlitzMatch = () => {
         {/* Top label */}
         <div className="relative z-10 pt-12 text-center">
           <p className="text-[10px] font-black uppercase tracking-[0.5em] text-[hsl(var(--blitz-pink))]">
-            ⚡ Activation
+            {t("blitzMatch.activation")}
           </p>
         </div>
 
@@ -240,28 +242,28 @@ const BlitzMatch = () => {
         {/* Headline + mission card */}
         <div className="relative z-10 px-6 pb-10 space-y-5">
           <div className="text-center space-y-1">
-            <h1 className="text-6xl font-black uppercase text-white leading-[0.85] animate-blitz-headline">
-              You're<br/>on!
+            <h1 className="text-6xl font-black uppercase text-white leading-[0.85] animate-blitz-headline whitespace-pre-line">
+              {t("blitzMatch.youOn")}
             </h1>
             <p className="text-[11px] font-black uppercase tracking-[0.4em] text-[hsl(var(--blitz-pink))] pt-2">
-              Meetup locked in
+              {t("blitzMatch.meetupLocked")}
             </p>
           </div>
 
           {/* Mission / Plan card — sharp, no rounded softness */}
           <div className="relative border-2 border-[hsl(var(--blitz-pink))] bg-black/30 backdrop-blur-sm p-4">
             <div className="absolute -top-2.5 left-3 px-2 bg-[hsl(var(--blitz-forest))] text-[10px] font-black uppercase tracking-[0.3em] text-[hsl(var(--blitz-pink))]">
-              Mission
+              {t("blitzMatch.mission")}
             </div>
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-[10px] font-black uppercase tracking-widest text-white/50">Activity</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/50">{t("blitzMatch.activity")}</p>
                 <p className="text-xl font-black uppercase text-white truncate">{activity || "—"}</p>
               </div>
               <div className="text-right shrink-0">
-                <p className="text-[10px] font-black uppercase tracking-widest text-white/50">With</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/50">{t("blitzMatch.with")}</p>
                 <p className="text-sm font-bold uppercase text-white truncate max-w-[120px]">
-                  {other?.name ?? "Player 2"}
+                  {other?.name ?? t("blitzMatch.player2")}
                 </p>
               </div>
             </div>
@@ -285,7 +287,7 @@ const BlitzMatch = () => {
             </AvatarFallback>
           </Avatar>
           <div className="leading-tight">
-            <p className="font-bold text-sm">{other?.name ?? "Match"}</p>
+            <p className="font-bold text-sm">{other?.name ?? t("blitzMatch.fallbackName")}</p>
             <p className="text-[10px] uppercase tracking-wider text-white/60">{activity}</p>
           </div>
         </div>
@@ -293,7 +295,7 @@ const BlitzMatch = () => {
           {isAdmin && (
             <button
               onClick={handleAdminDelete}
-              aria-label="Blitz als Admin löschen"
+              aria-label={t("blitzMatch.adminDeleteAria")}
               className="w-9 h-9 rounded-full bg-red-500/90 hover:bg-red-500 flex items-center justify-center transition"
             >
               <Trash2 className="w-4 h-4 text-white" />
@@ -314,7 +316,7 @@ const BlitzMatch = () => {
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 space-y-3 pb-32">
         {messages.length === 0 && (
           <div className="text-center text-white/50 text-sm py-12">
-            Message them directly — only 5 min to coordinate ⚡
+            {t("blitzMatch.emptyChat")}
           </div>
         )}
         {messages.map((msg) => {
@@ -346,7 +348,7 @@ const BlitzMatch = () => {
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={expired ? "Chat expired" : "Type something…"}
+          placeholder={expired ? t("blitzMatch.chatExpired") : t("blitzMatch.typeSomething")}
           disabled={expired}
           className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-white/40"
         />

@@ -1,44 +1,17 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import Layout from "@/components/Layout";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { markConversationRead } from "@/hooks/useUnreadDMCount";
 
-const welcomeMessages = [
-  {
-    id: "1",
-    message: "Hey! 👋 Welcome to Evendle!",
-    time: "09:00",
-  },
-  {
-    id: "2",
-    message:
-      "We're stoked you're here! 🎉 Evendle helps you discover exciting events, gigs and activities around you.",
-    time: "09:00",
-  },
-  {
-    id: "3",
-    message:
-      "Concerts, sports events, food markets or spontaneous hangouts — this is where you'll find everything happening in your city. 🌆",
-    time: "09:01",
-  },
-  {
-    id: "4",
-    message:
-      "The best part? You can meet up with other people and create real-life moments together. Because the best memories happen offline! 🤝✨",
-    time: "09:01",
-  },
-  {
-    id: "5",
-    message:
-      "Get started: explore events near you, join one and meet new people. Have fun! 🚀",
-    time: "09:02",
-  },
-];
+const messageTimes = ["09:00", "09:00", "09:01", "09:01", "09:02"];
 
 const EvenldeWelcomeChat = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+  const messages = (t("welcomeChat.messages", { returnObjects: true }) as string[]) ?? [];
 
   useEffect(() => {
     markConversationRead("evendle-welcome");
@@ -67,12 +40,12 @@ const EvenldeWelcomeChat = () => {
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
-          {welcomeMessages.map((msg) => (
-            <div key={msg.id} className="flex justify-start">
+          {messages.map((msg, i) => (
+            <div key={i} className="flex justify-start">
               <div className="max-w-[80%] rounded-2xl rounded-bl-sm bg-card text-foreground px-4 py-2">
-                <p className="text-sm">{msg.message}</p>
+                <p className="text-sm">{msg}</p>
                 <p className="text-[10px] mt-1 text-muted-foreground">
-                  {msg.time}
+                  {messageTimes[i]}
                 </p>
               </div>
             </div>
@@ -82,7 +55,7 @@ const EvenldeWelcomeChat = () => {
         {/* Info footer */}
         <div className="p-4 border-t border-border bg-background">
           <p className="text-muted-foreground text-xs text-center">
-            This is an automatic welcome message from Evendle.
+            {t("welcomeChat.footer")}
           </p>
         </div>
       </div>

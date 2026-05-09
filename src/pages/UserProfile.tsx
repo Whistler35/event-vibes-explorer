@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import Layout from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -57,14 +58,15 @@ interface Friendship {
   status: string;
 }
 
-const activityLevel = (score: number) => {
-  if (score >= 20) return "Hoch";
-  if (score >= 5) return "Mittel";
-  return "Niedrig";
+const activityLevelKey = (score: number) => {
+  if (score >= 20) return "userProfile.activityHigh";
+  if (score >= 5) return "userProfile.activityMid";
+  return "userProfile.activityLow";
 };
 
 const UserProfile = () => {
   const { userId } = useParams<{ userId: string }>();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
@@ -86,7 +88,7 @@ const UserProfile = () => {
 
   const handleStartDM = async () => {
     if (!user || !userId) {
-      toast.error("Bitte einloggen, um Nachrichten zu senden.");
+      toast.error(t("userProfile.loginToMessage"));
       return;
     }
     const { data, error } = await supabase.rpc("get_or_create_dm", {
@@ -94,7 +96,7 @@ const UserProfile = () => {
       p_user2: userId,
     });
     if (error) {
-      toast.error("Chat konnte nicht erstellt werden.");
+      toast.error(t("userProfile.chatCreateError"));
       return;
     }
     navigate(`/dm/${data}`);
@@ -118,8 +120,8 @@ const UserProfile = () => {
     const { error } = await supabase
       .from("friendships")
       .insert({ requester_id: user.id, addressee_id: userId } as any);
-    if (error) toast.error("Anfrage konnte nicht gesendet werden.");
-    else toast.success("Freundschaftsanfrage gesendet!");
+    if (error) toast.error(t("userProfile.friendRequestError"));
+    else toast.success(t("userProfile.friendRequestSent"));
     await fetchFriendship();
     setFriendActionLoading(false);
   };
@@ -130,15 +132,15 @@ const UserProfile = () => {
     if (status === "rejected") {
       // Reject = delete the row, so the requester can send a new request later
       const { error } = await supabase.from("friendships").delete().eq("id", friendship.id);
-      if (error) toast.error("Fehler beim Aktualisieren.");
-      else toast.success("Anfrage abgelehnt.");
+      if (error) toast.error(t("userProfile.updateError"));
+      else toast.success(t("userProfile.requestRejected"));
     } else {
       const { error } = await supabase
         .from("friendships")
         .update({ status, updated_at: new Date().toISOString() } as any)
         .eq("id", friendship.id);
-      if (error) toast.error("Fehler beim Aktualisieren.");
-      else toast.success("Freund hinzugefügt! 🎉");
+      if (error) toast.error(t("userProfile.updateError"));
+      else toast.success(t("userProfile.friendAdded"));
     }
     await fetchFriendship();
     setFriendActionLoading(false);
@@ -148,8 +150,8 @@ const UserProfile = () => {
     if (!friendship) return;
     setFriendActionLoading(true);
     const { error } = await supabase.from("friendships").delete().eq("id", friendship.id);
-    if (error) toast.error("Fehler beim Entfernen.");
-    else toast.success("Freund entfernt.");
+    if (error) toast.error(t("userProfile.removeError"));
+    else toast.success(t("userProfile.friendRemoved"));
     setFriendship(null);
     setFriendActionLoading(false);
   };
@@ -215,7 +217,7 @@ const UserProfile = () => {
     return (
       <Layout>
         <div className="flex items-center justify-center h-[70vh]">
-          <p className="text-muted-foreground">Laden...</p>
+          <p className="text-muted-foreground">{t("userProfile.loading")}</p>
         </div>
       </Layout>
     );
@@ -225,9 +227,9 @@ const UserProfile = () => {
     return (
       <Layout>
         <div className="flex flex-col items-center justify-center h-[70vh] space-y-4">
-          <p className="text-muted-foreground">Profil nicht gefunden.</p>
+          <p className="text-muted-foreground">{t("userProfile.notFound")}</p>
           <Button variant="outline" onClick={() => navigate(-1)}>
-            Zurück
+            {t("userProfile.back")}
           </Button>
         </div>
       </Layout>
@@ -243,7 +245,7 @@ const UserProfile = () => {
   const photos = profile.photos || [];
   const interests = profile.interests || [];
   const score = stats.blitzSent + stats.participatedCount;
-  const level = activityLevel(score);
+  const level = t(activityLevelKey(score));
   const isOwnProfile = user?.id === userId;
 
   const friendActions = user && !isOwnProfile && (
@@ -251,12 +253,12 @@ const UserProfile = () => {
       {friendship?.status === "pending" && friendship.addressee_id === user.id && (
         <div className="w-full space-y-2">
           <p className={`text-sm text-center ${isHost ? "text-muted-foreground" : "text-white/70"}`}>
-            Möchte mit dir befreundet sein
+            {t("userProfile.wantsToBeFriends")}
           </p>
           <div className="flex gap-2 w-full">
             <Button onClick={() => respondToRequest("accepted")} disabled={friendActionLoading} className="flex-1">
               <UserCheck className="w-4 h-4 mr-2" />
-              Annehmen
+              {t("userProfile.accept")}
             </Button>
             <Button
               variant="outline"
@@ -265,7 +267,7 @@ const UserProfile = () => {
               className="flex-1"
             >
               <X className="w-4 h-4 mr-2" />
-              Ablehnen
+              {t("userProfile.decline")}
             </Button>
           </div>
         </div>

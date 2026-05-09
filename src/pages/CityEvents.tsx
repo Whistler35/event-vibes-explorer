@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Filter, Calendar } from "lucide-react";
 import Layout from "@/components/Layout";
 import EventCard from "@/components/EventCard";
@@ -8,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const CityEvents = () => {
   const { city } = useParams();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedDate, setSelectedDate] = useState("all");
@@ -98,22 +100,22 @@ const CityEvents = () => {
           >
             <ArrowLeft className="h-6 w-6" />
           </Button>
-          <h1 className="text-foreground text-2xl font-bold">Events in {cityName}</h1>
+          <h1 className="text-foreground text-2xl font-bold">{t("cityEvents.title", { city: cityName })}</h1>
         </div>
 
         {/* Filters */}
         <div className="space-y-4">
           <h2 className="text-foreground text-lg font-semibold flex items-center">
             <Filter className="mr-2 h-5 w-5" />
-            Filter Events
+            {t("cityEvents.filterEvents")}
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-muted-foreground text-sm mb-2 block">Category</label>
+              <label className="text-muted-foreground text-sm mb-2 block">{t("cityEvents.category")}</label>
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                 <SelectTrigger className="bg-card border-border text-foreground">
-                  <SelectValue placeholder="Select category" />
+                  <SelectValue placeholder={t("cityEvents.selectCategory")} />
                 </SelectTrigger>
                 <SelectContent className="bg-card border-border z-50">
                   {categories.map((category) => (
@@ -122,7 +124,7 @@ const CityEvents = () => {
                       value={category}
                       className="text-foreground hover:bg-primary/10"
                     >
-                      {category === "all" ? "All Categories" : category}
+                      {category === "all" ? t("cityEvents.allCategories") : category}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -132,11 +134,11 @@ const CityEvents = () => {
             <div>
               <label className="text-muted-foreground text-sm mb-2 block flex items-center">
                 <Calendar className="mr-1 h-4 w-4" />
-                Date
+                {t("cityEvents.date")}
               </label>
               <Select value={selectedDate} onValueChange={setSelectedDate}>
                 <SelectTrigger className="bg-card border-border text-foreground">
-                  <SelectValue placeholder="Select date" />
+                  <SelectValue placeholder={t("cityEvents.selectDate")} />
                 </SelectTrigger>
                 <SelectContent className="bg-card border-border z-50">
                   {dates.map((date) => (
@@ -145,7 +147,7 @@ const CityEvents = () => {
                       value={date}
                       className="text-foreground hover:bg-primary/10"
                     >
-                      {date === "all" ? "All Dates" : date}
+                      {date === "all" ? t("cityEvents.allDates") : date}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -157,12 +159,12 @@ const CityEvents = () => {
         {/* Events List */}
         <div className="space-y-4">
           <h2 className="text-foreground text-lg font-semibold">
-            {filteredEvents.length} Events Found
+            {t("cityEvents.found", { count: filteredEvents.length })}
           </h2>
           
           {filteredEvents.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground text-lg">No events found matching your filters.</p>
+              <p className="text-muted-foreground text-lg">{t("cityEvents.empty")}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
