@@ -21,6 +21,7 @@ interface ScanResult {
 
 const EventCheckin = () => {
   const { id: eventId } = useParams();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { isAdmin } = useIsAdmin();
   const navigate = useNavigate();
