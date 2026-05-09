@@ -95,6 +95,7 @@ const ReelCard: React.FC<{
   reel: ReelItem;
   isActive: boolean;
 }> = ({ reel, isActive }) => {
+  const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isMuted, setIsMuted] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -184,7 +185,7 @@ const ReelCard: React.FC<{
           <span className="text-white font-semibold text-sm">{reel.author}</span>
         </div>
         <h3 className="text-white font-bold text-base leading-tight">{reel.title}</h3>
-        <p className="text-white/80 text-xs line-clamp-2">{reel.description}</p>
+        <p className="text-white/80 text-xs line-clamp-2">{t(reel.description)}</p>
         <Badge variant="secondary" className="bg-white/20 text-white border-0 text-xs backdrop-blur-sm">
           {categoryEmoji[reel.category] || '📌'} {reel.category}
         </Badge>
@@ -194,6 +195,7 @@ const ReelCard: React.FC<{
 };
 
 const ReelsFeed: React.FC = () => {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -224,12 +226,12 @@ const ReelsFeed: React.FC = () => {
           onClick={() => setIsExpanded(!isExpanded)}
           className="text-primary text-sm font-medium flex items-center gap-1"
         >
-          {isExpanded ? 'Minimieren' : 'Vollbild'}
+          {isExpanded ? t('reels.minimize') : t('reels.fullscreen')}
           <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
         </button>
       </div>
 
-      <p className="text-muted-foreground text-sm -mt-1">Swipe nach oben für mehr Inspiration ✨</p>
+      <p className="text-muted-foreground text-sm -mt-1">{t('reels.swipeHint')}</p>
 
       {/* Reels Container */}
       <div
