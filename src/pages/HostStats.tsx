@@ -122,7 +122,7 @@ const HostStats = () => {
   }
 
   // Aggregate stats
-  const allStats = events.map((e) => ({ event: e, stats: generateMockStats(e) }));
+  const allStats = events.map((e) => ({ event: e, stats: generateMockStats(e, dateLocale) }));
   const totalViews = allStats.reduce((s, a) => s + a.stats.totalViews, 0);
   const totalRegs = allStats.reduce((s, a) => s + a.stats.totalRegistrations, 0);
 
