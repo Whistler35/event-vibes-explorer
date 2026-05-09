@@ -273,9 +273,10 @@ const Nearby = () => {
     setSelectedEventId(null);
     setSelectedEvent(null);
     setFrozenCarousel(null);
-    mapRef.current?.setOverview(loc.lat, loc.lng, LOCATION_OVERVIEW_ZOOM);
+    // Pan to the city without changing zoom — keep the user's current zoom level.
+    mapRef.current?.setOverview(loc.lat, loc.lng);
     cityOverviewTimerRef.current = setTimeout(() => {
-      mapRef.current?.setOverview(loc.lat, loc.lng, LOCATION_OVERVIEW_ZOOM);
+      mapRef.current?.setOverview(loc.lat, loc.lng);
     }, 350);
     localStorage.setItem('selectedCity', JSON.stringify(loc));
     localStorage.removeItem('lastUserLocation');
