@@ -269,7 +269,7 @@ const HostBilling = () => {
         {/* Invoice History */}
         <div>
           <h2 className="text-foreground font-bold text-sm mb-3 flex items-center gap-2">
-            <FileText className="w-4 h-4" /> Rechnungshistorie
+            <FileText className="w-4 h-4" /> {t('host.invoiceHistory')}
           </h2>
           <div className="space-y-2">
             {invoices.map((inv) => (
