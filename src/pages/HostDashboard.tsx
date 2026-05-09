@@ -290,16 +290,20 @@ function EventRow({
   event,
   onDelete,
   onNavigate,
+  dateLocale,
+  t,
 }: {
   event: HostEvent;
   onDelete: (id: string) => void;
   onNavigate: (path: string) => void;
+  dateLocale: any;
+  t: (key: string, opts?: any) => string;
 }) {
   const stats = getMockStats(event.id);
   const statusBadge = {
-    approved: { label: 'Aktiv', variant: 'default' as const },
-    pending: { label: 'Ausstehend', variant: 'secondary' as const },
-    rejected: { label: 'Abgelehnt', variant: 'destructive' as const },
+    approved: { label: t('host.approved'), variant: 'default' as const },
+    pending: { label: t('host.pending'), variant: 'secondary' as const },
+    rejected: { label: t('host.rejected'), variant: 'destructive' as const },
   }[event.approval_status] || { label: event.approval_status, variant: 'outline' as const };
 
   return (
@@ -325,7 +329,7 @@ function EventRow({
                 {event.is_featured && <Star className="w-3.5 h-3.5 text-yellow-500 flex-shrink-0" />}
               </div>
               <p className="text-muted-foreground text-xs truncate">
-                {format(new Date(event.event_date), 'dd. MMM yyyy, HH:mm', { locale: de })} · {event.location_name}
+                {format(new Date(event.event_date), 'dd. MMM yyyy, HH:mm', { locale: dateLocale })} · {event.location_name}
               </p>
             </div>
             <Badge variant={statusBadge.variant} className="text-[10px] flex-shrink-0">
@@ -353,7 +357,7 @@ function EventRow({
             </button>
             <button
               onClick={() => {
-                if (confirm('Event wirklich löschen?')) onDelete(event.id);
+                if (confirm(t('host.deleteConfirm'))) onDelete(event.id);
               }}
               className="p-1 rounded hover:bg-destructive/10"
             >
