@@ -193,12 +193,12 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
 
       if (error) throw error;
 
-      toast.success('Event updated successfully! ✅');
+      toast.success(t('editEvent.successUpdate'));
       onClose();
       onEventUpdated?.();
     } catch (err: any) {
       console.error('Error updating event:', err);
-      toast.error('Error updating event');
+      toast.error(t('editEvent.errorUpdate'));
     } finally {
       setLoading(false);
     }
