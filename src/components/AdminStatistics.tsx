@@ -35,6 +35,8 @@ interface Stats {
   totalFriendships: number;
   totalJoinRequests: number;
   totalVisits: number;
+  siteVisits: number;
+  uniqueSessions: number;
 }
 
 interface MonthlyData {
@@ -103,7 +105,7 @@ const AdminStatistics = () => {
   const fetchCounts = async (threshold: string | null) => {
     const [
       profiles, events, approvedEvents, pendingEvents, rejectedEvents,
-      participants, chatMessages, directMessages, likes, friendships, joinRequests, visits,
+      participants, chatMessages, directMessages, likes, friendships, joinRequests, visits, siteVisits,
     ] = await Promise.all([
       addDateFilter(supabase.from("profiles").select("id", { count: "exact", head: true }), threshold),
       addDateFilter(supabase.from("events").select("id", { count: "exact", head: true }), threshold),
@@ -117,7 +119,14 @@ const AdminStatistics = () => {
       addDateFilter(supabase.from("friendships").select("id", { count: "exact", head: true }).eq("status", "accepted"), threshold),
       addDateFilter(supabase.from("join_requests").select("id", { count: "exact", head: true }), threshold),
       addDateFilter(supabase.from("event_views").select("id", { count: "exact", head: true }), threshold, "viewed_at"),
+      addDateFilter(supabase.from("site_visits").select("id", { count: "exact", head: true }), threshold, "visited_at"),
     ]);
+
+    // Unique sessions
+    let sessionsQuery = supabase.from("site_visits").select("session_id");
+    if (threshold) sessionsQuery = sessionsQuery.gte("visited_at", threshold);
+    const { data: sessionRows } = await sessionsQuery;
+    const uniqueSessions = new Set((sessionRows ?? []).map((r) => r.session_id).filter(Boolean)).size;
 
     setStats({
       totalUsers: profiles.count ?? 0,
@@ -132,6 +141,8 @@ const AdminStatistics = () => {
       totalFriendships: friendships.count ?? 0,
       totalJoinRequests: joinRequests.count ?? 0,
       totalVisits: visits.count ?? 0,
+      siteVisits: siteVisits.count ?? 0,
+      uniqueSessions,
     });
   };
 
@@ -216,7 +227,9 @@ const AdminStatistics = () => {
       ["Metric", "Value"],
       ["Period", chartTitle],
       ["Users", stats.totalUsers],
-      ["Visits", stats.totalVisits],
+      ["Site Visits", stats.siteVisits],
+      ["Unique Sessions", stats.uniqueSessions],
+      ["Event Views", stats.totalVisits],
       ["Total Events", stats.totalEvents],
       ["Events Approved", stats.approvedEvents],
       ["Events Pending", stats.pendingEvents],
@@ -287,7 +300,8 @@ const AdminStatistics = () => {
               <StatCard icon={Heart} label="Likes" value={stats.totalLikes} onClick={() => setDetailKind("likes")} />
               <StatCard icon={MessageCircle} label="Messages" value={stats.totalChatMessages + stats.totalDirectMessages} subtext={`${stats.totalChatMessages} groups · ${stats.totalDirectMessages} DMs`} onClick={() => setDetailKind("messages")} />
               <StatCard icon={Handshake} label="Friendships" value={stats.totalFriendships} onClick={() => setDetailKind("friendships")} />
-              <StatCard icon={Eye} label="Visits" value={stats.totalVisits} subtext="Event page views" />
+              <StatCard icon={Eye} label="Site Visits" value={stats.siteVisits} subtext={`${stats.uniqueSessions} unique sessions`} />
+              <StatCard icon={Eye} label="Event Views" value={stats.totalVisits} subtext="Detail page views" />
             </div>
           </div>
 
