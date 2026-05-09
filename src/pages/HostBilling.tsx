@@ -278,7 +278,7 @@ const HostBilling = () => {
                   <div>
                     <p className="text-foreground text-sm font-medium">{inv.description}</p>
                     <p className="text-muted-foreground text-xs">
-                      {inv.invoice_number} · {format(new Date(inv.created_at), 'dd.MM.yyyy', { locale: de })}
+                      {inv.invoice_number} · {format(new Date(inv.created_at), 'dd.MM.yyyy', { locale: dateLocale })}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
