@@ -284,7 +284,7 @@ const UserProfile = () => {
         <div className="flex gap-2 w-full">
           <Button onClick={handleStartDM} className="flex-1">
             <MessageCircle className="w-4 h-4 mr-2" />
-            Nachricht
+            {t("userProfile.message")}
           </Button>
           <Button
             variant="outline"
@@ -300,7 +300,7 @@ const UserProfile = () => {
       {!friendship && (
         <Button onClick={sendFriendRequest} disabled={friendActionLoading} className="w-full">
           <UserPlus className="w-4 h-4 mr-2" />
-          Freund hinzufügen
+          {t("userProfile.addFriend")}
         </Button>
       )}
 
@@ -311,7 +311,7 @@ const UserProfile = () => {
           className={`w-full ${isHost ? "text-muted-foreground" : "text-white/80 hover:text-white hover:bg-white/10"}`}
         >
           <MessageCircle className="w-4 h-4 mr-2" />
-          Nachricht senden
+          {t("userProfile.sendMessage")}
         </Button>
       )}
     </div>
@@ -331,7 +331,7 @@ const UserProfile = () => {
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
-            <h1 className={`${isHost ? "text-foreground" : "text-white"} text-xl font-bold`}>Profil</h1>
+            <h1 className={`${isHost ? "text-foreground" : "text-white"} text-xl font-bold`}>{t("userProfile.profile")}</h1>
           </div>
 
           {isHost ? (
@@ -351,21 +351,21 @@ const UserProfile = () => {
                 )}
                 <Badge variant="secondary" className="text-xs mt-1">
                   <Building2 className="w-3 h-3 mr-1" />
-                  Professional Host
+                  {t("userProfile.professionalHost")}
                 </Badge>
               </div>
 
               <div className="flex justify-center gap-8">
                 <button onClick={() => setStatsSheet({ open: true, tab: "hosted" })} className="text-center">
                   <p className="text-foreground text-xl font-bold">{stats.hostedCount}</p>
-                  <p className="text-muted-foreground text-xs">Gehostet</p>
+                  <p className="text-muted-foreground text-xs">{t("userProfile.hosted")}</p>
                 </button>
                 <div className="text-center">
                   <HostRating hostUserId={userId} interactive={!!user && user.id !== userId} />
                 </div>
                 <button onClick={() => setStatsSheet({ open: true, tab: "friends" })} className="text-center">
                   <p className="text-foreground text-xl font-bold">{stats.friendsCount}</p>
-                  <p className="text-muted-foreground text-xs">Freunde</p>
+                  <p className="text-muted-foreground text-xs">{t("userProfile.friends")}</p>
                 </button>
               </div>
               {friendActions}
@@ -375,7 +375,7 @@ const UserProfile = () => {
                     <Button variant="outline" size="sm" asChild>
                       <a href={hostProfile.website_url} target="_blank" rel="noopener noreferrer">
                         <Globe className="w-4 h-4 mr-1.5" />
-                        Website
+                        {t("userProfile.website")}
                         <ExternalLink className="w-3 h-3 ml-1" />
                       </a>
                     </Button>
@@ -406,7 +406,7 @@ const UserProfile = () => {
                   {displayName}
                 </h1>
                 <p className="text-[hsl(var(--blitz-pink))] font-semibold text-sm mt-1">
-                  Bereit für den nächsten Blitz ⚡
+                  {t("userProfile.readyForBlitz")}
                 </p>
               </div>
 
@@ -424,7 +424,7 @@ const UserProfile = () => {
                   <div className="w-11 h-11 rounded-full bg-[hsl(var(--blitz-pink))] text-white flex items-center justify-center font-extrabold text-lg shadow-lg">
                     {stats.blitzSent}
                   </div>
-                  <p className="text-white/85 text-[11px] font-semibold leading-tight">Blitze gesendet ⚡</p>
+                  <p className="text-white/85 text-[11px] font-semibold leading-tight">{t("userProfile.blitzSent")}</p>
                 </div>
                 <button
                   onClick={() => setStatsSheet({ open: true, tab: "participated" })}
@@ -434,7 +434,7 @@ const UserProfile = () => {
                     {stats.participatedCount}
                   </div>
                   <p className="text-white/85 text-[11px] font-semibold leading-tight">
-                    Teilgenommen <ThumbsUp className="inline w-3 h-3 -mt-0.5" />
+                    {t("userProfile.participated")} <ThumbsUp className="inline w-3 h-3 -mt-0.5" />
                   </p>
                 </button>
                 <div className="blitz-stat-card rounded-2xl p-3 flex flex-col items-center gap-1.5 text-center">
@@ -442,7 +442,7 @@ const UserProfile = () => {
                     <Zap className="w-5 h-5 fill-white" />
                   </div>
                   <p className="text-white/85 text-[11px] font-semibold leading-tight">
-                    Aktivität: {level} <Flame className="inline w-3 h-3 -mt-0.5 text-orange-400" />
+                    {t("userProfile.activity")}: {level} <Flame className="inline w-3 h-3 -mt-0.5 text-orange-400" />
                   </p>
                 </div>
               </div>
@@ -450,7 +450,7 @@ const UserProfile = () => {
               {/* Interests + Bio */}
               {(interests.length > 0 || profile.bio) && (
                 <div className="space-y-3">
-                  <h3 className="text-white font-bold text-lg">Was {displayName.split(" ")[0]} macht</h3>
+                  <h3 className="text-white font-bold text-lg">{t("userProfile.whatDoes", { name: displayName.split(" ")[0] })}</h3>
                   {interests.length > 0 && <InterestChips interests={interests} />}
                   {profile.bio && (
                     <p className="text-white/75 text-sm leading-relaxed">{profile.bio}</p>
@@ -463,7 +463,7 @@ const UserProfile = () => {
                 <div className="flex justify-center pt-2">
                   <div className="fun-fact-sticker rounded-2xl px-5 py-4 max-w-[88%]">
                     <p className="text-[hsl(var(--blitz-pink))] font-extrabold text-sm uppercase tracking-wider">
-                      Fun fact!
+                      {t("userProfile.funFact")}
                     </p>
                     <p className="text-[#2a1a00] font-semibold mt-1 text-base leading-snug">
                       {profile.fun_fact}
