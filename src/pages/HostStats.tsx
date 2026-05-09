@@ -297,7 +297,7 @@ const HostStats = () => {
                                 dataKey="views"
                                 fill="hsl(var(--primary))"
                                 radius={[2, 2, 0, 0]}
-                                name="Views"
+                                name={t('host.views')}
                               />
                             </BarChart>
                           </ResponsiveContainer>
@@ -307,10 +307,10 @@ const HostStats = () => {
                       {/* Participant list */}
                       <div>
                         <h4 className="text-foreground text-xs font-semibold mb-2 flex items-center gap-1">
-                          <Users className="w-3.5 h-3.5" /> Teilnehmer ({stats.participants.length})
+                          <Users className="w-3.5 h-3.5" /> {t('host.participantsHeader', { count: stats.participants.length })}
                         </h4>
                         {stats.participants.length === 0 ? (
-                          <p className="text-muted-foreground text-xs">Noch keine Teilnehmer</p>
+                          <p className="text-muted-foreground text-xs">{t('host.noParticipants')}</p>
                         ) : (
                           <div className="space-y-1 max-h-48 overflow-y-auto">
                             {stats.participants.map((p, i) => (
