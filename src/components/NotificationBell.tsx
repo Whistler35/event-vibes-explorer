@@ -72,9 +72,10 @@ const NotificationBell = () => {
       else navigate("/profile");
     } else if (notif.type === "friend_accepted" && notif.data?.friend_id) {
       navigate(`/user/${notif.data.friend_id}`);
-    } else if ((notif.type === "event_approved" || notif.type === "event_rejected") && notif.data?.event_id) {
+    } else if ((notif.type === "event_approved" || notif.type === "event_rejected" || notif.type === "join_request_accepted") && notif.data?.event_id) {
       navigate(`/event/${notif.data.event_id}`);
     } else if (notif.type === "new_event_pending") {
+      navigate("/admin/events");
       navigate("/admin/events");
     } else if (notif.type === "blitz_match" && notif.data?.match_id) {
       navigate(`/blitz/match/${notif.data.match_id}`);
