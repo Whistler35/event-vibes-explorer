@@ -242,11 +242,11 @@ const BlitzMatch = () => {
         {/* Headline + mission card */}
         <div className="relative z-10 px-6 pb-10 space-y-5">
           <div className="text-center space-y-1">
-            <h1 className="text-6xl font-black uppercase text-white leading-[0.85] animate-blitz-headline">
-              You're<br/>on!
+            <h1 className="text-6xl font-black uppercase text-white leading-[0.85] animate-blitz-headline whitespace-pre-line">
+              {t("blitzMatch.youOn")}
             </h1>
             <p className="text-[11px] font-black uppercase tracking-[0.4em] text-[hsl(var(--blitz-pink))] pt-2">
-              Meetup locked in
+              {t("blitzMatch.meetupLocked")}
             </p>
           </div>
 
