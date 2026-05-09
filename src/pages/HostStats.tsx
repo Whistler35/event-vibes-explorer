@@ -153,7 +153,7 @@ const HostStats = () => {
             <CardContent className="p-3 text-center">
               <Users className="w-5 h-5 text-primary mx-auto mb-1" />
               <p className="text-foreground font-bold text-lg">{totalRegs}</p>
-              <p className="text-muted-foreground text-[10px]">Anmeldungen</p>
+              <p className="text-muted-foreground text-[10px]">{t('host.registrations')}</p>
             </CardContent>
           </Card>
           <Card>
