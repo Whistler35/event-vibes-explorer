@@ -150,8 +150,8 @@ const UserProfile = () => {
     if (!friendship) return;
     setFriendActionLoading(true);
     const { error } = await supabase.from("friendships").delete().eq("id", friendship.id);
-    if (error) toast.error("Fehler beim Entfernen.");
-    else toast.success("Freund entfernt.");
+    if (error) toast.error(t("userProfile.removeError"));
+    else toast.success(t("userProfile.friendRemoved"));
     setFriendship(null);
     setFriendActionLoading(false);
   };
