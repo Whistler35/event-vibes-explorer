@@ -61,7 +61,7 @@ const EventCheckin = () => {
 
       if (!ticket) {
         setLastResult({ status: "invalid" });
-        toast.error("Ungültiger QR-Code");
+        toast.error(t("eventCheckin.toastInvalid"));
         return;
       }
       if (ticket.event_id !== eventId) {
