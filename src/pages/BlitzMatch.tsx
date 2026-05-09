@@ -287,7 +287,7 @@ const BlitzMatch = () => {
             </AvatarFallback>
           </Avatar>
           <div className="leading-tight">
-            <p className="font-bold text-sm">{other?.name ?? "Match"}</p>
+            <p className="font-bold text-sm">{other?.name ?? t("blitzMatch.fallbackName")}</p>
             <p className="text-[10px] uppercase tracking-wider text-white/60">{activity}</p>
           </div>
         </div>
