@@ -287,14 +287,14 @@ const HostBilling = () => {
                         €{(inv.amount_cents / 100).toFixed(2).replace('.', ',')}
                       </p>
                       <Badge variant="secondary" className="text-[10px]">
-                        {inv.status === 'paid' ? 'Bezahlt' : inv.status}
+                        {inv.status === 'paid' ? t('host.paid') : inv.status}
                       </Badge>
                     </div>
                     <Button
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8"
-                      onClick={() => toast.info('PDF-Download wird mit Stripe aktiviert')}
+                      onClick={() => toast.info(t('host.pdfDownloadInfo'))}
                     >
                       <Download className="w-4 h-4" />
                     </Button>
