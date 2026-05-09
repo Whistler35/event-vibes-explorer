@@ -159,12 +159,12 @@ const CityEvents = () => {
         {/* Events List */}
         <div className="space-y-4">
           <h2 className="text-foreground text-lg font-semibold">
-            {filteredEvents.length} Events Found
+            {t("cityEvents.found", { count: filteredEvents.length })}
           </h2>
           
           {filteredEvents.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground text-lg">No events found matching your filters.</p>
+              <p className="text-muted-foreground text-lg">{t("cityEvents.empty")}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
