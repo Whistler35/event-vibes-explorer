@@ -382,7 +382,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
 
           {/* Recurring toggle */}
           <div className="flex items-center justify-between py-2 px-1">
-            <Label className="text-foreground text-sm">Wiederkehrendes Event</Label>
+            <Label className="text-foreground text-sm">{t('createEvent.recurringToggle')}</Label>
             <Switch checked={isRecurring} onCheckedChange={setIsRecurring} />
           </div>
 
