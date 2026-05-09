@@ -27,8 +27,8 @@ const formatTime = (iso?: string) => {
 };
 
 // Card geometry
-const CARD_WIDTH = 240;          // px
-const CARD_GAP = 12;             // spacing between cards
+const CARD_WIDTH = 200;          // px
+const CARD_GAP = 10;             // spacing between cards
 const STEP = CARD_WIDTH + CARD_GAP;
 
 const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInteractionStart, onSelect, onExpand }) => {
@@ -214,7 +214,7 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
                 : '0 8px 20px rgba(0,0,0,0.15)',
             }}
           >
-            <div className="relative h-44 bg-muted">
+            <div className="relative h-32 bg-muted">
               {ev.image ? (
                 <img src={ev.image} alt="" className="w-full h-full object-cover" draggable={false} loading="lazy" />
               ) : (
@@ -232,7 +232,7 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
                 </span>
               )}
             </div>
-            <div className="px-3.5 py-3 space-y-1.5">
+            <div className="px-3 py-2 space-y-1">
               <h3 className="text-sm font-bold text-foreground line-clamp-1">{ev.title}</h3>
               <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                 <Calendar className="w-3 h-3 shrink-0" />
