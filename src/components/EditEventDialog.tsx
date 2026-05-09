@@ -217,7 +217,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
         <div className="flex items-center justify-between p-4 pb-2">
           <div className="flex items-center gap-2">
             <Pencil className="h-5 w-5 text-primary" />
-            <span className="text-foreground text-lg font-semibold">Edit event</span>
+            <span className="text-foreground text-lg font-semibold">{t('editEvent.title')}</span>
           </div>
         </div>
 
