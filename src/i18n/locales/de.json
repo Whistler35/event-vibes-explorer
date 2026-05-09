@@ -330,7 +330,10 @@
     "activityLow": "Niedrig",
     "activityLabel": "Aktivität: {{level}}",
     "doesLabel": "Was {{name}} macht",
-    "funFact": "Fun fact!"
+    "funFact": "Fun fact!",
+    "profile": "Profil",
+    "activity": "Aktivität",
+    "whatDoes": "Was {{name}} macht"
   },
   "host": {
     "dashboard": "Host Dashboard",
