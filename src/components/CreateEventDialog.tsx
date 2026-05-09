@@ -390,25 +390,25 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
             <>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="date" className="text-foreground text-sm">Start-Datum *</Label>
+                  <Label htmlFor="date" className="text-foreground text-sm">{t('createEvent.startDate')}</Label>
                   <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="time" className="text-foreground text-sm">Start-Zeit *</Label>
+                  <Label htmlFor="time" className="text-foreground text-sm">{t('createEvent.startTime')}</Label>
                   <Input id="time" type="time" value={time} onChange={(e) => setTime(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="endDate" className="text-foreground text-sm">End-Datum (optional)</Label>
+                  <Label htmlFor="endDate" className="text-foreground text-sm">{t('createEvent.endDate')}</Label>
                   <Input id="endDate" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} min={date || undefined} className="bg-transparent border-border text-foreground rounded-xl h-12" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="endTime" className="text-foreground text-sm">End-Zeit (optional)</Label>
+                  <Label htmlFor="endTime" className="text-foreground text-sm">{t('createEvent.endTime')}</Label>
                   <Input id="endTime" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
                 </div>
               </div>
-              <p className="text-muted-foreground text-xs -mt-2">Endzeit ist optional.</p>
+              <p className="text-muted-foreground text-xs -mt-2">{t('createEvent.endTimeOptional')}</p>
             </>
           ) : (
             <div className="space-y-3">
