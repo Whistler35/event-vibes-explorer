@@ -316,7 +316,7 @@ const BlitzMatch = () => {
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 space-y-3 pb-32">
         {messages.length === 0 && (
           <div className="text-center text-white/50 text-sm py-12">
-            Message them directly — only 5 min to coordinate ⚡
+            {t("blitzMatch.emptyChat")}
           </div>
         )}
         {messages.map((msg) => {
