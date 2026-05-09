@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,6 +24,7 @@ interface Friendship {
 }
 
 const FriendSearch: React.FC = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
@@ -109,10 +111,10 @@ const FriendSearch: React.FC = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success('Freundschaftsanfrage gesendet!');
+      toast.success(t('friendSearch.requestSent'));
       queryClient.invalidateQueries({ queryKey: ['friendships'] });
     },
-    onError: () => toast.error('Anfrage konnte nicht gesendet werden.'),
+    onError: () => toast.error(t('friendSearch.requestSendError')),
   });
 
   const respondRequest = useMutation({
