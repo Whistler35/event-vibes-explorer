@@ -26,6 +26,7 @@ const CollapsibleCarousel: React.FC<CollapsibleCarouselProps> = ({
 }) => {
   const [expanded, setExpanded] = useState(true);
   const [dragOffset, setDragOffset] = useState(0); // negative = shrinking
+  const [blockChildClicks, setBlockChildClicks] = useState(false);
   const draggingRef = useRef(false);
   const startYRef = useRef(0);
   const startExpandedRef = useRef(true);
@@ -86,6 +87,9 @@ const CollapsibleCarousel: React.FC<CollapsibleCarouselProps> = ({
       setDragOffset(0);
       return;
     }
+    // After a real drag, block child clicks briefly so cards don't fire onExpand
+    setBlockChildClicks(true);
+    setTimeout(() => setBlockChildClicks(false), 300);
     const finalH = (startExpandedRef.current ? expandedHeight : collapsedHeight) + dragOffset;
     const mid = (expandedHeight + collapsedHeight) / 2;
     userOverrideRef.current = true;
@@ -122,7 +126,7 @@ const CollapsibleCarousel: React.FC<CollapsibleCarouselProps> = ({
       <div
         style={{
           opacity: expanded ? 1 : 0,
-          pointerEvents: expanded ? 'auto' : 'none',
+          pointerEvents: (expanded && !blockChildClicks) ? 'auto' : 'none',
           transition: 'opacity 0.18s ease',
         }}
       >

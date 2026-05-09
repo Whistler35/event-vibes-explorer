@@ -204,8 +204,8 @@ const Home = () => {
         {/* Hero Section */}
         <div className="px-4 space-y-6">
           <div className="text-center space-y-2">
-            <h1 className="text-foreground text-5xl font-bold leading-tight">{t('home.headline1')}</h1>
-            <h2 className="text-foreground text-5xl font-bold leading-tight">{t('home.headline2')}</h2>
+            <h1 className="text-foreground text-4xl font-bold leading-tight">{t('home.headline1')}</h1>
+            <h2 className="text-foreground text-4xl font-bold leading-tight">{t('home.headline2')}</h2>
           </div>
 
           <div className="flex justify-center">

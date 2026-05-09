@@ -1,7 +1,8 @@
-import { Hourglass, Zap } from "lucide-react";
+import { Hourglass, Zap, X } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useMyPendingSwipes } from "@/hooks/useMyPendingSwipes";
+import { useMyPendingSwipes, withdrawSwipe } from "@/hooks/useMyPendingSwipes";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 const Countdown = ({ target }: { target: string }) => {
   const [now, setNow] = useState(Date.now());
@@ -20,7 +21,21 @@ const Countdown = ({ target }: { target: string }) => {
 };
 
 const MyPendingSwipesList = () => {
-  const { items } = useMyPendingSwipes();
+  const { items, reload } = useMyPendingSwipes();
+  const [withdrawing, setWithdrawing] = useState<string | null>(null);
+
+  const handleWithdraw = async (swipeId: string) => {
+    setWithdrawing(swipeId);
+    try {
+      await withdrawSwipe(swipeId);
+      toast("Anfrage zurückgezogen");
+      reload();
+    } catch (e: any) {
+      toast.error(e.message || "Fehler");
+    } finally {
+      setWithdrawing(null);
+    }
+  };
 
   if (items.length === 0) return null;
 
@@ -52,8 +67,18 @@ const MyPendingSwipesList = () => {
               waiting for response…
             </p>
           </div>
-          <div className="text-xs font-black tabular-nums text-[hsl(var(--blitz-pink))]">
-            <Countdown target={s.expires_at} />
+          <div className="flex items-center gap-2">
+            <div className="text-xs font-black tabular-nums text-[hsl(var(--blitz-pink))]">
+              <Countdown target={s.expires_at} />
+            </div>
+            <button
+              onClick={() => handleWithdraw(s.swipe_id)}
+              disabled={withdrawing === s.swipe_id}
+              className="p-1.5 rounded-full hover:bg-muted transition-colors text-muted-foreground hover:text-foreground disabled:opacity-50"
+              title="Anfrage zurückziehen"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
       ))}

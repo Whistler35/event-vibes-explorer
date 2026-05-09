@@ -103,3 +103,11 @@ export function useMyPendingSwipes() {
 
   return { items, loading, reload: load };
 }
+
+export async function withdrawSwipe(swipeId: string) {
+  const { error } = await supabase
+    .from("blitz_swipes")
+    .delete()
+    .eq("id", swipeId);
+  if (error) throw error;
+}
