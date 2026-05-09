@@ -191,7 +191,7 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
           localStorage.setItem('lastUserLocation', JSON.stringify({ lat, lng, ts: Date.now() }));
           // First-ever share → animate in to the location so the user sees the move.
           if (!prev && map.current) {
-            const opts: any = { center: [lng, lat], zoom: 14, duration: 600, essential: true, curve: 1.2 };
+            const opts: any = { center: [lng, lat], zoom: 12, duration: 600, essential: true, curve: 1.2 };
             if (typeof window !== 'undefined' && window.innerWidth < 768) opts.offset = [0, -140];
             map.current.flyTo(opts);
           }
