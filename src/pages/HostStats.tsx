@@ -11,7 +11,8 @@ import {
   ArrowLeft, Eye, Users, TrendingUp, Clock, ChevronDown, ChevronUp, Loader2
 } from 'lucide-react';
 import { format, subDays, subHours, addDays } from 'date-fns';
-import { de } from 'date-fns/locale';
+import { de, enGB } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar
