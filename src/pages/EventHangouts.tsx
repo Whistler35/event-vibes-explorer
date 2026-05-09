@@ -64,13 +64,13 @@ const EventHangouts = () => {
               className="flex-1 bg-evendle-gray hover:bg-evendle-gray/80 text-white py-3 rounded-2xl font-medium"
               onClick={() => {/* Navigate to search hangouts */}}
             >
-              look for evendles
+              {t("eventHangouts.lookFor")}
             </Button>
             <Button 
               className="flex-1 bg-evendle-orange hover:bg-evendle-orange-hover text-white py-3 rounded-2xl font-medium"
               onClick={() => {/* Navigate to create hangout */}}
             >
-              create hang out
+              {t("eventHangouts.create")}
             </Button>
           </div>
 
