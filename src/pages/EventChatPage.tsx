@@ -36,8 +36,8 @@ const EventChatPage = () => {
             <ArrowLeft className="w-5 h-5 text-foreground" />
           </button>
           <div className="flex-1 min-w-0">
-            <h1 className="text-foreground font-bold truncate">{eventTitle || "Gruppenchat"}</h1>
-            <p className="text-muted-foreground text-xs">Gruppenchat</p>
+            <h1 className="text-foreground font-bold truncate">{eventTitle || t("eventChat.groupChat")}</h1>
+            <p className="text-muted-foreground text-xs">{t("eventChat.groupChat")}</p>
           </div>
         </div>
 
