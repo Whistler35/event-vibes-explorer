@@ -77,7 +77,7 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
   // Expose flyTo + getBounds
   useImperativeHandle(ref, () => ({
     flyTo: (lat: number, lng: number, zoomLevel?: number) => {
-      const opts: any = { center: [lng, lat], duration: 1000, essential: true };
+      const opts: any = { center: [lng, lat], duration: 600, essential: true, curve: 1.2 };
       if (typeof zoomLevel === 'number') opts.zoom = zoomLevel;
       // On mobile the carousel covers the bottom ~280px of the map.
       // Offset the camera so the target sits above the carousel, not behind it.
