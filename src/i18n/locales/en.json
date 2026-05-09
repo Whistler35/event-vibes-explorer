@@ -527,7 +527,12 @@
     "toastError": "Check-in failed"
   },
   "eventChat": {
-    "groupChat": "Group chat"
+    "loadError": "Could not load chat",
+    "sendError": "Could not send message",
+    "unknownUser": "Unknown user",
+    "loading": "Loading chat...",
+    "noChat": "No chat available yet.",
+    "createdOnJoin": "The chat will be created as soon as someone joins the event."
   },
   "eventHangouts": {
     "lookFor": "look for evendles",
@@ -679,5 +684,45 @@
   "index": {
     "welcome": "Welcome to Your App",
     "start": "Start building your amazing project here!"
+  },
+  "mapbox": {
+    "cancel": "Cancel",
+    "placeHere": "Place here",
+    "dragHint": "Drag the pin to the desired spot"
+  },
+  "friendSearch": {
+    "requestSent": "Friend request sent!",
+    "requestSendError": "Could not send request.",
+    "friendAdded": "Friend added! 🎉",
+    "requestRejected": "Request rejected.",
+    "updateError": "Failed to update.",
+    "friendRemoved": "Friend removed.",
+    "removeError": "Failed to remove.",
+    "noFriends": "No friends added yet."
+  },
+  "joinRequests": {
+    "loading": "Loading requests...",
+    "title": "Join requests",
+    "accepted": "Accepted",
+    "rejected": "Rejected",
+    "withdrawn": "Withdrawn",
+    "unknown": "Unknown",
+    "acceptedToast": "Accepted!",
+    "rejectedToast": "Rejected",
+    "error": "Error"
+  },
+  "recentActivities": {
+    "title": "Recent activities"
+  },
+  "reels": {
+    "minimize": "Minimize",
+    "fullscreen": "Fullscreen",
+    "swipeHint": "Swipe up for more inspiration ✨",
+    "desc1": "The hottest party in town – lights, beats & good vibes!",
+    "desc2": "Open-air DJ session with massive drops – are you in?",
+    "desc3": "Taste your way through the best street food stalls!",
+    "desc4": "Breathe in, let go – yoga at sunset in the park",
+    "desc5": "Every Saturday 7 a.m. – run together, grow together",
+    "desc6": "Live music above the city rooftops – an unforgettable night!"
   }
 }
