@@ -71,7 +71,7 @@ function generateMockStats(event: HostEvent, dateLocale: any) {
     .slice(0, Math.min(totalRegistrations, participantNames.length))
     .map((name, i) => ({
       name,
-      signupDate: format(subDays(new Date(), 14 - i), 'dd. MMM yyyy', { locale: de }),
+      signupDate: format(subDays(new Date(), 14 - i), 'dd. MMM yyyy', { locale: dateLocale }),
     }));
 
   return {
