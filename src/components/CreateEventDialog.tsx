@@ -347,7 +347,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
                 }}
                 onFocus={() => setShowSuggestions(true)}
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-                placeholder="e.g. Maria-Theresien-Straße 1, Innsbruck"
+                placeholder={t('createEvent.addressPlaceholder')}
                 className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12"
                 autoComplete="off"
               />
