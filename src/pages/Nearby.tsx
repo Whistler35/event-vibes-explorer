@@ -533,6 +533,21 @@ const Nearby = () => {
             </div>
             {showCitySuggestions && (
               <div className="mt-1.5 bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-xl overflow-hidden max-h-[60vh] overflow-y-auto">
+                {citySuggestions.length > 0 && (
+                  <>
+                    <div className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t('nearby.places')}</div>
+                    {citySuggestions.map((s, i) => (
+                      <button
+                        key={`pl-${i}`}
+                        onClick={() => selectCity(s)}
+                        className="w-full px-4 py-2.5 text-left text-sm text-foreground hover:bg-muted/50 flex items-center gap-3"
+                      >
+                        <MapPin className="h-4 w-4 text-primary shrink-0" />
+                        <span className="truncate">{s.name}</span>
+                      </button>
+                    ))}
+                  </>
+                )}
                 {eventSuggestions.length > 0 && (
                   <>
                     <div className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t('nearby.events')}</div>
@@ -559,21 +574,6 @@ const Nearby = () => {
                             {ev.location_name && ` · ${ev.location_name}`}
                           </div>
                         </div>
-                      </button>
-                    ))}
-                  </>
-                )}
-                {citySuggestions.length > 0 && (
-                  <>
-                    <div className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t('nearby.places')}</div>
-                    {citySuggestions.map((s, i) => (
-                      <button
-                        key={`pl-${i}`}
-                        onClick={() => selectCity(s)}
-                        className="w-full px-4 py-2.5 text-left text-sm text-foreground hover:bg-muted/50 flex items-center gap-3"
-                      >
-                        <MapPin className="h-4 w-4 text-primary shrink-0" />
-                        <span className="truncate">{s.name}</span>
                       </button>
                     ))}
                   </>
