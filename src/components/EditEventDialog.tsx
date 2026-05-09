@@ -398,7 +398,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Ticket className="h-4 w-4 text-primary" />
-                  <Label className="text-foreground text-sm">Tickets aktivieren</Label>
+                  <Label className="text-foreground text-sm">{t('editEvent.ticketsEnable')}</Label>
                 </div>
                 <Switch checked={ticketsEnabled} onCheckedChange={setTicketsEnabled} />
               </div>
@@ -410,14 +410,14 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
                       onClick={() => setTicketMode('qr')}
                       className={`flex-1 h-10 rounded-xl text-xs font-semibold border ${ticketMode === 'qr' ? 'bg-primary text-primary-foreground border-primary' : 'bg-transparent text-foreground border-border'}`}
                     >
-                      QR-Code generieren
+                      {t('editEvent.ticketsQr')}
                     </button>
                     <button
                       type="button"
                       onClick={() => setTicketMode('link')}
                       className={`flex-1 h-10 rounded-xl text-xs font-semibold border ${ticketMode === 'link' ? 'bg-primary text-primary-foreground border-primary' : 'bg-transparent text-foreground border-border'}`}
                     >
-                      Externer Link
+                      {t('editEvent.ticketsLink')}
                     </button>
                   </div>
                   {ticketMode === 'link' && (
