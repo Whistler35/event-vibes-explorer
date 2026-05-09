@@ -109,9 +109,9 @@ const HostDashboard = () => {
   const handleDelete = async (eventId: string) => {
     const { error } = await supabase.from('events').delete().eq('id', eventId);
     if (error) {
-      toast.error('Event konnte nicht gelöscht werden');
+      toast.error(t('host.deleteFailed'));
     } else {
-      toast.success('Event gelöscht');
+      toast.success(t('host.deleted'));
       setEvents((prev) => prev.filter((e) => e.id !== eventId));
     }
   };
