@@ -154,7 +154,7 @@ const EditProfile = () => {
     return (
       <Layout>
         <div className="flex items-center justify-center h-[70vh]">
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">{t('editProfile.loading')}</p>
         </div>
       </Layout>
     );
