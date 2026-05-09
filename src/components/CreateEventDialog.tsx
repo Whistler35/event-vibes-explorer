@@ -31,6 +31,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
   onEventCreated,
   defaultPrivate = false,
 }) => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { isHost } = useIsHost();
   const canManageTickets = isAdmin || isHost;
