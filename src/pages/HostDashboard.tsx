@@ -15,7 +15,8 @@ import {
 import CreateEventDialog from '@/components/CreateEventDialog';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { de } from 'date-fns/locale';
+import { de, enGB } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 
 interface HostEvent {
   id: string;
@@ -52,6 +53,8 @@ function getMockStats(eventId: string) {
 }
 
 const HostDashboard = () => {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language.startsWith('de') ? de : enGB;
   const { user } = useAuth();
   const { isHost, loading: hostLoading } = useIsHost();
   const navigate = useNavigate();
@@ -106,9 +109,9 @@ const HostDashboard = () => {
   const handleDelete = async (eventId: string) => {
     const { error } = await supabase.from('events').delete().eq('id', eventId);
     if (error) {
-      toast.error('Event konnte nicht gelöscht werden');
+      toast.error(t('host.deleteFailed'));
     } else {
-      toast.success('Event gelöscht');
+      toast.success(t('host.deleted'));
       setEvents((prev) => prev.filter((e) => e.id !== eventId));
     }
   };
@@ -137,14 +140,14 @@ const HostDashboard = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-foreground text-2xl font-bold">Host Dashboard</h1>
+            <h1 className="text-foreground text-2xl font-bold">{t('host.dashboard')}</h1>
             <p className="text-muted-foreground text-sm">
-              {plan ? plan.name : 'Kein Plan'} · {eventsUsed} Events erstellt
+              {plan ? plan.name : t('host.noPlan')} · {t('host.eventsCreated', { count: eventsUsed })}
             </p>
           </div>
           <Button size="sm" onClick={() => setShowCreateDialog(true)}>
             <CalendarPlus className="w-4 h-4 mr-1" />
-            Neues Event
+            {t('host.newEvent')}
           </Button>
         </div>
 
@@ -157,13 +160,13 @@ const HostDashboard = () => {
                   <FileText className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-foreground font-semibold text-sm">Event-Kontingent</p>
+                  <p className="text-foreground font-semibold text-sm">{t('host.eventQuota')}</p>
                   <p className="text-muted-foreground text-xs">
                     {plan?.included_events === null
-                      ? 'Unbegrenzte Events'
+                      ? t('host.unlimitedEvents')
                       : plan?.included_events === 0
-                      ? 'Pay-per-Event'
-                      : `${eventsUsed} von ${plan?.included_events} Events genutzt`}
+                      ? t('host.payPerEvent')
+                      : t('host.ofUsed', { used: eventsUsed, total: plan?.included_events })}
                   </p>
                 </div>
               </div>
@@ -190,14 +193,14 @@ const HostDashboard = () => {
             <CardContent className="p-3 text-center">
               <Eye className="w-5 h-5 text-primary mx-auto mb-1" />
               <p className="text-foreground font-bold text-lg">{totalViews}</p>
-              <p className="text-muted-foreground text-[10px]">Views gesamt</p>
+              <p className="text-muted-foreground text-[10px]">{t('host.totalViews')}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-3 text-center">
               <Users className="w-5 h-5 text-primary mx-auto mb-1" />
               <p className="text-foreground font-bold text-lg">{totalRegistrations}</p>
-              <p className="text-muted-foreground text-[10px]">Anmeldungen</p>
+              <p className="text-muted-foreground text-[10px]">{t('host.registrations')}</p>
             </CardContent>
           </Card>
           <Card>
@@ -206,7 +209,7 @@ const HostDashboard = () => {
               <p className="text-foreground font-bold text-lg">
                 {totalViews > 0 ? ((totalRegistrations / totalViews) * 100).toFixed(1) : 0}%
               </p>
-              <p className="text-muted-foreground text-[10px]">Conversion</p>
+              <p className="text-muted-foreground text-[10px]">{t('host.conversion')}</p>
             </CardContent>
           </Card>
         </div>
@@ -215,42 +218,42 @@ const HostDashboard = () => {
         <Tabs defaultValue="active" className="w-full">
           <TabsList className="w-full grid grid-cols-3">
             <TabsTrigger value="active" className="text-xs">
-              Aktiv ({activeEvents.length})
+              {t('host.active')} ({activeEvents.length})
             </TabsTrigger>
             <TabsTrigger value="pending" className="text-xs">
-              Ausstehend ({pendingEvents.length})
+              {t('host.pending')} ({pendingEvents.length})
             </TabsTrigger>
             <TabsTrigger value="expired" className="text-xs">
-              Abgelaufen ({expiredEvents.length})
+              {t('host.expired')} ({expiredEvents.length})
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="active" className="space-y-3 mt-3">
             {activeEvents.length === 0 ? (
-              <EmptyState text="Keine aktiven Events" />
+              <EmptyState text={t('host.noActive')} />
             ) : (
               activeEvents.map((event) => (
-                <EventRow key={event.id} event={event} onDelete={handleDelete} onNavigate={navigate} />
+                <EventRow key={event.id} event={event} onDelete={handleDelete} onNavigate={navigate} dateLocale={dateLocale} t={t} />
               ))
             )}
           </TabsContent>
 
           <TabsContent value="pending" className="space-y-3 mt-3">
             {pendingEvents.length === 0 ? (
-              <EmptyState text="Keine ausstehenden Events" />
+              <EmptyState text={t('host.noPending')} />
             ) : (
               pendingEvents.map((event) => (
-                <EventRow key={event.id} event={event} onDelete={handleDelete} onNavigate={navigate} />
+                <EventRow key={event.id} event={event} onDelete={handleDelete} onNavigate={navigate} dateLocale={dateLocale} t={t} />
               ))
             )}
           </TabsContent>
 
           <TabsContent value="expired" className="space-y-3 mt-3">
             {expiredEvents.length === 0 ? (
-              <EmptyState text="Keine abgelaufenen Events" />
+              <EmptyState text={t('host.noExpired')} />
             ) : (
               expiredEvents.map((event) => (
-                <EventRow key={event.id} event={event} onDelete={handleDelete} onNavigate={navigate} />
+                <EventRow key={event.id} event={event} onDelete={handleDelete} onNavigate={navigate} dateLocale={dateLocale} t={t} />
               ))
             )}
           </TabsContent>
@@ -260,11 +263,11 @@ const HostDashboard = () => {
         <div className="grid grid-cols-2 gap-3">
           <Button variant="outline" className="w-full" onClick={() => navigate('/host/stats')}>
             <BarChart3 className="w-4 h-4 mr-2" />
-            Statistiken
+            {t('host.stats')}
           </Button>
           <Button variant="outline" className="w-full" onClick={() => navigate('/host/billing')}>
             <CreditCard className="w-4 h-4 mr-2" />
-            Abrechnung
+            {t('host.billing')}
           </Button>
         </div>
 
@@ -287,16 +290,20 @@ function EventRow({
   event,
   onDelete,
   onNavigate,
+  dateLocale,
+  t,
 }: {
   event: HostEvent;
   onDelete: (id: string) => void;
   onNavigate: (path: string) => void;
+  dateLocale: any;
+  t: (key: string, opts?: any) => string;
 }) {
   const stats = getMockStats(event.id);
   const statusBadge = {
-    approved: { label: 'Aktiv', variant: 'default' as const },
-    pending: { label: 'Ausstehend', variant: 'secondary' as const },
-    rejected: { label: 'Abgelehnt', variant: 'destructive' as const },
+    approved: { label: t('host.approved'), variant: 'default' as const },
+    pending: { label: t('host.pending'), variant: 'secondary' as const },
+    rejected: { label: t('host.rejected'), variant: 'destructive' as const },
   }[event.approval_status] || { label: event.approval_status, variant: 'outline' as const };
 
   return (
@@ -322,7 +329,7 @@ function EventRow({
                 {event.is_featured && <Star className="w-3.5 h-3.5 text-yellow-500 flex-shrink-0" />}
               </div>
               <p className="text-muted-foreground text-xs truncate">
-                {format(new Date(event.event_date), 'dd. MMM yyyy, HH:mm', { locale: de })} · {event.location_name}
+                {format(new Date(event.event_date), 'dd. MMM yyyy, HH:mm', { locale: dateLocale })} · {event.location_name}
               </p>
             </div>
             <Badge variant={statusBadge.variant} className="text-[10px] flex-shrink-0">
@@ -350,7 +357,7 @@ function EventRow({
             </button>
             <button
               onClick={() => {
-                if (confirm('Event wirklich löschen?')) onDelete(event.id);
+                if (confirm(t('host.deleteConfirm'))) onDelete(event.id);
               }}
               className="p-1 rounded hover:bg-destructive/10"
             >

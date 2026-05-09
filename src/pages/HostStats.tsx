@@ -11,7 +11,8 @@ import {
   ArrowLeft, Eye, Users, TrendingUp, Clock, ChevronDown, ChevronUp, Loader2
 } from 'lucide-react';
 import { format, subDays, subHours, addDays } from 'date-fns';
-import { de } from 'date-fns/locale';
+import { de, enGB } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar
@@ -30,7 +31,7 @@ interface HostEvent {
 }
 
 // Generate deterministic mock data based on event id
-function generateMockStats(event: HostEvent) {
+function generateMockStats(event: HostEvent, dateLocale: any) {
   const hash = event.id.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
   const totalViews = 80 + (hash % 500);
   const totalRegistrations = Math.floor(totalViews * (0.06 + (hash % 25) / 100));
@@ -43,7 +44,7 @@ function generateMockStats(event: HostEvent) {
     const spike = i === 7 || i === 10 ? base * 2 : 0;
     const views = base + Math.floor(Math.random() * base * 0.6) + spike;
     return {
-      date: format(date, 'dd.MM', { locale: de }),
+      date: format(date, 'dd.MM', { locale: dateLocale }),
       views,
       registrations: Math.floor(views * (totalRegistrations / totalViews)),
     };
@@ -70,7 +71,7 @@ function generateMockStats(event: HostEvent) {
     .slice(0, Math.min(totalRegistrations, participantNames.length))
     .map((name, i) => ({
       name,
-      signupDate: format(subDays(new Date(), 14 - i), 'dd. MMM yyyy', { locale: de }),
+      signupDate: format(subDays(new Date(), 14 - i), 'dd. MMM yyyy', { locale: dateLocale }),
     }));
 
   return {
@@ -84,6 +85,8 @@ function generateMockStats(event: HostEvent) {
 }
 
 const HostStats = () => {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language.startsWith('de') ? de : enGB;
   const { user } = useAuth();
   const { isHost, loading: hostLoading } = useIsHost();
   const navigate = useNavigate();
@@ -119,7 +122,7 @@ const HostStats = () => {
   }
 
   // Aggregate stats
-  const allStats = events.map((e) => ({ event: e, stats: generateMockStats(e) }));
+  const allStats = events.map((e) => ({ event: e, stats: generateMockStats(e, dateLocale) }));
   const totalViews = allStats.reduce((s, a) => s + a.stats.totalViews, 0);
   const totalRegs = allStats.reduce((s, a) => s + a.stats.totalRegistrations, 0);
 
@@ -132,8 +135,8 @@ const HostStats = () => {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="text-foreground text-xl font-bold">Statistiken</h1>
-            <p className="text-muted-foreground text-xs">{events.length} Events · Mock-Daten</p>
+            <h1 className="text-foreground text-xl font-bold">{t('host.statsTitle')}</h1>
+            <p className="text-muted-foreground text-xs">{t('host.eventsCount', { count: events.length })}</p>
           </div>
         </div>
 
@@ -143,14 +146,14 @@ const HostStats = () => {
             <CardContent className="p-3 text-center">
               <Eye className="w-5 h-5 text-primary mx-auto mb-1" />
               <p className="text-foreground font-bold text-lg">{totalViews}</p>
-              <p className="text-muted-foreground text-[10px]">Views gesamt</p>
+              <p className="text-muted-foreground text-[10px]">{t('host.totalViews')}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-3 text-center">
               <Users className="w-5 h-5 text-primary mx-auto mb-1" />
               <p className="text-foreground font-bold text-lg">{totalRegs}</p>
-              <p className="text-muted-foreground text-[10px]">Anmeldungen</p>
+              <p className="text-muted-foreground text-[10px]">{t('host.registrations')}</p>
             </CardContent>
           </Card>
           <Card>
@@ -159,14 +162,14 @@ const HostStats = () => {
               <p className="text-foreground font-bold text-lg">
                 {totalViews > 0 ? ((totalRegs / totalViews) * 100).toFixed(1) : 0}%
               </p>
-              <p className="text-muted-foreground text-[10px]">Conversion</p>
+              <p className="text-muted-foreground text-[10px]">{t('host.conversion')}</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Per-Event Stats */}
         {events.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">Noch keine Events erstellt</div>
+          <div className="text-center py-12 text-muted-foreground">{t('host.noEventsCreated')}</div>
         ) : (
           <div className="space-y-3">
             {allStats.map(({ event, stats }) => {
@@ -183,13 +186,13 @@ const HostStats = () => {
                         <div className="min-w-0 flex-1">
                           <CardTitle className="text-sm truncate">{event.title}</CardTitle>
                           <p className="text-muted-foreground text-xs mt-0.5">
-                            {format(new Date(event.event_date), 'dd. MMM yyyy', { locale: de })} · {event.location_name}
+                            {format(new Date(event.event_date), 'dd. MMM yyyy', { locale: dateLocale })} · {event.location_name}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="text-right text-xs">
                             <span className="text-foreground font-semibold">{stats.totalViews}</span>
-                            <span className="text-muted-foreground"> Views</span>
+                            <span className="text-muted-foreground"> {t('host.views')}</span>
                           </div>
                           {isExpanded ? (
                             <ChevronUp className="w-4 h-4 text-muted-foreground" />
@@ -208,21 +211,21 @@ const HostStats = () => {
                       <div className="grid grid-cols-3 gap-2 pt-2">
                         <div className="text-center p-2 rounded-lg bg-muted/50">
                           <p className="text-foreground font-bold">{stats.totalViews}</p>
-                          <p className="text-muted-foreground text-[10px]">Views</p>
+                          <p className="text-muted-foreground text-[10px]">{t('host.views')}</p>
                         </div>
                         <div className="text-center p-2 rounded-lg bg-muted/50">
                           <p className="text-foreground font-bold">{stats.totalRegistrations}</p>
-                          <p className="text-muted-foreground text-[10px]">Anmeldungen</p>
+                          <p className="text-muted-foreground text-[10px]">{t('host.registrations')}</p>
                         </div>
                         <div className="text-center p-2 rounded-lg bg-muted/50">
                           <p className="text-foreground font-bold">{stats.conversionRate}%</p>
-                          <p className="text-muted-foreground text-[10px]">Conversion</p>
+                          <p className="text-muted-foreground text-[10px]">{t('host.conversion')}</p>
                         </div>
                       </div>
 
                       {/* Views over time chart */}
                       <div>
-                        <h4 className="text-foreground text-xs font-semibold mb-2">Views & Anmeldungen (14 Tage)</h4>
+                        <h4 className="text-foreground text-xs font-semibold mb-2">{t('host.viewsAndRegs')}</h4>
                         <div className="h-40">
                           <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={stats.viewsOverTime}>
@@ -251,7 +254,7 @@ const HostStats = () => {
                                 stroke="hsl(var(--primary))"
                                 strokeWidth={2}
                                 dot={false}
-                                name="Views"
+                                name={t('host.views')}
                               />
                               <Line
                                 type="monotone"
@@ -259,7 +262,7 @@ const HostStats = () => {
                                 stroke="hsl(var(--accent-foreground))"
                                 strokeWidth={2}
                                 dot={false}
-                                name="Anmeldungen"
+                                name={t('host.registrations')}
                                 strokeDasharray="4 4"
                               />
                             </LineChart>
@@ -270,7 +273,7 @@ const HostStats = () => {
                       {/* Peak hours chart */}
                       <div>
                         <h4 className="text-foreground text-xs font-semibold mb-2 flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5" /> Peak-Zeiten
+                          <Clock className="w-3.5 h-3.5" /> {t('host.peakTimes')}
                         </h4>
                         <div className="h-32">
                           <ResponsiveContainer width="100%" height="100%">
@@ -294,7 +297,7 @@ const HostStats = () => {
                                 dataKey="views"
                                 fill="hsl(var(--primary))"
                                 radius={[2, 2, 0, 0]}
-                                name="Views"
+                                name={t('host.views')}
                               />
                             </BarChart>
                           </ResponsiveContainer>
@@ -304,10 +307,10 @@ const HostStats = () => {
                       {/* Participant list */}
                       <div>
                         <h4 className="text-foreground text-xs font-semibold mb-2 flex items-center gap-1">
-                          <Users className="w-3.5 h-3.5" /> Teilnehmer ({stats.participants.length})
+                          <Users className="w-3.5 h-3.5" /> {t('host.participantsHeader', { count: stats.participants.length })}
                         </h4>
                         {stats.participants.length === 0 ? (
-                          <p className="text-muted-foreground text-xs">Noch keine Teilnehmer</p>
+                          <p className="text-muted-foreground text-xs">{t('host.noParticipants')}</p>
                         ) : (
                           <div className="space-y-1 max-h-48 overflow-y-auto">
                             {stats.participants.map((p, i) => (

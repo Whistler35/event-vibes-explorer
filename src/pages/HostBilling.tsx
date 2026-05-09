@@ -16,9 +16,10 @@ import {
   Star, Download, Loader2, CalendarDays, ArrowUpRight
 } from 'lucide-react';
 import { format, addMonths } from 'date-fns';
-import { de } from 'date-fns/locale';
+import { de, enGB } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface Plan {
   id: string;
@@ -71,6 +72,8 @@ function getMockInvoices(planName: string): Invoice[] {
 }
 
 const HostBilling = () => {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language.startsWith('de') ? de : enGB;
   const { user } = useAuth();
   const { isHost, loading: hostLoading } = useIsHost();
   const navigate = useNavigate();
@@ -129,14 +132,14 @@ const HostBilling = () => {
 
     setCurrentPlan(selectedNewPlan);
     setConfirmDialog(false);
-    toast.success(`Plan gewechselt zu ${selectedNewPlan.name}`);
+    toast.success(t('host.planChangedTo', { plan: selectedNewPlan.name }));
   };
 
   const handlePayPerEvent = () => {
     toast.success(
       payPerEventType === 'standard'
-        ? 'Standard Event für €29,90 gebucht (Demo)'
-        : 'Top Event für €49,90 gebucht (Demo)'
+        ? t('host.bookedStandardDemo')
+        : t('host.bookedTopDemo')
     );
     setPayPerEventDialog(false);
   };
@@ -151,7 +154,7 @@ const HostBilling = () => {
     );
   }
 
-  const nextBillingDate = format(addMonths(new Date(), 1), 'dd. MMMM yyyy', { locale: de });
+  const nextBillingDate = format(addMonths(new Date(), 1), 'dd. MMMM yyyy', { locale: dateLocale });
   const invoices = getMockInvoices(currentPlan?.name || 'Starter');
 
   return (
@@ -162,7 +165,7 @@ const HostBilling = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate('/host/dashboard')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h1 className="text-foreground text-xl font-bold">Abrechnung</h1>
+          <h1 className="text-foreground text-xl font-bold">{t('host.billingTitle')}</h1>
         </div>
 
         {/* Current Plan */}
@@ -174,40 +177,40 @@ const HostBilling = () => {
                   const Icon = planIcons[currentPlan.slug] || CreditCard;
                   return <Icon className="w-5 h-5 text-primary" />;
                 })()}
-                <CardTitle className="text-lg">{currentPlan?.name || 'Kein Plan'}</CardTitle>
+                <CardTitle className="text-lg">{currentPlan?.name || t('host.noPlan')}</CardTitle>
               </div>
-              <Badge variant="default" className="text-xs">Aktiv</Badge>
+              <Badge variant="default" className="text-xs">{t('host.currentPlanBadge')}</Badge>
             </div>
             <CardDescription>{currentPlan?.description}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <p className="text-muted-foreground text-xs">Monatlicher Preis</p>
+                <p className="text-muted-foreground text-xs">{t('host.monthlyPrice')}</p>
                 <p className="text-foreground font-bold">
                   {currentPlan?.price_cents === 0
-                    ? 'Kein Abo'
+                    ? t('host.noSubscription')
                     : `€${(currentPlan?.price_cents || 0 / 100).toFixed(2).replace('.', ',')}`}
                 </p>
               </div>
               <div>
-                <p className="text-muted-foreground text-xs">Events diesen Monat</p>
+                <p className="text-muted-foreground text-xs">{t('host.eventsThisMonth')}</p>
                 <p className="text-foreground font-bold">
                   {currentPlan?.included_events === null
-                    ? `${eventsUsed} (unbegrenzt)`
+                    ? `${eventsUsed} (${t('host.unlimited')})`
                     : currentPlan?.included_events === 0
-                    ? `${eventsUsed} (Pay-per-Event)`
-                    : `${eventsUsed} von ${currentPlan?.included_events}`}
+                    ? `${eventsUsed} (${t('host.payPerEvent')})`
+                    : `${eventsUsed} / ${currentPlan?.included_events}`}
                 </p>
               </div>
               {currentPlan?.slug !== 'pay-per-event' && (
                 <>
                   <div>
-                    <p className="text-muted-foreground text-xs">Nächste Abrechnung</p>
+                    <p className="text-muted-foreground text-xs">{t('host.nextBilling')}</p>
                     <p className="text-foreground font-semibold text-xs">{nextBillingDate}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground text-xs">Nächster Betrag</p>
+                    <p className="text-muted-foreground text-xs">{t('host.nextAmount')}</p>
                     <p className="text-foreground font-semibold text-xs">
                       €{((currentPlan?.price_cents || 0) / 100).toFixed(2).replace('.', ',')}
                     </p>
@@ -223,7 +226,7 @@ const HostBilling = () => {
                 className="flex-1"
                 onClick={() => setChangePlanDialog(true)}
               >
-                Plan wechseln
+                {t('host.changePlan')}
               </Button>
               <Button
                 variant="outline"
@@ -231,7 +234,7 @@ const HostBilling = () => {
                 className="flex-1"
                 onClick={() => setPayPerEventDialog(true)}
               >
-                Einzelnes Event buchen
+                {t('host.bookSingleEvent')}
               </Button>
             </div>
           </CardContent>
@@ -242,12 +245,12 @@ const HostBilling = () => {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               <Star className="w-4 h-4 text-primary" />
-              Event-Boost
+              {t('host.eventBoost')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground text-xs mb-3">
-              Mache dein Event zum Top Event für mehr Sichtbarkeit und eine Hervorhebung auf der Karte.
+              {t('host.eventBoostDescription')}
             </p>
             <Button
               size="sm"
@@ -258,7 +261,7 @@ const HostBilling = () => {
               }}
             >
               <Star className="w-4 h-4 mr-1" />
-              Top Event buchen · €49,90
+              {t('host.bookTopEvent')}
             </Button>
           </CardContent>
         </Card>
@@ -266,7 +269,7 @@ const HostBilling = () => {
         {/* Invoice History */}
         <div>
           <h2 className="text-foreground font-bold text-sm mb-3 flex items-center gap-2">
-            <FileText className="w-4 h-4" /> Rechnungshistorie
+            <FileText className="w-4 h-4" /> {t('host.invoiceHistory')}
           </h2>
           <div className="space-y-2">
             {invoices.map((inv) => (
@@ -275,7 +278,7 @@ const HostBilling = () => {
                   <div>
                     <p className="text-foreground text-sm font-medium">{inv.description}</p>
                     <p className="text-muted-foreground text-xs">
-                      {inv.invoice_number} · {format(new Date(inv.created_at), 'dd.MM.yyyy', { locale: de })}
+                      {inv.invoice_number} · {format(new Date(inv.created_at), 'dd.MM.yyyy', { locale: dateLocale })}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -284,14 +287,14 @@ const HostBilling = () => {
                         €{(inv.amount_cents / 100).toFixed(2).replace('.', ',')}
                       </p>
                       <Badge variant="secondary" className="text-[10px]">
-                        {inv.status === 'paid' ? 'Bezahlt' : inv.status}
+                        {inv.status === 'paid' ? t('host.paid') : inv.status}
                       </Badge>
                     </div>
                     <Button
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8"
-                      onClick={() => toast.info('PDF-Download wird mit Stripe aktiviert')}
+                      onClick={() => toast.info(t('host.pdfDownloadInfo'))}
                     >
                       <Download className="w-4 h-4" />
                     </Button>
@@ -307,9 +310,9 @@ const HostBilling = () => {
           <Button
             variant="ghost"
             className="w-full text-destructive hover:text-destructive"
-            onClick={() => toast.info('Kündigung wird mit Stripe aktiviert')}
+            onClick={() => toast.info(t('host.cancelInfo'))}
           >
-            Plan kündigen
+            {t('host.cancelPlan')}
           </Button>
         )}
       </div>
@@ -318,8 +321,8 @@ const HostBilling = () => {
       <Dialog open={changePlanDialog} onOpenChange={setChangePlanDialog}>
         <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Plan wechseln</DialogTitle>
-            <DialogDescription>Wähle deinen neuen Plan</DialogDescription>
+            <DialogTitle>{t('host.changePlan')}</DialogTitle>
+            <DialogDescription>{t('host.selectNewPlan')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2">
             {plans.map((plan) => {
@@ -342,26 +345,26 @@ const HostBilling = () => {
                       <Icon className="w-5 h-5 text-primary" />
                       <span className="text-foreground font-semibold">{plan.name}</span>
                     </div>
-                    {isCurrent && <Badge variant="default" className="text-[10px]">Aktuell</Badge>}
+                    {isCurrent && <Badge variant="default" className="text-[10px]">{t('host.current')}</Badge>}
                   </div>
                   <p className="text-muted-foreground text-xs mb-2">{plan.description}</p>
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-foreground font-bold">
                       {plan.price_cents === 0
-                        ? 'Kostenlos'
-                        : `€${(plan.price_cents / 100).toFixed(0)}/Monat`}
+                        ? t('host.free')
+                        : t('host.perMonth', { price: (plan.price_cents / 100).toFixed(0) })}
                     </span>
                     <span className="text-muted-foreground">
                       {plan.included_events === null
-                        ? 'Unbegrenzte Events'
+                        ? t('host.unlimitedEvents')
                         : plan.included_events === 0
-                        ? 'Einzelkauf'
-                        : `${plan.included_events} Events inkl.`}
+                        ? t('host.singlePurchase')
+                        : t('host.includedEvents', { count: plan.included_events })}
                     </span>
                   </div>
                   {plan.additional_event_price_cents && plan.additional_event_price_cents > 0 && (
                     <p className="text-muted-foreground text-[10px] mt-1">
-                      + €{(plan.additional_event_price_cents / 100).toFixed(2).replace('.', ',')} pro zusätzlichem Event
+                      {t('host.additionalEvent', { price: (plan.additional_event_price_cents / 100).toFixed(2).replace('.', ',') })}
                     </p>
                   )}
                 </button>
@@ -375,17 +378,17 @@ const HostBilling = () => {
       <Dialog open={confirmDialog} onOpenChange={setConfirmDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Plan wechseln bestätigen</DialogTitle>
+            <DialogTitle>{t('host.confirmChangeTitle')}</DialogTitle>
             <DialogDescription>
-              Möchtest du zu <strong>{selectedNewPlan?.name}</strong> wechseln?
+              {t('host.confirmChangeBody', { plan: selectedNewPlan?.name })}
               {selectedNewPlan && selectedNewPlan.price_cents > 0 && (
-                <> Der neue Preis beträgt <strong>€{(selectedNewPlan.price_cents / 100).toFixed(0)}/Monat</strong>.</>
+                <> {t('host.newPriceInfo', { price: (selectedNewPlan.price_cents / 100).toFixed(0) })}</>
               )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setConfirmDialog(false)}>Abbrechen</Button>
-            <Button onClick={confirmPlanChange}>Bestätigen</Button>
+            <Button variant="outline" onClick={() => setConfirmDialog(false)}>{t('host.cancel')}</Button>
+            <Button onClick={confirmPlanChange}>{t('host.confirm')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -394,8 +397,8 @@ const HostBilling = () => {
       <Dialog open={payPerEventDialog} onOpenChange={setPayPerEventDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Event buchen</DialogTitle>
-            <DialogDescription>Wähle die Art des Events</DialogDescription>
+            <DialogTitle>{t('host.bookEvent')}</DialogTitle>
+            <DialogDescription>{t('host.selectEventType')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2">
             <button
@@ -407,8 +410,8 @@ const HostBilling = () => {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-foreground font-semibold">Standard Event</p>
-                  <p className="text-muted-foreground text-xs">Normales Event veröffentlichen</p>
+                  <p className="text-foreground font-semibold">{t('host.standardEvent')}</p>
+                  <p className="text-muted-foreground text-xs">{t('host.standardEventDesc')}</p>
                 </div>
                 <p className="text-foreground font-bold">€29,90</p>
               </div>
@@ -424,9 +427,9 @@ const HostBilling = () => {
                 <div className="flex items-center gap-2">
                   <div>
                     <p className="text-foreground font-semibold flex items-center gap-1">
-                      Top Event <Star className="w-3.5 h-3.5 text-yellow-500" />
+                      {t('host.topEvent')} <Star className="w-3.5 h-3.5 text-yellow-500" />
                     </p>
-                    <p className="text-muted-foreground text-xs">Hervorgehoben auf der Karte + Featured</p>
+                    <p className="text-muted-foreground text-xs">{t('host.topEventDesc')}</p>
                   </div>
                 </div>
                 <p className="text-foreground font-bold">€49,90</p>
@@ -434,9 +437,9 @@ const HostBilling = () => {
             </button>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setPayPerEventDialog(false)}>Abbrechen</Button>
+            <Button variant="outline" onClick={() => setPayPerEventDialog(false)}>{t('host.cancel')}</Button>
             <Button onClick={handlePayPerEvent}>
-              Jetzt buchen · €{payPerEventType === 'standard' ? '29,90' : '49,90'}
+              {t('host.bookNow')} · €{payPerEventType === 'standard' ? '29,90' : '49,90'}
             </Button>
           </DialogFooter>
         </DialogContent>
