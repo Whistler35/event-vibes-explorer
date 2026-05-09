@@ -226,7 +226,7 @@ const HostBilling = () => {
                 className="flex-1"
                 onClick={() => setChangePlanDialog(true)}
               >
-                Plan wechseln {/* placeholder unused */}
+                {t('host.changePlan')}
               </Button>
               <Button
                 variant="outline"
