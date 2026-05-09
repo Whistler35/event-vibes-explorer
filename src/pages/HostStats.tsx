@@ -146,7 +146,7 @@ const HostStats = () => {
             <CardContent className="p-3 text-center">
               <Eye className="w-5 h-5 text-primary mx-auto mb-1" />
               <p className="text-foreground font-bold text-lg">{totalViews}</p>
-              <p className="text-muted-foreground text-[10px]">Views gesamt</p>
+              <p className="text-muted-foreground text-[10px]">{t('host.totalViews')}</p>
             </CardContent>
           </Card>
           <Card>
