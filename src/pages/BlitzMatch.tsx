@@ -35,6 +35,7 @@ interface Profile {
 const BlitzMatch = () => {
   const { matchId } = useParams<{ matchId: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { isAdmin } = useIsAdmin();
   const [match, setMatch] = useState<Match | null>(null);
