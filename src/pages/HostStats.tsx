@@ -169,7 +169,7 @@ const HostStats = () => {
 
         {/* Per-Event Stats */}
         {events.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">Noch keine Events erstellt</div>
+          <div className="text-center py-12 text-muted-foreground">{t('host.noEventsCreated')}</div>
         ) : (
           <div className="space-y-3">
             {allStats.map(({ event, stats }) => {
