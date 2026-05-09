@@ -251,8 +251,8 @@ const EditProfile = () => {
           </div>
 
           <div>
-            <Label className="text-foreground font-medium">Was ich mache (Interessen)</Label>
-            <p className="text-muted-foreground text-xs mt-0.5">Tipp: kurze Tags, z.B. "Tennis 🎾", "Techno 🎧"</p>
+            <Label className="text-foreground font-medium">{t('editProfile.interestsLabel')}</Label>
+            <p className="text-muted-foreground text-xs mt-0.5">{t('editProfile.interestsHint')}</p>
             <div className="flex gap-2 mt-2">
               <Input
                 value={interestInput}
@@ -267,7 +267,7 @@ const EditProfile = () => {
                     }
                   }
                 }}
-                placeholder="Tag eingeben + Enter"
+                placeholder={t('editProfile.interestsPh')}
                 className="bg-muted border-border text-foreground"
               />
               <Button
@@ -281,7 +281,7 @@ const EditProfile = () => {
                   }
                 }}
               >
-                Add
+                {t('editProfile.add')}
               </Button>
             </div>
             {form.interests.length > 0 && (
@@ -301,23 +301,23 @@ const EditProfile = () => {
           </div>
 
           <div className="border-t border-border pt-4">
-            <h3 className="text-foreground font-bold text-lg mb-3">Instagram (optional)</h3>
+            <h3 className="text-foreground font-bold text-lg mb-3">{t('editProfile.instagramTitle')}</h3>
             <div className="space-y-3">
               <div>
-                <Label className="text-muted-foreground font-medium">Username</Label>
+                <Label className="text-muted-foreground font-medium">{t('editProfile.username')}</Label>
                 <Input
                   value={form.instagram_username}
                   onChange={(e) => setForm(prev => ({ ...prev, instagram_username: e.target.value }))}
-                  placeholder="@your_username"
+                  placeholder={t('editProfile.usernamePh')}
                   className="mt-1 bg-muted border-border text-foreground"
                 />
               </div>
               <div>
-                <Label className="text-muted-foreground font-medium">Followers</Label>
+                <Label className="text-muted-foreground font-medium">{t('editProfile.followers')}</Label>
                 <Input
                   value={form.instagram_followers}
                   onChange={(e) => setForm(prev => ({ ...prev, instagram_followers: e.target.value }))}
-                  placeholder="e.g. 1.2k"
+                  placeholder={t('editProfile.followersPh')}
                   className="mt-1 bg-muted border-border text-foreground"
                 />
               </div>
@@ -332,7 +332,7 @@ const EditProfile = () => {
           className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg"
         >
           {saving ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
-          Save profile
+          {t('editProfile.save')}
         </Button>
       </div>
     </Layout>
