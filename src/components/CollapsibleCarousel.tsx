@@ -84,15 +84,16 @@ const CollapsibleCarousel: React.FC<CollapsibleCarouselProps> = ({
     draggingRef.current = false;
     try { (e.target as HTMLElement).releasePointerCapture(e.pointerId); } catch {}
     if (!movedRef.current) {
-      // Treat as tap → toggle
+      // Treat as tap → toggle. Release the click block immediately so child taps work normally next time.
       userOverrideRef.current = true;
       setExpanded(v => !v);
       setDragOffset(0);
+      setTimeout(() => setBlockChildClicks(false), 50);
       return;
     }
-    // After a real drag, block child clicks briefly so cards don't fire onExpand
-    setBlockChildClicks(true);
-    setTimeout(() => setBlockChildClicks(false), 300);
+    // After a real drag, keep child clicks blocked a bit longer
+    // so the synthesized click after pointerup doesn't open an event card.
+    setTimeout(() => setBlockChildClicks(false), 400);
     const finalH = (startExpandedRef.current ? expandedHeight : collapsedHeight) + dragOffset;
     const mid = (expandedHeight + collapsedHeight) / 2;
     userOverrideRef.current = true;
