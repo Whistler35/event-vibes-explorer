@@ -66,7 +66,7 @@ const EventCheckin = () => {
       }
       if (ticket.event_id !== eventId) {
         setLastResult({ status: "wrong_event" });
-        toast.error("Ticket gehört zu einem anderen Event");
+        toast.error(t("eventCheckin.toastWrongEvent"));
         return;
       }
 
