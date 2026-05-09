@@ -103,7 +103,7 @@ const AdminStatistics = () => {
   const fetchCounts = async (threshold: string | null) => {
     const [
       profiles, events, approvedEvents, pendingEvents, rejectedEvents,
-      participants, chatMessages, directMessages, likes, friendships, joinRequests,
+      participants, chatMessages, directMessages, likes, friendships, joinRequests, visits,
     ] = await Promise.all([
       addDateFilter(supabase.from("profiles").select("id", { count: "exact", head: true }), threshold),
       addDateFilter(supabase.from("events").select("id", { count: "exact", head: true }), threshold),
@@ -116,6 +116,7 @@ const AdminStatistics = () => {
       addDateFilter(supabase.from("event_likes").select("id", { count: "exact", head: true }), threshold),
       addDateFilter(supabase.from("friendships").select("id", { count: "exact", head: true }).eq("status", "accepted"), threshold),
       addDateFilter(supabase.from("join_requests").select("id", { count: "exact", head: true }), threshold),
+      addDateFilter(supabase.from("event_views").select("id", { count: "exact", head: true }), threshold, "viewed_at"),
     ]);
 
     setStats({
@@ -130,6 +131,7 @@ const AdminStatistics = () => {
       totalLikes: likes.count ?? 0,
       totalFriendships: friendships.count ?? 0,
       totalJoinRequests: joinRequests.count ?? 0,
+      totalVisits: visits.count ?? 0,
     });
   };
 
