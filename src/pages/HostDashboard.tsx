@@ -140,14 +140,14 @@ const HostDashboard = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-foreground text-2xl font-bold">Host Dashboard</h1>
+            <h1 className="text-foreground text-2xl font-bold">{t('host.dashboard')}</h1>
             <p className="text-muted-foreground text-sm">
-              {plan ? plan.name : 'Kein Plan'} · {eventsUsed} Events erstellt
+              {plan ? plan.name : t('host.noPlan')} · {t('host.eventsCreated', { count: eventsUsed })}
             </p>
           </div>
           <Button size="sm" onClick={() => setShowCreateDialog(true)}>
             <CalendarPlus className="w-4 h-4 mr-1" />
-            Neues Event
+            {t('host.newEvent')}
           </Button>
         </div>
 
