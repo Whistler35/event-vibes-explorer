@@ -505,5 +505,32 @@
     "saving": "Saving...",
     "successUpdate": "Event updated ✅",
     "errorUpdate": "Error updating event"
+  },
+  "eventCheckin": {
+    "title": "Check-in",
+    "scanHint": "Point your camera at the ticket QR code",
+    "checkedIn": "Checked in!",
+    "alreadyCheckedIn": "Already checked in",
+    "invalidTicket": "Invalid ticket",
+    "wrongEvent": "Wrong event",
+    "scanNext": "Scan next code",
+    "noPermission": "You don't have permission to check in to this event.",
+    "back": "Back",
+    "toastInvalid": "Invalid QR code",
+    "toastWrongEvent": "Ticket belongs to a different event",
+    "toastAlready": "Already checked in: {{name}}",
+    "toastSuccess": "Check-in: {{name}}",
+    "toastError": "Check-in failed"
+  },
+  "eventChat": {
+    "groupChat": "Group chat"
+  },
+  "eventHangouts": {
+    "lookFor": "look for evendles",
+    "create": "create hangout",
+    "members": "members"
+  },
+  "chat": {
+    "messagePlaceholder": "Message..."
   }
 }
