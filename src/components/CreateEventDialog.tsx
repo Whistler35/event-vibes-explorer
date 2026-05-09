@@ -195,7 +195,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
           }
         }
         if (occurrences.length === 0) {
-          toast.error('Keine passenden Wochentage im Zeitraum gefunden');
+          toast.error(t('createEvent.errorWeekdays'));
           setLoading(false);
           return;
         }
