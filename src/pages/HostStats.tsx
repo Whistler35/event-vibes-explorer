@@ -162,7 +162,7 @@ const HostStats = () => {
               <p className="text-foreground font-bold text-lg">
                 {totalViews > 0 ? ((totalRegs / totalViews) * 100).toFixed(1) : 0}%
               </p>
-              <p className="text-muted-foreground text-[10px]">Conversion</p>
+              <p className="text-muted-foreground text-[10px]">{t('host.conversion')}</p>
             </CardContent>
           </Card>
         </div>
