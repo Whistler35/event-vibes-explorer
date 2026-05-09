@@ -42,7 +42,7 @@ const ActiveBlitzScreen = ({ request, onEnded }: ActiveBlitzScreenProps) => {
   };
 
   return (
-    <div className="relative h-[calc(100dvh-260px)] min-h-[440px] max-h-[680px] overflow-hidden rounded-3xl bg-[hsl(var(--blitz-forest))] text-white">
+    <div className="relative h-[calc(100dvh-220px)] sm:h-[calc(100dvh-240px)] md:h-[calc(100dvh-260px)] min-h-[380px] sm:min-h-[420px] md:min-h-[440px] max-h-[560px] sm:max-h-[620px] md:max-h-[680px] overflow-hidden rounded-3xl bg-[hsl(var(--blitz-forest))] text-white">
       <div className="absolute inset-0 pointer-events-none opacity-30">
         <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-[hsl(var(--blitz-pink))] blur-3xl" />
         <div className="absolute bottom-10 -right-10 w-80 h-80 rounded-full bg-[hsl(var(--blitz-pink))] blur-3xl opacity-70" />
