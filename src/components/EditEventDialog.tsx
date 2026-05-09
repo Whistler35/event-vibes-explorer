@@ -318,7 +318,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
           {/* Map Position Picker */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-foreground text-sm">Position on the map</Label>
+              <Label className="text-foreground text-sm">{t('editEvent.mapPosition')}</Label>
               <Button
                 type="button"
                 variant="ghost"
@@ -327,7 +327,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
                 className="text-primary text-xs h-7 px-2"
               >
                 <MapPin className="h-3 w-3 mr-1" />
-                {showMapPicker ? 'Hide map' : 'Move on map'}
+                {showMapPicker ? t('editEvent.hideMap') : t('editEvent.moveOnMap')}
               </Button>
             </div>
             {showMapPicker && hasValidPosition && (
@@ -342,7 +342,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
               />
             )}
             {!hasValidPosition && showMapPicker && (
-              <p className="text-muted-foreground text-xs">No coordinates available.</p>
+              <p className="text-muted-foreground text-xs">{t('editEvent.noCoords')}</p>
             )}
           </div>
 
