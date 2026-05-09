@@ -216,10 +216,10 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
       if (error) throw error;
 
       if (isAdmin) {
-        toast.success(`${rows.length} Event(s) erstellt und veröffentlicht ✅`);
+        toast.success(t('createEvent.successAdmin', { count: rows.length }));
       } else {
-        toast.success(`${rows.length} Event(s) eingereicht ⏳`, {
-          description: 'Werden nach Admin-Freigabe veröffentlicht.'
+        toast.success(t('createEvent.successUser', { count: rows.length }), {
+          description: t('createEvent.successUserDesc'),
         });
       }
 
@@ -228,7 +228,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
       onEventCreated?.();
     } catch (err: any) {
       console.error('Error creating event:', err);
-      toast.error('Fehler beim Erstellen des Events');
+      toast.error(t('createEvent.errorCreate'));
     } finally {
       setLoading(false);
     }
