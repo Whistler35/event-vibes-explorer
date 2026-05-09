@@ -7,6 +7,10 @@ const config: CapacitorConfig = {
   plugins: {
     SplashScreen: {
       launchShowDuration: 0
+    },
+    Keyboard: {
+      resize: 'none',
+      resizeOnFullScreen: false,
     }
   }
 };

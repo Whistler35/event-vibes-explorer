@@ -465,9 +465,9 @@ const Nearby = () => {
   };
 
   const quickPills: { id: QuickFilter; label: string; icon: React.ElementType }[] = [
+    { id: 'nearby', label: t('nearby.nearbyFilter'), icon: Navigation },
     { id: 'tonight', label: t('nearby.tonight'), icon: Moon },
     { id: 'free', label: t('nearby.free'), icon: Tag },
-    { id: 'nearby', label: t('nearby.nearbyFilter'), icon: Navigation },
     { id: 'popular', label: t('nearby.popular'), icon: Flame },
   ];
 
@@ -644,7 +644,7 @@ const Nearby = () => {
         )}
 
         {/* BOTTOM CAROUSEL — collapsible drawer */}
-        <div className="absolute left-0 right-0 z-10" style={{ bottom: 'calc(2.5rem + env(safe-area-inset-bottom))' }}>
+        <div className="absolute left-0 right-0 z-10" style={{ bottom: 0, paddingBottom: 'calc(80px + env(safe-area-inset-bottom))' }}>
           <CollapsibleCarousel
             expandedHeight={240}
             collapsedHeight={36}
