@@ -61,23 +61,23 @@ const ActiveBlitzScreen = ({ request, onEnded }: ActiveBlitzScreenProps) => {
           </div>
         </div>
 
-        <div className="space-y-6 my-auto">
+        <div className="space-y-3 my-auto">
           <h1 className={`${getActivityFontClass(request.activity)} font-black uppercase leading-tight tracking-tight break-words max-w-full px-2`}>
             {request.activity}?
           </h1>
 
-          <div className="space-y-1">
-            <div className="text-7xl font-black tabular-nums text-[hsl(var(--blitz-pink))] drop-shadow-[0_0_20px_hsl(var(--blitz-pink)/0.6)]">
+          <div className="flex items-baseline justify-center gap-2">
+            <div className="text-5xl font-black tabular-nums text-[hsl(var(--blitz-pink))] drop-shadow-[0_0_20px_hsl(var(--blitz-pink)/0.6)] leading-none">
               {timeLabel}
             </div>
-            <p className="text-sm uppercase tracking-widest text-white/60 font-bold">left</p>
+            <p className="text-xs uppercase tracking-widest text-white/60 font-bold">left</p>
           </div>
 
-          <div className="flex flex-col items-center gap-1">
+          <div className="flex flex-col items-center gap-0.5">
             {request.city && (
-              <p className="text-base text-white/70 font-medium">📍 {request.city}</p>
+              <p className="text-sm text-white/70 font-medium">📍 {request.city}</p>
             )}
-            <p className="text-xs uppercase tracking-widest text-white/50 font-bold">
+            <p className="text-[10px] uppercase tracking-widest text-white/50 font-bold">
               Radius {request.radius_km} km
             </p>
           </div>
