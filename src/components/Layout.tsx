@@ -8,7 +8,7 @@ interface LayoutProps {
 
 const Layout = ({ children, showBottomNav = true }: LayoutProps) => {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground" style={{ paddingTop: "env(safe-area-inset-top)" }}>
       <main className={`scroll-container ${showBottomNav ? "pb-safe pb-24" : ""}`}>
         {children}
       </main>
