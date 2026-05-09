@@ -31,7 +31,7 @@ interface HostEvent {
 }
 
 // Generate deterministic mock data based on event id
-function generateMockStats(event: HostEvent) {
+function generateMockStats(event: HostEvent, dateLocale: any) {
   const hash = event.id.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
   const totalViews = 80 + (hash % 500);
   const totalRegistrations = Math.floor(totalViews * (0.06 + (hash % 25) / 100));
