@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Calendar, MapPin } from "lucide-react";
@@ -12,6 +13,7 @@ interface ActivityEvent {
 }
 
 const RecentActivities = ({ userId }: { userId: string }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [items, setItems] = useState<ActivityEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,7 +61,7 @@ const RecentActivities = ({ userId }: { userId: string }) => {
 
   return (
     <div className="space-y-3">
-      <h3 className="text-white font-bold text-lg px-4">Letzte Aktivitäten</h3>
+      <h3 className="text-white font-bold text-lg px-4">{t('recentActivities.title')}</h3>
       <div className="flex gap-3 overflow-x-auto no-scrollbar px-4 pb-2">
         {items.map((e) => (
           <button

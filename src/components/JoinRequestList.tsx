@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -20,6 +21,7 @@ interface JoinRequestListProps {
 }
 
 const JoinRequestList: React.FC<JoinRequestListProps> = ({ eventId }) => {
+  const { t } = useTranslation();
   const [requests, setRequests] = useState<JoinRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
@@ -77,16 +79,16 @@ const JoinRequestList: React.FC<JoinRequestListProps> = ({ eventId }) => {
         }
       }
 
-      toast.success(newStatus === 'accepted' ? 'Angenommen!' : 'Abgelehnt');
+      toast.success(newStatus === 'accepted' ? t('joinRequests.acceptedToast') : t('joinRequests.rejectedToast'));
       fetchRequests();
     } catch (err: any) {
-      toast.error(err.message || 'Fehler');
+      toast.error(err.message || t('joinRequests.error'));
     } finally {
       setUpdating(null);
     }
   };
 
-  if (loading) return <div className="text-muted-foreground text-sm">Lädt Anfragen...</div>;
+  if (loading) return <div className="text-muted-foreground text-sm">{t('joinRequests.loading')}</div>;
   if (requests.length === 0) return null;
 
   const pending = requests.filter(r => r.status === 'pending');
@@ -95,7 +97,7 @@ const JoinRequestList: React.FC<JoinRequestListProps> = ({ eventId }) => {
   return (
     <div className="space-y-3">
       <h3 className="text-foreground font-bold text-lg">
-        Teilnahme-Anfragen {pending.length > 0 && <span className="text-primary">({pending.length})</span>}
+        {t('joinRequests.title')} {pending.length > 0 && <span className="text-primary">({pending.length})</span>}
       </h3>
 
       {pending.map(req => (
@@ -111,7 +113,7 @@ const JoinRequestList: React.FC<JoinRequestListProps> = ({ eventId }) => {
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-foreground font-medium text-sm">{req.profile?.name || 'Unbekannt'}</p>
+              <p className="text-foreground font-medium text-sm">{req.profile?.name || t('joinRequests.unknown')}</p>
               {req.message && <p className="text-muted-foreground text-xs truncate">{req.message}</p>}
             </div>
           </div>
@@ -141,10 +143,10 @@ const JoinRequestList: React.FC<JoinRequestListProps> = ({ eventId }) => {
         <div className="space-y-1">
           {resolved.map(req => (
             <div key={req.id} className="flex items-center gap-2 text-xs text-muted-foreground px-1">
-              <span>{req.profile?.name || 'Unbekannt'}</span>
+              <span>{req.profile?.name || t('joinRequests.unknown')}</span>
               <span>–</span>
               <span className={req.status === 'accepted' ? 'text-green-500' : 'text-destructive'}>
-                {req.status === 'accepted' ? 'Angenommen' : req.status === 'rejected' ? 'Abgelehnt' : 'Zurückgezogen'}
+                {req.status === 'accepted' ? t('joinRequests.accepted') : req.status === 'rejected' ? t('joinRequests.rejected') : t('joinRequests.withdrawn')}
               </span>
             </div>
           ))}

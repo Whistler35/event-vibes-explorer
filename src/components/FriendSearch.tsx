@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,6 +24,7 @@ interface Friendship {
 }
 
 const FriendSearch: React.FC = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
@@ -109,10 +111,10 @@ const FriendSearch: React.FC = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success('Freundschaftsanfrage gesendet!');
+      toast.success(t('friendSearch.requestSent'));
       queryClient.invalidateQueries({ queryKey: ['friendships'] });
     },
-    onError: () => toast.error('Anfrage konnte nicht gesendet werden.'),
+    onError: () => toast.error(t('friendSearch.requestSendError')),
   });
 
   const respondRequest = useMutation({
@@ -130,10 +132,10 @@ const FriendSearch: React.FC = () => {
       }
     },
     onSuccess: (_, vars) => {
-      toast.success(vars.status === 'accepted' ? 'Freund hinzugefügt! 🎉' : 'Anfrage abgelehnt.');
+      toast.success(vars.status === 'accepted' ? t('friendSearch.friendAdded') : t('friendSearch.requestRejected'));
       queryClient.invalidateQueries({ queryKey: ['friendships'] });
     },
-    onError: () => toast.error('Fehler beim Aktualisieren.'),
+    onError: () => toast.error(t('friendSearch.updateError')),
   });
 
   const removeFriend = useMutation({
@@ -142,10 +144,10 @@ const FriendSearch: React.FC = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success('Freund entfernt.');
+      toast.success(t('friendSearch.friendRemoved'));
       queryClient.invalidateQueries({ queryKey: ['friendships'] });
     },
-    onError: () => toast.error('Fehler beim Entfernen.'),
+    onError: () => toast.error(t('friendSearch.removeError')),
   });
 
   const getFriendshipStatus = (profileUserId: string) => {
@@ -271,7 +273,7 @@ const FriendSearch: React.FC = () => {
           Freunde {friendProfiles.length > 0 && `(${friendProfiles.length})`}
         </h3>
         {friendProfiles.length === 0 ? (
-          <p className="text-muted-foreground text-sm">Noch keine Freunde hinzugefügt.</p>
+          <p className="text-muted-foreground text-sm">{t('friendSearch.noFriends')}</p>
         ) : (
           friendProfiles.map((profile) => {
             const friendship = getFriendshipStatus(profile.user_id);

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback, useImperativeHandle, forwardRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import Supercluster from 'supercluster';
@@ -55,6 +56,7 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
   selectedEventId = null,
   onViewportChange,
 }, ref) => {
+  const { t } = useTranslation();
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const geolocateRef = useRef<mapboxgl.GeolocateControl | null>(null);
@@ -431,14 +433,14 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
           </div>
           <div className="fixed bottom-[calc(6.75rem+env(safe-area-inset-bottom))] md:absolute md:bottom-6 left-1/2 transform -translate-x-1/2 z-[60] md:z-30 flex gap-3 px-4 max-w-full">
             <button onClick={cancelPlaceMode} className="px-6 py-3 bg-card border border-border rounded-full flex items-center gap-2 text-foreground hover:bg-muted transition-colors">
-              <X className="w-5 h-5" /><span>Abbrechen</span>
+              <X className="w-5 h-5" /><span>{t('mapbox.cancel')}</span>
             </button>
             <button onClick={confirmPlacement} className="px-6 py-3 bg-primary rounded-full flex items-center gap-2 text-primary-foreground hover:bg-primary/90 transition-colors">
-              <MapPin className="w-5 h-5" /><span>Hier platzieren</span>
+              <MapPin className="w-5 h-5" /><span>{t('mapbox.placeHere')}</span>
             </button>
           </div>
           <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30 px-4 py-2 bg-card/90 border border-border rounded-full">
-            <p className="text-foreground text-sm">Ziehe den Pin an die gewünschte Stelle</p>
+            <p className="text-foreground text-sm">{t('mapbox.dragHint')}</p>
           </div>
         </>
       )}

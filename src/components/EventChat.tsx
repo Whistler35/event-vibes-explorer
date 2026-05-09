@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ interface EventChatProps {
 }
 
 const EventChat = ({ eventId, eventTitle }: EventChatProps) => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
@@ -102,7 +104,7 @@ const EventChat = ({ eventId, eventTitle }: EventChatProps) => {
       }
     } catch (error) {
       console.error('Error fetching chat:', error);
-      toast.error('Chat konnte nicht geladen werden');
+      toast.error(t('eventChat.loadError'));
       setLoading(false);
     }
   };
@@ -141,7 +143,7 @@ const EventChat = ({ eventId, eventTitle }: EventChatProps) => {
         const profile = profileData?.find(p => p.user_id === message.user_id);
         return {
           ...message,
-          user_name: profile?.name || 'Unbekannter User',
+          user_name: profile?.name || t('eventChat.unknownUser'),
           user_avatar: profile?.avatar_url
         };
       });
@@ -172,7 +174,7 @@ const EventChat = ({ eventId, eventTitle }: EventChatProps) => {
       setNewMessage('');
     } catch (error: any) {
       console.error('Error sending message:', error);
-      toast.error('Nachricht konnte nicht gesendet werden');
+      toast.error(t('eventChat.sendError'));
     } finally {
       setSending(false);
     }
@@ -188,7 +190,7 @@ const EventChat = ({ eventId, eventTitle }: EventChatProps) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-white">Chat wird geladen...</div>
+        <div className="text-white">{t('eventChat.loading')}</div>
       </div>
     );
   }
@@ -197,8 +199,8 @@ const EventChat = ({ eventId, eventTitle }: EventChatProps) => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center text-muted-foreground">
-          <p>Noch kein Chat verfügbar.</p>
-          <p className="text-sm mt-2">Der Chat wird erstellt, sobald jemand dem Event beitritt.</p>
+          <p>{t('eventChat.noChat')}</p>
+          <p className="text-sm mt-2">{t('eventChat.createdOnJoin')}</p>
         </div>
       </div>
     );

@@ -527,7 +527,12 @@
     "toastError": "Fehler beim Check-in"
   },
   "eventChat": {
-    "groupChat": "Gruppenchat"
+    "loadError": "Chat konnte nicht geladen werden",
+    "sendError": "Nachricht konnte nicht gesendet werden",
+    "unknownUser": "Unbekannter User",
+    "loading": "Chat wird geladen...",
+    "noChat": "Noch kein Chat verfügbar.",
+    "createdOnJoin": "Der Chat wird erstellt, sobald jemand dem Event beitritt."
   },
   "eventHangouts": {
     "lookFor": "Evendles suchen",
@@ -679,5 +684,45 @@
   "index": {
     "welcome": "Willkommen in deiner App",
     "start": "Beginne hier dein Projekt!"
+  },
+  "mapbox": {
+    "cancel": "Abbrechen",
+    "placeHere": "Hier platzieren",
+    "dragHint": "Ziehe den Pin an die gewünschte Stelle"
+  },
+  "friendSearch": {
+    "requestSent": "Freundschaftsanfrage gesendet!",
+    "requestSendError": "Anfrage konnte nicht gesendet werden.",
+    "friendAdded": "Freund hinzugefügt! 🎉",
+    "requestRejected": "Anfrage abgelehnt.",
+    "updateError": "Fehler beim Aktualisieren.",
+    "friendRemoved": "Freund entfernt.",
+    "removeError": "Fehler beim Entfernen.",
+    "noFriends": "Noch keine Freunde hinzugefügt."
+  },
+  "joinRequests": {
+    "loading": "Lädt Anfragen...",
+    "title": "Teilnahme-Anfragen",
+    "accepted": "Angenommen",
+    "rejected": "Abgelehnt",
+    "withdrawn": "Zurückgezogen",
+    "unknown": "Unbekannt",
+    "acceptedToast": "Angenommen!",
+    "rejectedToast": "Abgelehnt",
+    "error": "Fehler"
+  },
+  "recentActivities": {
+    "title": "Letzte Aktivitäten"
+  },
+  "reels": {
+    "minimize": "Minimieren",
+    "fullscreen": "Vollbild",
+    "swipeHint": "Swipe nach oben für mehr Inspiration ✨",
+    "desc1": "Die heißeste Party der Stadt – Lichter, Beats & gute Vibes!",
+    "desc2": "Open-Air DJ Session mit fetten Drops – bist du dabei?",
+    "desc3": "Probier dich durch die besten Street-Food-Stände!",
+    "desc4": "Atme ein, lass los – Yoga bei Sonnenuntergang im Park",
+    "desc5": "Jeden Samstag 7 Uhr – gemeinsam laufen, gemeinsam wachsen",
+    "desc6": "Live-Musik über den Dächern der Stadt – unvergessliche Nacht!"
   }
 }
