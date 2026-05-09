@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, CalendarDays, UserPlus, MessageCircle, Heart, Handshake, TrendingUp, Download } from "lucide-react";
+import { Users, CalendarDays, UserPlus, MessageCircle, Heart, Handshake, TrendingUp, Download, Eye } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import StatDetailSheet, { StatKind } from "@/components/admin/StatDetailSheet";
 
@@ -34,6 +34,7 @@ interface Stats {
   totalLikes: number;
   totalFriendships: number;
   totalJoinRequests: number;
+  totalVisits: number;
 }
 
 interface MonthlyData {
@@ -102,7 +103,7 @@ const AdminStatistics = () => {
   const fetchCounts = async (threshold: string | null) => {
     const [
       profiles, events, approvedEvents, pendingEvents, rejectedEvents,
-      participants, chatMessages, directMessages, likes, friendships, joinRequests,
+      participants, chatMessages, directMessages, likes, friendships, joinRequests, visits,
     ] = await Promise.all([
       addDateFilter(supabase.from("profiles").select("id", { count: "exact", head: true }), threshold),
       addDateFilter(supabase.from("events").select("id", { count: "exact", head: true }), threshold),
@@ -115,6 +116,7 @@ const AdminStatistics = () => {
       addDateFilter(supabase.from("event_likes").select("id", { count: "exact", head: true }), threshold),
       addDateFilter(supabase.from("friendships").select("id", { count: "exact", head: true }).eq("status", "accepted"), threshold),
       addDateFilter(supabase.from("join_requests").select("id", { count: "exact", head: true }), threshold),
+      addDateFilter(supabase.from("event_views").select("id", { count: "exact", head: true }), threshold, "viewed_at"),
     ]);
 
     setStats({
@@ -129,6 +131,7 @@ const AdminStatistics = () => {
       totalLikes: likes.count ?? 0,
       totalFriendships: friendships.count ?? 0,
       totalJoinRequests: joinRequests.count ?? 0,
+      totalVisits: visits.count ?? 0,
     });
   };
 
@@ -213,6 +216,7 @@ const AdminStatistics = () => {
       ["Metric", "Value"],
       ["Period", chartTitle],
       ["Users", stats.totalUsers],
+      ["Visits", stats.totalVisits],
       ["Total Events", stats.totalEvents],
       ["Events Approved", stats.approvedEvents],
       ["Events Pending", stats.pendingEvents],
@@ -283,6 +287,7 @@ const AdminStatistics = () => {
               <StatCard icon={Heart} label="Likes" value={stats.totalLikes} onClick={() => setDetailKind("likes")} />
               <StatCard icon={MessageCircle} label="Messages" value={stats.totalChatMessages + stats.totalDirectMessages} subtext={`${stats.totalChatMessages} groups · ${stats.totalDirectMessages} DMs`} onClick={() => setDetailKind("messages")} />
               <StatCard icon={Handshake} label="Friendships" value={stats.totalFriendships} onClick={() => setDetailKind("friendships")} />
+              <StatCard icon={Eye} label="Visits" value={stats.totalVisits} subtext="Event page views" />
             </div>
           </div>
 
