@@ -83,5 +83,5 @@ export function useNotifications() {
     };
   }, [user, fetchNotifications]);
 
-  return { notifications, unreadCount, markAsRead, markAllAsRead };
+  return { notifications, unreadCount, markAsRead, markAllAsRead, refetch: fetchNotifications };
 }
