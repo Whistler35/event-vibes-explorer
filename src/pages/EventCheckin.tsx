@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import Layout from "@/components/Layout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +21,7 @@ interface ScanResult {
 
 const EventCheckin = () => {
   const { id: eventId } = useParams();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { isAdmin } = useIsAdmin();
   const navigate = useNavigate();
@@ -59,12 +61,12 @@ const EventCheckin = () => {
 
       if (!ticket) {
         setLastResult({ status: "invalid" });
-        toast.error("Ungültiger QR-Code");
+        toast.error(t("eventCheckin.toastInvalid"));
         return;
       }
       if (ticket.event_id !== eventId) {
         setLastResult({ status: "wrong_event" });
-        toast.error("Ticket gehört zu einem anderen Event");
+        toast.error(t("eventCheckin.toastWrongEvent"));
         return;
       }
 
@@ -78,7 +80,7 @@ const EventCheckin = () => {
           participantName: profile?.name,
           checkedInAt: ticket.checked_in_at,
         });
-        toast.warning(`Bereits eingecheckt: ${profile?.name || ticket.ticket_code}`);
+        toast.warning(t("eventCheckin.toastAlready", { name: profile?.name || ticket.ticket_code }));
         return;
       }
 
@@ -94,10 +96,10 @@ const EventCheckin = () => {
         ticketCode: ticket.ticket_code,
         participantName: profile?.name,
       });
-      toast.success(`Check-in: ${profile?.name || ticket.ticket_code}`);
+      toast.success(t("eventCheckin.toastSuccess", { name: profile?.name || ticket.ticket_code }));
       refreshStats();
     } catch (e: any) {
-      toast.error(e.message || "Fehler beim Check-in");
+      toast.error(e.message || t("eventCheckin.toastError"));
     } finally {
       setProcessing(false);
     }
@@ -107,8 +109,8 @@ const EventCheckin = () => {
     return (
       <Layout>
         <div className="p-6 text-center space-y-4">
-          <p>Du hast keine Berechtigung für den Check-in dieses Events.</p>
-          <Button onClick={() => navigate(-1)}>Zurück</Button>
+          <p>{t("eventCheckin.noPermission")}</p>
+          <Button onClick={() => navigate(-1)}>{t("eventCheckin.back")}</Button>
         </div>
       </Layout>
     );
@@ -123,7 +125,7 @@ const EventCheckin = () => {
           </Button>
           <div className="flex-1 min-w-0">
             <h1 className="text-xl font-bold flex items-center gap-2">
-              <ScanLine className="w-5 h-5 text-primary" /> Check-in
+              <ScanLine className="w-5 h-5 text-primary" /> {t("eventCheckin.title")}
             </h1>
             <p className="text-sm text-muted-foreground truncate">{eventTitle}</p>
           </div>
@@ -143,7 +145,7 @@ const EventCheckin = () => {
               />
             </div>
             <CardContent className="p-3 text-center text-sm text-muted-foreground">
-              Halte die Kamera auf den QR-Code des Tickets
+              {t("eventCheckin.scanHint")}
             </CardContent>
           </Card>
         ) : (
@@ -153,7 +155,7 @@ const EventCheckin = () => {
                 <>
                   <CheckCircle2 className="w-16 h-16 mx-auto text-primary" />
                   <div>
-                    <h3 className="font-bold text-xl">Eingecheckt!</h3>
+                    <h3 className="font-bold text-xl">{t("eventCheckin.checkedIn")}</h3>
                     <p className="text-muted-foreground">{lastResult.participantName}</p>
                     <Badge variant="outline" className="font-mono mt-2">{lastResult.ticketCode}</Badge>
                   </div>
@@ -163,10 +165,10 @@ const EventCheckin = () => {
                 <>
                   <CheckCircle2 className="w-16 h-16 mx-auto text-amber-500" />
                   <div>
-                    <h3 className="font-bold text-xl">Schon eingecheckt</h3>
+                    <h3 className="font-bold text-xl">{t("eventCheckin.alreadyCheckedIn")}</h3>
                     <p className="text-muted-foreground">{lastResult.participantName}</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {lastResult.checkedInAt && new Date(lastResult.checkedInAt).toLocaleString("de-DE")}
+                      {lastResult.checkedInAt && new Date(lastResult.checkedInAt).toLocaleString(i18n.language === "de" ? "de-DE" : "en-US")}
                     </p>
                   </div>
                 </>
@@ -176,13 +178,13 @@ const EventCheckin = () => {
                   <XCircle className="w-16 h-16 mx-auto text-destructive" />
                   <div>
                     <h3 className="font-bold text-xl">
-                      {lastResult.status === "invalid" ? "Ungültiges Ticket" : "Falsches Event"}
+                      {lastResult.status === "invalid" ? t("eventCheckin.invalidTicket") : t("eventCheckin.wrongEvent")}
                     </h3>
                   </div>
                 </>
               )}
               <Button onClick={() => { setLastResult(null); setScanning(true); }} className="w-full gap-2">
-                <RotateCcw className="w-4 h-4" /> Nächsten Code scannen
+                <RotateCcw className="w-4 h-4" /> {t("eventCheckin.scanNext")}
               </Button>
             </CardContent>
           </Card>

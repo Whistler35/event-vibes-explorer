@@ -505,5 +505,32 @@
     "saving": "Wird gespeichert …",
     "successUpdate": "Event aktualisiert ✅",
     "errorUpdate": "Fehler beim Aktualisieren"
+  },
+  "eventCheckin": {
+    "title": "Check-in",
+    "scanHint": "Halte die Kamera auf den QR-Code des Tickets",
+    "checkedIn": "Eingecheckt!",
+    "alreadyCheckedIn": "Schon eingecheckt",
+    "invalidTicket": "Ungültiges Ticket",
+    "wrongEvent": "Falsches Event",
+    "scanNext": "Nächsten Code scannen",
+    "noPermission": "Du hast keine Berechtigung für den Check-in dieses Events.",
+    "back": "Zurück",
+    "toastInvalid": "Ungültiger QR-Code",
+    "toastWrongEvent": "Ticket gehört zu einem anderen Event",
+    "toastAlready": "Bereits eingecheckt: {{name}}",
+    "toastSuccess": "Check-in: {{name}}",
+    "toastError": "Fehler beim Check-in"
+  },
+  "eventChat": {
+    "groupChat": "Gruppenchat"
+  },
+  "eventHangouts": {
+    "lookFor": "Evendles suchen",
+    "create": "Hangout erstellen",
+    "members": "Mitglieder"
+  },
+  "chat": {
+    "messagePlaceholder": "Nachricht …"
   }
 }

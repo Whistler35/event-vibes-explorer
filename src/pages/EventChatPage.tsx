@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft } from "lucide-react";
 import Layout from "@/components/Layout";
 import EventChat from "@/components/EventChat";
@@ -7,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const EventChatPage = () => {
   const { id } = useParams();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [eventTitle, setEventTitle] = useState("");
 
@@ -34,8 +36,8 @@ const EventChatPage = () => {
             <ArrowLeft className="w-5 h-5 text-foreground" />
           </button>
           <div className="flex-1 min-w-0">
-            <h1 className="text-foreground font-bold truncate">{eventTitle || "Gruppenchat"}</h1>
-            <p className="text-muted-foreground text-xs">Gruppenchat</p>
+            <h1 className="text-foreground font-bold truncate">{eventTitle || t("eventChat.groupChat")}</h1>
+            <p className="text-muted-foreground text-xs">{t("eventChat.groupChat")}</p>
           </div>
         </div>
 

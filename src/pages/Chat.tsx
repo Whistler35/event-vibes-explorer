@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Send } from "lucide-react";
 import Layout from "@/components/Layout";
 import yogaEventImage from "@/assets/yoga-event-new.jpg";
 
 const Chat = () => {
   const { id } = useParams();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [message, setMessage] = useState("");
 
@@ -112,7 +114,7 @@ const Chat = () => {
               type="text"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Message..."
+              placeholder={t("chat.messagePlaceholder")}
               className="flex-1 bg-evendle-dark-card rounded-full px-4 py-3 text-white placeholder-evendle-gray focus:outline-none focus:ring-2 focus:ring-evendle-orange"
               onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
             />

@@ -1,10 +1,12 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Users } from "lucide-react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 
 const EventHangouts = () => {
   const { id } = useParams();
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const hangouts = [
@@ -62,13 +64,13 @@ const EventHangouts = () => {
               className="flex-1 bg-evendle-gray hover:bg-evendle-gray/80 text-white py-3 rounded-2xl font-medium"
               onClick={() => {/* Navigate to search hangouts */}}
             >
-              look for evendles
+              {t("eventHangouts.lookFor")}
             </Button>
             <Button 
               className="flex-1 bg-evendle-orange hover:bg-evendle-orange-hover text-white py-3 rounded-2xl font-medium"
               onClick={() => {/* Navigate to create hangout */}}
             >
-              create hang out
+              {t("eventHangouts.create")}
             </Button>
           </div>
 
@@ -97,7 +99,7 @@ const EventHangouts = () => {
                     </p>
                     <div className="flex items-center space-x-1 text-evendle-gray text-sm">
                       <Users size={16} />
-                      <span>{hangout.members} members</span>
+                      <span>{hangout.members} {t("eventHangouts.members")}</span>
                     </div>
                   </div>
                 </div>
