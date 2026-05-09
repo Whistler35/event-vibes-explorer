@@ -169,10 +169,12 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
       if (showControls) {
         map.current.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'top-right');
       }
-      // Geolocate control (hidden — triggered via custom button)
+      // Geolocate control — shows the user's blue dot, but does NOT continuously
+      // recenter the map. Otherwise the map keeps snapping back to the user's
+      // physical location whenever the watch fires (e.g. while browsing Linz from Gmunden).
       const geo = new mapboxgl.GeolocateControl({
         positionOptions: { enableHighAccuracy: true },
-        trackUserLocation: true,
+        trackUserLocation: false,
         showUserHeading: true,
         showAccuracyCircle: true,
       });
@@ -198,11 +200,15 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
 
       map.current.on('load', () => {
         setIsLoaded(true);
-        // Auto-trigger geolocation so the blue dot appears without needing a tap.
-        // Browser will ask for permission the first time; we don't recenter aggressively.
-        setTimeout(() => {
-          try { geolocateRef.current?.trigger(); } catch {}
-        }, 600);
+        // Auto-trigger geolocation so the blue dot appears — but only if the user
+        // is not currently browsing a different city (otherwise the trigger would
+        // snap the map back to their physical location).
+        const hasSelectedCity = !!localStorage.getItem('selectedCity');
+        if (!hasSelectedCity) {
+          setTimeout(() => {
+            try { geolocateRef.current?.trigger(); } catch {}
+          }, 600);
+        }
       });
       map.current.on('error', (e) => {
         console.error('Mapbox error:', e);
