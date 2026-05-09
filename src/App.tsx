@@ -26,6 +26,7 @@ import UserProfile from "./pages/UserProfile";
 import EditProfile from "./pages/EditProfile";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/AuthContext";
+import VisitTracker from "./hooks/useTrackVisit";
 
 const AdminEvents = lazy(() => import("./pages/AdminEvents"));
 const HostDashboard = lazy(() => import("./pages/HostDashboard"));
