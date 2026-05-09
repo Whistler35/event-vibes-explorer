@@ -96,10 +96,10 @@ const EventCheckin = () => {
         ticketCode: ticket.ticket_code,
         participantName: profile?.name,
       });
-      toast.success(`Check-in: ${profile?.name || ticket.ticket_code}`);
+      toast.success(t("eventCheckin.toastSuccess", { name: profile?.name || ticket.ticket_code }));
       refreshStats();
     } catch (e: any) {
-      toast.error(e.message || "Fehler beim Check-in");
+      toast.error(e.message || t("eventCheckin.toastError"));
     } finally {
       setProcessing(false);
     }
