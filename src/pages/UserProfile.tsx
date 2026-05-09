@@ -120,8 +120,8 @@ const UserProfile = () => {
     const { error } = await supabase
       .from("friendships")
       .insert({ requester_id: user.id, addressee_id: userId } as any);
-    if (error) toast.error("Anfrage konnte nicht gesendet werden.");
-    else toast.success("Freundschaftsanfrage gesendet!");
+    if (error) toast.error(t("userProfile.friendRequestError"));
+    else toast.success(t("userProfile.friendRequestSent"));
     await fetchFriendship();
     setFriendActionLoading(false);
   };
