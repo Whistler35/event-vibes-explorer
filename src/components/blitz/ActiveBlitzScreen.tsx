@@ -42,7 +42,7 @@ const ActiveBlitzScreen = ({ request, onEnded }: ActiveBlitzScreenProps) => {
   };
 
   return (
-    <div className="relative h-[calc(100dvh-260px)] min-h-[440px] max-h-[680px] overflow-hidden rounded-3xl bg-[hsl(var(--blitz-forest))] text-white">
+    <div className="relative h-[calc(100dvh-220px)] sm:h-[calc(100dvh-240px)] md:h-[calc(100dvh-260px)] min-h-[380px] sm:min-h-[420px] md:min-h-[440px] max-h-[560px] sm:max-h-[620px] md:max-h-[680px] overflow-hidden rounded-3xl bg-[hsl(var(--blitz-forest))] text-white">
       <div className="absolute inset-0 pointer-events-none opacity-30">
         <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-[hsl(var(--blitz-pink))] blur-3xl" />
         <div className="absolute bottom-10 -right-10 w-80 h-80 rounded-full bg-[hsl(var(--blitz-pink))] blur-3xl opacity-70" />
@@ -52,7 +52,7 @@ const ActiveBlitzScreen = ({ request, onEnded }: ActiveBlitzScreenProps) => {
       <Zap className="absolute top-8 right-6 w-7 h-7 text-[hsl(var(--blitz-pink))] fill-[hsl(var(--blitz-pink))] opacity-60 animate-pulse" />
       <Zap className="absolute bottom-20 left-5 w-5 h-5 text-[hsl(var(--blitz-pink))] fill-[hsl(var(--blitz-pink))] opacity-40 animate-pulse" style={{ animationDelay: "0.5s" }} />
 
-      <div className="relative z-10 flex flex-col items-center justify-between h-full px-6 py-6 text-center">
+      <div className="relative z-10 flex flex-col items-center justify-between h-full px-4 sm:px-6 py-4 sm:py-6 text-center">
         <div className="space-y-2">
           <p className="text-xs uppercase tracking-[0.3em] text-white/60 font-bold">Live Blitz</p>
           <div className="flex items-center justify-center gap-2">
