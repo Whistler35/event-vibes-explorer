@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,6 +31,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
   onEventCreated,
   defaultPrivate = false,
 }) => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { isHost } = useIsHost();
   const canManageTickets = isAdmin || isHost;
@@ -193,7 +195,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
           }
         }
         if (occurrences.length === 0) {
-          toast.error('Keine passenden Wochentage im Zeitraum gefunden');
+          toast.error(t('createEvent.errorWeekdays'));
           setLoading(false);
           return;
         }
@@ -214,10 +216,10 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
       if (error) throw error;
 
       if (isAdmin) {
-        toast.success(`${rows.length} Event(s) erstellt und veröffentlicht ✅`);
+        toast.success(t('createEvent.successAdmin', { count: rows.length }));
       } else {
-        toast.success(`${rows.length} Event(s) eingereicht ⏳`, {
-          description: 'Werden nach Admin-Freigabe veröffentlicht.'
+        toast.success(t('createEvent.successUser', { count: rows.length }), {
+          description: t('createEvent.successUserDesc'),
         });
       }
 
@@ -226,7 +228,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
       onEventCreated?.();
     } catch (err: any) {
       console.error('Error creating event:', err);
-      toast.error('Fehler beim Erstellen des Events');
+      toast.error(t('createEvent.errorCreate'));
     } finally {
       setLoading(false);
     }
@@ -253,14 +255,14 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
         <div className="flex items-center justify-between p-4 pb-2 shrink-0">
           <div className="flex items-center gap-2">
             <span className="text-primary text-xl font-bold">+</span>
-            <span className="text-foreground text-lg font-semibold">Create evendle</span>
+            <span className="text-foreground text-lg font-semibold">{t('createEvent.title')}</span>
           </div>
           {isAdmin ?
           <span className="flex items-center gap-1 text-xs text-green-600">
-              <ShieldCheck className="h-3.5 w-3.5" /> Admin
+              <ShieldCheck className="h-3.5 w-3.5" /> {t('createEvent.adminBadge')}
             </span> :
           <span className="flex items-center gap-1 text-xs text-yellow-600">
-              <Clock className="h-3.5 w-3.5" /> Review required
+              <Clock className="h-3.5 w-3.5" /> {t('createEvent.reviewBadge')}
             </span>
           }
         </div>
@@ -268,14 +270,14 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
         <div className="overflow-y-auto flex-1 min-h-0">
         {!isAdmin &&
         <div className="mx-4 px-3 py-2 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs">
-            Your event will be visible after admin approval.
+            {t('createEvent.approvalNotice')}
           </div>
         }
 
         <div className="p-4 pt-2 space-y-4">
           {/* Image Upload */}
           <div className="space-y-2">
-            <Label className="text-foreground text-sm">Image</Label>
+            <Label className="text-foreground text-sm">{t('createEvent.image')}</Label>
             <div className="relative">
               {imagePreview ?
               <div className="relative">
@@ -286,7 +288,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
                 </div> :
               <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/50 transition-colors bg-transparent">
                   <Camera className="h-8 w-8 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground mt-2">Add image</span>
+                  <span className="text-sm text-muted-foreground mt-2">{t('createEvent.addImage')}</span>
                   <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                 </label>
               }
@@ -295,45 +297,45 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
 
           {/* Title */}
           <div className="space-y-2">
-            <Label htmlFor="title" className="text-foreground text-sm">Title *</Label>
-            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="What are you doing?" className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12" />
+            <Label htmlFor="title" className="text-foreground text-sm">{t('createEvent.fieldTitle')}</Label>
+            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t('createEvent.titlePlaceholder')} className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12" />
           </div>
 
           {/* Category */}
           <div className="space-y-2">
-            <Label className="text-foreground text-sm">Category *</Label>
+            <Label className="text-foreground text-sm">{t('createEvent.category')}</Label>
             {isAdmin ?
             <Select value={category} onValueChange={(val) => setCategory(val as EventCategory)}>
                 <SelectTrigger className="bg-transparent border-border text-foreground rounded-xl h-12">
-                  <SelectValue placeholder="Select category" />
+                  <SelectValue placeholder={t('createEvent.selectCategory')} />
                 </SelectTrigger>
                 <SelectContent className="bg-card border-border">
-                  <SelectItem value="sports">Sports</SelectItem>
-                  <SelectItem value="community">Community</SelectItem>
-                  <SelectItem value="music">Music</SelectItem>
-                  <SelectItem value="culture">Culture</SelectItem>
-                  <SelectItem value="food">Food</SelectItem>
-                  <SelectItem value="nightlife">Nightlife</SelectItem>
-                  <SelectItem value="outdoor">Outdoor</SelectItem>
-                  <SelectItem value="workshop">Workshop</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
+                  <SelectItem value="sports">{t('categories.sports')}</SelectItem>
+                  <SelectItem value="community">{t('categories.community')}</SelectItem>
+                  <SelectItem value="music">{t('categories.music')}</SelectItem>
+                  <SelectItem value="culture">{t('categories.culture')}</SelectItem>
+                  <SelectItem value="food">{t('categories.food')}</SelectItem>
+                  <SelectItem value="nightlife">{t('categories.nightlife')}</SelectItem>
+                  <SelectItem value="outdoor">{t('categories.outdoor')}</SelectItem>
+                  <SelectItem value="workshop">{t('categories.workshop')}</SelectItem>
+                  <SelectItem value="other">{t('categories.other')}</SelectItem>
                 </SelectContent>
               </Select> :
             <div className="flex items-center gap-2 h-12 px-3 rounded-xl border border-border text-foreground bg-transparent">
-                <span>Community</span>
+                <span>{t('categories.community')}</span>
                 <span className="text-xs text-muted-foreground ml-auto"></span>
               </div>}
           </div>
 
           {/* Description */}
           <div className="space-y-2">
-            <Label htmlFor="description" className="text-foreground text-sm">Description</Label>
-            <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe your event..." rows={3} className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl resize-none" />
+            <Label htmlFor="description" className="text-foreground text-sm">{t('createEvent.description')}</Label>
+            <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t('createEvent.descriptionPlaceholder')} rows={3} className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl resize-none" />
           </div>
 
           {/* Address */}
           <div className="space-y-2">
-            <Label htmlFor="address" className="text-foreground text-sm">Address (optional)</Label>
+            <Label htmlFor="address" className="text-foreground text-sm">{t('createEvent.address')}</Label>
             <div className="relative">
               <Input
                 id="address"
@@ -345,7 +347,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
                 }}
                 onFocus={() => setShowSuggestions(true)}
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-                placeholder="e.g. Maria-Theresien-Straße 1, Innsbruck"
+                placeholder={t('createEvent.addressPlaceholder')}
                 className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12"
                 autoComplete="off"
               />
@@ -373,14 +375,14 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
             </div>
             <p className="text-muted-foreground text-xs">
               {addressCoords
-                ? '✓ Address selected — event will appear at this location.'
-                : 'Pin location is used by default. Pick a suggestion to use a real address.'}
+                ? t('createEvent.addressSelected')
+                : t('createEvent.addressDefault')}
             </p>
           </div>
 
           {/* Recurring toggle */}
           <div className="flex items-center justify-between py-2 px-1">
-            <Label className="text-foreground text-sm">Wiederkehrendes Event</Label>
+            <Label className="text-foreground text-sm">{t('createEvent.recurringToggle')}</Label>
             <Switch checked={isRecurring} onCheckedChange={setIsRecurring} />
           </div>
 
@@ -388,33 +390,33 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
             <>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="date" className="text-foreground text-sm">Start-Datum *</Label>
+                  <Label htmlFor="date" className="text-foreground text-sm">{t('createEvent.startDate')}</Label>
                   <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="time" className="text-foreground text-sm">Start-Zeit *</Label>
+                  <Label htmlFor="time" className="text-foreground text-sm">{t('createEvent.startTime')}</Label>
                   <Input id="time" type="time" value={time} onChange={(e) => setTime(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="endDate" className="text-foreground text-sm">End-Datum (optional)</Label>
+                  <Label htmlFor="endDate" className="text-foreground text-sm">{t('createEvent.endDate')}</Label>
                   <Input id="endDate" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} min={date || undefined} className="bg-transparent border-border text-foreground rounded-xl h-12" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="endTime" className="text-foreground text-sm">End-Zeit (optional)</Label>
+                  <Label htmlFor="endTime" className="text-foreground text-sm">{t('createEvent.endTime')}</Label>
                   <Input id="endTime" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
                 </div>
               </div>
-              <p className="text-muted-foreground text-xs -mt-2">Endzeit ist optional.</p>
+              <p className="text-muted-foreground text-xs -mt-2">{t('createEvent.endTimeOptional')}</p>
             </>
           ) : (
             <div className="space-y-3">
-              <Label className="text-foreground text-sm">Wochentag-Slots *</Label>
+              <Label className="text-foreground text-sm">{t('createEvent.weekdaySlots')}</Label>
               {recurringSlots.map((slot, i) => (
                 <div key={i} className="grid grid-cols-[1fr_auto_auto_auto] gap-2 items-end">
                   <div className="space-y-1">
-                    <Label className="text-muted-foreground text-xs">Tag</Label>
+                    <Label className="text-muted-foreground text-xs">{t('createEvent.slotDay')}</Label>
                     <Select
                       value={String(slot.weekday)}
                       onValueChange={(v) => {
@@ -427,18 +429,18 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="bg-card border-border">
-                        <SelectItem value="1">Montag</SelectItem>
-                        <SelectItem value="2">Dienstag</SelectItem>
-                        <SelectItem value="3">Mittwoch</SelectItem>
-                        <SelectItem value="4">Donnerstag</SelectItem>
-                        <SelectItem value="5">Freitag</SelectItem>
-                        <SelectItem value="6">Samstag</SelectItem>
-                        <SelectItem value="0">Sonntag</SelectItem>
+                        <SelectItem value="1">{t('weekdays.monday')}</SelectItem>
+                        <SelectItem value="2">{t('weekdays.tuesday')}</SelectItem>
+                        <SelectItem value="3">{t('weekdays.wednesday')}</SelectItem>
+                        <SelectItem value="4">{t('weekdays.thursday')}</SelectItem>
+                        <SelectItem value="5">{t('weekdays.friday')}</SelectItem>
+                        <SelectItem value="6">{t('weekdays.saturday')}</SelectItem>
+                        <SelectItem value="0">{t('weekdays.sunday')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-muted-foreground text-xs">Start</Label>
+                    <Label className="text-muted-foreground text-xs">{t('createEvent.slotStart')}</Label>
                     <Input
                       type="time"
                       value={slot.startTime}
@@ -451,7 +453,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-muted-foreground text-xs">Ende</Label>
+                    <Label className="text-muted-foreground text-xs">{t('createEvent.slotEnd')}</Label>
                     <Input
                       type="time"
                       value={slot.endTime}
@@ -482,10 +484,10 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
                 onClick={() => setRecurringSlots([...recurringSlots, { weekday: 1, startTime: '', endTime: '' }])}
                 className="rounded-xl"
               >
-                + Slot hinzufügen
+                {t('createEvent.addSlot')}
               </Button>
               <div className="space-y-2">
-                <Label htmlFor="recurringUntil" className="text-foreground text-sm">Wiederholen bis *</Label>
+                <Label htmlFor="recurringUntil" className="text-foreground text-sm">{t('createEvent.repeatUntil')}</Label>
                 <Input
                   id="recurringUntil"
                   type="date"
@@ -494,7 +496,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
                   min={new Date().toISOString().slice(0, 10)}
                   className="bg-transparent border-border text-foreground rounded-xl h-12"
                 />
-                <p className="text-muted-foreground text-xs">Ein Event wird pro passendem Wochentag im Zeitraum erstellt.</p>
+                <p className="text-muted-foreground text-xs">{t('createEvent.recurringHint')}</p>
               </div>
             </div>
           )}
@@ -502,23 +504,23 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
           {/* Max Participants */}
           {!isAdmin && (
             <div className="space-y-2">
-              <Label htmlFor="maxParticipants" className="text-foreground text-sm">Max. Participants *</Label>
+              <Label htmlFor="maxParticipants" className="text-foreground text-sm">{t('createEvent.maxParticipants')}</Label>
               <Input
                 id="maxParticipants"
                 type="number"
                 min={2}
                 value={maxParticipants}
                 onChange={(e) => setMaxParticipants(e.target.value)}
-                placeholder="e.g. 10 (min. 2)"
+                placeholder={t('createEvent.maxParticipantsPlaceholder')}
                 className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12"
               />
-              <p className="text-muted-foreground text-xs">At least 2 participants</p>
+              <p className="text-muted-foreground text-xs">{t('createEvent.maxParticipantsHint')}</p>
             </div>
           )}
 
           {/* Price */}
           <div className="space-y-2">
-            <Label htmlFor="price" className="text-foreground text-sm">Price (EUR)</Label>
+            <Label htmlFor="price" className="text-foreground text-sm">{t('createEvent.price')}</Label>
             <Input
               id="price"
               type="number"
@@ -526,13 +528,13 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
               step="0.01"
               value={priceEur}
               onChange={(e) => setPriceEur(e.target.value)}
-              placeholder="0 = Free"
+              placeholder={t('createEvent.pricePlaceholder')}
               className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12"
             />
             <p className="text-muted-foreground text-xs">
               {priceEur && parseFloat(priceEur.replace(',', '.')) > 0
-                ? `€${parseFloat(priceEur.replace(',', '.')).toFixed(2)} per ticket`
-                : 'Leave empty or 0 for a free event'}
+                ? t('createEvent.pricePerTicket', { price: parseFloat(priceEur.replace(',', '.')).toFixed(2) })
+                : t('createEvent.priceFreeHint')}
             </p>
           </div>
 
@@ -542,7 +544,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Ticket className="h-4 w-4 text-primary" />
-                  <Label className="text-foreground text-sm">Tickets aktivieren</Label>
+                  <Label className="text-foreground text-sm">{t('createEvent.ticketsEnable')}</Label>
                 </div>
                 <Switch checked={ticketsEnabled} onCheckedChange={setTicketsEnabled} />
               </div>
@@ -554,14 +556,14 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
                       onClick={() => setTicketMode('qr')}
                       className={`flex-1 h-10 rounded-xl text-xs font-semibold border ${ticketMode === 'qr' ? 'bg-primary text-primary-foreground border-primary' : 'bg-transparent text-foreground border-border'}`}
                     >
-                      QR-Code generieren
+                      {t('createEvent.ticketsQr')}
                     </button>
                     <button
                       type="button"
                       onClick={() => setTicketMode('link')}
                       className={`flex-1 h-10 rounded-xl text-xs font-semibold border ${ticketMode === 'link' ? 'bg-primary text-primary-foreground border-primary' : 'bg-transparent text-foreground border-border'}`}
                     >
-                      Externer Link
+                      {t('createEvent.ticketsLink')}
                     </button>
                   </div>
                   {ticketMode === 'link' && (
@@ -575,8 +577,8 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
                   )}
                   <p className="text-muted-foreground text-xs">
                     {ticketMode === 'qr'
-                      ? 'Teilnehmer erhalten automatisch ein QR-Ticket beim Beitritt.'
-                      : 'Teilnehmer werden zu deinem Ticket-Link weitergeleitet.'}
+                      ? t('createEvent.ticketsHintQr')
+                      : t('createEvent.ticketsHintLink')}
                   </p>
                 </div>
               )}
@@ -588,7 +590,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
             <div className="flex items-center gap-2">
               {isPrivate ? <Lock className="h-4 w-4 text-muted-foreground" /> : <Globe className="h-4 w-4 text-primary" />}
               <Label className="text-foreground text-sm">
-                {isPrivate ? 'Private – visible only to you & friends' : 'Public – visible to everyone'}
+                {isPrivate ? t('createEvent.visibilityPrivate') : t('createEvent.visibilityPublic')}
               </Label>
             </div>
             <Switch
@@ -600,10 +602,10 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
           {/* Buttons */}
           <div className="flex gap-3 pt-2">
             <Button variant="outline" onClick={handleClose} className="flex-1 h-12 rounded-xl">
-              Cancel
+              {t('createEvent.cancel')}
             </Button>
             <Button onClick={handleSubmit} disabled={!title || loading || (!isRecurring && (!date || !time)) || (isRecurring && (!recurringUntil || recurringSlots.some(s => !s.startTime))) || (!isAdmin && (!maxParticipants || parseInt(maxParticipants) < 2))} className="flex-1 h-12 rounded-xl">
-              {loading ? 'Creating...' : 'Create Event'}
+              {loading ? t('createEvent.creating') : t('createEvent.create')}
             </Button>
           </div>
         </div>
