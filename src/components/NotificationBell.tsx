@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, MessageCircle, Calendar, Users, UserPlus, UserCheck, ShieldCheck, CheckCircle, XCircle, Zap } from "lucide-react";
+import { Bell, MessageCircle, Calendar, Users, UserPlus, UserCheck, ShieldCheck, CheckCircle, XCircle, Zap, Check, X } from "lucide-react";
 import { useNotifications, AppNotification } from "@/hooks/useNotifications";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 type FilterKey = "all" | "unread" | "messages" | "events" | "friends" | "blitz";
 
@@ -32,10 +35,50 @@ const TYPE_GROUPS: Record<Exclude<FilterKey, "all" | "unread">, string[]> = {
 };
 
 const NotificationBell = () => {
-  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, refetch } = useNotifications();
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<FilterKey>("all");
+  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
+
+  const respondFriendRequest = async (notif: AppNotification, accept: boolean) => {
+    const requesterId = notif.data?.requester_id || notif.data?.friend_id;
+    if (!requesterId || !user) return;
+    setPendingIds((s) => new Set(s).add(notif.id));
+    try {
+      const { data: fr, error: frErr } = await supabase
+        .from("friendships")
+        .select("id")
+        .eq("requester_id", requesterId)
+        .eq("addressee_id", user.id)
+        .eq("status", "pending")
+        .maybeSingle();
+      if (frErr) throw frErr;
+      if (!fr) {
+        toast.error("Anfrage nicht mehr verfügbar");
+      } else if (accept) {
+        const { error } = await supabase.from("friendships").update({ status: "accepted" }).eq("id", fr.id);
+        if (error) throw error;
+        toast.success("Freundschaftsanfrage angenommen");
+      } else {
+        const { error } = await supabase.from("friendships").delete().eq("id", fr.id);
+        if (error) throw error;
+        toast("Anfrage abgelehnt");
+      }
+      if (!notif.is_read) markAsRead(notif.id);
+      refetch?.();
+    } catch (e: any) {
+      toast.error(e.message ?? "Fehler");
+    } finally {
+      setPendingIds((s) => {
+        const n = new Set(s);
+        n.delete(notif.id);
+        return n;
+      });
+    }
+  };
+
 
   const filtered = notifications.filter((n) => {
     if (filter === "all") return true;
@@ -148,10 +191,13 @@ const NotificationBell = () => {
           ) : (
             <div className="divide-y divide-border">
               {filtered.map((notif) => (
-                <button
+                <div
                   key={notif.id}
+                  role="button"
+                  tabIndex={0}
                   onClick={() => handleClick(notif)}
-                  className={`w-full flex items-start gap-3 p-4 text-left transition-colors hover:bg-card/50 ${
+                  onKeyDown={(e) => { if (e.key === "Enter") handleClick(notif); }}
+                  className={`w-full flex items-start gap-3 p-4 text-left transition-colors hover:bg-card/50 cursor-pointer ${
                     !notif.is_read ? "bg-primary/5" : ""
                   }`}
                 >
@@ -168,11 +214,32 @@ const NotificationBell = () => {
                     <p className={`text-xs mt-0.5 line-clamp-2 ${!notif.is_read ? "text-foreground/80" : "text-muted-foreground"}`}>
                       {notif.body}
                     </p>
+                    {notif.type === "friend_request" && (
+                      <div className="flex gap-2 mt-2" onClick={(e) => e.stopPropagation()}>
+                        <Button
+                          size="sm"
+                          className="h-8 px-3 text-xs"
+                          disabled={pendingIds.has(notif.id)}
+                          onClick={(e) => { e.stopPropagation(); respondFriendRequest(notif, true); }}
+                        >
+                          <Check className="w-3.5 h-3.5 mr-1" /> Annehmen
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 px-3 text-xs"
+                          disabled={pendingIds.has(notif.id)}
+                          onClick={(e) => { e.stopPropagation(); respondFriendRequest(notif, false); }}
+                        >
+                          <X className="w-3.5 h-3.5 mr-1" /> Ablehnen
+                        </Button>
+                      </div>
+                    )}
                   </div>
                   {!notif.is_read && (
                     <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
                   )}
-                </button>
+                </div>
               ))}
             </div>
           )}
