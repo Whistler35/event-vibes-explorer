@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Users } from "lucide-react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
