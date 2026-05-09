@@ -103,9 +103,22 @@ const Nearby = () => {
     catch { return null; }
   })();
 
-  const initialCenter: [number, number] = storedCity
-    ? [storedCity.lat, storedCity.lng]
-    : [47.2692, 11.4041];
+  const storedUserLocation = (() => {
+    try {
+      const s = localStorage.getItem('lastUserLocation');
+      if (!s) return null;
+      const parsed = JSON.parse(s) as { lat: number; lng: number; ts: number };
+      // Expire after 24h so we don't drop users into a stale spot
+      if (Date.now() - parsed.ts > 24 * 60 * 60 * 1000) return null;
+      return parsed;
+    } catch { return null; }
+  })();
+
+  const initialCenter: [number, number] = storedUserLocation
+    ? [storedUserLocation.lat, storedUserLocation.lng]
+    : storedCity
+      ? [storedCity.lat, storedCity.lng]
+      : [47.2692, 11.4041];
   const [mapFocusCenter, setMapFocusCenter] = useState<[number, number]>(initialCenter);
 
   useEffect(() => {
