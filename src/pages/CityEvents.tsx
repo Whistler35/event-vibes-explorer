@@ -100,14 +100,14 @@ const CityEvents = () => {
           >
             <ArrowLeft className="h-6 w-6" />
           </Button>
-          <h1 className="text-foreground text-2xl font-bold">Events in {cityName}</h1>
+          <h1 className="text-foreground text-2xl font-bold">{t("cityEvents.title", { city: cityName })}</h1>
         </div>
 
         {/* Filters */}
         <div className="space-y-4">
           <h2 className="text-foreground text-lg font-semibold flex items-center">
             <Filter className="mr-2 h-5 w-5" />
-            Filter Events
+            {t("cityEvents.filterEvents")}
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
