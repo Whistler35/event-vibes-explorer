@@ -132,15 +132,15 @@ const UserProfile = () => {
     if (status === "rejected") {
       // Reject = delete the row, so the requester can send a new request later
       const { error } = await supabase.from("friendships").delete().eq("id", friendship.id);
-      if (error) toast.error("Fehler beim Aktualisieren.");
-      else toast.success("Anfrage abgelehnt.");
+      if (error) toast.error(t("userProfile.updateError"));
+      else toast.success(t("userProfile.requestRejected"));
     } else {
       const { error } = await supabase
         .from("friendships")
         .update({ status, updated_at: new Date().toISOString() } as any)
         .eq("id", friendship.id);
-      if (error) toast.error("Fehler beim Aktualisieren.");
-      else toast.success("Freund hinzugefügt! 🎉");
+      if (error) toast.error(t("userProfile.updateError"));
+      else toast.success(t("userProfile.friendAdded"));
     }
     await fetchFriendship();
     setFriendActionLoading(false);
