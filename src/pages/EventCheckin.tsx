@@ -165,10 +165,10 @@ const EventCheckin = () => {
                 <>
                   <CheckCircle2 className="w-16 h-16 mx-auto text-amber-500" />
                   <div>
-                    <h3 className="font-bold text-xl">Schon eingecheckt</h3>
+                    <h3 className="font-bold text-xl">{t("eventCheckin.alreadyCheckedIn")}</h3>
                     <p className="text-muted-foreground">{lastResult.participantName}</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {lastResult.checkedInAt && new Date(lastResult.checkedInAt).toLocaleString("de-DE")}
+                      {lastResult.checkedInAt && new Date(lastResult.checkedInAt).toLocaleString(i18n.language === "de" ? "de-DE" : "en-US")}
                     </p>
                   </div>
                 </>
