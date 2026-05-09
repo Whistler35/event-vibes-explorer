@@ -345,26 +345,26 @@ const HostBilling = () => {
                       <Icon className="w-5 h-5 text-primary" />
                       <span className="text-foreground font-semibold">{plan.name}</span>
                     </div>
-                    {isCurrent && <Badge variant="default" className="text-[10px]">Aktuell</Badge>}
+                    {isCurrent && <Badge variant="default" className="text-[10px]">{t('host.current')}</Badge>}
                   </div>
                   <p className="text-muted-foreground text-xs mb-2">{plan.description}</p>
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-foreground font-bold">
                       {plan.price_cents === 0
-                        ? 'Kostenlos'
-                        : `€${(plan.price_cents / 100).toFixed(0)}/Monat`}
+                        ? t('host.free')
+                        : t('host.perMonth', { price: (plan.price_cents / 100).toFixed(0) })}
                     </span>
                     <span className="text-muted-foreground">
                       {plan.included_events === null
-                        ? 'Unbegrenzte Events'
+                        ? t('host.unlimitedEvents')
                         : plan.included_events === 0
-                        ? 'Einzelkauf'
-                        : `${plan.included_events} Events inkl.`}
+                        ? t('host.singlePurchase')
+                        : t('host.includedEvents', { count: plan.included_events })}
                     </span>
                   </div>
                   {plan.additional_event_price_cents && plan.additional_event_price_cents > 0 && (
                     <p className="text-muted-foreground text-[10px] mt-1">
-                      + €{(plan.additional_event_price_cents / 100).toFixed(2).replace('.', ',')} pro zusätzlichem Event
+                      {t('host.additionalEvent', { price: (plan.additional_event_price_cents / 100).toFixed(2).replace('.', ',') })}
                     </p>
                   )}
                 </button>
