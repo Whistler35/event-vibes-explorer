@@ -192,11 +192,11 @@ const EditProfile = () => {
         {/* Form Fields */}
         <div className="space-y-4">
           <div>
-            <Label className="text-foreground font-medium">Name *</Label>
+            <Label className="text-foreground font-medium">{t('editProfile.name')} *</Label>
             <Input
               value={form.name}
               onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))}
-              placeholder="Your name"
+              placeholder={t('editProfile.namePh')}
               className="mt-1 bg-muted border-border text-foreground"
             />
             {errors.name && <p className="text-destructive text-xs mt-1">{errors.name}</p>}
@@ -204,7 +204,7 @@ const EditProfile = () => {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-foreground font-medium">Age *</Label>
+              <Label className="text-foreground font-medium">{t('editProfile.age')} *</Label>
               <Input
                 type="number"
                 value={form.age}
@@ -216,7 +216,7 @@ const EditProfile = () => {
               {errors.age && <p className="text-destructive text-xs mt-1">{errors.age}</p>}
             </div>
             <div>
-              <Label className="text-foreground font-medium">Country *</Label>
+              <Label className="text-foreground font-medium">{t('editProfile.country')} *</Label>
               <Input
                 value={form.country}
                 onChange={(e) => setForm(prev => ({ ...prev, country: e.target.value }))}
@@ -228,11 +228,11 @@ const EditProfile = () => {
           </div>
 
           <div>
-            <Label className="text-foreground font-medium">About me *</Label>
+            <Label className="text-foreground font-medium">{t('editProfile.aboutMe')} *</Label>
             <Textarea
               value={form.bio}
               onChange={(e) => setForm(prev => ({ ...prev, bio: e.target.value }))}
-              placeholder="Tell something about yourself..."
+              placeholder={t('editProfile.aboutMePh')}
               rows={3}
               className="mt-1 bg-muted border-border text-foreground resize-none"
             />
@@ -240,11 +240,11 @@ const EditProfile = () => {
           </div>
 
           <div>
-            <Label className="text-foreground font-medium">Fun Fact *</Label>
+            <Label className="text-foreground font-medium">{t('editProfile.funFact')} *</Label>
             <Input
               value={form.fun_fact}
               onChange={(e) => setForm(prev => ({ ...prev, fun_fact: e.target.value }))}
-              placeholder="Something fun about you"
+              placeholder={t('editProfile.funFactPh')}
               className="mt-1 bg-muted border-border text-foreground"
             />
             {errors.fun_fact && <p className="text-destructive text-xs mt-1">{errors.fun_fact}</p>}
