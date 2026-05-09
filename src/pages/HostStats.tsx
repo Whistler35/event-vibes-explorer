@@ -135,8 +135,8 @@ const HostStats = () => {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="text-foreground text-xl font-bold">Statistiken</h1>
-            <p className="text-muted-foreground text-xs">{events.length} Events · Mock-Daten</p>
+            <h1 className="text-foreground text-xl font-bold">{t('host.statsTitle')}</h1>
+            <p className="text-muted-foreground text-xs">{t('host.eventsCount', { count: events.length })}</p>
           </div>
         </div>
 
