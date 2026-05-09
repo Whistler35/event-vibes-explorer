@@ -487,7 +487,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
                 {t('createEvent.addSlot')}
               </Button>
               <div className="space-y-2">
-                <Label htmlFor="recurringUntil" className="text-foreground text-sm">Wiederholen bis *</Label>
+                <Label htmlFor="recurringUntil" className="text-foreground text-sm">{t('createEvent.repeatUntil')}</Label>
                 <Input
                   id="recurringUntil"
                   type="date"
@@ -496,7 +496,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
                   min={new Date().toISOString().slice(0, 10)}
                   className="bg-transparent border-border text-foreground rounded-xl h-12"
                 />
-                <p className="text-muted-foreground text-xs">Ein Event wird pro passendem Wochentag im Zeitraum erstellt.</p>
+                <p className="text-muted-foreground text-xs">{t('createEvent.recurringHint')}</p>
               </div>
             </div>
           )}
