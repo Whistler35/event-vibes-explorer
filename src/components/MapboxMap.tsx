@@ -179,6 +179,25 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
       });
       geolocateRef.current = geo;
       map.current.addControl(geo);
+
+      // Persist user location whenever geolocation reports a position,
+      // so the next visit can start there instead of the default center.
+      geo.on('geolocate', (e: any) => {
+        const lat = e?.coords?.latitude;
+        const lng = e?.coords?.longitude;
+        if (typeof lat !== 'number' || typeof lng !== 'number') return;
+        try {
+          const prev = localStorage.getItem('lastUserLocation');
+          localStorage.setItem('lastUserLocation', JSON.stringify({ lat, lng, ts: Date.now() }));
+          // First-ever share → animate in to the location so the user sees the move.
+          if (!prev && map.current) {
+            const opts: any = { center: [lng, lat], zoom: 14, duration: 600, essential: true, curve: 1.2 };
+            if (typeof window !== 'undefined' && window.innerWidth < 768) opts.offset = [0, -140];
+            map.current.flyTo(opts);
+          }
+        } catch {}
+      });
+
       map.current.on('load', () => {
         setIsLoaded(true);
         // Auto-trigger geolocation so the blue dot appears without needing a tap.
