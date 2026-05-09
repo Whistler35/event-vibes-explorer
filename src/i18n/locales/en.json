@@ -670,5 +670,14 @@
     "suspendedToast": "{{name}} suspended",
     "activatedToast": "{{name}} activated",
     "deletedToast": "{{name}} deleted"
+  },
+  "notFound": {
+    "title": "404",
+    "message": "Oops! Page not found",
+    "back": "Return to Home"
+  },
+  "index": {
+    "welcome": "Welcome to Your App",
+    "start": "Start building your amazing project here!"
   }
 }
