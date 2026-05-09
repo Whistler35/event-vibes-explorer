@@ -184,7 +184,7 @@ const EventCheckin = () => {
                 </>
               )}
               <Button onClick={() => { setLastResult(null); setScanning(true); }} className="w-full gap-2">
-                <RotateCcw className="w-4 h-4" /> Nächsten Code scannen
+                <RotateCcw className="w-4 h-4" /> {t("eventCheckin.scanNext")}
               </Button>
             </CardContent>
           </Card>
