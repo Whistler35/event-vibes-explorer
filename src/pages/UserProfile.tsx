@@ -66,6 +66,7 @@ const activityLevelKey = (score: number) => {
 
 const UserProfile = () => {
   const { userId } = useParams<{ userId: string }>();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
