@@ -277,7 +277,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
         <div className="p-4 pt-2 space-y-4">
           {/* Image Upload */}
           <div className="space-y-2">
-            <Label className="text-foreground text-sm">Image</Label>
+            <Label className="text-foreground text-sm">{t('createEvent.image')}</Label>
             <div className="relative">
               {imagePreview ?
               <div className="relative">
@@ -288,7 +288,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
                 </div> :
               <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/50 transition-colors bg-transparent">
                   <Camera className="h-8 w-8 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground mt-2">Add image</span>
+                  <span className="text-sm text-muted-foreground mt-2">{t('createEvent.addImage')}</span>
                   <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                 </label>
               }
@@ -297,8 +297,8 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
 
           {/* Title */}
           <div className="space-y-2">
-            <Label htmlFor="title" className="text-foreground text-sm">Title *</Label>
-            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="What are you doing?" className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12" />
+            <Label htmlFor="title" className="text-foreground text-sm">{t('createEvent.fieldTitle')}</Label>
+            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t('createEvent.titlePlaceholder')} className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12" />
           </div>
 
           {/* Category */}
