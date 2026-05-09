@@ -178,7 +178,7 @@ const EventCheckin = () => {
                   <XCircle className="w-16 h-16 mx-auto text-destructive" />
                   <div>
                     <h3 className="font-bold text-xl">
-                      {lastResult.status === "invalid" ? "Ungültiges Ticket" : "Falsches Event"}
+                      {lastResult.status === "invalid" ? t("eventCheckin.invalidTicket") : t("eventCheckin.wrongEvent")}
                     </h3>
                   </div>
                 </>
