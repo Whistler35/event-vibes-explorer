@@ -224,7 +224,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
         <div className="p-4 pt-2 space-y-4">
           {/* Image */}
           <div className="space-y-2">
-            <Label className="text-foreground text-sm">Image</Label>
+            <Label className="text-foreground text-sm">{t('editEvent.image')}</Label>
             <div className="relative">
               {imagePreview ? (
                 <div className="relative">
@@ -236,7 +236,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
               ) : (
                 <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/50 transition-colors bg-transparent">
                   <Camera className="h-8 w-8 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground mt-2">Add image</span>
+                  <span className="text-sm text-muted-foreground mt-2">{t('editEvent.addImage')}</span>
                   <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                 </label>
               )}
@@ -245,7 +245,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
 
           {/* Title */}
           <div className="space-y-2">
-            <Label htmlFor="edit-title" className="text-foreground text-sm">Title *</Label>
+            <Label htmlFor="edit-title" className="text-foreground text-sm">{t('editEvent.fieldTitle')}</Label>
             <Input id="edit-title" value={title} onChange={(e) => setTitle(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
           </div>
 
