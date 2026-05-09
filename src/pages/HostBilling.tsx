@@ -321,8 +321,8 @@ const HostBilling = () => {
       <Dialog open={changePlanDialog} onOpenChange={setChangePlanDialog}>
         <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Plan wechseln</DialogTitle>
-            <DialogDescription>Wähle deinen neuen Plan</DialogDescription>
+            <DialogTitle>{t('host.changePlan')}</DialogTitle>
+            <DialogDescription>{t('host.selectNewPlan')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2">
             {plans.map((plan) => {
