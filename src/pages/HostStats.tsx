@@ -211,15 +211,15 @@ const HostStats = () => {
                       <div className="grid grid-cols-3 gap-2 pt-2">
                         <div className="text-center p-2 rounded-lg bg-muted/50">
                           <p className="text-foreground font-bold">{stats.totalViews}</p>
-                          <p className="text-muted-foreground text-[10px]">Views</p>
+                          <p className="text-muted-foreground text-[10px]">{t('host.views')}</p>
                         </div>
                         <div className="text-center p-2 rounded-lg bg-muted/50">
                           <p className="text-foreground font-bold">{stats.totalRegistrations}</p>
-                          <p className="text-muted-foreground text-[10px]">Anmeldungen</p>
+                          <p className="text-muted-foreground text-[10px]">{t('host.registrations')}</p>
                         </div>
                         <div className="text-center p-2 rounded-lg bg-muted/50">
                           <p className="text-foreground font-bold">{stats.conversionRate}%</p>
-                          <p className="text-muted-foreground text-[10px]">Conversion</p>
+                          <p className="text-muted-foreground text-[10px]">{t('host.conversion')}</p>
                         </div>
                       </div>
 
