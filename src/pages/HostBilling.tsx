@@ -310,9 +310,9 @@ const HostBilling = () => {
           <Button
             variant="ghost"
             className="w-full text-destructive hover:text-destructive"
-            onClick={() => toast.info('Kündigung wird mit Stripe aktiviert')}
+            onClick={() => toast.info(t('host.cancelInfo'))}
           >
-            Plan kündigen
+            {t('host.cancelPlan')}
           </Button>
         )}
       </div>
