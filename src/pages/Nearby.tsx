@@ -318,6 +318,7 @@ const Nearby = () => {
     setShowCitySuggestions(false);
     setSearchLoading(false);
     localStorage.removeItem('selectedCity');
+    localStorage.removeItem('lastUserLocation');
   };
 
   const handleCreateEvent = (coordinates: [number, number]) => {
