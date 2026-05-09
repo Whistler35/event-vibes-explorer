@@ -160,13 +160,13 @@ const HostDashboard = () => {
                   <FileText className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-foreground font-semibold text-sm">Event-Kontingent</p>
+                  <p className="text-foreground font-semibold text-sm">{t('host.eventQuota')}</p>
                   <p className="text-muted-foreground text-xs">
                     {plan?.included_events === null
-                      ? 'Unbegrenzte Events'
+                      ? t('host.unlimitedEvents')
                       : plan?.included_events === 0
-                      ? 'Pay-per-Event'
-                      : `${eventsUsed} von ${plan?.included_events} Events genutzt`}
+                      ? t('host.payPerEvent')
+                      : t('host.ofUsed', { used: eventsUsed, total: plan?.included_events })}
                   </p>
                 </div>
               </div>
