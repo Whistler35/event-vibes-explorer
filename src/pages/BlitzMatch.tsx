@@ -348,7 +348,7 @@ const BlitzMatch = () => {
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={expired ? "Chat expired" : "Type something…"}
+          placeholder={expired ? t("blitzMatch.chatExpired") : t("blitzMatch.typeSomething")}
           disabled={expired}
           className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-white/40"
         />
