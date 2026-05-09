@@ -23,7 +23,7 @@ export interface MapBounds {
 }
 
 export interface MapboxMapHandle {
-  flyTo: (lat: number, lng: number, zoom?: number) => void;
+  flyTo: (lat: number, lng: number, zoom?: number, centered?: boolean) => void;
   setOverview: (lat: number, lng: number, zoom?: number) => void;
   getBounds: () => MapBounds | null;
 }
