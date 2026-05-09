@@ -255,14 +255,14 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
         <div className="flex items-center justify-between p-4 pb-2 shrink-0">
           <div className="flex items-center gap-2">
             <span className="text-primary text-xl font-bold">+</span>
-            <span className="text-foreground text-lg font-semibold">Create evendle</span>
+            <span className="text-foreground text-lg font-semibold">{t('createEvent.title')}</span>
           </div>
           {isAdmin ?
           <span className="flex items-center gap-1 text-xs text-green-600">
-              <ShieldCheck className="h-3.5 w-3.5" /> Admin
+              <ShieldCheck className="h-3.5 w-3.5" /> {t('createEvent.adminBadge')}
             </span> :
           <span className="flex items-center gap-1 text-xs text-yellow-600">
-              <Clock className="h-3.5 w-3.5" /> Review required
+              <Clock className="h-3.5 w-3.5" /> {t('createEvent.reviewBadge')}
             </span>
           }
         </div>
