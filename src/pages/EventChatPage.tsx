@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft } from "lucide-react";
 import Layout from "@/components/Layout";
 import EventChat from "@/components/EventChat";
@@ -7,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const EventChatPage = () => {
   const { id } = useParams();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [eventTitle, setEventTitle] = useState("");
 
