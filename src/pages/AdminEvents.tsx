@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Search, BarChart3, Trash2, Download, Loader2 } from "lucide-react";
 import {
   AlertDialog,
@@ -60,6 +61,7 @@ const SourceBadge = ({ source }: { source: string | null }) => {
 };
 
 const AdminEvents = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { isAdmin, loading: adminLoading } = useIsAdmin();
   const navigate = useNavigate();
@@ -95,10 +97,10 @@ const AdminEvents = () => {
 
       const inserted = result.inserted ?? 0;
       const skipped = result.skipped ?? 0;
-      toast.success(`${inserted} events imported successfully${skipped ? ` (${skipped} skipped)` : ""}`);
+      toast.success(t("adminEvents.importSuccess", { count: inserted, skipped: skipped ? t("adminEvents.importSkipped", { count: skipped }) : "" }));
       await fetchPendingEvents();
     } catch (err) {
-      toast.error(`Import fehlgeschlagen: ${err instanceof Error ? err.message : String(err)}`);
+      toast.error(t("adminEvents.importFailed", { msg: err instanceof Error ? err.message : String(err) }));
     } finally {
       setImporting(false);
     }
@@ -192,9 +194,9 @@ const AdminEvents = () => {
     const { error } = await supabase.from("events").delete().eq("id", eventToDelete.id);
     if (error) {
       console.error("Delete event failed:", error);
-      toast.error(`Fehler beim Löschen: ${error.message}`);
+      toast.error(t("adminEvents.deleteError", { msg: error.message }));
     } else {
-      toast.success(`"${eventToDelete.title}" gelöscht`);
+      toast.success(t("adminEvents.deleted", { title: eventToDelete.title }));
       setManageEvents((prev) => prev.filter((e) => e.id !== eventToDelete.id));
       setEventToDelete(null);
     }
@@ -207,9 +209,9 @@ const AdminEvents = () => {
       .eq("id", eventId);
 
     if (error) {
-      toast.error("Fehler beim Freigeben");
+      toast.error(t("adminEvents.approveError"));
     } else {
-      toast.success("Event freigegeben! ✅");
+      toast.success(t("adminEvents.approved"));
       setPendingEvents((prev) => prev.filter((e) => e.id !== eventId));
     }
   };
@@ -221,9 +223,9 @@ const AdminEvents = () => {
       .eq("id", eventId);
 
     if (error) {
-      toast.error("Fehler beim Ablehnen");
+      toast.error(t("adminEvents.rejectError"));
     } else {
-      toast.success("Event abgelehnt");
+      toast.success(t("adminEvents.rejected"));
       setPendingEvents((prev) => prev.filter((e) => e.id !== eventId));
     }
   };
@@ -242,9 +244,9 @@ const AdminEvents = () => {
       .eq("id", eventId);
 
     if (error) {
-      toast.error("Fehler beim Aktualisieren");
+      toast.error(t("adminEvents.updateError"));
     } else {
-      toast.success(currentlyFeatured ? "Nicht mehr Top Event" : "Als Top Event markiert ⭐");
+      toast.success(currentlyFeatured ? t("adminEvents.removedTop") : t("adminEvents.markedTop"));
       await Promise.all([fetchFeaturedEvents(), fetchNonFeaturedEvents()]);
     }
   };
@@ -267,7 +269,7 @@ const AdminEvents = () => {
     const hasError = results.some(r => r.error);
 
     if (hasError) {
-      toast.error("Fehler beim Sortieren");
+      toast.error(t("adminEvents.sortError"));
       await fetchFeaturedEvents();
     } else {
       setAllEvents(newEvents.map((e, i) => ({ ...e, featured_order: i + 1 })));
@@ -285,14 +287,14 @@ const AdminEvents = () => {
             <ArrowLeft className="w-5 h-5 text-foreground" />
           </Button>
           <div>
-            <h1 className="text-foreground text-xl font-bold">Admin Bereich</h1>
+            <h1 className="text-foreground text-xl font-bold">{t("adminEvents.title")}</h1>
           </div>
         </div>
 
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="w-full bg-muted">
             <TabsTrigger value="pending" className="flex-1 text-xs relative">
-              Freigaben
+              {t("adminEvents.tabs.pending")}
               {pendingEvents.length > 0 && (
                 <span className="ml-1.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold">
                   {pendingEvents.length}
@@ -300,16 +302,16 @@ const AdminEvents = () => {
               )}
             </TabsTrigger>
             <TabsTrigger value="featured" className="flex-1 text-xs">
-              Top Events
+              {t("adminEvents.tabs.featured")}
             </TabsTrigger>
             <TabsTrigger value="hosts" className="flex-1 text-xs">
-              Hosts
+              {t("adminEvents.tabs.hosts")}
             </TabsTrigger>
             <TabsTrigger value="manage" className="flex-1 text-xs">
-              Löschen
+              {t("adminEvents.tabs.manage")}
             </TabsTrigger>
             <TabsTrigger value="stats" className="flex-1 text-xs">
-              Stats
+              {t("adminEvents.tabs.stats")}
             </TabsTrigger>
           </TabsList>
 
@@ -323,19 +325,19 @@ const AdminEvents = () => {
                 size="sm"
               >
                 {importing ? (
-                  <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Importiere...</>
+                  <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> {t("adminEvents.importing")}</>
                 ) : (
-                  <><Download className="w-4 h-4 mr-1" /> Import from Apify</>
+                  <><Download className="w-4 h-4 mr-1" /> {t("adminEvents.importApify")}</>
                 )}
               </Button>
             </div>
             {loading ? (
-              <div className="text-center text-muted-foreground py-12">Laden...</div>
+              <div className="text-center text-muted-foreground py-12">{t("adminEvents.loading")}</div>
             ) : pendingEvents.length === 0 ? (
               <div className="text-center py-12 space-y-2">
                 <CheckCircle className="w-12 h-12 text-green-500 mx-auto" />
-                <p className="text-foreground font-semibold">Alles erledigt!</p>
-                <p className="text-muted-foreground text-sm">Keine offenen Events zur Prüfung.</p>
+                <p className="text-foreground font-semibold">{t("adminEvents.allDone")}</p>
+                <p className="text-muted-foreground text-sm">{t("adminEvents.noPending")}</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -349,7 +351,7 @@ const AdminEvents = () => {
                         <h3 className="text-foreground font-bold text-lg">{event.title}</h3>
                         <div className="flex flex-col items-end gap-1 shrink-0">
                           <Badge variant="outline" className="text-yellow-400 border-yellow-400/30">
-                            <Clock className="w-3 h-3 mr-1" /> Pending
+                            <Clock className="w-3 h-3 mr-1" /> {t("adminEvents.pending")}
                           </Badge>
                           <SourceBadge source={event.source} />
                         </div>
@@ -373,13 +375,13 @@ const AdminEvents = () => {
                           variant="outline"
                           className="flex-1 border-destructive text-destructive hover:bg-destructive/10 hover:text-destructive"
                         >
-                          <XCircle className="w-4 h-4 mr-1" /> Ablehnen
+                          <XCircle className="w-4 h-4 mr-1" /> {t("adminEvents.reject")}
                         </Button>
                         <Button
                           onClick={() => handleApprove(event.id)}
                           className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
                         >
-                          <CheckCircle className="w-4 h-4 mr-1" /> Freigeben
+                          <CheckCircle className="w-4 h-4 mr-1" /> {t("adminEvents.approve")}
                         </Button>
                       </div>
                     </div>
@@ -392,13 +394,13 @@ const AdminEvents = () => {
           {/* Top Events Tab */}
           <TabsContent value="featured" className="space-y-6 mt-4">
             {loading ? (
-              <div className="text-center text-muted-foreground py-12">Laden...</div>
+              <div className="text-center text-muted-foreground py-12">{t("adminEvents.loading")}</div>
             ) : (
               <>
                 {/* Current featured events */}
                 {allEvents.length > 0 && (
                   <div className="space-y-3">
-                    <h4 className="text-foreground font-semibold text-sm">Aktuelle Top Events</h4>
+                    <h4 className="text-foreground font-semibold text-sm">{t("adminEvents.currentTop")}</h4>
                     {allEvents.map((event) => (
                       <div
                         key={event.id}
@@ -448,7 +450,7 @@ const AdminEvents = () => {
                               onClick={() => toggleFeatured(event.id, true)}
                               className="border-destructive/50 text-destructive hover:bg-destructive/10 shrink-0"
                             >
-                              <StarOff className="w-4 h-4 mr-1" /> Entfernen
+                              <StarOff className="w-4 h-4 mr-1" /> {t("adminEvents.remove")}
                             </Button>
                           </div>
                         </div>
@@ -459,19 +461,19 @@ const AdminEvents = () => {
 
                 {/* Add new featured events */}
                 <div className="space-y-3">
-                  <h4 className="text-foreground font-semibold text-sm">Events hinzufügen</h4>
+                  <h4 className="text-foreground font-semibold text-sm">{t("adminEvents.addTop")}</h4>
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input
                       type="text"
-                      placeholder="Event suchen..."
+                      placeholder={t("adminEvents.searchEvent")}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="w-full pl-9 pr-4 py-2 rounded-xl bg-muted border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                     />
                   </div>
                   {filteredNonFeatured.length === 0 ? (
-                    <p className="text-muted-foreground text-sm text-center py-4">Keine weiteren Events verfügbar.</p>
+                    <p className="text-muted-foreground text-sm text-center py-4">{t("adminEvents.noMore")}</p>
                   ) : (
                     filteredNonFeatured.map((event) => (
                       <div key={event.id} className="bg-card rounded-2xl overflow-hidden border border-border">
@@ -492,7 +494,7 @@ const AdminEvents = () => {
                             onClick={() => toggleFeatured(event.id, false)}
                             className="border-yellow-400/50 text-yellow-400 hover:bg-yellow-400/10 shrink-0"
                           >
-                            <Star className="w-4 h-4 mr-1" /> Hinzufügen
+                            <Star className="w-4 h-4 mr-1" /> {t("adminEvents.add")}
                           </Button>
                         </div>
                       </div>
@@ -518,7 +520,7 @@ const AdminEvents = () => {
                   onClick={() => setManageFilter("past")}
                   className="flex-1"
                 >
-                  Vergangene
+                  {t("adminEvents.past")}
                 </Button>
                 <Button
                   size="sm"
@@ -526,7 +528,7 @@ const AdminEvents = () => {
                   onClick={() => setManageFilter("upcoming")}
                   className="flex-1"
                 >
-                  Kommende
+                  {t("adminEvents.upcoming")}
                 </Button>
                 <Button
                   size="sm"
@@ -534,14 +536,14 @@ const AdminEvents = () => {
                   onClick={() => setManageFilter("all")}
                   className="flex-1"
                 >
-                  Alle
+                  {t("adminEvents.all")}
                 </Button>
               </div>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
                   type="text"
-                  placeholder="Event oder Ort suchen..."
+                  placeholder={t("adminEvents.searchPlaceholder")}
                   value={manageSearch}
                   onChange={(e) => setManageSearch(e.target.value)}
                   className="w-full pl-9 pr-4 py-2 rounded-xl bg-muted border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
@@ -550,12 +552,12 @@ const AdminEvents = () => {
             </div>
 
             {loading ? (
-              <div className="text-center text-muted-foreground py-12">Laden...</div>
+              <div className="text-center text-muted-foreground py-12">{t("adminEvents.loading")}</div>
             ) : filteredManageEvents.length === 0 ? (
-              <p className="text-muted-foreground text-sm text-center py-8">Keine Events gefunden.</p>
+              <p className="text-muted-foreground text-sm text-center py-8">{t("adminEvents.noEvents")}</p>
             ) : (
               <div className="space-y-3">
-                <p className="text-muted-foreground text-xs">{filteredManageEvents.length} Events</p>
+                <p className="text-muted-foreground text-xs">{t("adminEvents.eventsCount", { count: filteredManageEvents.length })}</p>
                 {filteredManageEvents.map((event) => {
                   const isPast = new Date(event.event_date) < new Date();
                   return (
@@ -571,7 +573,7 @@ const AdminEvents = () => {
                             <h3 className="text-foreground font-bold text-sm truncate">{event.title}</h3>
                             {isPast && (
                               <Badge variant="outline" className="text-muted-foreground border-border shrink-0 text-[10px]">
-                                Vergangen
+                                {t("adminEvents.pastBadge")}
                               </Badge>
                             )}
                           </div>
@@ -605,18 +607,18 @@ const AdminEvents = () => {
         <AlertDialog open={!!eventToDelete} onOpenChange={(open) => !open && setEventToDelete(null)}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Event endgültig löschen?</AlertDialogTitle>
+              <AlertDialogTitle>{t("adminEvents.deleteTitle")}</AlertDialogTitle>
               <AlertDialogDescription>
-                "{eventToDelete?.title}" wird unwiderruflich aus der Datenbank entfernt. Alle zugehörigen Anmeldungen, Likes und Chats werden ebenfalls verloren gehen.
+                {t("adminEvents.deleteDesc", { title: eventToDelete?.title })}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+              <AlertDialogCancel>{t("adminEvents.cancel")}</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDeleteEvent}
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
-                Löschen
+                {t("adminEvents.delete")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
