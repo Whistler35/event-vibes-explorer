@@ -452,6 +452,13 @@ const Nearby = () => {
         (pos) => {
           setMapFocusCenter([pos.coords.latitude, pos.coords.longitude]);
           setFrozenCarousel(null);
+          try {
+            localStorage.setItem('lastUserLocation', JSON.stringify({
+              lat: pos.coords.latitude,
+              lng: pos.coords.longitude,
+              ts: Date.now(),
+            }));
+          } catch {}
           mapRef.current?.flyTo(pos.coords.latitude, pos.coords.longitude, 14);
         },
         () => toast.error(t('nearby.locationError'))
