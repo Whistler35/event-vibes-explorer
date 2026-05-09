@@ -80,7 +80,7 @@ const EventCheckin = () => {
           participantName: profile?.name,
           checkedInAt: ticket.checked_in_at,
         });
-        toast.warning(`Bereits eingecheckt: ${profile?.name || ticket.ticket_code}`);
+        toast.warning(t("eventCheckin.toastAlready", { name: profile?.name || ticket.ticket_code }));
         return;
       }
 
