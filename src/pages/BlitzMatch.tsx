@@ -295,7 +295,7 @@ const BlitzMatch = () => {
           {isAdmin && (
             <button
               onClick={handleAdminDelete}
-              aria-label="Blitz als Admin löschen"
+              aria-label={t("blitzMatch.adminDeleteAria")}
               className="w-9 h-9 rounded-full bg-red-500/90 hover:bg-red-500 flex items-center justify-center transition"
             >
               <Trash2 className="w-4 h-4 text-white" />
