@@ -132,14 +132,14 @@ const HostBilling = () => {
 
     setCurrentPlan(selectedNewPlan);
     setConfirmDialog(false);
-    toast.success(`Plan gewechselt zu ${selectedNewPlan.name}`);
+    toast.success(t('host.planChangedTo', { plan: selectedNewPlan.name }));
   };
 
   const handlePayPerEvent = () => {
     toast.success(
       payPerEventType === 'standard'
-        ? 'Standard Event für €29,90 gebucht (Demo)'
-        : 'Top Event für €49,90 gebucht (Demo)'
+        ? t('host.bookedStandardDemo')
+        : t('host.bookedTopDemo')
     );
     setPayPerEventDialog(false);
   };
