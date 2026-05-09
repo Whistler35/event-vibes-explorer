@@ -217,7 +217,7 @@ const UserProfile = () => {
     return (
       <Layout>
         <div className="flex items-center justify-center h-[70vh]">
-          <p className="text-muted-foreground">Laden...</p>
+          <p className="text-muted-foreground">{t("userProfile.loading")}</p>
         </div>
       </Layout>
     );
@@ -227,9 +227,9 @@ const UserProfile = () => {
     return (
       <Layout>
         <div className="flex flex-col items-center justify-center h-[70vh] space-y-4">
-          <p className="text-muted-foreground">Profil nicht gefunden.</p>
+          <p className="text-muted-foreground">{t("userProfile.notFound")}</p>
           <Button variant="outline" onClick={() => navigate(-1)}>
-            Zurück
+            {t("userProfile.back")}
           </Button>
         </div>
       </Layout>
