@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Send } from "lucide-react";
 import Layout from "@/components/Layout";
 import yogaEventImage from "@/assets/yoga-event-new.jpg";
 
 const Chat = () => {
   const { id } = useParams();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [message, setMessage] = useState("");
 
