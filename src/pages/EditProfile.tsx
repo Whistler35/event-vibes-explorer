@@ -97,9 +97,9 @@ const EditProfile = () => {
       const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
       setForm(prev => ({ ...prev, avatar_url: urlData.publicUrl }));
       setAvatarPreview(urlData.publicUrl);
-      toast.success("Image uploaded!");
+      toast.success(t('editProfile.uploadSuccess'));
     } catch (err: any) {
-      toast.error(err.message || "Upload failed");
+      toast.error(err.message || t('editProfile.uploadFailed'));
     } finally {
       setUploading(false);
     }
