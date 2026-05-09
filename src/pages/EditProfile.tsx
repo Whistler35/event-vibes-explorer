@@ -69,12 +69,12 @@ const EditProfile = () => {
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    if (!form.name.trim()) newErrors.name = "Name is required";
-    if (!form.age.trim() || isNaN(Number(form.age)) || Number(form.age) < 1) newErrors.age = "Enter a valid age";
-    if (!form.country.trim()) newErrors.country = "Country is required";
-    if (!form.bio.trim()) newErrors.bio = "Short bio is required";
-    if (!form.fun_fact.trim()) newErrors.fun_fact = "Fun fact is required";
-    if (!avatarPreview && !form.avatar_url) newErrors.avatar = "Profile picture is required";
+    if (!form.name.trim()) newErrors.name = t('editProfile.errors.name');
+    if (!form.age.trim() || isNaN(Number(form.age)) || Number(form.age) < 1) newErrors.age = t('editProfile.errors.age');
+    if (!form.country.trim()) newErrors.country = t('editProfile.errors.country');
+    if (!form.bio.trim()) newErrors.bio = t('editProfile.errors.bio');
+    if (!form.fun_fact.trim()) newErrors.fun_fact = t('editProfile.errors.fun_fact');
+    if (!avatarPreview && !form.avatar_url) newErrors.avatar = t('editProfile.errors.avatar');
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
