@@ -397,8 +397,8 @@ const HostBilling = () => {
       <Dialog open={payPerEventDialog} onOpenChange={setPayPerEventDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Event buchen</DialogTitle>
-            <DialogDescription>Wähle die Art des Events</DialogDescription>
+            <DialogTitle>{t('host.bookEvent')}</DialogTitle>
+            <DialogDescription>{t('host.selectEventType')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2">
             <button
@@ -410,8 +410,8 @@ const HostBilling = () => {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-foreground font-semibold">Standard Event</p>
-                  <p className="text-muted-foreground text-xs">Normales Event veröffentlichen</p>
+                  <p className="text-foreground font-semibold">{t('host.standardEvent')}</p>
+                  <p className="text-muted-foreground text-xs">{t('host.standardEventDesc')}</p>
                 </div>
                 <p className="text-foreground font-bold">€29,90</p>
               </div>
@@ -427,9 +427,9 @@ const HostBilling = () => {
                 <div className="flex items-center gap-2">
                   <div>
                     <p className="text-foreground font-semibold flex items-center gap-1">
-                      Top Event <Star className="w-3.5 h-3.5 text-yellow-500" />
+                      {t('host.topEvent')} <Star className="w-3.5 h-3.5 text-yellow-500" />
                     </p>
-                    <p className="text-muted-foreground text-xs">Hervorgehoben auf der Karte + Featured</p>
+                    <p className="text-muted-foreground text-xs">{t('host.topEventDesc')}</p>
                   </div>
                 </div>
                 <p className="text-foreground font-bold">€49,90</p>
@@ -437,9 +437,9 @@ const HostBilling = () => {
             </button>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setPayPerEventDialog(false)}>Abbrechen</Button>
+            <Button variant="outline" onClick={() => setPayPerEventDialog(false)}>{t('host.cancel')}</Button>
             <Button onClick={handlePayPerEvent}>
-              Jetzt buchen · €{payPerEventType === 'standard' ? '29,90' : '49,90'}
+              {t('host.bookNow')} · €{payPerEventType === 'standard' ? '29,90' : '49,90'}
             </Button>
           </DialogFooter>
         </DialogContent>
