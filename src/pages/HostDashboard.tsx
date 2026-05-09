@@ -218,42 +218,42 @@ const HostDashboard = () => {
         <Tabs defaultValue="active" className="w-full">
           <TabsList className="w-full grid grid-cols-3">
             <TabsTrigger value="active" className="text-xs">
-              Aktiv ({activeEvents.length})
+              {t('host.active')} ({activeEvents.length})
             </TabsTrigger>
             <TabsTrigger value="pending" className="text-xs">
-              Ausstehend ({pendingEvents.length})
+              {t('host.pending')} ({pendingEvents.length})
             </TabsTrigger>
             <TabsTrigger value="expired" className="text-xs">
-              Abgelaufen ({expiredEvents.length})
+              {t('host.expired')} ({expiredEvents.length})
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="active" className="space-y-3 mt-3">
             {activeEvents.length === 0 ? (
-              <EmptyState text="Keine aktiven Events" />
+              <EmptyState text={t('host.noActive')} />
             ) : (
               activeEvents.map((event) => (
-                <EventRow key={event.id} event={event} onDelete={handleDelete} onNavigate={navigate} />
+                <EventRow key={event.id} event={event} onDelete={handleDelete} onNavigate={navigate} dateLocale={dateLocale} t={t} />
               ))
             )}
           </TabsContent>
 
           <TabsContent value="pending" className="space-y-3 mt-3">
             {pendingEvents.length === 0 ? (
-              <EmptyState text="Keine ausstehenden Events" />
+              <EmptyState text={t('host.noPending')} />
             ) : (
               pendingEvents.map((event) => (
-                <EventRow key={event.id} event={event} onDelete={handleDelete} onNavigate={navigate} />
+                <EventRow key={event.id} event={event} onDelete={handleDelete} onNavigate={navigate} dateLocale={dateLocale} t={t} />
               ))
             )}
           </TabsContent>
 
           <TabsContent value="expired" className="space-y-3 mt-3">
             {expiredEvents.length === 0 ? (
-              <EmptyState text="Keine abgelaufenen Events" />
+              <EmptyState text={t('host.noExpired')} />
             ) : (
               expiredEvents.map((event) => (
-                <EventRow key={event.id} event={event} onDelete={handleDelete} onNavigate={navigate} />
+                <EventRow key={event.id} event={event} onDelete={handleDelete} onNavigate={navigate} dateLocale={dateLocale} t={t} />
               ))
             )}
           </TabsContent>
@@ -263,11 +263,11 @@ const HostDashboard = () => {
         <div className="grid grid-cols-2 gap-3">
           <Button variant="outline" className="w-full" onClick={() => navigate('/host/stats')}>
             <BarChart3 className="w-4 h-4 mr-2" />
-            Statistiken
+            {t('host.stats')}
           </Button>
           <Button variant="outline" className="w-full" onClick={() => navigate('/host/billing')}>
             <CreditCard className="w-4 h-4 mr-2" />
-            Abrechnung
+            {t('host.billing')}
           </Button>
         </div>
 
