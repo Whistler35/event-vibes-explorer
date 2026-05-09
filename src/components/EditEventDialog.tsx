@@ -44,6 +44,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
   event,
   onEventUpdated,
 }) => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { isHost } = useIsHost();
   const { isAdmin } = useIsAdmin();
