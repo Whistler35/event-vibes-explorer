@@ -211,6 +211,27 @@ const NotificationBell = () => {
                     <p className={`text-xs mt-0.5 line-clamp-2 ${!notif.is_read ? "text-foreground/80" : "text-muted-foreground"}`}>
                       {notif.body}
                     </p>
+                    {notif.type === "friend_request" && (
+                      <div className="flex gap-2 mt-2" onClick={(e) => e.stopPropagation()}>
+                        <Button
+                          size="sm"
+                          className="h-8 px-3 text-xs"
+                          disabled={pendingIds.has(notif.id)}
+                          onClick={(e) => { e.stopPropagation(); respondFriendRequest(notif, true); }}
+                        >
+                          <Check className="w-3.5 h-3.5 mr-1" /> Annehmen
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 px-3 text-xs"
+                          disabled={pendingIds.has(notif.id)}
+                          onClick={(e) => { e.stopPropagation(); respondFriendRequest(notif, false); }}
+                        >
+                          <X className="w-3.5 h-3.5 mr-1" /> Ablehnen
+                        </Button>
+                      </div>
+                    )}
                   </div>
                   {!notif.is_read && (
                     <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
