@@ -154,7 +154,7 @@ const HostBilling = () => {
     );
   }
 
-  const nextBillingDate = format(addMonths(new Date(), 1), 'dd. MMMM yyyy', { locale: de });
+  const nextBillingDate = format(addMonths(new Date(), 1), 'dd. MMMM yyyy', { locale: dateLocale });
   const invoices = getMockInvoices(currentPlan?.name || 'Starter');
 
   return (
