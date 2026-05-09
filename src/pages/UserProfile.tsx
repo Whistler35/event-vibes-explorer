@@ -245,7 +245,7 @@ const UserProfile = () => {
   const photos = profile.photos || [];
   const interests = profile.interests || [];
   const score = stats.blitzSent + stats.participatedCount;
-  const level = activityLevel(score);
+  const level = t(activityLevelKey(score));
   const isOwnProfile = user?.id === userId;
 
   const friendActions = user && !isOwnProfile && (
