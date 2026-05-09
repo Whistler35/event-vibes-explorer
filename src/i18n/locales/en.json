@@ -576,5 +576,99 @@
     "emptyChat": "Message them directly — only 5 min to coordinate ⚡",
     "chatExpired": "Chat expired",
     "typeSomething": "Type something…"
+  },
+  "adminEvents": {
+    "title": "Admin Area",
+    "tabs": {
+      "pending": "Approvals",
+      "featured": "Top Events",
+      "hosts": "Hosts",
+      "manage": "Delete",
+      "stats": "Stats"
+    },
+    "importing": "Importing...",
+    "importApify": "Import from Apify",
+    "loading": "Loading...",
+    "allDone": "All done!",
+    "noPending": "No events to review.",
+    "pending": "Pending",
+    "reject": "Reject",
+    "approve": "Approve",
+    "currentTop": "Current Top Events",
+    "addTop": "Add events",
+    "searchEvent": "Search event...",
+    "noMore": "No more events available.",
+    "remove": "Remove",
+    "add": "Add",
+    "past": "Past",
+    "upcoming": "Upcoming",
+    "all": "All",
+    "searchPlaceholder": "Search event or location...",
+    "noEvents": "No events found.",
+    "eventsCount": "{{count}} events",
+    "pastBadge": "Past",
+    "deleteTitle": "Delete event permanently?",
+    "deleteDesc": "\"{{title}}\" will be permanently removed from the database. All related signups, likes and chats will be lost.",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "importSuccess": "{{count}} events imported{{skipped}}",
+    "importSkipped": " ({{count}} skipped)",
+    "importFailed": "Import failed: {{msg}}",
+    "deleteError": "Failed to delete: {{msg}}",
+    "deleted": "\"{{title}}\" deleted",
+    "approveError": "Failed to approve",
+    "approved": "Event approved! ✅",
+    "rejectError": "Failed to reject",
+    "rejected": "Event rejected",
+    "updateError": "Failed to update",
+    "removedTop": "No longer Top Event",
+    "markedTop": "Marked as Top Event ⭐",
+    "sortError": "Failed to sort"
+  },
+  "adminHosts": {
+    "totalHosts": "Total hosts",
+    "activeHosts": "Active hosts",
+    "totalEvents": "Total events",
+    "totalRevenue": "Total revenue",
+    "noHosts": "No professional hosts registered yet",
+    "active": "Active",
+    "suspended": "Suspended",
+    "plan": "Plan",
+    "events": "Events",
+    "revenue": "Revenue",
+    "since": "Since",
+    "noPlan": "No plan",
+    "unknown": "Unknown",
+    "verify": "Verify",
+    "suspend": "Suspend",
+    "activate": "Activate",
+    "actions": {
+      "verify": {
+        "title": "Verify Host",
+        "desc": "mark as verified host",
+        "btn": "Verify"
+      },
+      "suspend": {
+        "title": "Suspend Host",
+        "desc": "temporarily suspend",
+        "btn": "Suspend"
+      },
+      "activate": {
+        "title": "Activate Host",
+        "desc": "activate again",
+        "btn": "Activate"
+      },
+      "delete": {
+        "title": "Delete Host",
+        "desc": "permanently delete",
+        "btn": "Delete"
+      }
+    },
+    "confirm": "Do you really want to {{desc}} {{name}}?",
+    "cancel": "Cancel",
+    "verified": "{{name}} verified ✅",
+    "suspendedToast": "{{name}} suspended",
+    "activatedToast": "{{name}} activated",
+    "deletedToast": "{{name}} deleted"
   }
 }

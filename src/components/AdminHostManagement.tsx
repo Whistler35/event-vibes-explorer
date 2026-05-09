@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,6 +34,7 @@ interface HostRow {
 }
 
 const AdminHostManagement = () => {
+  const { t } = useTranslation();
   const [hosts, setHosts] = useState<HostRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionDialog, setActionDialog] = useState<{
@@ -71,9 +73,9 @@ const AdminHostManagement = () => {
 
         return {
           ...h,
-          profile_name: profileRes.data?.name || 'Unknown',
+          profile_name: profileRes.data?.name || t('adminHosts.unknown'),
           profile_email: '',
-          plan_name: planRes.data?.name || 'No plan',
+          plan_name: planRes.data?.name || t('adminHosts.noPlan'),
           plan_slug: planRes.data?.slug || '',
           event_count: eventsRes.count || 0,
         };
@@ -93,22 +95,22 @@ const AdminHostManagement = () => {
         .from('host_profiles')
         .update({ is_verified: true } as any)
         .eq('id', host.id);
-      toast.success(`${host.profile_name} verified ✅`);
+      toast.success(t('adminHosts.verified', { name: host.profile_name }));
     } else if (action === 'suspend') {
       await supabase
         .from('host_profiles')
         .update({ status: 'suspended' } as any)
         .eq('id', host.id);
-      toast.success(`${host.profile_name} suspended`);
+      toast.success(t('adminHosts.suspendedToast', { name: host.profile_name }));
     } else if (action === 'activate') {
       await supabase
         .from('host_profiles')
         .update({ status: 'active' } as any)
         .eq('id', host.id);
-      toast.success(`${host.profile_name} activated`);
+      toast.success(t('adminHosts.activatedToast', { name: host.profile_name }));
     } else if (action === 'delete') {
       await supabase.from('host_profiles').delete().eq('id', host.id);
-      toast.success(`${host.profile_name} deleted`);
+      toast.success(t('adminHosts.deletedToast', { name: host.profile_name }));
     }
 
     setActionDialog(null);
@@ -116,11 +118,11 @@ const AdminHostManagement = () => {
   };
 
   const actionLabels = {
-    verify: { title: 'Verify Host', desc: 'mark as verified host', btn: 'Verify', icon: CheckCircle },
-    suspend: { title: 'Suspend Host', desc: 'temporarily suspend', btn: 'Suspend', icon: Ban },
-    activate: { title: 'Activate Host', desc: 'activate again', btn: 'Activate', icon: CheckCircle },
-    delete: { title: 'Delete Host', desc: 'permanently delete', btn: 'Delete', icon: Trash2 },
-  };
+    verify: { titleKey: 'adminHosts.actions.verify', icon: CheckCircle },
+    suspend: { titleKey: 'adminHosts.actions.suspend', icon: Ban },
+    activate: { titleKey: 'adminHosts.actions.activate', icon: CheckCircle },
+    delete: { titleKey: 'adminHosts.actions.delete', icon: Trash2 },
+  } as const;
 
   // Stats
   const totalHosts = hosts.length;
@@ -144,21 +146,21 @@ const AdminHostManagement = () => {
           <CardContent className="p-3 text-center">
             <Building2 className="w-5 h-5 text-primary mx-auto mb-1" />
             <p className="text-foreground font-bold text-lg">{totalHosts}</p>
-            <p className="text-muted-foreground text-[10px]">Total hosts</p>
+            <p className="text-muted-foreground text-[10px]">{t('adminHosts.totalHosts')}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-3 text-center">
             <CheckCircle className="w-5 h-5 text-primary mx-auto mb-1" />
             <p className="text-foreground font-bold text-lg">{activeHosts}</p>
-            <p className="text-muted-foreground text-[10px]">Active hosts</p>
+            <p className="text-muted-foreground text-[10px]">{t('adminHosts.activeHosts')}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-3 text-center">
             <CalendarDays className="w-5 h-5 text-primary mx-auto mb-1" />
             <p className="text-foreground font-bold text-lg">{totalEvents}</p>
-            <p className="text-muted-foreground text-[10px]">Total events</p>
+            <p className="text-muted-foreground text-[10px]">{t('adminHosts.totalEvents')}</p>
           </CardContent>
         </Card>
         <Card>
@@ -167,7 +169,7 @@ const AdminHostManagement = () => {
             <p className="text-foreground font-bold text-lg">
               €{(totalRevenue / 100).toFixed(0)}
             </p>
-            <p className="text-muted-foreground text-[10px]">Total revenue</p>
+            <p className="text-muted-foreground text-[10px]">{t('adminHosts.totalRevenue')}</p>
           </CardContent>
         </Card>
       </div>
@@ -175,7 +177,7 @@ const AdminHostManagement = () => {
       {/* Host List */}
       {hosts.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
-          No professional hosts registered yet
+          {t('adminHosts.noHosts')}
         </div>
       ) : (
         <div className="space-y-3">
@@ -206,7 +208,7 @@ const AdminHostManagement = () => {
                     variant={host.status === 'active' ? 'default' : 'destructive'}
                     className="text-[10px] flex-shrink-0"
                   >
-                    {host.status === 'active' ? 'Active' : host.status === 'suspended' ? 'Suspended' : host.status}
+                    {host.status === 'active' ? t('adminHosts.active') : host.status === 'suspended' ? t('adminHosts.suspended') : host.status}
                   </Badge>
                 </div>
 
@@ -214,23 +216,23 @@ const AdminHostManagement = () => {
                 <div className="grid grid-cols-4 gap-2 text-center">
                   <div className="p-1.5 rounded bg-muted/50">
                     <p className="text-foreground font-bold text-xs">{host.plan_name}</p>
-                    <p className="text-muted-foreground text-[9px]">Plan</p>
+                    <p className="text-muted-foreground text-[9px]">{t('adminHosts.plan')}</p>
                   </div>
                   <div className="p-1.5 rounded bg-muted/50">
                     <p className="text-foreground font-bold text-xs">{host.event_count}</p>
-                    <p className="text-muted-foreground text-[9px]">Events</p>
+                    <p className="text-muted-foreground text-[9px]">{t('adminHosts.events')}</p>
                   </div>
                   <div className="p-1.5 rounded bg-muted/50">
                     <p className="text-foreground font-bold text-xs">
                       €{(host.total_revenue_cents / 100).toFixed(0)}
                     </p>
-                    <p className="text-muted-foreground text-[9px]">Revenue</p>
+                    <p className="text-muted-foreground text-[9px]">{t('adminHosts.revenue')}</p>
                   </div>
                   <div className="p-1.5 rounded bg-muted/50">
                     <p className="text-foreground font-bold text-xs">
                       {format(new Date(host.created_at), 'MM/yy')}
                     </p>
-                    <p className="text-muted-foreground text-[9px]">Since</p>
+                    <p className="text-muted-foreground text-[9px]">{t('adminHosts.since')}</p>
                   </div>
                 </div>
 
@@ -243,7 +245,7 @@ const AdminHostManagement = () => {
                       className="flex-1 text-xs"
                       onClick={() => setActionDialog({ host, action: 'verify' })}
                     >
-                      <ShieldCheck className="w-3.5 h-3.5 mr-1" /> Verify
+                      <ShieldCheck className="w-3.5 h-3.5 mr-1" /> {t('adminHosts.verify')}
                     </Button>
                   )}
                   {host.status === 'active' ? (
@@ -253,7 +255,7 @@ const AdminHostManagement = () => {
                       className="flex-1 text-xs text-destructive border-destructive/30"
                       onClick={() => setActionDialog({ host, action: 'suspend' })}
                     >
-                      <Ban className="w-3.5 h-3.5 mr-1" /> Suspend
+                      <Ban className="w-3.5 h-3.5 mr-1" /> {t('adminHosts.suspend')}
                     </Button>
                   ) : (
                     <Button
@@ -262,7 +264,7 @@ const AdminHostManagement = () => {
                       className="flex-1 text-xs"
                       onClick={() => setActionDialog({ host, action: 'activate' })}
                     >
-                      <CheckCircle className="w-3.5 h-3.5 mr-1" /> Activate
+                      <CheckCircle className="w-3.5 h-3.5 mr-1" /> {t('adminHosts.activate')}
                     </Button>
                   )}
                   <Button
@@ -287,18 +289,18 @@ const AdminHostManagement = () => {
           <Dialog open={!!actionDialog} onOpenChange={() => setActionDialog(null)}>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>{info.title}</DialogTitle>
+                <DialogTitle>{t(`${info.titleKey}.title`)}</DialogTitle>
                 <DialogDescription>
-                  Do you really want to {info.desc} <strong>{actionDialog.host.profile_name}</strong>?
+                  {t('adminHosts.confirm', { desc: t(`${info.titleKey}.desc`), name: actionDialog.host.profile_name })}
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter className="gap-2">
-                <Button variant="outline" onClick={() => setActionDialog(null)}>Cancel</Button>
+                <Button variant="outline" onClick={() => setActionDialog(null)}>{t('adminHosts.cancel')}</Button>
                 <Button
                   variant={actionDialog.action === 'delete' || actionDialog.action === 'suspend' ? 'destructive' : 'default'}
                   onClick={handleAction}
                 >
-                  {info.btn}
+                  {t(`${info.titleKey}.btn`)}
                 </Button>
               </DialogFooter>
             </DialogContent>
