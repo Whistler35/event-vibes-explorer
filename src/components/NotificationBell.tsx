@@ -35,10 +35,50 @@ const TYPE_GROUPS: Record<Exclude<FilterKey, "all" | "unread">, string[]> = {
 };
 
 const NotificationBell = () => {
-  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, refetch } = useNotifications();
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<FilterKey>("all");
+  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
+
+  const respondFriendRequest = async (notif: AppNotification, accept: boolean) => {
+    const requesterId = notif.data?.requester_id || notif.data?.friend_id;
+    if (!requesterId || !user) return;
+    setPendingIds((s) => new Set(s).add(notif.id));
+    try {
+      const { data: fr, error: frErr } = await supabase
+        .from("friendships")
+        .select("id")
+        .eq("requester_id", requesterId)
+        .eq("addressee_id", user.id)
+        .eq("status", "pending")
+        .maybeSingle();
+      if (frErr) throw frErr;
+      if (!fr) {
+        toast.error("Anfrage nicht mehr verfügbar");
+      } else if (accept) {
+        const { error } = await supabase.from("friendships").update({ status: "accepted" }).eq("id", fr.id);
+        if (error) throw error;
+        toast.success("Freundschaftsanfrage angenommen");
+      } else {
+        const { error } = await supabase.from("friendships").delete().eq("id", fr.id);
+        if (error) throw error;
+        toast("Anfrage abgelehnt");
+      }
+      if (!notif.is_read) markAsRead(notif.id);
+      refetch?.();
+    } catch (e: any) {
+      toast.error(e.message ?? "Fehler");
+    } finally {
+      setPendingIds((s) => {
+        const n = new Set(s);
+        n.delete(notif.id);
+        return n;
+      });
+    }
+  };
+
 
   const filtered = notifications.filter((n) => {
     if (filter === "all") return true;
