@@ -169,10 +169,12 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
       if (showControls) {
         map.current.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'top-right');
       }
-      // Geolocate control (hidden — triggered via custom button)
+      // Geolocate control — shows the user's blue dot, but does NOT continuously
+      // recenter the map. Otherwise the map keeps snapping back to the user's
+      // physical location whenever the watch fires (e.g. while browsing Linz from Gmunden).
       const geo = new mapboxgl.GeolocateControl({
         positionOptions: { enableHighAccuracy: true },
-        trackUserLocation: true,
+        trackUserLocation: false,
         showUserHeading: true,
         showAccuracyCircle: true,
       });
