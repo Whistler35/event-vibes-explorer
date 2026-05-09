@@ -349,11 +349,11 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
           {/* Date and Time */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-date" className="text-foreground text-sm">Date *</Label>
+              <Label htmlFor="edit-date" className="text-foreground text-sm">{t('editEvent.date')}</Label>
               <Input id="edit-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-time" className="text-foreground text-sm">Time *</Label>
+              <Label htmlFor="edit-time" className="text-foreground text-sm">{t('editEvent.time')}</Label>
               <Input id="edit-time" type="time" value={time} onChange={(e) => setTime(e.target.value)} className="bg-transparent border-border text-foreground rounded-xl h-12" />
             </div>
           </div>
