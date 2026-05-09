@@ -49,8 +49,8 @@ const ActiveBlitzScreen = ({ request, onEnded }: ActiveBlitzScreenProps) => {
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-40 h-40 rounded-full bg-[hsl(var(--blitz-pink))] blur-2xl" />
       </div>
 
-      <Zap className="absolute top-8 right-6 w-7 h-7 text-[hsl(var(--blitz-pink))] fill-[hsl(var(--blitz-pink))] opacity-60 animate-pulse" />
-      <Zap className="absolute bottom-20 left-5 w-5 h-5 text-[hsl(var(--blitz-pink))] fill-[hsl(var(--blitz-pink))] opacity-40 animate-pulse" style={{ animationDelay: "0.5s" }} />
+      <Zap className="absolute top-4 right-4 sm:top-6 sm:right-5 w-6 h-6 sm:w-7 sm:h-7 text-[hsl(var(--blitz-pink))] fill-[hsl(var(--blitz-pink))] opacity-60 animate-pulse pointer-events-none" />
+      <Zap className="absolute top-1/2 left-3 sm:left-4 w-4 h-4 sm:w-5 sm:h-5 text-[hsl(var(--blitz-pink))] fill-[hsl(var(--blitz-pink))] opacity-40 animate-pulse pointer-events-none" style={{ animationDelay: "0.5s" }} />
 
       <div className="relative z-10 flex flex-col items-center justify-between h-full px-4 sm:px-6 py-4 sm:py-6 text-center">
         <div className="space-y-2">
