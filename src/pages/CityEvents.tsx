@@ -112,10 +112,10 @@ const CityEvents = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-muted-foreground text-sm mb-2 block">Category</label>
+              <label className="text-muted-foreground text-sm mb-2 block">{t("cityEvents.category")}</label>
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                 <SelectTrigger className="bg-card border-border text-foreground">
-                  <SelectValue placeholder="Select category" />
+                  <SelectValue placeholder={t("cityEvents.selectCategory")} />
                 </SelectTrigger>
                 <SelectContent className="bg-card border-border z-50">
                   {categories.map((category) => (
@@ -124,7 +124,7 @@ const CityEvents = () => {
                       value={category}
                       className="text-foreground hover:bg-primary/10"
                     >
-                      {category === "all" ? "All Categories" : category}
+                      {category === "all" ? t("cityEvents.allCategories") : category}
                     </SelectItem>
                   ))}
                 </SelectContent>
