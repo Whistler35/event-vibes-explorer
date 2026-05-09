@@ -44,7 +44,7 @@ function generateMockStats(event: HostEvent, dateLocale: any) {
     const spike = i === 7 || i === 10 ? base * 2 : 0;
     const views = base + Math.floor(Math.random() * base * 0.6) + spike;
     return {
-      date: format(date, 'dd.MM', { locale: de }),
+      date: format(date, 'dd.MM', { locale: dateLocale }),
       views,
       registrations: Math.floor(views * (totalRegistrations / totalViews)),
     };
