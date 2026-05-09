@@ -412,11 +412,11 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
             </>
           ) : (
             <div className="space-y-3">
-              <Label className="text-foreground text-sm">Wochentag-Slots *</Label>
+              <Label className="text-foreground text-sm">{t('createEvent.weekdaySlots')}</Label>
               {recurringSlots.map((slot, i) => (
                 <div key={i} className="grid grid-cols-[1fr_auto_auto_auto] gap-2 items-end">
                   <div className="space-y-1">
-                    <Label className="text-muted-foreground text-xs">Tag</Label>
+                    <Label className="text-muted-foreground text-xs">{t('createEvent.slotDay')}</Label>
                     <Select
                       value={String(slot.weekday)}
                       onValueChange={(v) => {
@@ -429,18 +429,18 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="bg-card border-border">
-                        <SelectItem value="1">Montag</SelectItem>
-                        <SelectItem value="2">Dienstag</SelectItem>
-                        <SelectItem value="3">Mittwoch</SelectItem>
-                        <SelectItem value="4">Donnerstag</SelectItem>
-                        <SelectItem value="5">Freitag</SelectItem>
-                        <SelectItem value="6">Samstag</SelectItem>
-                        <SelectItem value="0">Sonntag</SelectItem>
+                        <SelectItem value="1">{t('weekdays.monday')}</SelectItem>
+                        <SelectItem value="2">{t('weekdays.tuesday')}</SelectItem>
+                        <SelectItem value="3">{t('weekdays.wednesday')}</SelectItem>
+                        <SelectItem value="4">{t('weekdays.thursday')}</SelectItem>
+                        <SelectItem value="5">{t('weekdays.friday')}</SelectItem>
+                        <SelectItem value="6">{t('weekdays.saturday')}</SelectItem>
+                        <SelectItem value="0">{t('weekdays.sunday')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-muted-foreground text-xs">Start</Label>
+                    <Label className="text-muted-foreground text-xs">{t('createEvent.slotStart')}</Label>
                     <Input
                       type="time"
                       value={slot.startTime}
@@ -453,7 +453,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-muted-foreground text-xs">Ende</Label>
+                    <Label className="text-muted-foreground text-xs">{t('createEvent.slotEnd')}</Label>
                     <Input
                       type="time"
                       value={slot.endTime}
