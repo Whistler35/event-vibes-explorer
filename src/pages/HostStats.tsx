@@ -254,7 +254,7 @@ const HostStats = () => {
                                 stroke="hsl(var(--primary))"
                                 strokeWidth={2}
                                 dot={false}
-                                name="Views"
+                                name={t('host.views')}
                               />
                               <Line
                                 type="monotone"
@@ -262,7 +262,7 @@ const HostStats = () => {
                                 stroke="hsl(var(--accent-foreground))"
                                 strokeWidth={2}
                                 dot={false}
-                                name="Anmeldungen"
+                                name={t('host.registrations')}
                                 strokeDasharray="4 4"
                               />
                             </LineChart>
