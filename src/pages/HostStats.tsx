@@ -186,13 +186,13 @@ const HostStats = () => {
                         <div className="min-w-0 flex-1">
                           <CardTitle className="text-sm truncate">{event.title}</CardTitle>
                           <p className="text-muted-foreground text-xs mt-0.5">
-                            {format(new Date(event.event_date), 'dd. MMM yyyy', { locale: de })} · {event.location_name}
+                            {format(new Date(event.event_date), 'dd. MMM yyyy', { locale: dateLocale })} · {event.location_name}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="text-right text-xs">
                             <span className="text-foreground font-semibold">{stats.totalViews}</span>
-                            <span className="text-muted-foreground"> Views</span>
+                            <span className="text-muted-foreground"> {t('host.views')}</span>
                           </div>
                           {isExpanded ? (
                             <ChevronUp className="w-4 h-4 text-muted-foreground" />
