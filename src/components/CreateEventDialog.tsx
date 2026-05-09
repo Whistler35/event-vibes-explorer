@@ -602,10 +602,10 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
           {/* Buttons */}
           <div className="flex gap-3 pt-2">
             <Button variant="outline" onClick={handleClose} className="flex-1 h-12 rounded-xl">
-              Cancel
+              {t('createEvent.cancel')}
             </Button>
             <Button onClick={handleSubmit} disabled={!title || loading || (!isRecurring && (!date || !time)) || (isRecurring && (!recurringUntil || recurringSlots.some(s => !s.startTime))) || (!isAdmin && (!maxParticipants || parseInt(maxParticipants) < 2))} className="flex-1 h-12 rounded-xl">
-              {loading ? 'Creating...' : 'Create Event'}
+              {loading ? t('createEvent.creating') : t('createEvent.create')}
             </Button>
           </div>
         </div>
