@@ -191,10 +191,13 @@ const NotificationBell = () => {
           ) : (
             <div className="divide-y divide-border">
               {filtered.map((notif) => (
-                <button
+                <div
                   key={notif.id}
+                  role="button"
+                  tabIndex={0}
                   onClick={() => handleClick(notif)}
-                  className={`w-full flex items-start gap-3 p-4 text-left transition-colors hover:bg-card/50 ${
+                  onKeyDown={(e) => { if (e.key === "Enter") handleClick(notif); }}
+                  className={`w-full flex items-start gap-3 p-4 text-left transition-colors hover:bg-card/50 cursor-pointer ${
                     !notif.is_read ? "bg-primary/5" : ""
                   }`}
                 >
