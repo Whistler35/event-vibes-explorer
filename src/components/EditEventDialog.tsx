@@ -360,14 +360,14 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
 
           {/* Max Participants */}
           <div className="space-y-2">
-            <Label htmlFor="edit-maxParticipants" className="text-foreground text-sm">Max. Participants</Label>
+            <Label htmlFor="edit-maxParticipants" className="text-foreground text-sm">{t('editEvent.maxParticipants')}</Label>
             <Input
               id="edit-maxParticipants"
               type="number"
               min={2}
               value={maxParticipants}
               onChange={(e) => setMaxParticipants(e.target.value)}
-              placeholder="Unlimited"
+              placeholder={t('editEvent.unlimited')}
               className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12"
             />
           </div>
