@@ -278,7 +278,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
 
           {/* Location Name */}
           <div className="space-y-2">
-            <Label htmlFor="edit-location" className="text-foreground text-sm">Location</Label>
+            <Label htmlFor="edit-location" className="text-foreground text-sm">{t('editEvent.location')}</Label>
             <div className="relative">
               <Input
                 id="edit-location"
