@@ -88,7 +88,7 @@ const UserProfile = () => {
 
   const handleStartDM = async () => {
     if (!user || !userId) {
-      toast.error("Bitte einloggen, um Nachrichten zu senden.");
+      toast.error(t("userProfile.loginToMessage"));
       return;
     }
     const { data, error } = await supabase.rpc("get_or_create_dm", {
@@ -96,7 +96,7 @@ const UserProfile = () => {
       p_user2: userId,
     });
     if (error) {
-      toast.error("Chat konnte nicht erstellt werden.");
+      toast.error(t("userProfile.chatCreateError"));
       return;
     }
     navigate(`/dm/${data}`);
