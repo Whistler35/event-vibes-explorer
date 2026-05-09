@@ -109,8 +109,8 @@ const EventCheckin = () => {
     return (
       <Layout>
         <div className="p-6 text-center space-y-4">
-          <p>Du hast keine Berechtigung für den Check-in dieses Events.</p>
-          <Button onClick={() => navigate(-1)}>Zurück</Button>
+          <p>{t("eventCheckin.noPermission")}</p>
+          <Button onClick={() => navigate(-1)}>{t("eventCheckin.back")}</Button>
         </div>
       </Layout>
     );
