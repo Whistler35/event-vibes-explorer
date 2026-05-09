@@ -374,7 +374,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
 
           {/* Price */}
           <div className="space-y-2">
-            <Label htmlFor="edit-price" className="text-foreground text-sm">Price (EUR)</Label>
+            <Label htmlFor="edit-price" className="text-foreground text-sm">{t('editEvent.price')}</Label>
             <Input
               id="edit-price"
               type="number"
@@ -382,13 +382,13 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
               step="0.01"
               value={priceEur}
               onChange={(e) => setPriceEur(e.target.value)}
-              placeholder="0 = Free"
+              placeholder={t('editEvent.pricePlaceholder')}
               className="bg-transparent border-border text-foreground placeholder:text-muted-foreground rounded-xl h-12"
             />
             <p className="text-muted-foreground text-xs">
               {priceEur && parseFloat(priceEur.replace(',', '.')) > 0
-                ? `€${parseFloat(priceEur.replace(',', '.')).toFixed(2)} per ticket`
-                : 'Leave empty or 0 for a free event'}
+                ? t('editEvent.pricePerTicket', { price: parseFloat(priceEur.replace(',', '.')).toFixed(2) })
+                : t('editEvent.priceFreeHint')}
             </p>
           </div>
 
