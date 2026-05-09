@@ -576,5 +576,99 @@
     "emptyChat": "Schreibt direkt – nur 5 Min. zum Abstimmen ⚡",
     "chatExpired": "Chat abgelaufen",
     "typeSomething": "Etwas schreiben …"
+  },
+  "adminEvents": {
+    "title": "Admin Bereich",
+    "tabs": {
+      "pending": "Freigaben",
+      "featured": "Top Events",
+      "hosts": "Hosts",
+      "manage": "Löschen",
+      "stats": "Stats"
+    },
+    "importing": "Importiere...",
+    "importApify": "Import from Apify",
+    "loading": "Laden...",
+    "allDone": "Alles erledigt!",
+    "noPending": "Keine offenen Events zur Prüfung.",
+    "pending": "Pending",
+    "reject": "Ablehnen",
+    "approve": "Freigeben",
+    "currentTop": "Aktuelle Top Events",
+    "addTop": "Events hinzufügen",
+    "searchEvent": "Event suchen...",
+    "noMore": "Keine weiteren Events verfügbar.",
+    "remove": "Entfernen",
+    "add": "Hinzufügen",
+    "past": "Vergangene",
+    "upcoming": "Kommende",
+    "all": "Alle",
+    "searchPlaceholder": "Event oder Ort suchen...",
+    "noEvents": "Keine Events gefunden.",
+    "eventsCount": "{{count}} Events",
+    "pastBadge": "Vergangen",
+    "deleteTitle": "Event endgültig löschen?",
+    "deleteDesc": "\"{{title}}\" wird unwiderruflich aus der Datenbank entfernt. Alle zugehörigen Anmeldungen, Likes und Chats werden ebenfalls verloren gehen.",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "importSuccess": "{{count}} Events importiert{{skipped}}",
+    "importSkipped": " ({{count}} übersprungen)",
+    "importFailed": "Import fehlgeschlagen: {{msg}}",
+    "deleteError": "Fehler beim Löschen: {{msg}}",
+    "deleted": "\"{{title}}\" gelöscht",
+    "approveError": "Fehler beim Freigeben",
+    "approved": "Event freigegeben! ✅",
+    "rejectError": "Fehler beim Ablehnen",
+    "rejected": "Event abgelehnt",
+    "updateError": "Fehler beim Aktualisieren",
+    "removedTop": "Nicht mehr Top Event",
+    "markedTop": "Als Top Event markiert ⭐",
+    "sortError": "Fehler beim Sortieren"
+  },
+  "adminHosts": {
+    "totalHosts": "Total hosts",
+    "activeHosts": "Active hosts",
+    "totalEvents": "Total events",
+    "totalRevenue": "Total revenue",
+    "noHosts": "Noch keine Professional Hosts registriert",
+    "active": "Aktiv",
+    "suspended": "Gesperrt",
+    "plan": "Plan",
+    "events": "Events",
+    "revenue": "Umsatz",
+    "since": "Seit",
+    "noPlan": "Kein Plan",
+    "unknown": "Unbekannt",
+    "verify": "Verifizieren",
+    "suspend": "Sperren",
+    "activate": "Aktivieren",
+    "actions": {
+      "verify": {
+        "title": "Host verifizieren",
+        "desc": "als verifizierten Host markieren",
+        "btn": "Verifizieren"
+      },
+      "suspend": {
+        "title": "Host sperren",
+        "desc": "vorübergehend sperren",
+        "btn": "Sperren"
+      },
+      "activate": {
+        "title": "Host aktivieren",
+        "desc": "wieder aktivieren",
+        "btn": "Aktivieren"
+      },
+      "delete": {
+        "title": "Host löschen",
+        "desc": "endgültig löschen",
+        "btn": "Löschen"
+      }
+    },
+    "confirm": "Möchtest du wirklich {{desc}} {{name}}?",
+    "cancel": "Abbrechen",
+    "verified": "{{name}} verifiziert ✅",
+    "suspendedToast": "{{name}} gesperrt",
+    "activatedToast": "{{name}} aktiviert",
+    "deletedToast": "{{name}} gelöscht"
   }
 }
