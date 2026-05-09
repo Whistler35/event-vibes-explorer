@@ -253,17 +253,17 @@ const BlitzMatch = () => {
           {/* Mission / Plan card — sharp, no rounded softness */}
           <div className="relative border-2 border-[hsl(var(--blitz-pink))] bg-black/30 backdrop-blur-sm p-4">
             <div className="absolute -top-2.5 left-3 px-2 bg-[hsl(var(--blitz-forest))] text-[10px] font-black uppercase tracking-[0.3em] text-[hsl(var(--blitz-pink))]">
-              Mission
+              {t("blitzMatch.mission")}
             </div>
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-[10px] font-black uppercase tracking-widest text-white/50">Activity</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/50">{t("blitzMatch.activity")}</p>
                 <p className="text-xl font-black uppercase text-white truncate">{activity || "—"}</p>
               </div>
               <div className="text-right shrink-0">
-                <p className="text-[10px] font-black uppercase tracking-widest text-white/50">With</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/50">{t("blitzMatch.with")}</p>
                 <p className="text-sm font-bold uppercase text-white truncate max-w-[120px]">
-                  {other?.name ?? "Player 2"}
+                  {other?.name ?? t("blitzMatch.player2")}
                 </p>
               </div>
             </div>
