@@ -214,7 +214,7 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
                 : '0 8px 20px rgba(0,0,0,0.15)',
             }}
           >
-            <div className="relative h-44 bg-muted">
+            <div className="relative h-32 bg-muted">
               {ev.image ? (
                 <img src={ev.image} alt="" className="w-full h-full object-cover" draggable={false} loading="lazy" />
               ) : (
