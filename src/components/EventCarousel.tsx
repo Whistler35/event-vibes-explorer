@@ -27,8 +27,8 @@ const formatTime = (iso?: string) => {
 };
 
 // Card geometry
-const CARD_WIDTH = 240;          // px
-const CARD_GAP = 12;             // spacing between cards
+const CARD_WIDTH = 200;          // px
+const CARD_GAP = 10;             // spacing between cards
 const STEP = CARD_WIDTH + CARD_GAP;
 
 const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInteractionStart, onSelect, onExpand }) => {
