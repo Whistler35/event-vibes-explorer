@@ -335,7 +335,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
 
           {/* Address */}
           <div className="space-y-2">
-            <Label htmlFor="address" className="text-foreground text-sm">Address (optional)</Label>
+            <Label htmlFor="address" className="text-foreground text-sm">{t('createEvent.address')}</Label>
             <div className="relative">
               <Input
                 id="address"
