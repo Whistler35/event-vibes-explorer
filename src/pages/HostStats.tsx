@@ -85,6 +85,8 @@ function generateMockStats(event: HostEvent, dateLocale: any) {
 }
 
 const HostStats = () => {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language.startsWith('de') ? de : enGB;
   const { user } = useAuth();
   const { isHost, loading: hostLoading } = useIsHost();
   const navigate = useNavigate();
