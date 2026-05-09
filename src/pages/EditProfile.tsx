@@ -168,7 +168,7 @@ const EditProfile = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate("/profile")} className="text-muted-foreground hover:text-foreground">
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h1 className="text-foreground text-xl font-bold">Edit profile</h1>
+          <h1 className="text-foreground text-xl font-bold">{t('editProfile.title')}</h1>
         </div>
 
         {/* Avatar */}
