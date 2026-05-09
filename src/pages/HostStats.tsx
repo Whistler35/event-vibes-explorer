@@ -273,7 +273,7 @@ const HostStats = () => {
                       {/* Peak hours chart */}
                       <div>
                         <h4 className="text-foreground text-xs font-semibold mb-2 flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5" /> Peak-Zeiten
+                          <Clock className="w-3.5 h-3.5" /> {t('host.peakTimes')}
                         </h4>
                         <div className="h-32">
                           <ResponsiveContainer width="100%" height="100%">
