@@ -278,6 +278,7 @@ const Nearby = () => {
       mapRef.current?.setOverview(loc.lat, loc.lng, LOCATION_OVERVIEW_ZOOM);
     }, 350);
     localStorage.setItem('selectedCity', JSON.stringify(loc));
+    localStorage.removeItem('lastUserLocation');
   };
 
   const selectEventSuggestion = (ev: SearchEvent) => {
