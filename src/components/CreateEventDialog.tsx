@@ -375,8 +375,8 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
             </div>
             <p className="text-muted-foreground text-xs">
               {addressCoords
-                ? '✓ Address selected — event will appear at this location.'
-                : 'Pin location is used by default. Pick a suggestion to use a real address.'}
+                ? t('createEvent.addressSelected')
+                : t('createEvent.addressDefault')}
             </p>
           </div>
 
