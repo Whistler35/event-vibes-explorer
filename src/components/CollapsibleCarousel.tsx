@@ -66,6 +66,9 @@ const CollapsibleCarousel: React.FC<CollapsibleCarouselProps> = ({
     movedRef.current = false;
     startYRef.current = e.clientY;
     startExpandedRef.current = expanded;
+    // Pre-emptively block child clicks for the duration of any drag —
+    // prevents the first event from opening when the user pulls the carousel up.
+    setBlockChildClicks(true);
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
   }, [expanded]);
 
