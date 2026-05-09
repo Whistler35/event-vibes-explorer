@@ -1,44 +1,17 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import Layout from "@/components/Layout";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { markConversationRead } from "@/hooks/useUnreadDMCount";
 
-const welcomeMessages = [
-  {
-    id: "1",
-    message: "Hey! 👋 Welcome to Evendle!",
-    time: "09:00",
-  },
-  {
-    id: "2",
-    message:
-      "We're stoked you're here! 🎉 Evendle helps you discover exciting events, gigs and activities around you.",
-    time: "09:00",
-  },
-  {
-    id: "3",
-    message:
-      "Concerts, sports events, food markets or spontaneous hangouts — this is where you'll find everything happening in your city. 🌆",
-    time: "09:01",
-  },
-  {
-    id: "4",
-    message:
-      "The best part? You can meet up with other people and create real-life moments together. Because the best memories happen offline! 🤝✨",
-    time: "09:01",
-  },
-  {
-    id: "5",
-    message:
-      "Get started: explore events near you, join one and meet new people. Have fun! 🚀",
-    time: "09:02",
-  },
-];
+const messageTimes = ["09:00", "09:00", "09:01", "09:01", "09:02"];
 
 const EvenldeWelcomeChat = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+  const messages = (t("welcomeChat.messages", { returnObjects: true }) as string[]) ?? [];
 
   useEffect(() => {
     markConversationRead("evendle-welcome");
