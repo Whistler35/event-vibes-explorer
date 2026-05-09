@@ -245,12 +245,12 @@ const HostBilling = () => {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               <Star className="w-4 h-4 text-primary" />
-              Event-Boost
+              {t('host.eventBoost')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground text-xs mb-3">
-              Mache dein Event zum Top Event für mehr Sichtbarkeit und eine Hervorhebung auf der Karte.
+              {t('host.eventBoostDescription')}
             </p>
             <Button
               size="sm"
@@ -261,7 +261,7 @@ const HostBilling = () => {
               }}
             >
               <Star className="w-4 h-4 mr-1" />
-              Top Event buchen · €49,90
+              {t('host.bookTopEvent')}
             </Button>
           </CardContent>
         </Card>
