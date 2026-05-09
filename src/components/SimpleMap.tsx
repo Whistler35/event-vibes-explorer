@@ -141,7 +141,7 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
           <>
             <div className="absolute top-10 left-10 w-12 h-8 bg-gray-200 opacity-60 text-xs text-gray-600 flex items-center justify-center font-bold">Mitte</div>
             <div className="absolute top-16 right-16 w-16 h-6 bg-gray-200 opacity-60 text-xs text-gray-600 flex items-center justify-center font-bold">Kreuzberg</div>
-            <div className="absolute bottom-20 left-20 w-14 h-6 bg-gray-200 opacity-60 text-xs text-gray-600 flex items-center justify-center font-bold">Neukölln</div>
+            <div className="absolute bottom-20 left-20 w-14 h-6 bg-gray-200 opacity-60 text-xs text-gray-600 flex items-center justify-center font-bold">Neukoelln</div>
           </>
         )}
         

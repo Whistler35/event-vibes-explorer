@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Heart, MessageCircle, Share2, Volume2, VolumeX, Play, ChevronDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
@@ -27,7 +28,7 @@ const demoReels: ReelItem[] = [
     id: '1',
     videoUrl: neonPartyVideo,
     title: 'Neon Nights Party 🪩',
-    description: 'Die heißeste Party der Stadt – Lichter, Beats & gute Vibes!',
+    description: 'reels.desc1',
     category: 'nightlife',
     likes: 1847,
     comments: 134,
@@ -37,7 +38,7 @@ const demoReels: ReelItem[] = [
     id: '2',
     videoUrl: djSetVideo,
     title: 'DJ Live Set 🎧🔥',
-    description: 'Open-Air DJ Session mit fetten Drops – bist du dabei?',
+    description: 'reels.desc2',
     category: 'music',
     likes: 2341,
     comments: 189,
@@ -47,7 +48,7 @@ const demoReels: ReelItem[] = [
     id: '3',
     videoUrl: streetFoodVideo,
     title: 'Street Food Market 🍜✨',
-    description: 'Probier dich durch die besten Street-Food-Stände!',
+    description: 'reels.desc3',
     category: 'food',
     likes: 967,
     comments: 72,
@@ -57,7 +58,7 @@ const demoReels: ReelItem[] = [
     id: '4',
     videoUrl: sunsetYogaVideo,
     title: 'Sunset Yoga Flow 🧘‍♀️🌅',
-    description: 'Atme ein, lass los – Yoga bei Sonnenuntergang im Park',
+    description: 'reels.desc4',
     category: 'outdoor',
     likes: 1205,
     comments: 88,
@@ -67,7 +68,7 @@ const demoReels: ReelItem[] = [
     id: '5',
     videoUrl: morningRunVideo,
     title: 'Morning Run Crew 🏃‍♂️💪',
-    description: 'Jeden Samstag 7 Uhr – gemeinsam laufen, gemeinsam wachsen',
+    description: 'reels.desc5',
     category: 'sports',
     likes: 756,
     comments: 45,
@@ -77,7 +78,7 @@ const demoReels: ReelItem[] = [
     id: '6',
     videoUrl: rooftopConcertVideo,
     title: 'Rooftop Concert 🎶🌃',
-    description: 'Live-Musik über den Dächern der Stadt – unvergessliche Nacht!',
+    description: 'reels.desc6',
     category: 'music',
     likes: 3102,
     comments: 241,

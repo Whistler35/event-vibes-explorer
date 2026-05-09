@@ -132,10 +132,10 @@ const FriendSearch: React.FC = () => {
       }
     },
     onSuccess: (_, vars) => {
-      toast.success(vars.status === 'accepted' ? 'Freund hinzugefügt! 🎉' : 'Anfrage abgelehnt.');
+      toast.success(vars.status === 'accepted' ? t('friendSearch.friendAdded') : t('friendSearch.requestRejected'));
       queryClient.invalidateQueries({ queryKey: ['friendships'] });
     },
-    onError: () => toast.error('Fehler beim Aktualisieren.'),
+    onError: () => toast.error(t('friendSearch.updateError')),
   });
 
   const removeFriend = useMutation({
@@ -144,10 +144,10 @@ const FriendSearch: React.FC = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success('Freund entfernt.');
+      toast.success(t('friendSearch.friendRemoved'));
       queryClient.invalidateQueries({ queryKey: ['friendships'] });
     },
-    onError: () => toast.error('Fehler beim Entfernen.'),
+    onError: () => toast.error(t('friendSearch.removeError')),
   });
 
   const getFriendshipStatus = (profileUserId: string) => {
@@ -273,7 +273,7 @@ const FriendSearch: React.FC = () => {
           Freunde {friendProfiles.length > 0 && `(${friendProfiles.length})`}
         </h3>
         {friendProfiles.length === 0 ? (
-          <p className="text-muted-foreground text-sm">Noch keine Freunde hinzugefügt.</p>
+          <p className="text-muted-foreground text-sm">{t('friendSearch.noFriends')}</p>
         ) : (
           friendProfiles.map((profile) => {
             const friendship = getFriendshipStatus(profile.user_id);
