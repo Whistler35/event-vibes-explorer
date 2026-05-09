@@ -239,7 +239,7 @@ const NotificationBell = () => {
                   {!notif.is_read && (
                     <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
                   )}
-                </button>
+                </div>
               ))}
             </div>
           )}
