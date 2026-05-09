@@ -484,7 +484,7 @@ const CreateEventDialog: React.FC<CreateEventDialogProps> = ({
                 onClick={() => setRecurringSlots([...recurringSlots, { weekday: 1, startTime: '', endTime: '' }])}
                 className="rounded-xl"
               >
-                + Slot hinzufügen
+                {t('createEvent.addSlot')}
               </Button>
               <div className="space-y-2">
                 <Label htmlFor="recurringUntil" className="text-foreground text-sm">Wiederholen bis *</Label>
