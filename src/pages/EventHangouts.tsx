@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 
 const EventHangouts = () => {
   const { id } = useParams();
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const hangouts = [
