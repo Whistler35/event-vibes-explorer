@@ -251,28 +251,28 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
 
           {/* Category */}
           <div className="space-y-2">
-            <Label className="text-foreground text-sm">Category</Label>
+            <Label className="text-foreground text-sm">{t('editEvent.category')}</Label>
             <Select value={category} onValueChange={(val) => setCategory(val as EventCategory)}>
               <SelectTrigger className="bg-transparent border-border text-foreground rounded-xl h-12">
-                <SelectValue placeholder="Select category" />
+                <SelectValue placeholder={t('editEvent.selectCategory')} />
               </SelectTrigger>
               <SelectContent className="bg-card border-border">
-                <SelectItem value="sports">⚽ Sport</SelectItem>
-                <SelectItem value="community">👥 Community</SelectItem>
-                <SelectItem value="music">🎵 Musik</SelectItem>
-                <SelectItem value="culture">🎨 Kultur</SelectItem>
-                <SelectItem value="food">🍕 Food</SelectItem>
-                <SelectItem value="nightlife">🎉 Nightlife</SelectItem>
-                <SelectItem value="outdoor">🌲 Outdoor</SelectItem>
-                <SelectItem value="workshop">🔧 Workshop</SelectItem>
-                <SelectItem value="other">📌 Sonstiges</SelectItem>
+                <SelectItem value="sports">⚽ {t('categories.sports')}</SelectItem>
+                <SelectItem value="community">👥 {t('categories.community')}</SelectItem>
+                <SelectItem value="music">🎵 {t('categories.music')}</SelectItem>
+                <SelectItem value="culture">🎨 {t('categories.culture')}</SelectItem>
+                <SelectItem value="food">🍕 {t('categories.food')}</SelectItem>
+                <SelectItem value="nightlife">🎉 {t('categories.nightlife')}</SelectItem>
+                <SelectItem value="outdoor">🌲 {t('categories.outdoor')}</SelectItem>
+                <SelectItem value="workshop">🔧 {t('categories.workshop')}</SelectItem>
+                <SelectItem value="other">📌 {t('categories.other')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {/* Description */}
           <div className="space-y-2">
-            <Label htmlFor="edit-description" className="text-foreground text-sm">Description</Label>
+            <Label htmlFor="edit-description" className="text-foreground text-sm">{t('editEvent.description')}</Label>
             <Textarea id="edit-description" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className="bg-transparent border-border text-foreground rounded-xl resize-none" />
           </div>
 
