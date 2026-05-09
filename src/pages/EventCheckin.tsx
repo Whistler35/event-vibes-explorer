@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import Layout from "@/components/Layout";
 import { Card, CardContent } from "@/components/ui/card";
