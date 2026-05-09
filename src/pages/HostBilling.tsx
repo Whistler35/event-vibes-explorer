@@ -177,40 +177,40 @@ const HostBilling = () => {
                   const Icon = planIcons[currentPlan.slug] || CreditCard;
                   return <Icon className="w-5 h-5 text-primary" />;
                 })()}
-                <CardTitle className="text-lg">{currentPlan?.name || 'Kein Plan'}</CardTitle>
+                <CardTitle className="text-lg">{currentPlan?.name || t('host.noPlan')}</CardTitle>
               </div>
-              <Badge variant="default" className="text-xs">Aktiv</Badge>
+              <Badge variant="default" className="text-xs">{t('host.currentPlanBadge')}</Badge>
             </div>
             <CardDescription>{currentPlan?.description}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <p className="text-muted-foreground text-xs">Monatlicher Preis</p>
+                <p className="text-muted-foreground text-xs">{t('host.monthlyPrice')}</p>
                 <p className="text-foreground font-bold">
                   {currentPlan?.price_cents === 0
-                    ? 'Kein Abo'
+                    ? t('host.noSubscription')
                     : `€${(currentPlan?.price_cents || 0 / 100).toFixed(2).replace('.', ',')}`}
                 </p>
               </div>
               <div>
-                <p className="text-muted-foreground text-xs">Events diesen Monat</p>
+                <p className="text-muted-foreground text-xs">{t('host.eventsThisMonth')}</p>
                 <p className="text-foreground font-bold">
                   {currentPlan?.included_events === null
-                    ? `${eventsUsed} (unbegrenzt)`
+                    ? `${eventsUsed} (${t('host.unlimited')})`
                     : currentPlan?.included_events === 0
-                    ? `${eventsUsed} (Pay-per-Event)`
-                    : `${eventsUsed} von ${currentPlan?.included_events}`}
+                    ? `${eventsUsed} (${t('host.payPerEvent')})`
+                    : `${eventsUsed} / ${currentPlan?.included_events}`}
                 </p>
               </div>
               {currentPlan?.slug !== 'pay-per-event' && (
                 <>
                   <div>
-                    <p className="text-muted-foreground text-xs">Nächste Abrechnung</p>
+                    <p className="text-muted-foreground text-xs">{t('host.nextBilling')}</p>
                     <p className="text-foreground font-semibold text-xs">{nextBillingDate}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground text-xs">Nächster Betrag</p>
+                    <p className="text-muted-foreground text-xs">{t('host.nextAmount')}</p>
                     <p className="text-foreground font-semibold text-xs">
                       €{((currentPlan?.price_cents || 0) / 100).toFixed(2).replace('.', ',')}
                     </p>
