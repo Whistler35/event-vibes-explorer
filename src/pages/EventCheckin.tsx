@@ -145,7 +145,7 @@ const EventCheckin = () => {
               />
             </div>
             <CardContent className="p-3 text-center text-sm text-muted-foreground">
-              Halte die Kamera auf den QR-Code des Tickets
+              {t("eventCheckin.scanHint")}
             </CardContent>
           </Card>
         ) : (
