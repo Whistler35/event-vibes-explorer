@@ -253,12 +253,12 @@ const UserProfile = () => {
       {friendship?.status === "pending" && friendship.addressee_id === user.id && (
         <div className="w-full space-y-2">
           <p className={`text-sm text-center ${isHost ? "text-muted-foreground" : "text-white/70"}`}>
-            Möchte mit dir befreundet sein
+            {t("userProfile.wantsToBeFriends")}
           </p>
           <div className="flex gap-2 w-full">
             <Button onClick={() => respondToRequest("accepted")} disabled={friendActionLoading} className="flex-1">
               <UserCheck className="w-4 h-4 mr-2" />
-              Annehmen
+              {t("userProfile.accept")}
             </Button>
             <Button
               variant="outline"
@@ -267,7 +267,7 @@ const UserProfile = () => {
               className="flex-1"
             >
               <X className="w-4 h-4 mr-2" />
-              Ablehnen
+              {t("userProfile.decline")}
             </Button>
           </div>
         </div>
