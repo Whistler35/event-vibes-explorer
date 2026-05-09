@@ -226,7 +226,7 @@ const HostBilling = () => {
                 className="flex-1"
                 onClick={() => setChangePlanDialog(true)}
               >
-                Plan wechseln
+                Plan wechseln {/* placeholder unused */}
               </Button>
               <Button
                 variant="outline"
@@ -234,7 +234,7 @@ const HostBilling = () => {
                 className="flex-1"
                 onClick={() => setPayPerEventDialog(true)}
               >
-                Einzelnes Event buchen
+                {t('host.bookSingleEvent')}
               </Button>
             </div>
           </CardContent>
