@@ -461,7 +461,7 @@ const Nearby = () => {
               ts: Date.now(),
             }));
           } catch {}
-          mapRef.current?.flyTo(pos.coords.latitude, pos.coords.longitude, 12);
+          mapRef.current?.flyTo(pos.coords.latitude, pos.coords.longitude, 12, true);
         },
         () => toast.error(t('nearby.locationError'))
       );
