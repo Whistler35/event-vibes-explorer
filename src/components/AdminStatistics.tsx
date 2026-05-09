@@ -287,6 +287,7 @@ const AdminStatistics = () => {
               <StatCard icon={Heart} label="Likes" value={stats.totalLikes} onClick={() => setDetailKind("likes")} />
               <StatCard icon={MessageCircle} label="Messages" value={stats.totalChatMessages + stats.totalDirectMessages} subtext={`${stats.totalChatMessages} groups · ${stats.totalDirectMessages} DMs`} onClick={() => setDetailKind("messages")} />
               <StatCard icon={Handshake} label="Friendships" value={stats.totalFriendships} onClick={() => setDetailKind("friendships")} />
+              <StatCard icon={Eye} label="Visits" value={stats.totalVisits} subtext="Event page views" />
             </div>
           </div>
 
