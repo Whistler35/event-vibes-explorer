@@ -311,7 +311,7 @@ const BlitzMatch = () => {
         </div>
       </div>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 space-y-3">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 space-y-3 pb-32">
         {messages.length === 0 && (
           <div className="text-center text-white/50 text-sm py-12">
             Message them directly — only 5 min to coordinate ⚡
@@ -340,7 +340,8 @@ const BlitzMatch = () => {
 
       <form
         onSubmit={handleSend}
-        className="p-3 border-t border-white/10 flex items-center gap-2 bg-[hsl(var(--blitz-forest))]"
+        className="fixed left-0 right-0 bottom-0 p-3 border-t border-white/10 flex items-center gap-2 bg-[hsl(var(--blitz-forest))] z-20"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}
       >
         <Input
           value={input}
