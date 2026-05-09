@@ -35,6 +35,8 @@ interface Stats {
   totalFriendships: number;
   totalJoinRequests: number;
   totalVisits: number;
+  siteVisits: number;
+  uniqueSessions: number;
 }
 
 interface MonthlyData {
