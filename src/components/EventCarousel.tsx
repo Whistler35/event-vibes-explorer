@@ -165,7 +165,7 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
       style={{
         WebkitOverflowScrolling: 'touch',
         paddingTop: 32,
-        paddingBottom: 8,
+        paddingBottom: 32,
         gap: `${CARD_GAP}px`,
         contain: 'layout paint',
       }}
