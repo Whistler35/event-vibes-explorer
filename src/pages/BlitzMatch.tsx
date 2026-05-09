@@ -88,7 +88,7 @@ const BlitzMatch = () => {
   }, []);
 
   useEffect(() => {
-    const t = setTimeout(() => setShowMatchSplash(false), 2200);
+    const t = setTimeout(() => setShowMatchSplash(false), 1200);
     return () => clearTimeout(t);
   }, []);
 
