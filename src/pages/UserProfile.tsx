@@ -58,10 +58,10 @@ interface Friendship {
   status: string;
 }
 
-const activityLevel = (score: number) => {
-  if (score >= 20) return "Hoch";
-  if (score >= 5) return "Mittel";
-  return "Niedrig";
+const activityLevelKey = (score: number) => {
+  if (score >= 20) return "userProfile.activityHigh";
+  if (score >= 5) return "userProfile.activityMid";
+  return "userProfile.activityLow";
 };
 
 const UserProfile = () => {
