@@ -439,7 +439,7 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
             <div className="flex items-center gap-2">
               {isPrivate ? <Lock className="h-4 w-4 text-muted-foreground" /> : <Globe className="h-4 w-4 text-primary" />}
               <Label className="text-foreground text-sm">
-                {isPrivate ? 'Private' : 'Public'}
+                {isPrivate ? t('editEvent.private') : t('editEvent.public')}
               </Label>
             </div>
             <Switch checked={isPrivate} onCheckedChange={setIsPrivate} />
@@ -448,10 +448,10 @@ const EditEventDialog: React.FC<EditEventDialogProps> = ({
           {/* Buttons */}
           <div className="flex gap-3 pt-2">
             <Button variant="outline" onClick={onClose} className="flex-1 h-12 rounded-xl">
-              Cancel
+              {t('editEvent.cancel')}
             </Button>
             <Button onClick={handleSubmit} disabled={!title || !date || !time || loading} className="flex-1 h-12 rounded-xl">
-              {loading ? 'Saving...' : 'Save'}
+              {loading ? t('editEvent.saving') : t('editEvent.save')}
             </Button>
           </div>
         </div>
