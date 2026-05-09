@@ -114,7 +114,7 @@ const Chat = () => {
               type="text"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Message..."
+              placeholder={t("chat.messagePlaceholder")}
               className="flex-1 bg-evendle-dark-card rounded-full px-4 py-3 text-white placeholder-evendle-gray focus:outline-none focus:ring-2 focus:ring-evendle-orange"
               onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
             />
