@@ -43,6 +43,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Suspense fallback={<div className="min-h-screen bg-background" />}>
+            <VisitTracker />
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/city/:city" element={<CityEvents />} />
