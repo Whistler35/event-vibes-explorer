@@ -125,6 +125,14 @@ const Nearby = () => {
     if (storedCity) setCityQuery(storedCity.name?.split(',')[0] || '');
   }, []);
 
+  // Reset window scroll when entering the map page so the fixed map layout
+  // isn't offset by scroll position carried over from the Events page.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, []);
+
   useEffect(() => () => {
     if (cityOverviewTimerRef.current) clearTimeout(cityOverviewTimerRef.current);
   }, []);
