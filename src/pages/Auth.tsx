@@ -14,6 +14,20 @@ import { lovable } from '@/integrations/lovable/index';
 import evendleLogo from '@/assets/evendle-logo.jpeg';
 import { cn } from '@/lib/utils';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { Capacitor } from '@capacitor/core';
+
+const NATIVE_REDIRECT = 'com.evendle.app://login-callback';
+
+const nativeOAuth = async (provider: 'google' | 'apple') => {
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: { redirectTo: NATIVE_REDIRECT, skipBrowserRedirect: true },
+  });
+  if (error || !data.url) return error || new Error('No OAuth URL');
+  const { Browser } = await import('@capacitor/browser');
+  await Browser.open({ url: data.url });
+  return null;
+};
 
 type UserRole = 'private' | 'professional_host';
 
@@ -383,8 +397,13 @@ const Auth = () => {
             <Button type="button" variant="outline" disabled={socialLoading || loading} className="w-full"
               onClick={async () => {
                 setSocialLoading(true);
-                const { error } = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-                if (error) { toast.error(t('auth.errors.googleFailed')); console.error(error); }
+                if (Capacitor.isNativePlatform()) {
+                  const err = await nativeOAuth('google');
+                  if (err) { toast.error(t('auth.errors.googleFailed')); console.error(err); }
+                } else {
+                  const { error } = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+                  if (error) { toast.error(t('auth.errors.googleFailed')); console.error(error); }
+                }
                 setSocialLoading(false);
               }}>
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
@@ -399,8 +418,13 @@ const Auth = () => {
             <Button type="button" variant="outline" disabled={socialLoading || loading} className="w-full"
               onClick={async () => {
                 setSocialLoading(true);
-                const { error } = await lovable.auth.signInWithOAuth("apple", { redirect_uri: window.location.origin });
-                if (error) { toast.error(t('auth.errors.appleFailed')); console.error(error); }
+                if (Capacitor.isNativePlatform()) {
+                  const err = await nativeOAuth('apple');
+                  if (err) { toast.error(t('auth.errors.appleFailed')); console.error(err); }
+                } else {
+                  const { error } = await lovable.auth.signInWithOAuth("apple", { redirect_uri: window.location.origin });
+                  if (error) { toast.error(t('auth.errors.appleFailed')); console.error(error); }
+                }
                 setSocialLoading(false);
               }}>
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { applyLanguageFromCountry } from '@/i18n';
+import { Capacitor } from '@capacitor/core';
 
 interface AuthContextType {
   user: User | null;
@@ -61,7 +62,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (session?.user) setTimeout(() => applyLangForUser(session.user.id), 0);
     });
 
-    return () => subscription.unsubscribe();
+    // Handle OAuth deep link callback on native iOS
+    let removeUrlListener: (() => void) | undefined;
+    if (Capacitor.isNativePlatform()) {
+      import('@capacitor/app').then(({ App: CapApp }) => {
+        import('@capacitor/browser').then(({ Browser }) => {
+          const p = CapApp.addListener('appUrlOpen', async ({ url }) => {
+            if (!url.startsWith('com.evendle.app://')) return;
+            await Browser.close().catch(() => {});
+            const code = new URL(url).searchParams.get('code');
+            if (code) {
+              await supabase.auth.exchangeCodeForSession(code);
+            }
+          });
+          p.then((listener) => { removeUrlListener = () => listener.remove(); });
+        });
+      });
+    }
+
+    return () => {
+      subscription.unsubscribe();
+      removeUrlListener?.();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
