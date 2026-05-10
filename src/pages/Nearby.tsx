@@ -82,6 +82,26 @@ const Nearby = () => {
   const [frozenCarousel, setFrozenCarousel] = useState<MapEvent[] | null>(null);
   const carouselEventsRef = useRef<MapEvent[]>([]);
 
+  // Dynamic carousel sizing: smaller phones get a shorter carousel so more map stays visible.
+  // Also accounts for bottom safe-area (home indicator) and bottom nav (~80px).
+  const [carouselDims, setCarouselDims] = useState(() => {
+    const h = typeof window !== 'undefined' ? window.innerHeight : 800;
+    return { expanded: Math.round(Math.min(230, Math.max(170, h * 0.24))) };
+  });
+  useEffect(() => {
+    const update = () => {
+      const h = window.innerHeight;
+      setCarouselDims({ expanded: Math.round(Math.min(230, Math.max(170, h * 0.24))) });
+    };
+    update();
+    window.addEventListener('resize', update);
+    window.addEventListener('orientationchange', update);
+    return () => {
+      window.removeEventListener('resize', update);
+      window.removeEventListener('orientationchange', update);
+    };
+  }, []);
+
   // Search bar (events + places)
   const [searchOpen, setSearchOpen] = useState(false);
   const [cityQuery, setCityQuery] = useState("");
@@ -660,7 +680,7 @@ const Nearby = () => {
         {/* BOTTOM CAROUSEL — collapsible drawer */}
         <div className="absolute left-0 right-0 z-10" style={{ bottom: 0, paddingBottom: 'calc(80px + env(safe-area-inset-bottom))' }}>
           <CollapsibleCarousel
-            expandedHeight={205}
+            expandedHeight={carouselDims.expanded}
             collapsedHeight={36}
             expandTrigger={carouselExpandTrigger}
             autoCollapse={displayedCarouselEvents.length === 0}
