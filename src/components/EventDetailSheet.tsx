@@ -125,7 +125,7 @@ const EventDetailSheet: React.FC<EventDetailSheetProps> = ({ event, open, onClos
           <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
         </div>
 
-        <div className="overflow-y-auto flex-1 min-h-0 px-5 pb-6 space-y-4 overscroll-contain touch-pan-y">
+        <div className="overflow-y-auto flex-1 min-h-0 px-5 pb-4 space-y-4 overscroll-contain touch-pan-y">
           {/* Image */}
           {event.image && (
             <div className="rounded-2xl overflow-hidden -mx-1">
@@ -139,7 +139,7 @@ const EventDetailSheet: React.FC<EventDetailSheetProps> = ({ event, open, onClos
 
           {/* Title + Category + Like */}
           <div className="flex items-start justify-between gap-2">
-            <div className="space-y-2 flex-1">
+            <div className="space-y-2 flex-1 min-w-0">
               <h2 className="text-foreground text-xl font-bold">{event.title}</h2>
               {event.category && (
                 <Badge variant="secondary" className="text-xs">
@@ -201,17 +201,22 @@ const EventDetailSheet: React.FC<EventDetailSheetProps> = ({ event, open, onClos
             </div>
           </div>
 
-          {/* Description */}
+          {/* Description (clamped) */}
           {event.description && (
             <div>
               <h3 className="text-foreground text-sm font-semibold mb-1">Description</h3>
-              <TranslatedDescription event={{ id: String(event.id), description: event.description }} />
+              <TranslatedDescription
+                event={{ id: String(event.id), description: event.description }}
+                className="line-clamp-4"
+              />
             </div>
           )}
+        </div>
 
-          {/* Action */}
+        {/* Sticky action */}
+        <div className="shrink-0 border-t border-border bg-card px-5 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
           <Button
-            className="w-full mt-2"
+            className="w-full"
             onClick={() => {
               onClose();
               navigate(`/event/${event.id}`);
