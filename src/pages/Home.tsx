@@ -176,14 +176,13 @@ const Home = () => {
   };
 
   useEffect(() => {
-    if (shouldScrollRef.current && searchLocation && nearbyEvents !== undefined) {
+    if (shouldScrollRef.current && searchLocation) {
       shouldScrollRef.current = false;
-      // Wait for layout
       requestAnimationFrame(() => {
-        nearbySectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        topEventsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     }
-  }, [nearbyEvents, searchLocation]);
+  }, [searchLocation]);
 
   return (
     <Layout>
