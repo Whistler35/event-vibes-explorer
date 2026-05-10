@@ -1,8 +1,9 @@
 import { Hourglass, Zap, X } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useMyPendingSwipes, withdrawSwipe } from "@/hooks/useMyPendingSwipes";
+import { useMyPendingSwipes, withdrawSwipe, PendingSwipe } from "@/hooks/useMyPendingSwipes";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import PendingSwipeDetailSheet from "./PendingSwipeDetailSheet";
 
 const Countdown = ({ target }: { target: string }) => {
   const [now, setNow] = useState(Date.now());
@@ -23,6 +24,7 @@ const Countdown = ({ target }: { target: string }) => {
 const MyPendingSwipesList = () => {
   const { items, reload } = useMyPendingSwipes();
   const [withdrawing, setWithdrawing] = useState<string | null>(null);
+  const [selected, setSelected] = useState<PendingSwipe | null>(null);
 
   const handleWithdraw = async (swipeId: string) => {
     setWithdrawing(swipeId);
@@ -48,9 +50,11 @@ const MyPendingSwipesList = () => {
         </p>
       </div>
       {items.map((s) => (
-        <div
+        <button
           key={s.swipe_id}
-          className="flex items-center gap-3 p-2 rounded-xl bg-card"
+          type="button"
+          onClick={() => setSelected(s)}
+          className="w-full flex items-center gap-3 p-2 rounded-xl bg-card hover:bg-muted/60 active:scale-[0.99] transition text-left"
         >
           <Avatar className="w-9 h-9 border border-[hsl(var(--blitz-pink))]/40">
             <AvatarImage src={s.host_avatar ?? undefined} />
@@ -72,7 +76,10 @@ const MyPendingSwipesList = () => {
               <Countdown target={s.expires_at} />
             </div>
             <button
-              onClick={() => handleWithdraw(s.swipe_id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleWithdraw(s.swipe_id);
+              }}
               disabled={withdrawing === s.swipe_id}
               className="p-1.5 rounded-full hover:bg-muted transition-colors text-muted-foreground hover:text-foreground disabled:opacity-50"
               title="Anfrage zurückziehen"
@@ -80,8 +87,14 @@ const MyPendingSwipesList = () => {
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
-        </div>
+        </button>
       ))}
+
+      <PendingSwipeDetailSheet
+        swipe={selected}
+        onOpenChange={(open) => !open && setSelected(null)}
+        onWithdrawn={reload}
+      />
     </div>
   );
 };
