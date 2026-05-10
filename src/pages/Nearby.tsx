@@ -660,7 +660,7 @@ const Nearby = () => {
         {/* BOTTOM CAROUSEL — collapsible drawer */}
         <div className="absolute left-0 right-0 z-10" style={{ bottom: 0, paddingBottom: 'calc(80px + env(safe-area-inset-bottom))' }}>
           <CollapsibleCarousel
-            expandedHeight={240}
+            expandedHeight={205}
             collapsedHeight={36}
             expandTrigger={carouselExpandTrigger}
             autoCollapse={displayedCarouselEvents.length === 0}
