@@ -84,14 +84,16 @@ const Nearby = () => {
 
   // Dynamic carousel sizing: smaller phones get a shorter carousel so more map stays visible.
   // Also accounts for bottom safe-area (home indicator) and bottom nav (~80px).
+  // Card needs ~225px to show image (128) + title + date + location fully,
+  // plus carousel vertical padding. Clamp so small phones still see the map.
   const [carouselDims, setCarouselDims] = useState(() => {
     const h = typeof window !== 'undefined' ? window.innerHeight : 800;
-    return { expanded: Math.round(Math.min(220, Math.max(180, h * 0.22))) };
+    return { expanded: Math.round(Math.min(260, Math.max(228, h * 0.28))) };
   });
   useEffect(() => {
     const update = () => {
       const h = window.innerHeight;
-      setCarouselDims({ expanded: Math.round(Math.min(220, Math.max(180, h * 0.22))) });
+      setCarouselDims({ expanded: Math.round(Math.min(260, Math.max(228, h * 0.28))) });
     };
     update();
     window.addEventListener('resize', update);
