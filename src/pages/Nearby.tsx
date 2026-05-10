@@ -24,6 +24,10 @@ import type { MapboxMapHandle } from "@/components/MapboxMap";
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiZXZlbmRsZSIsImEiOiJjbWs0aHc2eWQwN2hqM2RyMjI4ZTY0N2F6In0.gMPP_wAbSR4Esz7WlB4Z4Q';
 const MAP_EVENT_RADIUS_KM = 30;
 const LOCATION_OVERVIEW_ZOOM = 11;
+const getCarouselExpandedHeight = () => {
+  const h = typeof window !== 'undefined' ? window.innerHeight : 800;
+  return Math.round(Math.min(286, Math.max(264, h * 0.31)));
+};
 
 function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const radius = 6371;
@@ -82,18 +86,14 @@ const Nearby = () => {
   const [frozenCarousel, setFrozenCarousel] = useState<MapEvent[] | null>(null);
   const carouselEventsRef = useRef<MapEvent[]>([]);
 
-  // Dynamic carousel sizing: smaller phones get a shorter carousel so more map stays visible.
-  // Also accounts for bottom safe-area (home indicator) and bottom nav (~80px).
-  // Card needs ~225px to show image (128) + title + date + location fully,
-  // plus carousel vertical padding. Clamp so small phones still see the map.
+  // Dynamic carousel sizing: enough room for handle + full card content,
+  // while still clamping on taller devices so the map remains visible.
   const [carouselDims, setCarouselDims] = useState(() => {
-    const h = typeof window !== 'undefined' ? window.innerHeight : 800;
-    return { expanded: Math.round(Math.min(260, Math.max(228, h * 0.28))) };
+    return { expanded: getCarouselExpandedHeight() };
   });
   useEffect(() => {
     const update = () => {
-      const h = window.innerHeight;
-      setCarouselDims({ expanded: Math.round(Math.min(260, Math.max(228, h * 0.28))) });
+      setCarouselDims({ expanded: getCarouselExpandedHeight() });
     };
     update();
     window.addEventListener('resize', update);
@@ -507,7 +507,7 @@ const Nearby = () => {
         className="fixed left-0 right-0 overflow-hidden"
         style={{
           top: 'env(safe-area-inset-top)',
-          bottom: 'calc(80px + env(safe-area-inset-bottom))',
+          bottom: 'calc(96px + env(safe-area-inset-bottom))',
         }}
       >
         {/* Map fills everything */}
@@ -680,7 +680,7 @@ const Nearby = () => {
         )}
 
         {/* BOTTOM CAROUSEL — collapsible drawer */}
-        <div className="absolute left-0 right-0 z-10" style={{ bottom: 0, paddingBottom: 12 }}>
+        <div className="absolute left-0 right-0 z-10" style={{ bottom: 0, paddingBottom: 8 }}>
           <CollapsibleCarousel
             expandedHeight={carouselDims.expanded}
             collapsedHeight={120}
