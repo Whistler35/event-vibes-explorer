@@ -57,6 +57,7 @@ const Home = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const nearbySectionRef = useRef<HTMLDivElement>(null);
+  const topEventsSectionRef = useRef<HTMLDivElement>(null);
   const shouldScrollRef = useRef(false);
 
   const { data: featuredEventsRaw } = useQuery({
