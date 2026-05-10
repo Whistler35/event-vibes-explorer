@@ -164,8 +164,8 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
       className="flex items-end overflow-x-auto scrollbar-hide snap-x snap-mandatory touch-pan-x overscroll-x-contain"
       style={{
         WebkitOverflowScrolling: 'touch',
-        paddingTop: 32,
-        paddingBottom: 32,
+        paddingTop: 8,
+        paddingBottom: 12,
         gap: `${CARD_GAP}px`,
         contain: 'layout paint',
       }}
