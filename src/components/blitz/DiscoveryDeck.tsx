@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Zap, X, Check, MapPin, Loader2, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useBlitzDiscovery, swipeBlitz, DiscoveryBlitz } from "@/hooks/useBlitzDiscovery";
+import { useBlitzDiscovery, swipeBlitz, undoSwipe, DiscoveryBlitz } from "@/hooks/useBlitzDiscovery";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { supabase } from "@/integrations/supabase/client";
 import { getActivityFontClass } from "@/lib/blitzText";
@@ -199,15 +199,49 @@ const DiscoveryDeck = ({ city }: DiscoveryDeckProps) => {
   const handleSwipe = async (dir: "left" | "right") => {
     const item = visibleItems[index];
     if (!item) return;
+    setIndex((i) => i + 1);
     try {
-      await swipeBlitz(item.id, dir);
+      const swipeId = await swipeBlitz(item.id, dir);
       if (dir === "right") {
-        toast("⚡ Request sent!", { description: `Waiting for ${item.host_name ?? "the host"}.` });
+        toast("⚡ Anfrage gesendet!", {
+          description: `Wartet auf ${item.host_name ?? "den Host"}.`,
+          action: swipeId
+            ? {
+                label: "Rückgängig",
+                onClick: async () => {
+                  try {
+                    await undoSwipe(swipeId);
+                    toast("Swipe rückgängig gemacht");
+                    reload();
+                  } catch (e: any) {
+                    toast.error(e.message || "Konnte nicht rückgängig gemacht werden");
+                  }
+                },
+              }
+            : undefined,
+        });
+      } else {
+        toast("Übersprungen", {
+          description: item.activity,
+          action: swipeId
+            ? {
+                label: "Rückgängig",
+                onClick: async () => {
+                  try {
+                    await undoSwipe(swipeId);
+                    toast("Blitz wieder im Stapel");
+                    reload();
+                  } catch (e: any) {
+                    toast.error(e.message || "Konnte nicht rückgängig gemacht werden");
+                  }
+                },
+              }
+            : undefined,
+        });
       }
     } catch (e: any) {
-      toast.error(e.message || "Swipe failed");
+      toast.error(e.message || "Swipe fehlgeschlagen");
     }
-    setIndex((i) => i + 1);
   };
 
   const handleAdminDelete = async (id: string) => {
