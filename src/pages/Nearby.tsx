@@ -86,12 +86,12 @@ const Nearby = () => {
   // Also accounts for bottom safe-area (home indicator) and bottom nav (~80px).
   const [carouselDims, setCarouselDims] = useState(() => {
     const h = typeof window !== 'undefined' ? window.innerHeight : 800;
-    return { expanded: Math.round(Math.min(230, Math.max(170, h * 0.24))) };
+    return { expanded: Math.round(Math.min(180, Math.max(140, h * 0.19))) };
   });
   useEffect(() => {
     const update = () => {
       const h = window.innerHeight;
-      setCarouselDims({ expanded: Math.round(Math.min(230, Math.max(170, h * 0.24))) });
+      setCarouselDims({ expanded: Math.round(Math.min(180, Math.max(140, h * 0.19))) });
     };
     update();
     window.addEventListener('resize', update);
@@ -678,10 +678,10 @@ const Nearby = () => {
         )}
 
         {/* BOTTOM CAROUSEL — collapsible drawer */}
-        <div className="absolute left-0 right-0 z-10" style={{ bottom: 0, paddingBottom: 'calc(80px + env(safe-area-inset-bottom))' }}>
+        <div className="absolute left-0 right-0 z-10" style={{ bottom: 0 }}>
           <CollapsibleCarousel
             expandedHeight={carouselDims.expanded}
-            collapsedHeight={36}
+            collapsedHeight={28}
             expandTrigger={carouselExpandTrigger}
             autoCollapse={displayedCarouselEvents.length === 0}
           >
