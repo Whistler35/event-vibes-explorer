@@ -57,6 +57,7 @@ const Home = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const nearbySectionRef = useRef<HTMLDivElement>(null);
+  const topEventsSectionRef = useRef<HTMLDivElement>(null);
   const shouldScrollRef = useRef(false);
 
   const { data: featuredEventsRaw } = useQuery({
@@ -175,14 +176,13 @@ const Home = () => {
   };
 
   useEffect(() => {
-    if (shouldScrollRef.current && searchLocation && nearbyEvents !== undefined) {
+    if (shouldScrollRef.current && searchLocation) {
       shouldScrollRef.current = false;
-      // Wait for layout
       requestAnimationFrame(() => {
-        nearbySectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        topEventsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     }
-  }, [nearbyEvents, searchLocation]);
+  }, [searchLocation]);
 
   return (
     <Layout>
@@ -258,7 +258,7 @@ const Home = () => {
         </div>
 
         {/* Top Events Section */}
-        <div className="px-4 mt-12 pb-8">
+        <div ref={topEventsSectionRef} className="px-4 mt-12 pb-8 scroll-mt-4">
           <h3 className="text-foreground text-2xl font-bold mb-6">{t('home.topEventsWeek')}</h3>
 
           {featuredEvents && featuredEvents.length > 0 ? (
