@@ -161,11 +161,11 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
     <div
       ref={scrollRef}
       onScroll={handleScroll}
-      className="flex items-end overflow-x-auto scrollbar-hide snap-x snap-mandatory touch-pan-x overscroll-x-contain"
+      className="h-full flex items-end overflow-x-auto scrollbar-hide snap-x snap-mandatory touch-pan-x overscroll-x-contain"
       style={{
         WebkitOverflowScrolling: 'touch',
-        paddingTop: 8,
-        paddingBottom: 12,
+        paddingTop: 4,
+        paddingBottom: 6,
         gap: `${CARD_GAP}px`,
         contain: 'layout paint',
       }}
@@ -202,6 +202,7 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
             className="shrink-0 snap-center text-left rounded-3xl overflow-hidden bg-card border border-border/60"
             style={{
               width: CARD_WIDTH,
+              minHeight: 206,
               transform: `scale(${scale})`,
               transformOrigin: 'bottom center',
               transition: isScrolling
@@ -232,7 +233,7 @@ const EventCarousel: React.FC<EventCarouselProps> = ({ events, selectedId, onInt
                 </span>
               )}
             </div>
-            <div className="px-3 py-2 space-y-1">
+            <div className="px-3 pt-2 pb-2.5 space-y-1">
               <h3 className="text-sm font-bold text-foreground line-clamp-1">{ev.title}</h3>
               <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                 <Calendar className="w-3 h-3 shrink-0" />
