@@ -481,7 +481,13 @@ const Nearby = () => {
 
   return (
     <Layout>
-      <div className="relative h-[calc(100dvh-96px-env(safe-area-inset-bottom))] overflow-hidden">
+      <div
+        className="fixed left-0 right-0 overflow-hidden"
+        style={{
+          top: 'env(safe-area-inset-top)',
+          bottom: 'calc(80px + env(safe-area-inset-bottom))',
+        }}
+      >
         {/* Map fills everything */}
         <div className="absolute inset-0">
           <InteractiveMap
