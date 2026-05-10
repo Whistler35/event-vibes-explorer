@@ -153,7 +153,10 @@ const NotificationBell = () => {
           )}
         </button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-full sm:w-96 p-0">
+      <SheetContent
+        side="right"
+        className="w-full sm:w-96 p-0 [&>button]:top-[calc(1rem+env(safe-area-inset-top))]"
+      >
         <SheetHeader className="px-4 pb-4 border-b border-border" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}>
           <div className="flex items-center justify-between">
             <SheetTitle className="text-foreground">Benachrichtigungen</SheetTitle>
