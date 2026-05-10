@@ -124,16 +124,29 @@ export function useBlitzDiscovery(_city?: string | null) {
   return { items, loading, reload: load, locError, hasLocation: !!viewerCoords };
 }
 
-export async function swipeBlitz(blitzRequestId: string, direction: "left" | "right") {
+export async function swipeBlitz(
+  blitzRequestId: string,
+  direction: "left" | "right"
+): Promise<string | null> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
 
-  const { error } = await supabase.from("blitz_swipes").insert({
-    blitz_request_id: blitzRequestId,
-    swiper_id: user.id,
-    direction,
-  });
+  const { data, error } = await supabase
+    .from("blitz_swipes")
+    .insert({
+      blitz_request_id: blitzRequestId,
+      swiper_id: user.id,
+      direction,
+    })
+    .select("id")
+    .single();
   if (error && !error.message.includes("duplicate")) throw error;
+  return data?.id ?? null;
+}
+
+export async function undoSwipe(swipeId: string) {
+  const { error } = await supabase.from("blitz_swipes").delete().eq("id", swipeId);
+  if (error) throw error;
 }
