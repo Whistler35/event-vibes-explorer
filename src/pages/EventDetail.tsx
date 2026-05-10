@@ -313,11 +313,7 @@ const EventDetail = () => {
 
         {/* Join Requests for Owner (Community Events) */}
         {isOwner && isCommunityEvent && (
-          <Card className="bg-card border-border">
-            <CardContent className="p-6">
-              <JoinRequestList eventId={event.id} />
-            </CardContent>
-          </Card>
+          <JoinRequestList eventId={event.id} />
         )}
 
         {/* Participants */}
