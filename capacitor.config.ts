@@ -9,8 +9,8 @@ const config: CapacitorConfig = {
       launchShowDuration: 0
     },
     Keyboard: {
-      resize: 'none',
-      resizeOnFullScreen: false,
+      resize: 'native',
+      resizeOnFullScreen: true,
     }
   }
 };
