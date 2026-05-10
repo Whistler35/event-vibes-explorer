@@ -234,29 +234,24 @@ const EventDetail = () => {
     <Layout>
       <div className="p-4 space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+        <div className="flex items-center justify-between gap-2 min-w-0">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => navigate(-1)}
-              className="text-foreground hover:bg-card"
+              className="text-foreground hover:bg-card shrink-0"
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
-            <h1 className="text-foreground text-xl font-bold">Event Details</h1>
+            <h1 className="text-foreground text-lg font-bold truncate">Event Details</h1>
             {event.category && (
-              <Badge variant="secondary" className="bg-primary/20 text-primary border-0">
+              <Badge variant="secondary" className="bg-primary/20 text-primary border-0 shrink-0">
                 {categoryLabels[event.category] || event.category}
               </Badge>
             )}
-            {isCommunityEvent && (
-              <Badge variant="outline" className="border-primary text-primary text-xs">
-                Community
-              </Badge>
-            )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <Button
               variant="outline"
               size="icon"
