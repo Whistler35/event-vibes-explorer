@@ -347,7 +347,7 @@ const Auth = () => {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="birthday" className="text-foreground">{t('auth.birthday')} *</Label>
-                        <Input id="birthday" type="date" value={birthday} onChange={(e) => setBirthday(e.target.value)} required max={new Date(new Date().setFullYear(new Date().getFullYear() - 16)).toISOString().split('T')[0]} min="1900-01-01" className="bg-card border-border text-foreground" />
+                        <Input id="birthday" type="date" value={birthday} onChange={(e) => setBirthday(e.target.value)} required max={new Date(new Date().setFullYear(new Date().getFullYear() - 12)).toISOString().split('T')[0]} min="1900-01-01" className="bg-card border-border text-foreground" />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="country" className="text-foreground">{t('auth.country')} *</Label>
