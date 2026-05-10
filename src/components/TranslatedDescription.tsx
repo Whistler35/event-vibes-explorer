@@ -11,8 +11,8 @@ const TranslatedDescription = ({ event, className }: Props) => {
   const { description, isTranslating } = useEventTranslation(event ?? undefined);
   if (!description) return null;
   return (
-    <div className={className}>
-      <p className="text-muted-foreground whitespace-pre-line">{description}</p>
+    <div>
+      <p className={`text-muted-foreground whitespace-pre-line ${className ?? ""}`}>{description}</p>
       {isTranslating && (
         <span className="text-xs text-muted-foreground/70 italic">{t("common.translating")}</span>
       )}
