@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,18 +15,82 @@ import evendleLogo from '@/assets/evendle-logo.jpeg';
 import { cn } from '@/lib/utils';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { Capacitor } from '@capacitor/core';
-import { signInWithGoogleNative } from '@/lib/nativeGoogleAuth';
 
 const NATIVE_REDIRECT = 'com.evendle.app://login-callback';
+const SUPABASE_URL = 'https://yhetszgeflsldahfuwen.supabase.co';
+// Key supabase-js reads when exchangeCodeForSession is called
+const CODE_VERIFIER_KEY = 'sb-yhetszgeflsldahfuwen-auth-token-code-verifier';
+
+const generateCodeVerifier = (): string => {
+  const array = new Uint8Array(96);
+  crypto.getRandomValues(array);
+  return btoa(String.fromCharCode(...array))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+};
+
+const generateCodeChallenge = async (verifier: string): Promise<string> => {
+  const data = new TextEncoder().encode(verifier);
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  return btoa(String.fromCharCode(...new Uint8Array(digest)))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+};
+
+const sha256Hex = async (plain: string): Promise<string> => {
+  const data = new TextEncoder().encode(plain);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash), b => b.toString(16).padStart(2, '0')).join('');
+};
+
+const nativeAppleSignIn = async (): Promise<Error | null> => {
+  const rawNonce = generateCodeVerifier(); // same CSPRNG — produces a random string
+  const hashedNonce = await sha256Hex(rawNonce);
+
+  const { SignInWithApple } = await import('@capacitor-community/apple-sign-in');
+  const result = await SignInWithApple.authorize({
+    clientId: 'com.evendle.app',
+    redirectURI: '',
+    scopes: 'email name',
+    nonce: hashedNonce,
+  });
+
+  const identityToken = result.response?.identityToken;
+  if (!identityToken) return new Error('No identityToken from Apple');
+
+  const { error } = await supabase.auth.signInWithIdToken({
+    provider: 'apple',
+    token: identityToken,
+    nonce: rawNonce,
+  });
+  return error ?? null;
+};
 
 const nativeOAuth = async (provider: 'google' | 'apple') => {
-  const { data, error } = await supabase.auth.signInWithOAuth({
+  toast(`[1] OAuth gestartet (${provider})`, { duration: 15000 });
+
+  // Generate PKCE pair ourselves — supabase.signInWithOAuth with skipBrowserRedirect
+  // does NOT write code_verifier to localStorage before returning, so we own it.
+  const codeVerifier = generateCodeVerifier();
+  const codeChallenge = await generateCodeChallenge(codeVerifier);
+
+  // Save to native Preferences before SFSafariViewController opens (isolated process).
+  const { Preferences } = await import('@capacitor/preferences');
+  await Preferences.set({ key: CODE_VERIFIER_KEY, value: codeVerifier });
+  console.log('[nativeOAuth] code_verifier saved to Preferences:', codeVerifier.slice(0, 20) + '...');
+  toast(`[2] code_verifier gesichert (${codeVerifier.slice(0, 12)}…)`, { duration: 15000 });
+
+  // Build Supabase authorize URL with our code_challenge
+  const params = new URLSearchParams({
     provider,
-    options: { redirectTo: NATIVE_REDIRECT, skipBrowserRedirect: true },
+    redirect_to: NATIVE_REDIRECT,
+    code_challenge: codeChallenge,
+    code_challenge_method: 'S256',
   });
-  if (error || !data.url) return error || new Error('No OAuth URL');
+  const authUrl = `${SUPABASE_URL}/auth/v1/authorize?${params.toString()}`;
+  console.log('[nativeOAuth] Opening URL:', authUrl.slice(0, 80) + '...');
+
+  toast(`[2] Browser öffnet…`, { duration: 15000 });
   const { Browser } = await import('@capacitor/browser');
-  await Browser.open({ url: data.url });
+  await Browser.open({ url: authUrl });
   return null;
 };
 
@@ -58,8 +122,14 @@ const Auth = () => {
   const [hostInstagram, setHostInstagram] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { signIn } = useAuth();
+  const { signIn, user } = useAuth();
   const navigate = useNavigate();
+
+  // After OAuth deep-link callback, exchangeCodeForSession fires onAuthStateChange
+  // which sets `user` in AuthContext. Navigate to home as soon as that happens.
+  useEffect(() => {
+    if (user) navigate('/');
+  }, [user]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -399,8 +469,8 @@ const Auth = () => {
               onClick={async () => {
                 setSocialLoading(true);
                 if (Capacitor.isNativePlatform()) {
-                  const { error: err } = await signInWithGoogleNative();
-                  if (err) { toast.error(t('auth.errors.googleFailed')); console.error(err); }
+                  const err = await nativeOAuth('google');
+                  if (err) console.error(err);
                 } else {
                   const { error } = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
                   if (error) { toast.error(t('auth.errors.googleFailed')); console.error(error); }
@@ -420,7 +490,7 @@ const Auth = () => {
               onClick={async () => {
                 setSocialLoading(true);
                 if (Capacitor.isNativePlatform()) {
-                  const err = await nativeOAuth('apple');
+                  const err = await nativeAppleSignIn();
                   if (err) { toast.error(t('auth.errors.appleFailed')); console.error(err); }
                 } else {
                   const { error } = await lovable.auth.signInWithOAuth("apple", { redirect_uri: window.location.origin });

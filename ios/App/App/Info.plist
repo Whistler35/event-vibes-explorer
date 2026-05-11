@@ -48,13 +48,23 @@
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
-			<key>CFBundleURLName</key>
-			<string>com.evendle.app</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>com.evendle.app</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.172064364995-jimhmvn5njc39u8rtm30qnfmf223o5es</string>
+			</array>
+		</dict>
 	</array>
+	<key>GIDClientID</key>
+	<string>172064364995-jimhmvn5njc39u8rtm30qnfmf223o5es.apps.googleusercontent.com</string>
 </dict>
 </plist>
