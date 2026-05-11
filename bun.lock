@@ -14,6 +14,7 @@
         "@capacitor/ios": "^7.4.2",
         "@capacitor/keyboard": "^7.0.6",
         "@capacitor/preferences": "^7.0.4",
+        "@codetrix-studio/capacitor-google-auth": "^3.4.0-rc.4",
         "@googlemaps/js-api-loader": "^1.16.10",
         "@hookform/resolvers": "^3.9.0",
         "@lovable.dev/cloud-auth-js": "^1.1.2",
@@ -129,6 +130,8 @@
     "@capacitor/keyboard": ["@capacitor/keyboard@7.0.6", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@capacitor/keyboard/-/keyboard-7.0.6.tgz", { "peerDependencies": { "@capacitor/core": ">=7.0.0" } }, "sha512-mH9EHo4EnBA9zJAi6domGVB/PdEkcm0h27nJDHG4Y3fd2oKsheCxDRXlYrbgj8hcyQPe0cGWqAfzfwKzkWQoFQ=="],
 
     "@capacitor/preferences": ["@capacitor/preferences@7.0.4", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@capacitor/preferences/-/preferences-7.0.4.tgz", { "peerDependencies": { "@capacitor/core": ">=7.0.0" } }, "sha512-TJhkwaI2RCs/iDC9PjNczZV4h6JM4gUtTuKMeFdy0OwGgFEHf4TrtW2mFMc1TnPDalYQ91p9NT+UKgiJs9/xtg=="],
+
+    "@codetrix-studio/capacitor-google-auth": ["@codetrix-studio/capacitor-google-auth@3.4.0-rc.4", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@codetrix-studio/capacitor-google-auth/-/capacitor-google-auth-3.4.0-rc.4.tgz", { "peerDependencies": { "@capacitor/core": "^6.0.0" } }, "sha512-d548/xKrbMHHbzMYSWnlgZCLZYo2zzY7Onrh3x8ujojrb7atkNK68I6su5WgmaBt4E+R4gxBsWams4554aOFjA=="],
 
     "@esbuild/aix-ppc64": ["@esbuild/aix-ppc64@0.25.0", "", { "os": "aix", "cpu": "ppc64" }, "sha512-O7vun9Sf8DFjH2UtqK8Ku3LkquL9SZL8OLY1T5NZkA34+wG3OQF7cl4Ql8vdNzM6fzBbYfLaiRLIOZ+2FOCgBQ=="],
 
