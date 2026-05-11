@@ -15,6 +15,7 @@ import evendleLogo from '@/assets/evendle-logo.jpeg';
 import { cn } from '@/lib/utils';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { Capacitor } from '@capacitor/core';
+import { signInWithGoogleNative } from '@/lib/nativeGoogleAuth';
 
 const NATIVE_REDIRECT = 'com.evendle.app://login-callback';
 
@@ -398,7 +399,7 @@ const Auth = () => {
               onClick={async () => {
                 setSocialLoading(true);
                 if (Capacitor.isNativePlatform()) {
-                  const err = await nativeOAuth('google');
+                  const { error: err } = await signInWithGoogleNative();
                   if (err) { toast.error(t('auth.errors.googleFailed')); console.error(err); }
                 } else {
                   const { error } = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
