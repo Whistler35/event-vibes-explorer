@@ -47,9 +47,18 @@ export const SignupEmail = ({
               </Link>
               ), um loszulegen.
             </Text>
-            <Button style={styles.button} href={confirmationUrl}>
-              E-Mail bestätigen
-            </Button>
+            <Section style={{ textAlign: 'center', margin: '24px 0' }}>
+              <Button style={styles.button} href={confirmationUrl}>
+                E-Mail bestätigen
+              </Button>
+            </Section>
+            <Text style={{ ...styles.text, fontSize: '13px', color: '#6b7280' }}>
+              Falls der Button nicht funktioniert, kopiere diesen Link in deinen Browser:
+              <br />
+              <Link href={confirmationUrl} style={{ ...styles.link, wordBreak: 'break-all' }}>
+                {confirmationUrl}
+              </Link>
+            </Text>
             <Section style={styles.divider}>&nbsp;</Section>
             <Text style={styles.text}>
               Falls du dich nicht bei EVENDLE registriert hast, kannst du diese
