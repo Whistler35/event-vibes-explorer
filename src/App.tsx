@@ -21,6 +21,7 @@ import Chat from "./pages/Chat";
 import CityEvents from "./pages/CityEvents";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
+import AuthCallback from "./pages/AuthCallback";
 import ResetPassword from "./pages/ResetPassword";
 import UserProfile from "./pages/UserProfile";
 import EditProfile from "./pages/EditProfile";
@@ -62,6 +63,7 @@ const App = () => (
               <Route path="/profile" element={<Profile />} />
               <Route path="/profile/edit" element={<EditProfile />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/admin/events" element={<AdminEvents />} />
               <Route path="/host/dashboard" element={<HostDashboard />} />
