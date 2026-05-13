@@ -1,7 +1,13 @@
 import { useEffect, useCallback, useRef } from 'react'
+import { Capacitor } from '@capacitor/core'
 import { supabase } from '@/integrations/supabase/client'
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string
+
+// true when running inside the native iOS/Android Capacitor shell.
+// WKWebView does not support ServiceWorker or PushManager, so we use
+// @capacitor/push-notifications (APNs/FCM) instead.
+const IS_NATIVE = Capacitor.isNativePlatform()
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
@@ -10,56 +16,128 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)))
 }
 
+async function getUserId(): Promise<string | null> {
+  const { data: { user } } = await supabase.auth.getUser()
+  return user?.id ?? null
+}
+
+// ─── Native path (APNs / FCM via @capacitor/push-notifications) ─────────────
+
+async function subscribeNative(): Promise<boolean> {
+  const { PushNotifications } = await import('@capacitor/push-notifications')
+
+  const { receive } = await PushNotifications.requestPermissions()
+  if (receive !== 'granted') return false
+
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => resolve(false), 10_000)
+
+    PushNotifications.addListener('registration', async ({ value: token }) => {
+      clearTimeout(timer)
+      const userId = await getUserId()
+      if (!userId) { resolve(false); return }
+
+      const { error } = await supabase.from('push_subscriptions').upsert(
+        {
+          user_id: userId,
+          platform: Capacitor.getPlatform(), // 'ios' | 'android'
+          device_token: token,
+          user_agent: navigator.userAgent,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id,device_token' }
+      )
+      if (error) console.error('push_subscriptions upsert (native):', error)
+      resolve(!error)
+    })
+
+    PushNotifications.addListener('registrationError', ({ error }) => {
+      clearTimeout(timer)
+      console.error('Capacitor push registration error:', error)
+      resolve(false)
+    })
+
+    PushNotifications.register()
+  })
+}
+
+async function unsubscribeNative(): Promise<void> {
+  const userId = await getUserId()
+  if (!userId) return
+  await supabase
+    .from('push_subscriptions')
+    .delete()
+    .eq('user_id', userId)
+    .eq('platform', Capacitor.getPlatform())
+}
+
+// ─── Web path (Web Push API via ServiceWorker + VAPID) ───────────────────────
+
+async function subscribeWeb(): Promise<boolean> {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return false
+  if (!VAPID_PUBLIC_KEY) {
+    console.warn('VITE_VAPID_PUBLIC_KEY not set')
+    return false
+  }
+
+  const permission = await Notification.requestPermission()
+  if (permission !== 'granted') return false
+
+  const reg = await navigator.serviceWorker.ready
+  let sub = await reg.pushManager.getSubscription()
+  if (!sub) {
+    sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+    })
+  }
+
+  const json = sub.toJSON()
+  if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) return false
+
+  const userId = await getUserId()
+  if (!userId) return false
+
+  const { error } = await supabase.from('push_subscriptions').upsert(
+    {
+      user_id: userId,
+      platform: 'web',
+      endpoint: json.endpoint,
+      p256dh: json.keys.p256dh,
+      auth: json.keys.auth,
+      user_agent: navigator.userAgent,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: 'endpoint' }
+  )
+  if (error) console.error('push_subscriptions upsert (web):', error)
+  return !error
+}
+
+async function unsubscribeWeb(): Promise<void> {
+  if (!('serviceWorker' in navigator)) return
+  const reg = await navigator.serviceWorker.ready
+  const sub = await reg.pushManager.getSubscription()
+  if (!sub) return
+
+  await sub.unsubscribe()
+  const userId = await getUserId()
+  if (!userId) return
+  await supabase
+    .from('push_subscriptions')
+    .delete()
+    .eq('user_id', userId)
+    .eq('endpoint', sub.endpoint)
+}
+
+// ─── Hook ────────────────────────────────────────────────────────────────────
+
 export function usePushNotifications() {
   const registeredRef = useRef(false)
 
   const subscribe = useCallback(async (): Promise<boolean> => {
-    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return false
-    if (!VAPID_PUBLIC_KEY) {
-      console.warn('VITE_VAPID_PUBLIC_KEY not set')
-      return false
-    }
-
     try {
-      const permission = await Notification.requestPermission()
-      if (permission !== 'granted') return false
-
-      const reg = await navigator.serviceWorker.ready
-
-      // Reuse existing sub or create new
-      let sub = await reg.pushManager.getSubscription()
-      if (!sub) {
-        sub = await reg.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-        })
-      }
-
-      const json = sub.toJSON()
-      if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) return false
-
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return false
-
-      const { error } = await supabase.from('push_subscriptions').upsert(
-        {
-          user_id: user.id,
-          endpoint: json.endpoint,
-          p256dh: json.keys.p256dh,
-          auth: json.keys.auth,
-          user_agent: navigator.userAgent,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'user_id,endpoint' }
-      )
-
-      if (error) {
-        console.error('push_subscriptions upsert:', error)
-        return false
-      }
-
-      registeredRef.current = true
-      return true
+      return await (IS_NATIVE ? subscribeNative() : subscribeWeb())
     } catch (err) {
       console.error('Push subscribe error:', err)
       return false
@@ -67,37 +145,30 @@ export function usePushNotifications() {
   }, [])
 
   const unsubscribe = useCallback(async (): Promise<void> => {
-    if (!('serviceWorker' in navigator)) return
-    const reg = await navigator.serviceWorker.ready
-    const sub = await reg.pushManager.getSubscription()
-    if (!sub) return
-
-    await sub.unsubscribe()
-
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-
-    await supabase
-      .from('push_subscriptions')
-      .delete()
-      .eq('user_id', user.id)
-      .eq('endpoint', sub.endpoint)
+    try {
+      await (IS_NATIVE ? unsubscribeNative() : unsubscribeWeb())
+    } catch (err) {
+      console.error('Push unsubscribe error:', err)
+    }
   }, [])
 
-  // Register SW on mount; auto-subscribe if permission already granted
+  // Web only: register SW on mount; auto-subscribe if permission already granted.
+  // Native: the SW is irrelevant — APNs/FCM registration happens in subscribe().
   useEffect(() => {
+    if (IS_NATIVE) return
     if (!('serviceWorker' in navigator)) return
     if (registeredRef.current) return
 
     navigator.serviceWorker
       .register('/service-worker.js', { scope: '/' })
       .then(async () => {
+        registeredRef.current = true
         if (Notification.permission === 'granted') {
-          await subscribe()
+          await subscribeWeb()
         }
       })
       .catch((err) => console.error('SW register error:', err))
-  }, [subscribe])
+  }, [])
 
   return { subscribe, unsubscribe }
 }
