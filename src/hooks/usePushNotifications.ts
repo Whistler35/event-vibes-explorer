@@ -3,10 +3,6 @@ import { Capacitor } from '@capacitor/core'
 import { supabase } from '@/integrations/supabase/client'
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string
-
-// true when running inside the native iOS/Android Capacitor shell.
-// WKWebView does not support ServiceWorker or PushManager, so we use
-// @capacitor/push-notifications (APNs/FCM) instead.
 const IS_NATIVE = Capacitor.isNativePlatform()
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
@@ -19,6 +15,18 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 async function getUserId(): Promise<string | null> {
   const { data: { user } } = await supabase.auth.getUser()
   return user?.id ?? null
+}
+
+// Returns current position silently (no error thrown, returns null on failure)
+function getCurrentPosition(): Promise<GeolocationCoordinates | null> {
+  if (!('geolocation' in navigator)) return Promise.resolve(null)
+  return new Promise((resolve) => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => resolve(pos.coords),
+      () => resolve(null),
+      { maximumAge: 300_000, timeout: 10_000 }
+    )
+  })
 }
 
 // ─── Native path (APNs / FCM via @capacitor/push-notifications) ─────────────
@@ -34,18 +42,20 @@ async function subscribeNative(): Promise<boolean> {
 
     PushNotifications.addListener('registration', async ({ value: token }) => {
       clearTimeout(timer)
-      const userId = await getUserId()
+      const [userId, coords] = await Promise.all([getUserId(), getCurrentPosition()])
       if (!userId) { resolve(false); return }
 
       const { error } = await supabase.from('push_subscriptions').upsert(
         {
-          user_id: userId,
-          platform: Capacitor.getPlatform(), // 'ios' | 'android'
+          user_id:      userId,
+          platform:     Capacitor.getPlatform(),
           device_token: token,
-          user_agent: navigator.userAgent,
-          updated_at: new Date().toISOString(),
+          latitude:     coords?.latitude  ?? null,
+          longitude:    coords?.longitude ?? null,
+          user_agent:   navigator.userAgent,
+          updated_at:   new Date().toISOString(),
         },
-        { onConflict: 'user_id,device_token' } // requires migration 20260513180000
+        { onConflict: 'user_id,device_token' }
       )
       if (error) console.error('push_subscriptions upsert (native):', error)
       resolve(!error)
@@ -95,15 +105,17 @@ async function subscribeWeb(): Promise<boolean> {
   const json = sub.toJSON()
   if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) return false
 
-  const userId = await getUserId()
+  const [userId, coords] = await Promise.all([getUserId(), getCurrentPosition()])
   if (!userId) return false
 
   const { error } = await supabase.from('push_subscriptions').upsert(
     {
-      user_id: userId,
-      endpoint: json.endpoint,
-      p256dh: json.keys.p256dh,
-      auth: json.keys.auth,
+      user_id:    userId,
+      endpoint:   json.endpoint,
+      p256dh:     json.keys.p256dh,
+      auth:       json.keys.auth,
+      latitude:   coords?.latitude  ?? null,
+      longitude:  coords?.longitude ?? null,
       user_agent: navigator.userAgent,
       updated_at: new Date().toISOString(),
     },
@@ -129,6 +141,25 @@ async function unsubscribeWeb(): Promise<void> {
     .eq('endpoint', sub.endpoint)
 }
 
+// ─── Location update (called silently on every app open) ─────────────────────
+
+async function updateLocation(): Promise<void> {
+  const userId = await getUserId()
+  if (!userId) return
+
+  const coords = await getCurrentPosition()
+  if (!coords) return
+
+  await supabase
+    .from('push_subscriptions')
+    .update({
+      latitude:   coords.latitude,
+      longitude:  coords.longitude,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('user_id', userId)
+}
+
 // ─── Hook ────────────────────────────────────────────────────────────────────
 
 export function usePushNotifications() {
@@ -151,8 +182,13 @@ export function usePushNotifications() {
     }
   }, [])
 
-  // Web only: register SW on mount; auto-subscribe if permission already granted.
-  // Native: the SW is irrelevant — APNs/FCM registration happens in subscribe().
+  const refreshLocation = useCallback(async (): Promise<void> => {
+    try {
+      await updateLocation()
+    } catch { /* silent */ }
+  }, [])
+
+  // Web only: register SW on mount; auto-subscribe if permission already granted
   useEffect(() => {
     if (IS_NATIVE) return
     if (!('serviceWorker' in navigator)) return
@@ -169,5 +205,5 @@ export function usePushNotifications() {
       .catch((err) => console.error('SW register error:', err))
   }, [])
 
-  return { subscribe, unsubscribe }
+  return { subscribe, unsubscribe, refreshLocation }
 }

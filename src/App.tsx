@@ -26,6 +26,7 @@ import ResetPassword from "./pages/ResetPassword";
 import UserProfile from "./pages/UserProfile";
 import EditProfile from "./pages/EditProfile";
 import NotFound from "./pages/NotFound";
+import { Capacitor } from "@capacitor/core";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import VisitTracker from "./hooks/useTrackVisit";
 import { usePushNotifications } from "./hooks/usePushNotifications";
@@ -39,9 +40,10 @@ const queryClient = new QueryClient();
 
 function PushSetup() {
   const { user } = useAuth();
-  const { subscribe } = usePushNotifications();
+  const { subscribe, refreshLocation } = usePushNotifications();
   const prevUserIdRef = useRef<string | null>(null);
 
+  // Subscribe on first login
   useEffect(() => {
     if (user && prevUserIdRef.current !== user.id) {
       prevUserIdRef.current = user.id;
@@ -50,6 +52,34 @@ function PushSetup() {
       prevUserIdRef.current = null;
     }
   }, [user, subscribe]);
+
+  // Refresh location every time the PWA becomes visible (tab focus / app resume)
+  useEffect(() => {
+    if (!user) return;
+
+    // Web: document visibility change
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') refreshLocation();
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    // Native: Capacitor app foreground event
+    let removeCapListener: (() => void) | undefined;
+    if (Capacitor.isNativePlatform()) {
+      import('@capacitor/app').then(({ App: CapApp }) => {
+        CapApp.addListener('appStateChange', ({ isActive }) => {
+          if (isActive) refreshLocation();
+        }).then((handle) => {
+          removeCapListener = () => handle.remove();
+        });
+      });
+    }
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      removeCapListener?.();
+    };
+  }, [user, refreshLocation]);
 
   return null;
 }
