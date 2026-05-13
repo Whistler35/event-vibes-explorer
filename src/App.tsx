@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect, useRef } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -26,8 +26,9 @@ import ResetPassword from "./pages/ResetPassword";
 import UserProfile from "./pages/UserProfile";
 import EditProfile from "./pages/EditProfile";
 import NotFound from "./pages/NotFound";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import VisitTracker from "./hooks/useTrackVisit";
+import { usePushNotifications } from "./hooks/usePushNotifications";
 
 const AdminEvents = lazy(() => import("./pages/AdminEvents"));
 const HostDashboard = lazy(() => import("./pages/HostDashboard"));
@@ -35,6 +36,23 @@ const HostStats = lazy(() => import("./pages/HostStats"));
 const HostBilling = lazy(() => import("./pages/HostBilling"));
 
 const queryClient = new QueryClient();
+
+function PushSetup() {
+  const { user } = useAuth();
+  const { subscribe } = usePushNotifications();
+  const prevUserIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (user && prevUserIdRef.current !== user.id) {
+      prevUserIdRef.current = user.id;
+      subscribe();
+    } else if (!user) {
+      prevUserIdRef.current = null;
+    }
+  }, [user, subscribe]);
+
+  return null;
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -45,6 +63,7 @@ const App = () => (
         <BrowserRouter>
           <Suspense fallback={<div className="min-h-screen bg-background" />}>
             <VisitTracker />
+            <PushSetup />
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/city/:city" element={<CityEvents />} />
