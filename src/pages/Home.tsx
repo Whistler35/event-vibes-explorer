@@ -319,11 +319,24 @@ const Home = () => {
             return `${fmt(nearbyDateRange.from)} – ${fmt(nearbyDateRange.to)}`;
           };
 
+          // Tier: events directly in/around the city (≤ 5km) vs. wider area (5–30km)
+          const LOCAL_RADIUS_KM = 5;
+          const LOCAL_THRESHOLD = 5;
+          const localCount = filteredNearby.filter((e: any) =>
+            haversineDistance(searchLocation.lat, searchLocation.lng, e.latitude, e.longitude) <= LOCAL_RADIUS_KM
+          ).length;
+          const expandedToArea = localCount < LOCAL_THRESHOLD && filteredNearby.length > localCount;
+
           return (
             <div ref={nearbySectionRef} className="px-4 pb-8 scroll-mt-4">
-              <h3 className="text-foreground text-2xl font-bold mb-2">
+              <h3 className="text-foreground text-2xl font-bold mb-1">
                 {t('home.nearTitle', { city: searchQuery })}
               </h3>
+              {expandedToArea && (
+                <p className="text-muted-foreground text-sm mb-3">
+                  {`Wenig Events direkt in ${searchQuery} – zeige auch Events im Umkreis von 30 km.`}
+                </p>
+              )}
 
               {/* Filter toggle */}
               <div className="flex items-center gap-2 mb-4">
