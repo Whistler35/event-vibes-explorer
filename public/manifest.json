@@ -1,0 +1,26 @@
+{
+  "name": "EVENDLE",
+  "short_name": "EVENDLE",
+  "description": "Discover events and connect with people around you",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f0f0f",
+  "theme_color": "#7c3aed",
+  "icons": [
+    {
+      "src": "/app-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/app-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["social", "entertainment", "lifestyle"],
+  "lang": "de"
+}
