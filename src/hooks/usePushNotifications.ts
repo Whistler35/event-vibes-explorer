@@ -45,19 +45,22 @@ async function subscribeNative(): Promise<boolean> {
       const [userId, coords] = await Promise.all([getUserId(), getCurrentPosition()])
       if (!userId) { resolve(false); return }
 
-      const { error } = await supabase.from('push_subscriptions').upsert(
-        {
-          user_id:      userId,
-          platform:     Capacitor.getPlatform(),
-          device_token: token,
-          latitude:     coords?.latitude  ?? null,
-          longitude:    coords?.longitude ?? null,
-          user_agent:   navigator.userAgent,
-          updated_at:   new Date().toISOString(),
-        },
-        { onConflict: 'user_id,device_token' }
-      )
-      if (error) console.error('push_subscriptions upsert (native):', error)
+      // DELETE + INSERT (no onConflict needed — avoids constraint issues)
+      await supabase
+        .from('push_subscriptions')
+        .delete()
+        .eq('user_id', userId)
+        .eq('device_token', token)
+
+      const { error } = await supabase.from('push_subscriptions').insert({
+        user_id:      userId,
+        platform:     Capacitor.getPlatform(),
+        device_token: token,
+        latitude:     coords?.latitude  ?? null,
+        longitude:    coords?.longitude ?? null,
+        user_agent:   navigator.userAgent,
+      })
+      if (error) console.error('push_subscriptions insert (native):', error)
       resolve(!error)
     })
 
@@ -108,20 +111,23 @@ async function subscribeWeb(): Promise<boolean> {
   const [userId, coords] = await Promise.all([getUserId(), getCurrentPosition()])
   if (!userId) return false
 
-  const { error } = await supabase.from('push_subscriptions').upsert(
-    {
-      user_id:    userId,
-      endpoint:   json.endpoint,
-      p256dh:     json.keys.p256dh,
-      auth:       json.keys.auth,
-      latitude:   coords?.latitude  ?? null,
-      longitude:  coords?.longitude ?? null,
-      user_agent: navigator.userAgent,
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: 'endpoint' }
-  )
-  if (error) console.error('push_subscriptions upsert (web):', error)
+  // DELETE + INSERT (no onConflict needed — avoids constraint issues)
+  await supabase
+    .from('push_subscriptions')
+    .delete()
+    .eq('user_id', userId)
+    .eq('endpoint', json.endpoint)
+
+  const { error } = await supabase.from('push_subscriptions').insert({
+    user_id:    userId,
+    endpoint:   json.endpoint,
+    p256dh:     json.keys.p256dh,
+    auth:       json.keys.auth,
+    latitude:   coords?.latitude  ?? null,
+    longitude:  coords?.longitude ?? null,
+    user_agent: navigator.userAgent,
+  })
+  if (error) console.error('push_subscriptions insert (web):', error)
   return !error
 }
 
