@@ -45,7 +45,7 @@ async function subscribeNative(): Promise<boolean> {
           user_agent: navigator.userAgent,
           updated_at: new Date().toISOString(),
         },
-        { onConflict: 'user_id,device_token' }
+        { onConflict: 'user_id,device_token' } // requires migration 20260513180000
       )
       if (error) console.error('push_subscriptions upsert (native):', error)
       resolve(!error)
@@ -101,7 +101,6 @@ async function subscribeWeb(): Promise<boolean> {
   const { error } = await supabase.from('push_subscriptions').upsert(
     {
       user_id: userId,
-      platform: 'web',
       endpoint: json.endpoint,
       p256dh: json.keys.p256dh,
       auth: json.keys.auth,
