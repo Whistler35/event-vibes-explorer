@@ -113,15 +113,17 @@ self.addEventListener('notificationclick', (event) => {
 
   switch (type) {
     case 'new_event_nearby':
-    case 'new_blitz_nearby':
     case 'friend_joined_event':
-      url = event_id ? `/events/${event_id}` : '/';
+      url = event_id ? `/event/${event_id}` : '/';
+      break;
+    case 'new_blitz_nearby':
+      url = event_id ? `/event/${event_id}` : '/';
       break;
     case 'new_dm':
-      url = conversation_id ? `/messages/${conversation_id}` : '/messages';
+      url = conversation_id ? `/dm/${conversation_id}` : '/dm';
       break;
     case 'friend_request':
-      url = from_user_id ? `/profile/${from_user_id}` : '/friends';
+      url = from_user_id ? `/user/${from_user_id}` : '/';
       break;
   }
 
