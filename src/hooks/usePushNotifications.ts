@@ -45,12 +45,10 @@ async function subscribeNative(): Promise<boolean> {
       const [userId, coords] = await Promise.all([getUserId(), getCurrentPosition()])
       if (!userId) { resolve(false); return }
 
-      // DELETE + INSERT (no onConflict needed — avoids constraint issues)
       await supabase
         .from('push_subscriptions')
         .delete()
         .eq('user_id', userId)
-        .eq('device_token', token)
 
       const { error } = await supabase.from('push_subscriptions').insert({
         user_id:      userId,
@@ -111,12 +109,13 @@ async function subscribeWeb(): Promise<boolean> {
   const [userId, coords] = await Promise.all([getUserId(), getCurrentPosition()])
   if (!userId) return false
 
-  // DELETE + INSERT (no onConflict needed — avoids constraint issues)
+  // Delete ALL existing subscriptions for this user, then insert fresh.
+  // Scoping to endpoint is unreliable when the stored value differs
+  // slightly (encoding, trailing slash) — a full user purge is safer.
   await supabase
     .from('push_subscriptions')
     .delete()
     .eq('user_id', userId)
-    .eq('endpoint', json.endpoint)
 
   const { error } = await supabase.from('push_subscriptions').insert({
     user_id:    userId,
