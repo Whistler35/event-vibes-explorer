@@ -45,20 +45,15 @@ async function subscribeNative(): Promise<boolean> {
       const [userId, coords] = await Promise.all([getUserId(), getCurrentPosition()])
       if (!userId) { resolve(false); return }
 
-      await supabase
-        .from('push_subscriptions')
-        .delete()
-        .eq('user_id', userId)
-
-      const { error } = await supabase.from('push_subscriptions').insert({
+      const { error } = await supabase.from('push_subscriptions').upsert({
         user_id:      userId,
         platform:     Capacitor.getPlatform(),
         device_token: token,
         latitude:     coords?.latitude  ?? null,
         longitude:    coords?.longitude ?? null,
         user_agent:   navigator.userAgent,
-      })
-      if (error) console.error('push_subscriptions insert (native):', error)
+      }, { onConflict: 'user_id' })
+      if (error) console.error('push_subscriptions upsert (native):', error)
       resolve(!error)
     })
 
@@ -99,7 +94,7 @@ async function subscribeWeb(): Promise<boolean> {
   if (!sub) {
     sub = await reg.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as BufferSource,
     })
   }
 
@@ -109,15 +104,7 @@ async function subscribeWeb(): Promise<boolean> {
   const [userId, coords] = await Promise.all([getUserId(), getCurrentPosition()])
   if (!userId) return false
 
-  // Delete ALL existing subscriptions for this user, then insert fresh.
-  // Scoping to endpoint is unreliable when the stored value differs
-  // slightly (encoding, trailing slash) — a full user purge is safer.
-  await supabase
-    .from('push_subscriptions')
-    .delete()
-    .eq('user_id', userId)
-
-  const { error } = await supabase.from('push_subscriptions').insert({
+  const { error } = await supabase.from('push_subscriptions').upsert({
     user_id:    userId,
     endpoint:   json.endpoint,
     p256dh:     json.keys.p256dh,
@@ -125,8 +112,8 @@ async function subscribeWeb(): Promise<boolean> {
     latitude:   coords?.latitude  ?? null,
     longitude:  coords?.longitude ?? null,
     user_agent: navigator.userAgent,
-  })
-  if (error) console.error('push_subscriptions insert (web):', error)
+  }, { onConflict: 'user_id' })
+  if (error) console.error('push_subscriptions upsert (web):', error)
   return !error
 }
 
