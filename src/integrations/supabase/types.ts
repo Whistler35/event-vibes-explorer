@@ -995,31 +995,43 @@ export type Database = {
       }
       push_subscriptions: {
         Row: {
-          auth: string
+          auth: string | null
           created_at: string
-          endpoint: string
+          device_token: string | null
+          endpoint: string | null
           id: string
-          p256dh: string
+          latitude: number | null
+          longitude: number | null
+          p256dh: string | null
+          platform: string
           updated_at: string
           user_agent: string | null
           user_id: string
         }
         Insert: {
-          auth: string
+          auth?: string | null
           created_at?: string
-          endpoint: string
+          device_token?: string | null
+          endpoint?: string | null
           id?: string
-          p256dh: string
+          latitude?: number | null
+          longitude?: number | null
+          p256dh?: string | null
+          platform?: string
           updated_at?: string
           user_agent?: string | null
           user_id: string
         }
         Update: {
-          auth?: string
+          auth?: string | null
           created_at?: string
-          endpoint?: string
+          device_token?: string | null
+          endpoint?: string | null
           id?: string
-          p256dh?: string
+          latitude?: number | null
+          longitude?: number | null
+          p256dh?: string | null
+          platform?: string
           updated_at?: string
           user_agent?: string | null
           user_id?: string
@@ -1337,6 +1349,16 @@ export type Database = {
             }
             Returns: string
           }
+      call_push_notification: {
+        Args: {
+          p_body: string
+          p_data?: Json
+          p_title: string
+          p_type: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       create_notification: {
         Args: {
           _body: string
