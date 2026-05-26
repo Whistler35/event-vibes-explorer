@@ -179,21 +179,30 @@ const Nearby = () => {
 
   // Build date filter — default to the next 14 days unless a quick filter or
   // explicit date range overrides it.
+  // IMPORTANT: format dates from the LOCAL calendar (not UTC) so a date the
+  // user picked as "26.05." doesn't roll back to "25.05." in timezones east
+  // of UTC.
+  const toLocalYMD = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
   const dateFilter = useMemo(() => {
     if (activeQuickFilters.has('tonight')) {
-      const today = new Date().toISOString().split('T')[0];
+      const today = toLocalYMD(new Date());
       return { from: today, to: today };
     }
     if (selectedDateRange?.from) {
-      const from = selectedDateRange.from.toISOString().split('T')[0];
-      const to = (selectedDateRange.to || selectedDateRange.from).toISOString().split('T')[0];
+      const from = toLocalYMD(selectedDateRange.from);
+      const to = toLocalYMD(selectedDateRange.to || selectedDateRange.from);
       return { from, to };
     }
     const now = new Date();
     const in14 = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 14);
     return {
-      from: now.toISOString().split('T')[0],
-      to: in14.toISOString().split('T')[0],
+      from: toLocalYMD(now),
+      to: toLocalYMD(in14),
     };
   }, [activeQuickFilters, selectedDateRange]);
 
