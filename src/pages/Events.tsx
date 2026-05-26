@@ -26,7 +26,8 @@ const Events = () => {
   const diffToMonday = (day + 6) % 7;
   const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday, 0, 0, 0);
   const sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6, 23, 59, 59);
-  const today = new Date().toISOString().split('T')[0];
+  // Local calendar date (avoid toISOString → UTC roll-back in timezones east of UTC)
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
   const { data: searchResult, isLoading } = useSearchEvents({
     categories: selectedCategories.length > 0 ? selectedCategories : undefined,
