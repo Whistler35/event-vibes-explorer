@@ -40,17 +40,11 @@ interface PlanInfo {
   additional_event_price_cents: number | null;
 }
 
-// Mock stats for each event (will be replaced with real tracking later)
-function getMockStats(eventId: string) {
-  const hash = eventId.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-  const views = 50 + (hash % 450);
-  const registrations = Math.floor(views * (0.08 + (hash % 20) / 100));
-  return {
-    views,
-    registrations,
-    conversionRate: ((registrations / views) * 100).toFixed(1),
-  };
+interface EventStats {
+  views: number;
+  uniqueViewers: number;
 }
+
 
 const HostDashboard = () => {
   const { t, i18n } = useTranslation();
