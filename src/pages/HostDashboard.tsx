@@ -54,6 +54,7 @@ const HostDashboard = () => {
   const navigate = useNavigate();
 
   const [events, setEvents] = useState<HostEvent[]>([]);
+  const [statsByEvent, setStatsByEvent] = useState<Record<string, EventStats>>({});
   const [plan, setPlan] = useState<PlanInfo | null>(null);
   const [eventsUsed, setEventsUsed] = useState(0);
   const [loading, setLoading] = useState(true);
