@@ -23,6 +23,7 @@ import { CheckCircle, XCircle, Clock, ArrowLeft, MapPin, Calendar, Star, StarOff
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AdminStatistics from "@/components/AdminStatistics";
 import AdminHostManagement from "@/components/AdminHostManagement";
+import EventViewsStats from "@/components/EventViewsStats";
 
 const formatDate = (dateStr: string) => {
   const d = new Date(dateStr);
@@ -309,6 +310,9 @@ const AdminEvents = () => {
             </TabsTrigger>
             <TabsTrigger value="manage" className="flex-1 text-xs">
               {t("adminEvents.tabs.manage")}
+            </TabsTrigger>
+            <TabsTrigger value="views" className="flex-1 text-xs">
+              Views
             </TabsTrigger>
             <TabsTrigger value="stats" className="flex-1 text-xs">
               {t("adminEvents.tabs.stats")}
@@ -597,6 +601,11 @@ const AdminEvents = () => {
           </TabsContent>
 
           {/* Hosts Tab — moved below manage in JSX order is fine; Tabs match by value */}
+
+          {/* Views Tab */}
+          <TabsContent value="views" className="mt-4">
+            <EventViewsStats />
+          </TabsContent>
 
           {/* Statistics Tab */}
           <TabsContent value="stats" className="mt-4">
