@@ -72,6 +72,30 @@ const EventDetail = () => {
     }
   }, [id, user]);
 
+  // Track event view (once per session per event)
+  useEffect(() => {
+    if (!id) return;
+    const storageKey = `ev_viewed_${id}`;
+    if (sessionStorage.getItem(storageKey)) return;
+
+    let sessionId = sessionStorage.getItem('ev_session_id');
+    if (!sessionId) {
+      sessionId = (crypto.randomUUID?.() ?? `${Date.now()}-${Math.random()}`);
+      sessionStorage.setItem('ev_session_id', sessionId);
+    }
+
+    supabase
+      .from('event_views')
+      .insert({
+        event_id: id,
+        viewer_id: user?.id ?? null,
+        session_id: sessionId,
+      })
+      .then(({ error }) => {
+        if (!error) sessionStorage.setItem(storageKey, '1');
+      });
+  }, [id, user]);
+
   const fetchEventDetails = async () => {
     try {
       const { data, error } = await supabase
