@@ -40,17 +40,11 @@ interface PlanInfo {
   additional_event_price_cents: number | null;
 }
 
-// Mock stats for each event (will be replaced with real tracking later)
-function getMockStats(eventId: string) {
-  const hash = eventId.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-  const views = 50 + (hash % 450);
-  const registrations = Math.floor(views * (0.08 + (hash % 20) / 100));
-  return {
-    views,
-    registrations,
-    conversionRate: ((registrations / views) * 100).toFixed(1),
-  };
+interface EventStats {
+  views: number;
+  uniqueViewers: number;
 }
+
 
 const HostDashboard = () => {
   const { t, i18n } = useTranslation();
@@ -60,6 +54,7 @@ const HostDashboard = () => {
   const navigate = useNavigate();
 
   const [events, setEvents] = useState<HostEvent[]>([]);
+  const [statsByEvent, setStatsByEvent] = useState<Record<string, EventStats>>({});
   const [plan, setPlan] = useState<PlanInfo | null>(null);
   const [eventsUsed, setEventsUsed] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -84,8 +79,31 @@ const HostDashboard = () => {
       .eq('created_by', user.id)
       .order('event_date', { ascending: false });
 
-    setEvents(eventsData || []);
-    setEventsUsed(eventsData?.length || 0);
+    const list = eventsData || [];
+    setEvents(list);
+    setEventsUsed(list.length);
+
+    // Fetch real view stats for these events
+    if (list.length > 0) {
+      const ids = list.map((e) => e.id);
+      const { data: viewsData } = await supabase
+        .from('event_views')
+        .select('event_id, viewer_id, session_id')
+        .in('event_id', ids);
+
+      const agg: Record<string, { views: number; viewers: Set<string> }> = {};
+      (viewsData || []).forEach((v: any) => {
+        const key = v.event_id as string;
+        if (!agg[key]) agg[key] = { views: 0, viewers: new Set() };
+        agg[key].views += 1;
+        agg[key].viewers.add(v.viewer_id || v.session_id || Math.random().toString());
+      });
+      const stats: Record<string, EventStats> = {};
+      Object.entries(agg).forEach(([id, v]) => {
+        stats[id] = { views: v.views, uniqueViewers: v.viewers.size };
+      });
+      setStatsByEvent(stats);
+    }
 
     // Fetch host profile + plan
     const { data: hostProfile } = await supabase
@@ -131,8 +149,9 @@ const HostDashboard = () => {
   const pendingEvents = events.filter((e) => e.approval_status === 'pending');
   const expiredEvents = events.filter((e) => new Date(e.event_date) < now);
 
-  const totalViews = events.reduce((sum, e) => sum + getMockStats(e.id).views, 0);
-  const totalRegistrations = events.reduce((sum, e) => sum + getMockStats(e.id).registrations, 0);
+  const totalViews = events.reduce((sum, e) => sum + (statsByEvent[e.id]?.views || 0), 0);
+  const totalUniqueViewers = events.reduce((sum, e) => sum + (statsByEvent[e.id]?.uniqueViewers || 0), 0);
+  const totalRegistrations = events.reduce((sum, e) => sum + (e.current_participants || 0), 0);
 
   return (
     <Layout>
@@ -199,17 +218,15 @@ const HostDashboard = () => {
           <Card>
             <CardContent className="p-3 text-center">
               <Users className="w-5 h-5 text-primary mx-auto mb-1" />
-              <p className="text-foreground font-bold text-lg">{totalRegistrations}</p>
-              <p className="text-muted-foreground text-[10px]">{t('host.registrations')}</p>
+              <p className="text-foreground font-bold text-lg">{totalUniqueViewers}</p>
+              <p className="text-muted-foreground text-[10px]">Unique Besucher</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-3 text-center">
               <TrendingUp className="w-5 h-5 text-primary mx-auto mb-1" />
-              <p className="text-foreground font-bold text-lg">
-                {totalViews > 0 ? ((totalRegistrations / totalViews) * 100).toFixed(1) : 0}%
-              </p>
-              <p className="text-muted-foreground text-[10px]">{t('host.conversion')}</p>
+              <p className="text-foreground font-bold text-lg">{totalRegistrations}</p>
+              <p className="text-muted-foreground text-[10px]">{t('host.registrations')}</p>
             </CardContent>
           </Card>
         </div>
@@ -233,7 +250,7 @@ const HostDashboard = () => {
               <EmptyState text={t('host.noActive')} />
             ) : (
               activeEvents.map((event) => (
-                <EventRow key={event.id} event={event} onDelete={handleDelete} onNavigate={navigate} dateLocale={dateLocale} t={t} />
+                <EventRow key={event.id} event={event} stats={statsByEvent[event.id]} onDelete={handleDelete} onNavigate={navigate} dateLocale={dateLocale} t={t} />
               ))
             )}
           </TabsContent>
@@ -243,7 +260,7 @@ const HostDashboard = () => {
               <EmptyState text={t('host.noPending')} />
             ) : (
               pendingEvents.map((event) => (
-                <EventRow key={event.id} event={event} onDelete={handleDelete} onNavigate={navigate} dateLocale={dateLocale} t={t} />
+                <EventRow key={event.id} event={event} stats={statsByEvent[event.id]} onDelete={handleDelete} onNavigate={navigate} dateLocale={dateLocale} t={t} />
               ))
             )}
           </TabsContent>
@@ -253,7 +270,7 @@ const HostDashboard = () => {
               <EmptyState text={t('host.noExpired')} />
             ) : (
               expiredEvents.map((event) => (
-                <EventRow key={event.id} event={event} onDelete={handleDelete} onNavigate={navigate} dateLocale={dateLocale} t={t} />
+                <EventRow key={event.id} event={event} stats={statsByEvent[event.id]} onDelete={handleDelete} onNavigate={navigate} dateLocale={dateLocale} t={t} />
               ))
             )}
           </TabsContent>
@@ -288,18 +305,22 @@ const HostDashboard = () => {
 
 function EventRow({
   event,
+  stats,
   onDelete,
   onNavigate,
   dateLocale,
   t,
 }: {
   event: HostEvent;
+  stats?: EventStats;
   onDelete: (id: string) => void;
   onNavigate: (path: string) => void;
   dateLocale: any;
   t: (key: string, opts?: any) => string;
 }) {
-  const stats = getMockStats(event.id);
+  const views = stats?.views ?? 0;
+  const uniqueViewers = stats?.uniqueViewers ?? 0;
+  const registrations = event.current_participants ?? 0;
   const statusBadge = {
     approved: { label: t('host.approved'), variant: 'default' as const },
     pending: { label: t('host.pending'), variant: 'secondary' as const },
@@ -339,14 +360,14 @@ function EventRow({
 
           {/* Mini stats */}
           <div className="flex items-center gap-3 mt-2 text-[10px] text-muted-foreground">
-            <span className="flex items-center gap-0.5">
-              <Eye className="w-3 h-3" /> {stats.views}
+            <span className="flex items-center gap-0.5" title="Aufrufe">
+              <Eye className="w-3 h-3" /> {views}
             </span>
-            <span className="flex items-center gap-0.5">
-              <Users className="w-3 h-3" /> {stats.registrations}
+            <span className="flex items-center gap-0.5" title="Unique Besucher">
+              <Users className="w-3 h-3" /> {uniqueViewers}
             </span>
-            <span className="flex items-center gap-0.5">
-              <TrendingUp className="w-3 h-3" /> {stats.conversionRate}%
+            <span className="flex items-center gap-0.5" title="Anmeldungen">
+              <CheckCircle className="w-3 h-3" /> {registrations}
             </span>
             <div className="flex-1" />
             <button
