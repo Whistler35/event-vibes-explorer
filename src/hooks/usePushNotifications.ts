@@ -45,15 +45,17 @@ async function subscribeNative(): Promise<boolean> {
       const [userId, coords] = await Promise.all([getUserId(), getCurrentPosition()])
       if (!userId) { resolve(false); return }
 
-      const { error } = await supabase.from('push_subscriptions').upsert({
+      await supabase.from('push_subscriptions').delete().eq('user_id', userId)
+
+      const { error } = await supabase.from('push_subscriptions').insert({
         user_id:      userId,
         platform:     Capacitor.getPlatform(),
         device_token: token,
         latitude:     coords?.latitude  ?? null,
         longitude:    coords?.longitude ?? null,
         user_agent:   navigator.userAgent,
-      }, { onConflict: 'user_id' })
-      if (error) console.error('push_subscriptions upsert (native):', error)
+      })
+      if (error) console.error('push_subscriptions insert (native):', error)
       resolve(!error)
     })
 
@@ -104,7 +106,9 @@ async function subscribeWeb(): Promise<boolean> {
   const [userId, coords] = await Promise.all([getUserId(), getCurrentPosition()])
   if (!userId) return false
 
-  const { error } = await supabase.from('push_subscriptions').upsert({
+  await supabase.from('push_subscriptions').delete().eq('user_id', userId)
+
+  const { error } = await supabase.from('push_subscriptions').insert({
     user_id:    userId,
     endpoint:   json.endpoint,
     p256dh:     json.keys.p256dh,
@@ -112,8 +116,8 @@ async function subscribeWeb(): Promise<boolean> {
     latitude:   coords?.latitude  ?? null,
     longitude:  coords?.longitude ?? null,
     user_agent: navigator.userAgent,
-  }, { onConflict: 'user_id' })
-  if (error) console.error('push_subscriptions upsert (web):', error)
+  })
+  if (error) console.error('push_subscriptions insert (web):', error)
   return !error
 }
 
