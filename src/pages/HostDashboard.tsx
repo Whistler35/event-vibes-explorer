@@ -250,7 +250,7 @@ const HostDashboard = () => {
               <EmptyState text={t('host.noActive')} />
             ) : (
               activeEvents.map((event) => (
-                <EventRow key={event.id} event={event} onDelete={handleDelete} onNavigate={navigate} dateLocale={dateLocale} t={t} />
+                <EventRow key={event.id} event={event} stats={statsByEvent[event.id]} onDelete={handleDelete} onNavigate={navigate} dateLocale={dateLocale} t={t} />
               ))
             )}
           </TabsContent>
@@ -260,7 +260,7 @@ const HostDashboard = () => {
               <EmptyState text={t('host.noPending')} />
             ) : (
               pendingEvents.map((event) => (
-                <EventRow key={event.id} event={event} onDelete={handleDelete} onNavigate={navigate} dateLocale={dateLocale} t={t} />
+                <EventRow key={event.id} event={event} stats={statsByEvent[event.id]} onDelete={handleDelete} onNavigate={navigate} dateLocale={dateLocale} t={t} />
               ))
             )}
           </TabsContent>
@@ -270,7 +270,7 @@ const HostDashboard = () => {
               <EmptyState text={t('host.noExpired')} />
             ) : (
               expiredEvents.map((event) => (
-                <EventRow key={event.id} event={event} onDelete={handleDelete} onNavigate={navigate} dateLocale={dateLocale} t={t} />
+                <EventRow key={event.id} event={event} stats={statsByEvent[event.id]} onDelete={handleDelete} onNavigate={navigate} dateLocale={dateLocale} t={t} />
               ))
             )}
           </TabsContent>
