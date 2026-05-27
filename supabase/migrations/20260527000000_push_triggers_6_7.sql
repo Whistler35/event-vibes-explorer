@@ -48,9 +48,11 @@ CREATE TRIGGER trg_notify_request_accepted
   EXECUTE FUNCTION public.notify_request_accepted();
 
 -- ================================================================
--- 7. BLITZ SWIPE ACCEPTED
--- Fires when a blitz_swipe status changes pending → accepted.
--- Notifies the swiper that the host accepted their request.
+-- 7. BLITZ MATCH CREATED (= host accepted)
+-- Fires on INSERT into blitz_matches.
+-- blitz_match_status enum: 'active', 'expired', 'closed'
+-- A new match always starts as 'active' — no status filter needed.
+-- Notifies participant_id that they were accepted.
 -- ================================================================
 CREATE OR REPLACE FUNCTION public.notify_blitz_accepted()
 RETURNS trigger
@@ -58,25 +60,13 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, extensions
 AS $$
-DECLARE
-  v_host_name text;
-  v_host_id   uuid;
 BEGIN
-  IF OLD.status = NEW.status THEN RETURN NEW; END IF;
-  IF OLD.status != 'pending' OR NEW.status != 'accepted' THEN RETURN NEW; END IF;
-
-  SELECT host_id INTO v_host_id
-    FROM public.blitz_requests WHERE id = NEW.blitz_request_id LIMIT 1;
-
-  SELECT name INTO v_host_name
-    FROM public.profiles WHERE user_id = v_host_id LIMIT 1;
-
   PERFORM public.call_push_notification(
-    NEW.swiper_id,
+    NEW.participant_id,
     '⚡ Blitz-Anfrage angenommen!',
-    COALESCE(v_host_name, 'Jemand') || ' hat deine Anfrage angenommen',
+    'Du wurdest für den Blitz zugelassen',
     'blitz_accepted',
-    jsonb_build_object('blitz_request_id', NEW.blitz_request_id, 'host_id', v_host_id)
+    jsonb_build_object('blitz_request_id', NEW.blitz_request_id, 'host_id', NEW.host_id)
   );
 
   RETURN NEW;
@@ -84,7 +74,8 @@ END;
 $$;
 
 DROP TRIGGER IF EXISTS trg_notify_blitz_accepted ON public.blitz_swipes;
+DROP TRIGGER IF EXISTS trg_notify_blitz_accepted ON public.blitz_matches;
 CREATE TRIGGER trg_notify_blitz_accepted
-  AFTER UPDATE OF status ON public.blitz_swipes
+  AFTER INSERT ON public.blitz_matches
   FOR EACH ROW
   EXECUTE FUNCTION public.notify_blitz_accepted();
