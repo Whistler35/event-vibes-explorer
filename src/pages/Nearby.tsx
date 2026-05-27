@@ -199,10 +199,10 @@ const Nearby = () => {
       return { from, to };
     }
     const now = new Date();
-    const in14 = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 14);
+    const in60 = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 60);
     return {
       from: toLocalYMD(now),
-      to: toLocalYMD(in14),
+      to: toLocalYMD(in60),
     };
   }, [activeQuickFilters, selectedDateRange]);
 
