@@ -305,18 +305,22 @@ const HostDashboard = () => {
 
 function EventRow({
   event,
+  stats,
   onDelete,
   onNavigate,
   dateLocale,
   t,
 }: {
   event: HostEvent;
+  stats?: EventStats;
   onDelete: (id: string) => void;
   onNavigate: (path: string) => void;
   dateLocale: any;
   t: (key: string, opts?: any) => string;
 }) {
-  const stats = getMockStats(event.id);
+  const views = stats?.views ?? 0;
+  const uniqueViewers = stats?.uniqueViewers ?? 0;
+  const registrations = event.current_participants ?? 0;
   const statusBadge = {
     approved: { label: t('host.approved'), variant: 'default' as const },
     pending: { label: t('host.pending'), variant: 'secondary' as const },
@@ -356,14 +360,14 @@ function EventRow({
 
           {/* Mini stats */}
           <div className="flex items-center gap-3 mt-2 text-[10px] text-muted-foreground">
-            <span className="flex items-center gap-0.5">
-              <Eye className="w-3 h-3" /> {stats.views}
+            <span className="flex items-center gap-0.5" title="Aufrufe">
+              <Eye className="w-3 h-3" /> {views}
             </span>
-            <span className="flex items-center gap-0.5">
-              <Users className="w-3 h-3" /> {stats.registrations}
+            <span className="flex items-center gap-0.5" title="Unique Besucher">
+              <Users className="w-3 h-3" /> {uniqueViewers}
             </span>
-            <span className="flex items-center gap-0.5">
-              <TrendingUp className="w-3 h-3" /> {stats.conversionRate}%
+            <span className="flex items-center gap-0.5" title="Anmeldungen">
+              <CheckCircle className="w-3 h-3" /> {registrations}
             </span>
             <div className="flex-1" />
             <button
