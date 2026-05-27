@@ -79,8 +79,31 @@ const HostDashboard = () => {
       .eq('created_by', user.id)
       .order('event_date', { ascending: false });
 
-    setEvents(eventsData || []);
-    setEventsUsed(eventsData?.length || 0);
+    const list = eventsData || [];
+    setEvents(list);
+    setEventsUsed(list.length);
+
+    // Fetch real view stats for these events
+    if (list.length > 0) {
+      const ids = list.map((e) => e.id);
+      const { data: viewsData } = await supabase
+        .from('event_views')
+        .select('event_id, viewer_id, session_id')
+        .in('event_id', ids);
+
+      const agg: Record<string, { views: number; viewers: Set<string> }> = {};
+      (viewsData || []).forEach((v: any) => {
+        const key = v.event_id as string;
+        if (!agg[key]) agg[key] = { views: 0, viewers: new Set() };
+        agg[key].views += 1;
+        agg[key].viewers.add(v.viewer_id || v.session_id || Math.random().toString());
+      });
+      const stats: Record<string, EventStats> = {};
+      Object.entries(agg).forEach(([id, v]) => {
+        stats[id] = { views: v.views, uniqueViewers: v.viewers.size };
+      });
+      setStatsByEvent(stats);
+    }
 
     // Fetch host profile + plan
     const { data: hostProfile } = await supabase
