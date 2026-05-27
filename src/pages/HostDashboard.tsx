@@ -149,8 +149,9 @@ const HostDashboard = () => {
   const pendingEvents = events.filter((e) => e.approval_status === 'pending');
   const expiredEvents = events.filter((e) => new Date(e.event_date) < now);
 
-  const totalViews = events.reduce((sum, e) => sum + getMockStats(e.id).views, 0);
-  const totalRegistrations = events.reduce((sum, e) => sum + getMockStats(e.id).registrations, 0);
+  const totalViews = events.reduce((sum, e) => sum + (statsByEvent[e.id]?.views || 0), 0);
+  const totalUniqueViewers = events.reduce((sum, e) => sum + (statsByEvent[e.id]?.uniqueViewers || 0), 0);
+  const totalRegistrations = events.reduce((sum, e) => sum + (e.current_participants || 0), 0);
 
   return (
     <Layout>
