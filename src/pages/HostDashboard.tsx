@@ -218,17 +218,15 @@ const HostDashboard = () => {
           <Card>
             <CardContent className="p-3 text-center">
               <Users className="w-5 h-5 text-primary mx-auto mb-1" />
-              <p className="text-foreground font-bold text-lg">{totalRegistrations}</p>
-              <p className="text-muted-foreground text-[10px]">{t('host.registrations')}</p>
+              <p className="text-foreground font-bold text-lg">{totalUniqueViewers}</p>
+              <p className="text-muted-foreground text-[10px]">Unique Besucher</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-3 text-center">
               <TrendingUp className="w-5 h-5 text-primary mx-auto mb-1" />
-              <p className="text-foreground font-bold text-lg">
-                {totalViews > 0 ? ((totalRegistrations / totalViews) * 100).toFixed(1) : 0}%
-              </p>
-              <p className="text-muted-foreground text-[10px]">{t('host.conversion')}</p>
+              <p className="text-foreground font-bold text-lg">{totalRegistrations}</p>
+              <p className="text-muted-foreground text-[10px]">{t('host.registrations')}</p>
             </CardContent>
           </Card>
         </div>
