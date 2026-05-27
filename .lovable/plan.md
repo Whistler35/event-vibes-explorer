@@ -1,36 +1,24 @@
 ## Ziel
+Wenn aktuell keine Events im sichtbaren Kartenausschnitt liegen, soll das Karussell unten trotzdem die **3 nächstgelegenen Events** (gemessen am aktuellen Kartenzentrum) anzeigen, statt leer zu bleiben.
 
-Aktuell sieht man im Blitz-Screen über dem Hauptbereich nur eine kleine Zeile pro angefragtem Blitz ("Your Requests" mit Avatar, Aktivität, Countdown, X). Du willst die ganze Blitz-Karte (so wie im Discover-Deck) wieder ansehen können, indem du auf diese Zeile tippst.
+## Änderung
+Datei: `src/pages/Nearby.tsx` — `carouselEvents` useMemo (Zeilen ~410-433)
 
-## Änderungen
+Logik:
+1. Wie bisher `inView` aus `mapEvents` per Viewport-Bounds filtern.
+2. **Neu:** Wenn `inView.length === 0` und `mapEvents.length > 0`:
+   - Referenzpunkt = Mittelpunkt von `effectiveBounds` (sonst aktueller Map-Center / `mapCenter`).
+   - Alle `mapEvents` per Haversine-Distanz zum Referenzpunkt sortieren.
+   - Die nächsten **3** als Fallback-Liste zurückgeben (Featured-Sortierung in diesem Fallback ignorieren — Distanz hat Vorrang).
+3. Sonst: bisherige Featured-first + Datums-Sortierung, max 10.
 
-### 1. `src/components/blitz/MyPendingSwipesList.tsx`
-- Die ganze Zeile (das `div` mit Avatar + Text + Countdown) wird klickbar.
-- Klick öffnet ein neues Sheet/Modal mit der Vollansicht des angefragten Blitz.
-- Der existierende X-Button (Anfrage zurückziehen) bekommt `stopPropagation`, damit er den Klick nicht auslöst.
+## Technische Details
+- Haversine-Helfer ist bereits im Projekt vorhanden (Memory: "Nearby Ranking"). Verwenden oder kleine lokale Funktion ergänzen.
+- Bestehende Filter (Kategorien, Datum, `popular`, `isPrivateMode`) bleiben unverändert — der Fallback arbeitet auf dem bereits gefilterten `mapEvents`, also respektiert er die aktiven Filter.
+- Auto-Select des ersten Karussell-Items funktioniert unverändert.
+- Karten-Marker bleiben unverändert; nur das Karussell bekommt den Fallback.
 
-### 2. Neue Komponente `src/components/blitz/PendingSwipeDetailSheet.tsx`
-- Bottom-Sheet (oder Dialog) im gleichen Look wie eine Discover-`SwipeCard`:
-  - Forest Hintergrund, Pink Glow
-  - Avatar + Hostname (klickbar → `/user/:hostId`)
-  - Große Aktivität ("Coffee?") mit `getActivityFontClass`
-  - Countdown bis `expires_at` in Pink
-  - Status-Badge "⚡ Wartet auf Antwort…"
-- Buttons unten:
-  - "Schließen" (Ghost)
-  - "Anfrage zurückziehen" (rot/destructive) → ruft `withdrawSwipe()` auf, schließt Sheet, ruft `reload()` auf der Liste auf
-
-### 3. State in `MyPendingSwipesList`
-- `selectedSwipe: PendingSwipe | null`
-- Klick auf eine Zeile setzt `selectedSwipe`.
-- Sheet liest alle Daten aus `selectedSwipe` (Aktivität, Host-Name/Avatar, Countdown, host_id für Profil-Link).
-
-## Was sich nicht ändert
-
-- Kein Backend, keine RLS, keine Migration nötig — alle Daten sind schon im Hook (`useMyPendingSwipes`).
-- `DiscoveryDeck`, `ActiveBlitzScreen` und Matching-Logik bleiben unverändert.
-- Distanz wird im Sheet weggelassen (Hook liefert sie aktuell nicht; wenn du sie unbedingt willst, müssten wir `latitude`/`longitude` im Hook mitladen — sag Bescheid).
-
-## Offene Frage
-
-Soll im Sheet zusätzlich ein Button "Profil ansehen" sichtbar sein, oder reicht der Tap auf den Avatar/Namen wie in der Discover-Karte?
+## Edge Cases
+- `mapEvents` leer → Karussell bleibt leer (wie heute).
+- Weniger als 3 vorhandene Events insgesamt → es werden so viele angezeigt wie da sind.
+- Fallback-Events können außerhalb des sichtbaren Bereichs liegen — das ist gewollt.

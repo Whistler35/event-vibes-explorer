@@ -422,6 +422,23 @@ const Nearby = () => {
     if (selected && !inView.find(e => String(e.id) === String(selected.id))) {
       inView.unshift(selected);
     }
+    // Fallback: if nothing is visible in the current map viewport, show the 3
+    // nearest events (by distance to the map focus center) so the carousel is
+    // never empty when events exist.
+    if (inView.length === 0 && mapEvents.length > 0) {
+      const refLat = effectiveBounds
+        ? (effectiveBounds.north + effectiveBounds.south) / 2
+        : mapFocusCenter[0];
+      const refLng = effectiveBounds
+        ? (effectiveBounds.east + effectiveBounds.west) / 2
+        : mapFocusCenter[1];
+      return [...mapEvents]
+        .sort((a, b) =>
+          haversineDistance(refLat, refLng, a.position[0], a.position[1]) -
+          haversineDistance(refLat, refLng, b.position[0], b.position[1])
+        )
+        .slice(0, 3);
+    }
     const featured = inView.filter(e => e.is_featured);
     const others = inView.filter(e => !e.is_featured);
     const sortedOthers = [...others].sort((a, b) => {
@@ -430,7 +447,7 @@ const Nearby = () => {
       return da - db;
     });
     return [...featured, ...sortedOthers].slice(0, 10);
-  }, [mapEvents, effectiveBounds, selectedEventId]);
+  }, [mapEvents, effectiveBounds, selectedEventId, mapFocusCenter]);
 
   carouselEventsRef.current = carouselEvents;
 
