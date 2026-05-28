@@ -47,7 +47,7 @@ function PushSetup() {
   useEffect(() => {
     if (user && prevUserIdRef.current !== user.id) {
       prevUserIdRef.current = user.id;
-      subscribe();
+      setTimeout(() => { subscribe() }, 0);
     } else if (!user) {
       prevUserIdRef.current = null;
     }

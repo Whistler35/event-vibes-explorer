@@ -24,7 +24,7 @@ DECLARE
   v_event_title text;
 BEGIN
   IF OLD.status = NEW.status THEN RETURN NEW; END IF;
-  IF OLD.status::text != 'pending' OR NEW.status::text != 'accepted' THEN RETURN NEW; END IF;
+  IF OLD.status::text != 'pending' AND NEW.status::text != 'accepted' THEN RETURN NEW; END IF;
 
   SELECT title INTO v_event_title
     FROM public.events WHERE id = NEW.event_id LIMIT 1;

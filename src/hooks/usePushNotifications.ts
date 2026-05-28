@@ -86,35 +86,40 @@ async function subscribeWeb(): Promise<boolean> {
     return false
   }
 
-  const permission = await Notification.requestPermission()
-  if (permission !== 'granted') return false
+  try {
+    const permission = await Notification.requestPermission()
+    if (permission !== 'granted') return false
 
-  const reg = await navigator.serviceWorker.ready
-  let sub = await reg.pushManager.getSubscription()
-  if (!sub) {
-    sub = await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as BufferSource,
-    })
+    const reg = await navigator.serviceWorker.ready
+    let sub = await reg.pushManager.getSubscription()
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as BufferSource,
+      })
+    }
+
+    const json = sub.toJSON()
+    if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) return false
+
+    const [userId, coords] = await Promise.all([getUserId(), getCurrentPosition()])
+    if (!userId) return false
+
+    const { error } = await supabase.from('push_subscriptions').upsert({
+      user_id:    userId,
+      endpoint:   json.endpoint,
+      p256dh:     json.keys.p256dh,
+      auth:       json.keys.auth,
+      latitude:   coords?.latitude  ?? null,
+      longitude:  coords?.longitude ?? null,
+      user_agent: navigator.userAgent,
+    }, { onConflict: 'user_id' })
+    if (error) console.error('push_subscriptions upsert (web):', error)
+    return !error
+  } catch (err) {
+    console.error('subscribeWeb error:', err)
+    return false
   }
-
-  const json = sub.toJSON()
-  if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) return false
-
-  const [userId, coords] = await Promise.all([getUserId(), getCurrentPosition()])
-  if (!userId) return false
-
-  const { error } = await supabase.from('push_subscriptions').upsert({
-    user_id:    userId,
-    endpoint:   json.endpoint,
-    p256dh:     json.keys.p256dh,
-    auth:       json.keys.auth,
-    latitude:   coords?.latitude  ?? null,
-    longitude:  coords?.longitude ?? null,
-    user_agent: navigator.userAgent,
-  }, { onConflict: 'user_id' })
-  if (error) console.error('push_subscriptions upsert (web):', error)
-  return !error
 }
 
 async function unsubscribeWeb(): Promise<void> {
