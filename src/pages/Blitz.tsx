@@ -29,6 +29,22 @@ const Blitz = () => {
   const [city, setCity] = useState<string | null>(null);
   const { matches } = useMyBlitzMatches();
   const seenMatchIds = useRef<Set<string>>(new Set());
+  const [matchMoment, setMatchMoment] = useState<BlitzMatch | null>(null);
+
+  // Fetch own profile once for the match moment avatars
+  const { data: myProfile } = useQuery({
+    queryKey: ["own-profile-mini", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      if (!user) return null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("name, avatar_url")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      return data as { name: string | null; avatar_url: string | null } | null;
+    },
+  });
 
   useEffect(() => {
     try {
@@ -39,7 +55,7 @@ const Blitz = () => {
     } catch {}
   }, []);
 
-  // Auto-navigate to brand-new matches where the current user is the participant
+  // Detect brand-new matches → show fullscreen Match Moment
   useEffect(() => {
     if (!user) return;
     if (matches.length === 0) return;
@@ -47,17 +63,14 @@ const Blitz = () => {
       matches.forEach((m) => seenMatchIds.current.add(m.id));
       return;
     }
-    const fresh = matches.find(
-      (m) => !seenMatchIds.current.has(m.id) && m.participant_id === user.id
-    );
+    const fresh = matches.find((m) => !seenMatchIds.current.has(m.id));
     if (fresh) {
       seenMatchIds.current.add(fresh.id);
-      toast(t('blitz.matchToast'), { description: t('blitz.matchAccepted', { name: fresh.other_name ?? t('blitz.someone') }) });
-      navigate(`/blitz/match/${fresh.id}`);
+      setMatchMoment(fresh);
     } else {
       matches.forEach((m) => seenMatchIds.current.add(m.id));
     }
-  }, [matches, user, navigate]);
+  }, [matches, user]);
 
   // Logged-out teaser
   if (!authLoading && !user) {
