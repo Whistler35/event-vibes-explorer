@@ -316,16 +316,26 @@ const DiscoveryDeck = ({ city, onStartOwn }: DiscoveryDeckProps) => {
     return (
       <div className="h-[calc(100vh-220px)] rounded-3xl bg-[hsl(var(--blitz-forest))] text-white flex flex-col items-center justify-center text-center p-8 gap-4">
         <Zap className="w-16 h-16 text-[hsl(var(--blitz-pink))] fill-[hsl(var(--blitz-pink))] opacity-60" />
-        <h2 className="text-3xl font-black uppercase">No Blitzes</h2>
+        <h2 className="text-3xl font-black uppercase">Keine Blitzes</h2>
         <p className="text-white/70 max-w-xs">
-          No active Blitz around you right now. Come back later or start your own!
+          Aktuell ist hier in der Nähe nichts los. Sei der Erste und starte deinen eigenen Blitz.
         </p>
-        <button
-          onClick={reload}
-          className="mt-4 px-6 py-3 rounded-full bg-[hsl(var(--blitz-pink))] text-white font-bold uppercase text-sm tracking-wide"
-        >
-          Reload
-        </button>
+        <div className="flex flex-col gap-2 w-full max-w-xs mt-4">
+          {onStartOwn && (
+            <button
+              onClick={onStartOwn}
+              className="px-6 py-3 rounded-full bg-[hsl(var(--blitz-pink))] text-white font-black uppercase text-sm tracking-wide flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition"
+            >
+              <Zap className="w-4 h-4 fill-white" /> Starte deinen eigenen
+            </button>
+          )}
+          <button
+            onClick={reload}
+            className="px-6 py-3 rounded-full bg-white/10 border border-white/20 text-white font-bold uppercase text-sm tracking-wide hover:bg-white/20 transition"
+          >
+            Neu laden
+          </button>
+        </div>
       </div>
     );
   }
