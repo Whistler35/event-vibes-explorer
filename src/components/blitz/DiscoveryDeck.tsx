@@ -126,8 +126,16 @@ const SwipeCard = ({ item, onSwipe, onAdminDelete, isTop, isAdmin }: CardProps) 
       onTouchEnd={handleEnd}
     >
       <div className="relative w-full h-full overflow-hidden rounded-3xl bg-[hsl(var(--blitz-forest))] text-white shadow-2xl">
+        <TimeProgressBar expiresAt={item.expires_at} durationMinutes={item.duration_minutes} />
         <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-[hsl(var(--blitz-pink))] blur-3xl opacity-30" />
         <div className="absolute -bottom-10 -left-10 w-72 h-72 rounded-full bg-[hsl(var(--blitz-pink))] blur-3xl opacity-25" />
+
+        {(item.audience === "friends" || item.audience === "selected") && (
+          <div className="absolute top-4 left-4 z-20 flex items-center gap-1 px-2.5 py-1 rounded-full bg-[hsl(var(--blitz-pink))]/90 text-white text-[10px] font-black uppercase tracking-wider">
+            <Users className="w-3 h-3" /> Freund
+          </div>
+        )}
+
 
         <div
           className="absolute top-8 left-8 z-20 px-4 py-2 rounded-xl border-4 border-[hsl(var(--blitz-pink))] text-[hsl(var(--blitz-pink))] font-black text-3xl uppercase rotate-[-15deg]"
