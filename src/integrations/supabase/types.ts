@@ -2255,7 +2255,7 @@ export type Database = {
     Enums: {
       app_role: "admin" | "moderator" | "user" | "professional_host"
       approval_status: "pending" | "approved" | "rejected"
-      blitz_audience: "public" | "friends"
+      blitz_audience: "public" | "friends" | "selected"
       blitz_match_status: "active" | "expired" | "closed"
       blitz_status: "active" | "expired" | "cancelled" | "matched"
       blitz_swipe_direction: "left" | "right"
@@ -2409,7 +2409,7 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "moderator", "user", "professional_host"],
       approval_status: ["pending", "approved", "rejected"],
-      blitz_audience: ["public", "friends"],
+      blitz_audience: ["public", "friends", "selected"],
       blitz_match_status: ["active", "expired", "closed"],
       blitz_status: ["active", "expired", "cancelled", "matched"],
       blitz_swipe_direction: ["left", "right"],
