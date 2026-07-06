@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Zap, X, Check, MapPin, Loader2, Trash2 } from "lucide-react";
+import { Zap, X, Check, MapPin, Loader2, Trash2, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useBlitzDiscovery, swipeBlitz, undoSwipe, DiscoveryBlitz } from "@/hooks/useBlitzDiscovery";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
