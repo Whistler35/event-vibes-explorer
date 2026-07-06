@@ -1,8 +1,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { MapPin, Calendar, User, MessageCircle, Building2, Zap } from "lucide-react";
+import { User, MessageCircle, Zap } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useUnreadDMCount } from "@/hooks/useUnreadDMCount";
-import { useIsHost } from "@/hooks/useIsHost";
 import { useIncomingBlitzCount } from "@/hooks/useIncomingBlitzCount";
 
 const BottomNavigation = () => {
@@ -10,78 +9,74 @@ const BottomNavigation = () => {
   const location = useLocation();
   const { t } = useTranslation();
   const { unreadCount } = useUnreadDMCount();
-  const { isHost } = useIsHost();
   const { count: blitzIncoming } = useIncomingBlitzCount();
 
-  const navItems = [
-    { id: "events", label: t("nav.events"), icon: Calendar, path: "/" },
-    { id: "nearby", label: t("nav.nearby"), icon: MapPin, path: "/nearby" },
-    { id: "blitz", label: t("nav.blitz"), icon: Zap, path: "/blitz", isBlitz: true },
-    { id: "messenger", label: t("nav.chat"), icon: MessageCircle, path: "/messenger" },
-    ...(isHost ? [{ id: "host", label: t("nav.host"), icon: Building2, path: "/host/dashboard" }] : []),
-    { id: "profile", label: t("nav.profile"), icon: User, path: "/profile" },
-  ];
+  const isActive = (p: string) => location.pathname === p || location.pathname.startsWith(p + "/");
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-xl border-t border-border/60 z-50 safe-bottom shadow-[0_-4px_20px_rgba(0,0,0,0.04)]">
-      <div className="flex justify-around items-end py-2">
-        {navItems.map((item: any) => {
-          const isActive = location.pathname === item.path;
-          const Icon = item.icon;
-          const isBlitz = item.isBlitz;
-
-          if (isBlitz) {
-            return (
-              <button
-                key={item.id}
-                onClick={() => navigate(item.path)}
-                className="flex flex-col items-center gap-1"
-                aria-label="BLITZ"
-              >
-                <div className={`relative -mt-5 p-3.5 rounded-full bg-[hsl(var(--blitz-pink))] ${
-                  isActive
-                    ? "shadow-[0_8px_28px_hsl(var(--blitz-pink)/0.65)] ring-4 ring-[hsl(var(--blitz-pink))]/25"
-                    : "shadow-[0_6px_22px_hsl(var(--blitz-pink)/0.55)] animate-blitz-pulse"
-                }`}>
-                  <Icon size={22} className="text-white fill-white" strokeWidth={2.5} />
-                  {blitzIncoming > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-white text-[hsl(var(--blitz-pink))] text-[10px] font-black rounded-full min-w-[20px] h-[20px] px-1 flex items-center justify-center shadow-md ring-2 ring-[hsl(var(--blitz-pink))]">
-                      {blitzIncoming > 9 ? "9+" : blitzIncoming}
-                    </span>
-                  )}
-                </div>
-                <span className={`text-[10px] font-bold tracking-wide ${isActive ? "text-[hsl(var(--blitz-pink))]" : "text-[hsl(var(--blitz-pink))]/70"}`}>
-                  {item.label}
-                </span>
-              </button>
-            );
-          }
-
-          return (
-            <button
-              key={item.id}
-              onClick={() => navigate(item.path)}
-              className="flex flex-col items-center gap-0.5 px-3 py-1 transition-all"
-            >
-              <div className="relative p-1.5">
-                <Icon
-                  size={22}
-                  strokeWidth={isActive ? 2.4 : 1.8}
-                  className={`transition-colors ${isActive ? 'text-primary' : 'text-muted-foreground/70'}`}
-                />
-                {item.id === "messenger" && unreadCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 bg-[hsl(var(--blitz-pink))] text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center shadow">
-                    {unreadCount > 9 ? "9+" : unreadCount}
-                  </span>
-                )}
-              </div>
-              <span className={`text-[10px] tracking-wide transition-all ${isActive ? 'text-primary font-bold' : 'text-muted-foreground/70 font-medium'}`}>
-                {item.label}
+      <div className="flex justify-around items-end py-2 px-6">
+        {/* Chat left */}
+        <button
+          onClick={() => navigate("/messenger")}
+          className="flex flex-col items-center gap-0.5 px-3 py-1"
+        >
+          <div className="relative p-1.5">
+            <MessageCircle
+              size={24}
+              strokeWidth={isActive("/messenger") ? 2.4 : 1.8}
+              className={isActive("/messenger") ? "text-[hsl(var(--blitz-forest))]" : "text-muted-foreground/70"}
+            />
+            {unreadCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 bg-[hsl(var(--blitz-forest))] text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center shadow">
+                {unreadCount > 9 ? "9+" : unreadCount}
               </span>
-              {isActive && <span className="w-1 h-1 rounded-full bg-primary mt-0.5" />}
-            </button>
-          );
-        })}
+            )}
+          </div>
+          <span className={`text-[10px] tracking-wide ${isActive("/messenger") ? "text-[hsl(var(--blitz-forest))] font-bold" : "text-muted-foreground/70 font-medium"}`}>
+            {t("nav.chat")}
+          </span>
+        </button>
+
+        {/* Blitz center */}
+        <button
+          onClick={() => navigate("/blitz")}
+          className="flex flex-col items-center gap-1"
+          aria-label="BLITZ"
+        >
+          <div className={`relative -mt-5 p-3.5 rounded-full bg-[hsl(var(--blitz-forest))] ${
+            isActive("/blitz")
+              ? "shadow-[0_8px_28px_hsl(var(--blitz-forest)/0.55)] ring-4 ring-[hsl(var(--blitz-forest))]/25"
+              : "shadow-[0_6px_22px_hsl(var(--blitz-forest)/0.45)] animate-blitz-pulse"
+          }`}>
+            <Zap size={22} className="text-white fill-white" strokeWidth={2.5} />
+            {blitzIncoming > 0 && (
+              <span className="absolute -top-1 -right-1 bg-white text-[hsl(var(--blitz-forest))] text-[10px] font-black rounded-full min-w-[20px] h-[20px] px-1 flex items-center justify-center shadow-md ring-2 ring-[hsl(var(--blitz-forest))]">
+                {blitzIncoming > 9 ? "9+" : blitzIncoming}
+              </span>
+            )}
+          </div>
+          <span className={`text-[10px] font-bold tracking-wide ${isActive("/blitz") ? "text-[hsl(var(--blitz-forest))]" : "text-[hsl(var(--blitz-forest))]/70"}`}>
+            {t("nav.blitz")}
+          </span>
+        </button>
+
+        {/* Profile right */}
+        <button
+          onClick={() => navigate("/profile")}
+          className="flex flex-col items-center gap-0.5 px-3 py-1"
+        >
+          <div className="p-1.5">
+            <User
+              size={24}
+              strokeWidth={isActive("/profile") ? 2.4 : 1.8}
+              className={isActive("/profile") ? "text-[hsl(var(--blitz-forest))]" : "text-muted-foreground/70"}
+            />
+          </div>
+          <span className={`text-[10px] tracking-wide ${isActive("/profile") ? "text-[hsl(var(--blitz-forest))] font-bold" : "text-muted-foreground/70 font-medium"}`}>
+            {t("nav.profile")}
+          </span>
+        </button>
       </div>
     </div>
   );
