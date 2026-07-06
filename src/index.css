@@ -60,7 +60,8 @@ All colors MUST be HSL.
 
     /* Blitz feature tokens */
     --blitz-forest: 122 39% 15%;
-    --blitz-pink: 330 100% 50%;
+    /* Pink token remapped to Forest — CI is now green + white only */
+    --blitz-pink: 122 39% 15%;
   }
 
   @keyframes blitz-pulse {

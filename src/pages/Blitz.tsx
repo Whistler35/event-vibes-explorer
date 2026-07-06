@@ -22,7 +22,8 @@ const Blitz = () => {
   const { user, loading: authLoading } = useAuth();
   const { request, loading, reload } = useActiveBlitzRequest();
   const [createOpen, setCreateOpen] = useState(false);
-  const [tab, setTab] = useState<Tab>("request");
+  // Default = Discovery mode (users open the app straight into discovering blitzes)
+  const [tab, setTab] = useState<Tab>("discover");
   const [city, setCity] = useState<string | null>(null);
   const { matches } = useMyBlitzMatches();
   const seenMatchIds = useRef<Set<string>>(new Set());

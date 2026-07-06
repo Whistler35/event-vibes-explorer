@@ -101,6 +101,7 @@ export type Database = {
           longitude: number | null
           radius_km: number
           status: Database["public"]["Enums"]["blitz_status"]
+          target_user_ids: string[] | null
           updated_at: string
         }
         Insert: {
@@ -116,6 +117,7 @@ export type Database = {
           longitude?: number | null
           radius_km?: number
           status?: Database["public"]["Enums"]["blitz_status"]
+          target_user_ids?: string[] | null
           updated_at?: string
         }
         Update: {
@@ -131,6 +133,7 @@ export type Database = {
           longitude?: number | null
           radius_km?: number
           status?: Database["public"]["Enums"]["blitz_status"]
+          target_user_ids?: string[] | null
           updated_at?: string
         }
         Relationships: []
@@ -955,6 +958,8 @@ export type Database = {
           instagram_username: string | null
           interests: string[]
           name: string
+          phone: string | null
+          phone_hash: string | null
           photos: string[]
           updated_at: string
           user_id: string
@@ -971,6 +976,8 @@ export type Database = {
           instagram_username?: string | null
           interests?: string[]
           name: string
+          phone?: string | null
+          phone_hash?: string | null
           photos?: string[]
           updated_at?: string
           user_id: string
@@ -987,6 +994,8 @@ export type Database = {
           instagram_username?: string | null
           interests?: string[]
           name?: string
+          phone?: string | null
+          phone_hash?: string | null
           photos?: string[]
           updated_at?: string
           user_id?: string
@@ -2255,7 +2264,7 @@ export type Database = {
     Enums: {
       app_role: "admin" | "moderator" | "user" | "professional_host"
       approval_status: "pending" | "approved" | "rejected"
-      blitz_audience: "public" | "friends"
+      blitz_audience: "public" | "friends" | "selected"
       blitz_match_status: "active" | "expired" | "closed"
       blitz_status: "active" | "expired" | "cancelled" | "matched"
       blitz_swipe_direction: "left" | "right"
@@ -2409,7 +2418,7 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "moderator", "user", "professional_host"],
       approval_status: ["pending", "approved", "rejected"],
-      blitz_audience: ["public", "friends"],
+      blitz_audience: ["public", "friends", "selected"],
       blitz_match_status: ["active", "expired", "closed"],
       blitz_status: ["active", "expired", "cancelled", "matched"],
       blitz_swipe_direction: ["left", "right"],
