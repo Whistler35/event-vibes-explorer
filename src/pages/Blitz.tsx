@@ -5,14 +5,16 @@ import { Zap } from "lucide-react";
 import BottomNavigation from "@/components/BottomNavigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useActiveBlitzRequest } from "@/hooks/useBlitzRequest";
-import { useMyBlitzMatches } from "@/hooks/useBlitzMatching";
+import { useMyBlitzMatches, type BlitzMatch } from "@/hooks/useBlitzMatching";
 import CreateBlitzModal from "@/components/blitz/CreateBlitzModal";
 import ActiveBlitzScreen from "@/components/blitz/ActiveBlitzScreen";
 import DiscoveryDeck from "@/components/blitz/DiscoveryDeck";
 import IncomingRequestsList from "@/components/blitz/IncomingRequestsList";
 import MyMatchesBanner from "@/components/blitz/MyMatchesBanner";
 import MyPendingSwipesList from "@/components/blitz/MyPendingSwipesList";
-import { toast } from "sonner";
+import MatchMoment from "@/components/blitz/MatchMoment";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 type Tab = "request" | "discover";
 
