@@ -71,6 +71,7 @@ export async function createBlitzRequest(params: {
   longitude: number;
   radiusKm: number;
   audience?: BlitzAudience;
+  targetUserIds?: string[];
 }) {
   const {
     data: { user },
@@ -91,6 +92,10 @@ export async function createBlitzRequest(params: {
       radius_km: params.radiusKm,
       expires_at: expiresAt,
       audience: params.audience ?? "public",
+      target_user_ids:
+        params.audience === "selected" && params.targetUserIds?.length
+          ? params.targetUserIds
+          : null,
     })
     .select()
     .single();
