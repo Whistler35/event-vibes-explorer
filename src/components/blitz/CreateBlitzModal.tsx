@@ -28,10 +28,34 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
   const [duration, setDuration] = useState(60);
   const [radius, setRadius] = useState(10);
   const [audience, setAudience] = useState<BlitzAudience>("public");
+  const [selectedFriendIds, setSelectedFriendIds] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [locating, setLocating] = useState(false);
   const [locError, setLocError] = useState<string | null>(null);
+  const { user } = useAuth();
+
+  const { data: friends = [] } = useQuery({
+    queryKey: ["blitz-friend-picker", user?.id],
+    enabled: !!user && open,
+    queryFn: async () => {
+      if (!user) return [];
+      const { data: fs } = await supabase
+        .from("friendships")
+        .select("requester_id, addressee_id, status")
+        .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
+        .eq("status", "accepted");
+      const ids = (fs || []).map((f: any) =>
+        f.requester_id === user.id ? f.addressee_id : f.requester_id
+      );
+      if (ids.length === 0) return [];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, name, avatar_url")
+        .in("user_id", ids);
+      return (profiles || []) as { user_id: string; name: string; avatar_url: string | null }[];
+    },
+  });
 
   const requestLocation = () => {
     if (!("geolocation" in navigator)) {
