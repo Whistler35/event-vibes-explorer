@@ -52,6 +52,11 @@ const Messenger = () => {
       )
       .on(
         "postgres_changes",
+        { event: "*", schema: "public", table: "blitz_match_participants" },
+        () => queryClient.invalidateQueries({ queryKey: ["dm-conversations", user.id] })
+      )
+      .on(
+        "postgres_changes",
         { event: "INSERT", schema: "public", table: "direct_messages" },
         () => queryClient.invalidateQueries({ queryKey: ["dm-conversations", user.id] })
       )
