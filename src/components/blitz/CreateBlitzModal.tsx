@@ -89,17 +89,28 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
       setDuration(60);
       setRadius(10);
       setAudience("public");
+      setSelectedFriendIds([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
+  const toggleFriend = (id: string) => {
+    setSelectedFriendIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
   const handleSubmit = async () => {
     if (!activity.trim()) {
-      toast.error("Tell us what you're up for!");
+      toast.error("Sag uns, worauf du Bock hast!");
       return;
     }
     if (!coords) {
-      toast.error("Location required to Blitz.");
+      toast.error("Standort erforderlich.");
+      return;
+    }
+    if (audience === "selected" && selectedFriendIds.length === 0) {
+      toast.error("Wähl mindestens einen Freund aus.");
       return;
     }
     setSubmitting(true);
@@ -116,18 +127,29 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
         longitude: coords.lng,
         radiusKm: radius,
         audience,
+        targetUserIds: audience === "selected" ? selectedFriendIds : undefined,
       });
-      toast.success(audience === "friends" ? "⚡ Blitzed! (nur Freunde)" : "⚡ Blitzed!");
+      toast.success(
+        audience === "selected"
+          ? `⚡ Geblitzt an ${selectedFriendIds.length} Freund${selectedFriendIds.length === 1 ? "" : "e"}`
+          : audience === "friends"
+          ? "⚡ Geblitzt! (nur Freunde)"
+          : "⚡ Geblitzt!"
+      );
       onOpenChange(false);
       onCreated?.();
     } catch (e: any) {
-      toast.error(e.message || "Could not create");
+      toast.error(e.message || "Konnte nicht erstellt werden");
     } finally {
       setSubmitting(false);
     }
   };
 
-  const canSubmit = !submitting && !!activity.trim() && !!coords;
+  const canSubmit =
+    !submitting &&
+    !!activity.trim() &&
+    !!coords &&
+    (audience !== "selected" || selectedFriendIds.length > 0);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
