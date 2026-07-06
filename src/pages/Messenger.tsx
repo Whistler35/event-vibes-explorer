@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import evendleLogo from "@/assets/evendle-logo.jpeg";
+
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -318,122 +318,127 @@ const Messenger = () => {
     avatar ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=ff5722&color=fff&size=100`;
 
+  const activeConversations = conversations.filter((c) => c.isBlitz);
+  const otherConversations = conversations.filter((c) => !c.isBlitz);
+
+  const renderConversation = (conversation: ConversationWithProfile) => (
+    <div
+      key={conversation.id}
+      onClick={() =>
+        conversation.isBlitz
+          ? navigate(`/blitz/match/${conversation.matchId}`)
+          : conversation.isEventGroup
+            ? navigate(`/event/${conversation.eventId}/chat`)
+            : navigate(`/dm/${conversation.id}`)
+      }
+      className="flex items-center gap-4 p-4 rounded-3xl cursor-pointer transition-colors bg-card hover:bg-card/80"
+    >
+      <div className={`relative w-12 h-12 ${conversation.isEventGroup ? "rounded-2xl" : "rounded-full"} overflow-hidden flex-shrink-0 bg-muted`}>
+        {conversation.isEventGroup && !conversation.other_avatar ? (
+          <div className="w-full h-full flex items-center justify-center bg-primary">
+            <Users className="w-6 h-6 text-primary-foreground" />
+          </div>
+        ) : (
+          <img
+            src={getAvatarUrl(conversation.other_name, conversation.other_avatar)}
+            alt={conversation.other_name}
+            className="w-full h-full object-cover"
+          />
+        )}
+        {conversation.isBlitz && (
+          <div className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-primary flex items-center justify-center border-2 border-background">
+            <Zap className="w-2.5 h-2.5 text-primary-foreground fill-primary-foreground" />
+          </div>
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between gap-2">
+          <h3 className={`truncate ${conversation.isUnread ? "font-bold text-foreground" : "font-semibold text-foreground"}`}>
+            {conversation.other_name}
+          </h3>
+          <span className="text-xs text-muted-foreground flex-shrink-0">
+            {conversation.isEventGroup && conversation.participantCount
+              ? `${conversation.participantCount} 👥`
+              : formatTime(conversation.last_message_at)}
+          </span>
+        </div>
+        {conversation.isBlitz && conversation.blitzActivity && (
+          <p className="text-[11px] uppercase tracking-wider text-primary font-bold mt-0.5 flex items-center gap-1">
+            <Zap className="w-3 h-3 fill-primary" /> {conversation.blitzActivity}
+          </p>
+        )}
+        <p className={`text-sm truncate mt-0.5 ${conversation.isUnread ? "text-foreground" : "text-muted-foreground"}`}>
+          {conversation.last_message || t('messenger.noMessage')}
+        </p>
+      </div>
+      {conversation.isUnread && (
+        <span className="w-2.5 h-2.5 rounded-full bg-primary flex-shrink-0" />
+      )}
+    </div>
+  );
+
   return (
     <Layout>
       <div className="p-4 space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <img src={evendleLogo} alt="Evendle" className="w-9 h-9 object-contain" />
-            <span className="text-foreground text-xl font-bold">EVENDLE</span>
+        <h1 className="text-3xl font-black tracking-tight text-foreground">Chats</h1>
+
+        {/* EVENDLE Welcome Chat */}
+        <div
+          onClick={() => navigate("/dm/evendle-welcome")}
+          className="flex items-center gap-4 p-4 rounded-3xl cursor-pointer transition-colors bg-card hover:bg-card/80"
+        >
+          <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-primary flex items-center justify-center">
+            <span className="text-primary-foreground font-bold text-lg">E</span>
           </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between">
+              <h3 className={`truncate ${isEvenldeUnread ? "font-bold" : "font-semibold"} text-foreground`}>EVENDLE</h3>
+              <span className="text-xs text-muted-foreground">{t('messenger.team')}</span>
+            </div>
+            <p className={`text-sm truncate mt-0.5 ${isEvenldeUnread ? "text-foreground" : "text-muted-foreground"}`}>
+              {t('messenger.welcome')}
+            </p>
+          </div>
+          {isEvenldeUnread && <span className="w-2.5 h-2.5 rounded-full bg-primary flex-shrink-0" />}
         </div>
 
-        <div className="space-y-1">
-          {/* EVENDLE Welcome Chat */}
-          <div
-            onClick={() => navigate("/dm/evendle-welcome")}
-            className={`flex items-center space-x-4 p-3 rounded-2xl cursor-pointer transition-colors ${
-              isEvenldeUnread
-                ? "bg-primary/10 border border-primary/20"
-                : "hover:bg-card/50"
-            }`}
-          >
-            <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">E</span>
-              {isEvenldeUnread && (
-                <div className="absolute top-0 right-0 w-3 h-3 bg-primary rounded-full border-2 border-background" />
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between">
-                <h3 className={`text-lg truncate ${isEvenldeUnread ? "text-foreground font-bold" : "text-foreground font-semibold"}`}>
-                  EVENDLE
-                </h3>
-                <span className="text-muted-foreground text-sm flex-shrink-0 ml-2">{t('messenger.team')}</span>
-              </div>
-              <p className={`text-sm truncate ${isEvenldeUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
-                {t('messenger.welcome')}
-              </p>
-            </div>
+        {isLoading ? (
+          <div className="space-y-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-20 rounded-3xl bg-card animate-pulse" />
+            ))}
           </div>
+        ) : (
+          <>
+            {activeConversations.length > 0 && (
+              <section className="space-y-2">
+                <h2 className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground px-2 flex items-center gap-1.5">
+                  <Zap className="w-3 h-3 fill-current" /> Aktiv
+                </h2>
+                {activeConversations.map(renderConversation)}
+              </section>
+            )}
 
-          {/* Real conversations */}
-          {isLoading ? (
-            <p className="text-muted-foreground text-center py-8">{t('messenger.loading')}</p>
-          ) : (
-            conversations.map((conversation) => (
-              <div
-                key={conversation.id}
-                onClick={() =>
-                  conversation.isBlitz
-                    ? navigate(`/blitz/match/${conversation.matchId}`)
-                    : conversation.isEventGroup
-                      ? navigate(`/event/${conversation.eventId}/chat`)
-                      : navigate(`/dm/${conversation.id}`)
-                }
-                className={`flex items-center space-x-4 p-3 rounded-2xl cursor-pointer transition-colors ${
-                  conversation.isBlitz
-                    ? "bg-[hsl(var(--blitz-pink))]/15 border border-[hsl(var(--blitz-pink))]/40 hover:bg-[hsl(var(--blitz-pink))]/20"
-                    : conversation.isUnread
-                      ? "bg-primary/10 border border-primary/20"
-                      : "hover:bg-card/50"
-                }`}
-              >
-                <div className={`relative w-12 h-12 ${conversation.isEventGroup ? "rounded-2xl" : "rounded-full"} overflow-hidden flex-shrink-0 bg-muted`}>
-                  {conversation.isEventGroup && !conversation.other_avatar ? (
-                    <div className="w-full h-full flex items-center justify-center bg-primary">
-                      <Users className="w-6 h-6 text-primary-foreground" />
-                    </div>
-                  ) : (
-                    <img
-                      src={getAvatarUrl(conversation.other_name, conversation.other_avatar)}
-                      alt={conversation.other_name}
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-                  {conversation.isBlitz && (
-                    <div className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-[hsl(var(--blitz-pink))] flex items-center justify-center border-2 border-background">
-                      <Zap className="w-2.5 h-2.5 text-white fill-white" />
-                    </div>
-                  )}
-                  {conversation.isEventGroup && (
-                    <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-primary flex items-center justify-center border-2 border-background">
-                      <Users className="w-2.5 h-2.5 text-primary-foreground" />
-                    </div>
-                  )}
-                  {!conversation.isBlitz && !conversation.isEventGroup && conversation.isUnread && (
-                    <div className="absolute top-0 right-0 w-3 h-3 bg-primary rounded-full border-2 border-background" />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <h3 className={`text-lg truncate ${conversation.isUnread ? "text-foreground font-bold" : "text-foreground font-semibold"}`}>
-                      {conversation.other_name}
-                      {conversation.isBlitz && (
-                        <span className="ml-2 text-[10px] font-black uppercase tracking-wider text-[hsl(var(--blitz-pink))]">
-                          {t('messenger.blitz')}
-                        </span>
-                      )}
-                    </h3>
-                    <span className={`text-sm flex-shrink-0 ml-2 ${
-                      conversation.isBlitz
-                        ? "text-[hsl(var(--blitz-pink))] font-bold"
-                        : conversation.isUnread ? "text-primary font-semibold" : "text-muted-foreground"
-                    }`}>
-                      {conversation.isEventGroup && conversation.participantCount
-                        ? `${conversation.participantCount} 👥`
-                        : formatTime(conversation.last_message_at)}
-                    </span>
-                  </div>
-                  <p className={`text-sm truncate ${conversation.isUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
-                    {conversation.last_message || t('messenger.noMessage')}
-                  </p>
-                </div>
+            {otherConversations.length > 0 && (
+              <section className="space-y-2">
+                <h2 className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground px-2">
+                  Chats
+                </h2>
+                {otherConversations.map(renderConversation)}
+              </section>
+            )}
+
+            {conversations.length === 0 && (
+              <div className="text-center py-12 space-y-2">
+                <p className="text-foreground font-bold">Noch keine Chats</p>
+                <p className="text-sm text-muted-foreground">
+                  Starte einen Blitz und match dich mit Leuten in deiner Nähe.
+                </p>
               </div>
-            ))
-          )}
-        </div>
+            )}
+          </>
+        )}
       </div>
     </Layout>
   );

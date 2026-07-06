@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Zap, MapPin, Loader2, Globe2, Users } from "lucide-react";
+import { Zap, MapPin, Loader2, Globe2, Users, UserCheck, Check } from "lucide-react";
 import { createBlitzRequest, BlitzAudience } from "@/hooks/useBlitzRequest";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 interface CreateBlitzModalProps {
@@ -25,10 +28,34 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
   const [duration, setDuration] = useState(60);
   const [radius, setRadius] = useState(10);
   const [audience, setAudience] = useState<BlitzAudience>("public");
+  const [selectedFriendIds, setSelectedFriendIds] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [locating, setLocating] = useState(false);
   const [locError, setLocError] = useState<string | null>(null);
+  const { user } = useAuth();
+
+  const { data: friends = [] } = useQuery({
+    queryKey: ["blitz-friend-picker", user?.id],
+    enabled: !!user && open,
+    queryFn: async () => {
+      if (!user) return [];
+      const { data: fs } = await supabase
+        .from("friendships")
+        .select("requester_id, addressee_id, status")
+        .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
+        .eq("status", "accepted");
+      const ids = (fs || []).map((f: any) =>
+        f.requester_id === user.id ? f.addressee_id : f.requester_id
+      );
+      if (ids.length === 0) return [];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, name, avatar_url")
+        .in("user_id", ids);
+      return (profiles || []) as { user_id: string; name: string; avatar_url: string | null }[];
+    },
+  });
 
   const requestLocation = () => {
     if (!("geolocation" in navigator)) {
@@ -62,17 +89,28 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
       setDuration(60);
       setRadius(10);
       setAudience("public");
+      setSelectedFriendIds([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
+  const toggleFriend = (id: string) => {
+    setSelectedFriendIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
   const handleSubmit = async () => {
     if (!activity.trim()) {
-      toast.error("Tell us what you're up for!");
+      toast.error("Sag uns, worauf du Bock hast!");
       return;
     }
     if (!coords) {
-      toast.error("Location required to Blitz.");
+      toast.error("Standort erforderlich.");
+      return;
+    }
+    if (audience === "selected" && selectedFriendIds.length === 0) {
+      toast.error("Wähl mindestens einen Freund aus.");
       return;
     }
     setSubmitting(true);
@@ -89,18 +127,29 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
         longitude: coords.lng,
         radiusKm: radius,
         audience,
+        targetUserIds: audience === "selected" ? selectedFriendIds : undefined,
       });
-      toast.success(audience === "friends" ? "⚡ Blitzed! (nur Freunde)" : "⚡ Blitzed!");
+      toast.success(
+        audience === "selected"
+          ? `⚡ Geblitzt an ${selectedFriendIds.length} Freund${selectedFriendIds.length === 1 ? "" : "e"}`
+          : audience === "friends"
+          ? "⚡ Geblitzt! (nur Freunde)"
+          : "⚡ Geblitzt!"
+      );
       onOpenChange(false);
       onCreated?.();
     } catch (e: any) {
-      toast.error(e.message || "Could not create");
+      toast.error(e.message || "Konnte nicht erstellt werden");
     } finally {
       setSubmitting(false);
     }
   };
 
-  const canSubmit = !submitting && !!activity.trim() && !!coords;
+  const canSubmit =
+    !submitting &&
+    !!activity.trim() &&
+    !!coords &&
+    (audience !== "selected" || selectedFriendIds.length > 0);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -184,35 +233,85 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
             <label className="text-sm font-bold uppercase tracking-wide text-white/70">
               Sichtbarkeit
             </label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               {([
-                { value: "public", label: "Öffentlich", desc: "Alle in der Nähe", Icon: Globe2 },
-                { value: "friends", label: "Nur Freunde", desc: "Nur deine Freunde", Icon: Users },
-              ] as const).map(({ value, label, desc, Icon }) => {
+                { value: "public", label: "Öffentlich", Icon: Globe2 },
+                { value: "friends", label: "Freunde", Icon: Users },
+                { value: "selected", label: "Auswählen", Icon: UserCheck },
+              ] as const).map(({ value, label, Icon }) => {
                 const active = audience === value;
                 return (
                   <button
                     key={value}
                     type="button"
                     onClick={() => setAudience(value)}
-                    className={`p-3 rounded-xl text-left transition border-2 ${
+                    className={`p-3 rounded-xl text-center transition border-2 ${
                       active
                         ? "bg-[hsl(var(--blitz-pink))] border-[hsl(var(--blitz-pink))] text-white shadow-[0_0_20px_hsl(var(--blitz-pink)/0.5)]"
                         : "bg-white/5 border-white/10 text-white/80 hover:border-white/30"
                     }`}
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col items-center gap-1">
                       <Icon className="w-4 h-4" />
-                      <span className="font-black text-sm uppercase tracking-wide">{label}</span>
+                      <span className="font-black text-[11px] uppercase tracking-wide">{label}</span>
                     </div>
-                    <p className={`text-[11px] mt-1 ${active ? "text-white/80" : "text-white/50"}`}>
-                      {desc}
-                    </p>
                   </button>
                 );
               })}
             </div>
+
+            {audience === "selected" && (
+              <div className="mt-2 rounded-xl bg-white/5 border border-white/10 p-2 max-h-56 overflow-y-auto space-y-1">
+                {friends.length === 0 ? (
+                  <p className="text-xs text-white/60 text-center py-6">
+                    Du hast noch keine Freunde auf EVENDLE.
+                  </p>
+                ) : (
+                  friends.map((f) => {
+                    const selected = selectedFriendIds.includes(f.user_id);
+                    const avatar =
+                      f.avatar_url ||
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(f.name || "?")}&background=173518&color=fff&size=80`;
+                    return (
+                      <button
+                        key={f.user_id}
+                        type="button"
+                        onClick={() => toggleFriend(f.user_id)}
+                        className={`w-full flex items-center gap-3 px-2 py-2 rounded-lg transition ${
+                          selected ? "bg-[hsl(var(--blitz-pink))]/30" : "hover:bg-white/5"
+                        }`}
+                      >
+                        <img
+                          src={avatar}
+                          alt={f.name}
+                          className="w-8 h-8 rounded-full object-cover"
+                        />
+                        <span className="flex-1 text-left text-sm font-semibold text-white truncate">
+                          {f.name}
+                        </span>
+                        <span
+                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                            selected
+                              ? "bg-[hsl(var(--blitz-pink))] border-[hsl(var(--blitz-pink))]"
+                              : "border-white/30"
+                          }`}
+                        >
+                          {selected && <Check className="w-3 h-3 text-white" />}
+                        </span>
+                      </button>
+                    );
+                  })
+                )}
+                {selectedFriendIds.length > 0 && (
+                  <p className="text-[10px] text-white/60 text-center pt-2 uppercase tracking-widest font-bold">
+                    {selectedFriendIds.length} ausgewählt
+                  </p>
+                )}
+              </div>
+            )}
           </div>
+
+
 
           <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 flex items-center gap-3">
             {locating ? (

@@ -62,6 +62,14 @@ All colors MUST be HSL.
     --blitz-forest: 122 39% 15%;
     /* Pink token remapped to Forest — CI is now green + white only */
     --blitz-pink: 122 39% 15%;
+
+    /* Hinge-style refresh (additive, do not remove old tokens) */
+    --green-900: 134 27% 16%;   /* #1E3323 */
+    --green-700: 133 22% 22%;   /* #2C4632 */
+    --offwhite:  50 20% 95%;    /* #F5F4F0 */
+    --ink:       105 12% 7%;    /* #101410 */
+    --muted-ink: 105 5% 55%;    /* #8A9186 */
+    --bolt:      48 92% 53%;    /* #F5C518 */
   }
 
   @keyframes blitz-pulse {
