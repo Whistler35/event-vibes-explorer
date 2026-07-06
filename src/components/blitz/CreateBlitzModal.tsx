@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Zap, MapPin, Loader2, Globe2, Users } from "lucide-react";
+import { Zap, MapPin, Loader2, Globe2, Users, UserCheck, Check } from "lucide-react";
 import { createBlitzRequest, BlitzAudience } from "@/hooks/useBlitzRequest";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 interface CreateBlitzModalProps {
