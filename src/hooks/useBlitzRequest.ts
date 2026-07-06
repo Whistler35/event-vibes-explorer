@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-export type BlitzAudience = "public" | "friends";
+export type BlitzAudience = "public" | "friends" | "selected";
 
 export interface BlitzRequest {
   id: string;
