@@ -13,6 +13,7 @@ export interface DiscoveryBlitz {
   radius_km: number;
   expires_at: string;
   created_at: string;
+  audience: "public" | "friends" | "selected";
   host_name: string | null;
   host_avatar: string | null;
   distance_km: number;
@@ -75,7 +76,7 @@ export function useBlitzDiscovery(_city?: string | null) {
     const { data: requests } = await supabase
       .from("blitz_requests")
       .select(
-        "id, host_id, activity, duration_minutes, city, latitude, longitude, radius_km, expires_at, created_at"
+        "id, host_id, activity, duration_minutes, city, latitude, longitude, radius_km, expires_at, created_at, audience"
       )
       .eq("status", "active")
       .gt("expires_at", new Date().toISOString())

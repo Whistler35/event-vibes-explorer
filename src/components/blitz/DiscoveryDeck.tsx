@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Zap, X, Check, MapPin, Loader2, Trash2 } from "lucide-react";
+import { Zap, X, Check, MapPin, Loader2, Trash2, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useBlitzDiscovery, swipeBlitz, undoSwipe, DiscoveryBlitz } from "@/hooks/useBlitzDiscovery";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -31,6 +31,31 @@ const Countdown = ({ expiresAt }: { expiresAt: string }) => {
     <span className="tabular-nums">
       {String(m).padStart(2, "0")}:{String(s).padStart(2, "0")}
     </span>
+  );
+};
+
+const TimeProgressBar = ({
+  expiresAt,
+  durationMinutes,
+}: {
+  expiresAt: string;
+  durationMinutes: number;
+}) => {
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const totalMs = Math.max(1, durationMinutes * 60_000);
+  const remaining = Math.max(0, new Date(expiresAt).getTime() - now);
+  const pct = Math.min(100, Math.max(0, (remaining / totalMs) * 100));
+  return (
+    <div className="absolute top-0 left-0 right-0 h-1 bg-white/10">
+      <div
+        className="h-full bg-[hsl(var(--blitz-pink))] transition-[width] duration-1000 ease-linear"
+        style={{ width: `${pct}%` }}
+      />
+    </div>
   );
 };
 
@@ -101,8 +126,16 @@ const SwipeCard = ({ item, onSwipe, onAdminDelete, isTop, isAdmin }: CardProps) 
       onTouchEnd={handleEnd}
     >
       <div className="relative w-full h-full overflow-hidden rounded-3xl bg-[hsl(var(--blitz-forest))] text-white shadow-2xl">
+        <TimeProgressBar expiresAt={item.expires_at} durationMinutes={item.duration_minutes} />
         <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-[hsl(var(--blitz-pink))] blur-3xl opacity-30" />
         <div className="absolute -bottom-10 -left-10 w-72 h-72 rounded-full bg-[hsl(var(--blitz-pink))] blur-3xl opacity-25" />
+
+        {(item.audience === "friends" || item.audience === "selected") && (
+          <div className="absolute top-4 left-4 z-20 flex items-center gap-1 px-2.5 py-1 rounded-full bg-[hsl(var(--blitz-pink))]/90 text-white text-[10px] font-black uppercase tracking-wider">
+            <Users className="w-3 h-3" /> Freund
+          </div>
+        )}
+
 
         <div
           className="absolute top-8 left-8 z-20 px-4 py-2 rounded-xl border-4 border-[hsl(var(--blitz-pink))] text-[hsl(var(--blitz-pink))] font-black text-3xl uppercase rotate-[-15deg]"
@@ -181,9 +214,10 @@ const SwipeCard = ({ item, onSwipe, onAdminDelete, isTop, isAdmin }: CardProps) 
 
 interface DiscoveryDeckProps {
   city?: string | null;
+  onStartOwn?: () => void;
 }
 
-const DiscoveryDeck = ({ city }: DiscoveryDeckProps) => {
+const DiscoveryDeck = ({ city, onStartOwn }: DiscoveryDeckProps) => {
   const { items, loading, reload, locError, hasLocation } = useBlitzDiscovery(city);
   const { isAdmin } = useIsAdmin();
   const [index, setIndex] = useState(0);
@@ -282,16 +316,26 @@ const DiscoveryDeck = ({ city }: DiscoveryDeckProps) => {
     return (
       <div className="h-[calc(100vh-220px)] rounded-3xl bg-[hsl(var(--blitz-forest))] text-white flex flex-col items-center justify-center text-center p-8 gap-4">
         <Zap className="w-16 h-16 text-[hsl(var(--blitz-pink))] fill-[hsl(var(--blitz-pink))] opacity-60" />
-        <h2 className="text-3xl font-black uppercase">No Blitzes</h2>
+        <h2 className="text-3xl font-black uppercase">Keine Blitzes</h2>
         <p className="text-white/70 max-w-xs">
-          No active Blitz around you right now. Come back later or start your own!
+          Aktuell ist hier in der Nähe nichts los. Sei der Erste und starte deinen eigenen Blitz.
         </p>
-        <button
-          onClick={reload}
-          className="mt-4 px-6 py-3 rounded-full bg-[hsl(var(--blitz-pink))] text-white font-bold uppercase text-sm tracking-wide"
-        >
-          Reload
-        </button>
+        <div className="flex flex-col gap-2 w-full max-w-xs mt-4">
+          {onStartOwn && (
+            <button
+              onClick={onStartOwn}
+              className="px-6 py-3 rounded-full bg-[hsl(var(--blitz-pink))] text-white font-black uppercase text-sm tracking-wide flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition"
+            >
+              <Zap className="w-4 h-4 fill-white" /> Starte deinen eigenen
+            </button>
+          )}
+          <button
+            onClick={reload}
+            className="px-6 py-3 rounded-full bg-white/10 border border-white/20 text-white font-bold uppercase text-sm tracking-wide hover:bg-white/20 transition"
+          >
+            Neu laden
+          </button>
+        </div>
       </div>
     );
   }
