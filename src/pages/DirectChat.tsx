@@ -223,9 +223,13 @@ const DirectChat = () => {
               size="icon"
               onClick={handleSend}
               disabled={!newMessage.trim() || sending}
-              className="rounded-full h-12 w-12"
+              className="rounded-full h-12 w-12 transition-transform active:scale-90"
             >
-              <Send className="w-5 h-5" />
+              {newMessage.trim() ? (
+                <Zap className="w-5 h-5 fill-current" />
+              ) : (
+                <Send className="w-5 h-5" />
+              )}
             </Button>
           </div>
         </div>
