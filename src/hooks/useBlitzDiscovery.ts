@@ -13,6 +13,7 @@ export interface DiscoveryBlitz {
   radius_km: number;
   expires_at: string;
   created_at: string;
+  audience: "public" | "friends" | "selected";
   host_name: string | null;
   host_avatar: string | null;
   distance_km: number;
