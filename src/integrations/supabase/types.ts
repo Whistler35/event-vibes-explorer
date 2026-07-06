@@ -46,6 +46,35 @@ export type Database = {
           },
         ]
       }
+      blitz_match_participants: {
+        Row: {
+          id: string
+          joined_at: string
+          match_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          match_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          match_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blitz_match_participants_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "blitz_matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blitz_matches: {
         Row: {
           blitz_request_id: string
@@ -53,7 +82,6 @@ export type Database = {
           created_at: string
           host_id: string
           id: string
-          participant_id: string
           status: Database["public"]["Enums"]["blitz_match_status"]
           updated_at: string
         }
@@ -63,7 +91,6 @@ export type Database = {
           created_at?: string
           host_id: string
           id?: string
-          participant_id: string
           status?: Database["public"]["Enums"]["blitz_match_status"]
           updated_at?: string
         }
@@ -73,7 +100,6 @@ export type Database = {
           created_at?: string
           host_id?: string
           id?: string
-          participant_id?: string
           status?: Database["public"]["Enums"]["blitz_match_status"]
           updated_at?: string
         }
@@ -81,7 +107,7 @@ export type Database = {
           {
             foreignKeyName: "blitz_matches_blitz_request_id_fkey"
             columns: ["blitz_request_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "blitz_requests"
             referencedColumns: ["id"]
           },
@@ -1535,6 +1561,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_blitz_match_participant: {
+        Args: { _match_id: string; _user_id: string }
         Returns: boolean
       }
       longtransactionsenabled: { Args: never; Returns: boolean }
