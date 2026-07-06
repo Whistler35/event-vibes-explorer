@@ -214,9 +214,10 @@ const SwipeCard = ({ item, onSwipe, onAdminDelete, isTop, isAdmin }: CardProps) 
 
 interface DiscoveryDeckProps {
   city?: string | null;
+  onStartOwn?: () => void;
 }
 
-const DiscoveryDeck = ({ city }: DiscoveryDeckProps) => {
+const DiscoveryDeck = ({ city, onStartOwn }: DiscoveryDeckProps) => {
   const { items, loading, reload, locError, hasLocation } = useBlitzDiscovery(city);
   const { isAdmin } = useIsAdmin();
   const [index, setIndex] = useState(0);
