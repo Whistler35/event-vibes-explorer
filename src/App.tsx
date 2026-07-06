@@ -1,10 +1,11 @@
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Landing from "./pages/Landing";
+import Onboarding from "./pages/Onboarding";
 import Blitz from "./pages/Blitz";
 import BlitzMatch from "./pages/BlitzMatch";
 import Messenger from "./pages/Messenger";
@@ -62,11 +63,32 @@ function PushSetup() {
   return null;
 }
 
-/** Root route: logged-out → Snapchat-style Landing, logged-in → straight into Blitz. */
+/** Root route: logged-out → Landing, logged-in without onboarding → /onboarding, else /blitz. */
 function RootRoute() {
   const { user, loading } = useAuth();
-  if (loading) return <div className="min-h-screen bg-[hsl(var(--blitz-forest))]" />;
+  const [checking, setChecking] = useState(true);
+  const [onboarded, setOnboarded] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!user) { setChecking(false); setOnboarded(null); return; }
+    setChecking(true);
+    (async () => {
+      const { data } = await (await import("@/integrations/supabase/client")).supabase
+        .from("profiles")
+        .select("onboarding_completed")
+        .eq("user_id", user.id)
+        .maybeSingle() as any;
+      if (cancelled) return;
+      setOnboarded(!!data?.onboarding_completed);
+      setChecking(false);
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
+
+  if (loading || checking) return <div className="min-h-screen bg-[hsl(var(--blitz-forest))]" />;
   if (!user) return <Landing />;
+  if (!onboarded) return <Navigate to="/onboarding" replace />;
   return <Navigate to="/blitz" replace />;
 }
 
@@ -81,6 +103,7 @@ const App = () => (
             <PushSetup />
             <Routes>
               <Route path="/" element={<RootRoute />} />
+              <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/blitz" element={<Blitz />} />
               <Route path="/blitz/match/:matchId" element={<BlitzMatch />} />
               <Route path="/messenger" element={<Messenger />} />
