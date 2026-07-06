@@ -34,6 +34,31 @@ const Countdown = ({ expiresAt }: { expiresAt: string }) => {
   );
 };
 
+const TimeProgressBar = ({
+  expiresAt,
+  durationMinutes,
+}: {
+  expiresAt: string;
+  durationMinutes: number;
+}) => {
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const totalMs = Math.max(1, durationMinutes * 60_000);
+  const remaining = Math.max(0, new Date(expiresAt).getTime() - now);
+  const pct = Math.min(100, Math.max(0, (remaining / totalMs) * 100));
+  return (
+    <div className="absolute top-0 left-0 right-0 h-1 bg-white/10">
+      <div
+        className="h-full bg-[hsl(var(--blitz-pink))] transition-[width] duration-1000 ease-linear"
+        style={{ width: `${pct}%` }}
+      />
+    </div>
+  );
+};
+
 const SwipeCard = ({ item, onSwipe, onAdminDelete, isTop, isAdmin }: CardProps) => {
   const navigate = useNavigate();
   const [drag, setDrag] = useState({ x: 0, y: 0 });
