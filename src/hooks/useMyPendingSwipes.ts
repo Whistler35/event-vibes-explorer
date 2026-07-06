@@ -92,7 +92,7 @@ export function useMyPendingSwipes() {
       )
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "blitz_matches", filter: `participant_id=eq.${user.id}` },
+        { event: "*", schema: "public", table: "blitz_match_participants", filter: `user_id=eq.${user.id}` },
         () => load()
       )
       .subscribe();
