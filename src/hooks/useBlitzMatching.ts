@@ -88,30 +88,59 @@ export function useIncomingBlitzRequests(blitzRequestId?: string | null) {
   return { items, loading, reload: load };
 }
 
+/**
+ * Host accepts a swiper for their blitz.
+ * Ensures ONE match exists per blitz_request, host is a participant,
+ * and adds the swiper as a participant → group chat.
+ */
 export async function acceptBlitzRequest(swipe: IncomingBlitzRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
 
+  // 1) Mark the swipe as accepted
   const { error: swErr } = await supabase
     .from("blitz_swipes")
     .update({ status: "accepted" })
     .eq("id", swipe.swipe_id);
   if (swErr) throw swErr;
 
-  const chatExpiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
-  const { data: match, error: mErr } = await supabase
+  // 2) Find-or-create the group match for this blitz_request
+  const { data: existing } = await supabase
     .from("blitz_matches")
-    .insert({
-      blitz_request_id: swipe.blitz_request_id,
-      host_id: user.id,
-      participant_id: swipe.swiper_id,
-      chat_expires_at: chatExpiresAt,
-    })
-    .select()
-    .single();
-  if (mErr) throw mErr;
+    .select("*")
+    .eq("blitz_request_id", swipe.blitz_request_id)
+    .maybeSingle();
+
+  let match = existing;
+  if (!match) {
+    const chatExpiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+    const { data: inserted, error: mErr } = await supabase
+      .from("blitz_matches")
+      .insert({
+        blitz_request_id: swipe.blitz_request_id,
+        host_id: user.id,
+        chat_expires_at: chatExpiresAt,
+      })
+      .select()
+      .single();
+    if (mErr) throw mErr;
+    match = inserted;
+
+    // Add host as first participant
+    await supabase.from("blitz_match_participants").insert({
+      match_id: match.id,
+      user_id: user.id,
+    });
+  }
+
+  // 3) Add the swiper as participant (idempotent via UNIQUE)
+  const { error: pErr } = await supabase
+    .from("blitz_match_participants")
+    .insert({ match_id: match.id, user_id: swipe.swiper_id });
+  if (pErr && !pErr.message.toLowerCase().includes("duplicate")) throw pErr;
+
   return match;
 }
 
@@ -127,13 +156,13 @@ export interface BlitzMatch {
   id: string;
   blitz_request_id: string;
   host_id: string;
-  participant_id: string;
   status: "active" | "expired" | "closed";
   chat_expires_at: string;
   created_at: string;
   activity: string | null;
-  other_name: string | null;
-  other_avatar: string | null;
+  participant_count: number;
+  preview_names: string[];
+  preview_avatars: (string | null)[];
 }
 
 export function useMyBlitzMatches() {
@@ -147,41 +176,72 @@ export function useMyBlitzMatches() {
       setLoading(false);
       return;
     }
-    const { data } = await supabase
+
+    // Find matches where I am a participant
+    const { data: myParts } = await supabase
+      .from("blitz_match_participants")
+      .select("match_id")
+      .eq("user_id", user.id);
+    const matchIds = Array.from(new Set((myParts ?? []).map((p: any) => p.match_id)));
+
+    if (matchIds.length === 0) {
+      setMatches([]);
+      setLoading(false);
+      return;
+    }
+
+    const { data: rows } = await supabase
       .from("blitz_matches")
       .select("*")
-      .or(`host_id.eq.${user.id},participant_id.eq.${user.id}`)
+      .in("id", matchIds)
       .eq("status", "active")
       .gt("chat_expires_at", new Date().toISOString())
       .order("created_at", { ascending: false });
 
-    const list = data ?? [];
+    const list = rows ?? [];
     if (list.length === 0) {
       setMatches([]);
       setLoading(false);
       return;
     }
 
-    const reqIds = Array.from(new Set(list.map((m) => m.blitz_request_id)));
-    const otherIds = Array.from(
-      new Set(list.map((m) => (m.host_id === user.id ? m.participant_id : m.host_id)))
-    );
+    const reqIds = Array.from(new Set(list.map((m: any) => m.blitz_request_id)));
+    const activeMatchIds = list.map((m: any) => m.id);
 
-    const [{ data: reqs }, { data: profs }] = await Promise.all([
+    const [{ data: reqs }, { data: allParts }] = await Promise.all([
       supabase.from("blitz_requests").select("id, activity").in("id", reqIds),
-      supabase.from("profiles").select("user_id, name, avatar_url").in("user_id", otherIds),
+      supabase
+        .from("blitz_match_participants")
+        .select("match_id, user_id")
+        .in("match_id", activeMatchIds),
     ]);
-    const reqMap = new Map((reqs ?? []).map((r) => [r.id, r]));
-    const profMap = new Map((profs ?? []).map((p) => [p.user_id, p]));
+    const reqMap = new Map((reqs ?? []).map((r: any) => [r.id, r]));
+
+    const otherUserIds = Array.from(
+      new Set((allParts ?? []).map((p: any) => p.user_id).filter((id: string) => id !== user.id))
+    );
+    const { data: profs } = otherUserIds.length
+      ? await supabase.from("profiles").select("user_id, name, avatar_url").in("user_id", otherUserIds)
+      : { data: [] as any[] };
+    const profMap = new Map((profs ?? []).map((p: any) => [p.user_id, p]));
 
     setMatches(
-      list.map((m) => {
-        const otherId = m.host_id === user.id ? m.participant_id : m.host_id;
+      list.map((m: any) => {
+        const partsForMatch = (allParts ?? []).filter((p: any) => p.match_id === m.id);
+        const others = partsForMatch
+          .map((p: any) => p.user_id)
+          .filter((id: string) => id !== user.id);
         return {
-          ...(m as any),
+          id: m.id,
+          blitz_request_id: m.blitz_request_id,
+          host_id: m.host_id,
+          status: m.status,
+          chat_expires_at: m.chat_expires_at,
+          created_at: m.created_at,
           activity: reqMap.get(m.blitz_request_id)?.activity ?? null,
-          other_name: profMap.get(otherId)?.name ?? null,
-          other_avatar: profMap.get(otherId)?.avatar_url ?? null,
+          participant_count: partsForMatch.length,
+          preview_names: others.slice(0, 3).map((id: string) => profMap.get(id)?.name ?? "?"),
+          preview_avatars: others.slice(0, 3).map((id: string) => profMap.get(id)?.avatar_url ?? null),
         };
       })
     );
@@ -196,6 +256,11 @@ export function useMyBlitzMatches() {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "blitz_matches" },
+        () => load()
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "blitz_match_participants" },
         () => load()
       )
       .subscribe();
