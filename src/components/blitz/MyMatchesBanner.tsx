@@ -35,17 +35,18 @@ const MyMatchesBanner = () => {
           className="w-full flex items-center gap-3 p-3 rounded-2xl bg-[hsl(var(--blitz-pink))] text-white shadow-[0_0_25px_hsl(var(--blitz-pink)/0.4)] hover:scale-[1.01] active:scale-[0.99] transition"
         >
           <Avatar className="w-10 h-10 border-2 border-white">
-            <AvatarImage src={m.other_avatar ?? undefined} />
+            <AvatarImage src={m.preview_avatars[0] ?? undefined} />
             <AvatarFallback className="bg-white text-[hsl(var(--blitz-pink))] font-black text-sm">
-              {m.other_name?.[0] ?? "?"}
+              {m.preview_names[0]?.[0] ?? "?"}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 text-left min-w-0">
             <p className="font-black uppercase text-xs tracking-wider opacity-90 flex items-center gap-1">
-              <Zap className="w-3 h-3 fill-white" /> Match active
+              <Zap className="w-3 h-3 fill-white" /> Match aktiv · {m.participant_count} 👥
             </p>
             <p className="font-bold truncate">
-              {m.other_name ?? "Match"} · {m.activity}
+              {m.activity ?? "Blitz"}
+              {m.preview_names.length > 0 && ` · ${m.preview_names.join(", ")}`}
             </p>
           </div>
           <div className="font-black tabular-nums text-lg">

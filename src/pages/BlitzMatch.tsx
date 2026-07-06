@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Send, Zap, Trash2 } from "lucide-react";
+import { ArrowLeft, Send, Zap, Trash2, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -13,7 +13,6 @@ interface Match {
   id: string;
   blitz_request_id: string;
   host_id: string;
-  participant_id: string;
   status: string;
   chat_expires_at: string;
 }
@@ -40,6 +39,7 @@ const BlitzMatch = () => {
   const { isAdmin } = useIsAdmin();
   const [match, setMatch] = useState<Match | null>(null);
   const [activity, setActivity] = useState<string>("");
+  const [participantIds, setParticipantIds] = useState<string[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [profilesMap, setProfilesMap] = useState<Map<string, Profile>>(new Map());
   const [input, setInput] = useState("");
@@ -69,10 +69,17 @@ const BlitzMatch = () => {
         .maybeSingle();
       setActivity(req?.activity ?? "");
 
+      const { data: parts } = await supabase
+        .from("blitz_match_participants")
+        .select("user_id")
+        .eq("match_id", matchId);
+      const ids = Array.from(new Set([...(parts ?? []).map((p: any) => p.user_id), m.host_id]));
+      setParticipantIds(ids);
+
       const { data: profs } = await supabase
         .from("profiles")
         .select("user_id, name, avatar_url")
-        .in("user_id", [m.host_id, m.participant_id]);
+        .in("user_id", ids);
       setProfilesMap(new Map((profs ?? []).map((p) => [p.user_id, p])));
 
       const { data: msgs } = await supabase
@@ -101,15 +108,37 @@ const BlitzMatch = () => {
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "blitz_chat_messages", filter: `match_id=eq.${matchId}` },
-        (payload) => {
-          setMessages((prev) => [...prev, payload.new as ChatMessage]);
+        (payload) => setMessages((prev) => [...prev, payload.new as ChatMessage])
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "blitz_match_participants", filter: `match_id=eq.${matchId}` },
+        async () => {
+          const { data: parts } = await supabase
+            .from("blitz_match_participants")
+            .select("user_id")
+            .eq("match_id", matchId);
+          const ids = Array.from(new Set((parts ?? []).map((p: any) => p.user_id)));
+          setParticipantIds(ids);
+          const missing = ids.filter((id) => !profilesMap.has(id));
+          if (missing.length) {
+            const { data: profs } = await supabase
+              .from("profiles")
+              .select("user_id, name, avatar_url")
+              .in("user_id", missing);
+            setProfilesMap((prev) => {
+              const next = new Map(prev);
+              (profs ?? []).forEach((p: any) => next.set(p.user_id, p));
+              return next;
+            });
+          }
         }
       )
       .subscribe();
     return () => {
       supabase.removeChannel(ch);
     };
-  }, [matchId]);
+  }, [matchId, profilesMap]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -123,14 +152,22 @@ const BlitzMatch = () => {
     );
   }
 
-  const otherId = match.host_id === user.id ? match.participant_id : match.host_id;
-  const me = profilesMap.get(user.id);
-  const other = profilesMap.get(otherId);
+  const others = participantIds.filter((id) => id !== user.id);
+  const otherProfiles = others.map((id) => profilesMap.get(id)).filter(Boolean) as Profile[];
+  const headerTitle =
+    activity ||
+    (otherProfiles.length === 1
+      ? otherProfiles[0]?.name ?? t("blitzMatch.fallbackName")
+      : `${participantIds.length} Teilnehmer`);
+  const headerSub =
+    otherProfiles.length > 0
+      ? otherProfiles.map((p) => p?.name?.split(" ")[0] ?? "?").join(", ")
+      : t("blitzMatch.emptyChat");
 
   const expiresAt = new Date(match.chat_expires_at).getTime();
   const remaining = Math.max(0, expiresAt - now);
-  const m = Math.floor(remaining / 60000);
-  const s = Math.floor((remaining % 60000) / 1000);
+  const mm = Math.floor(remaining / 60000);
+  const ss = Math.floor((remaining % 60000) / 1000);
   const expired = remaining === 0;
 
   const handleSend = async (e: React.FormEvent) => {
@@ -162,9 +199,11 @@ const BlitzMatch = () => {
   };
 
   if (showMatchSplash) {
+    // Splash keeps 1-1 aesthetic for the first accept moment. For subsequent joins the splash is short.
+    const firstOther = otherProfiles[0];
+    const me = profilesMap.get(user.id);
     return (
       <div className="fixed inset-0 z-50 bg-[hsl(var(--blitz-forest))] text-white overflow-hidden flex flex-col">
-        {/* Sharp diagonal grid backdrop — urban / sport feeling */}
         <div
           className="absolute inset-0 opacity-[0.07]"
           style={{
@@ -173,100 +212,35 @@ const BlitzMatch = () => {
             backgroundSize: "28px 28px",
           }}
         />
-        {/* Single hard impact flash — no soft floating gradients */}
         <div className="absolute inset-0 bg-[hsl(var(--blitz-pink))] opacity-0 animate-blitz-impact pointer-events-none" />
-
-        {/* Top label */}
-        <div className="relative z-10 pt-12 text-center">
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center gap-6 px-6">
           <p className="text-[10px] font-black uppercase tracking-[0.5em] text-[hsl(var(--blitz-pink))]">
             {t("blitzMatch.activation")}
           </p>
-        </div>
-
-        {/* Impact stage */}
-        <div className="relative z-10 flex-1 flex items-center justify-center">
-          {/* Shockwave rings radiating from center */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-            <div className="w-40 h-40 rounded-full border-[hsl(var(--blitz-pink))] animate-blitz-shockwave" />
-          </div>
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" style={{ animationDelay: "0.4s" }}>
-            <div className="w-40 h-40 rounded-full border-[hsl(var(--blitz-pink))] animate-blitz-shockwave" style={{ animationDelay: "0.4s" }} />
-          </div>
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-            <div className="w-40 h-40 rounded-full border-[hsl(var(--blitz-pink))] animate-blitz-shockwave" style={{ animationDelay: "0.8s" }} />
-          </div>
-
-          {/* Avatars slamming in, asymmetric and angled */}
-          <div className="relative flex items-center justify-center w-full max-w-md px-6">
-            <div className="animate-blitz-slam-left -mr-4 z-10">
-              <div className="relative">
-                <Avatar className="w-24 h-24 rounded-none border-2 border-[hsl(var(--blitz-pink))]" style={{ clipPath: "polygon(8% 0, 100% 0, 92% 100%, 0 100%)" }}>
-                  <AvatarImage src={me?.avatar_url ?? undefined} className="object-cover" />
-                  <AvatarFallback className="rounded-none bg-white text-[hsl(var(--blitz-forest))] text-3xl font-black">
-                    {me?.name?.[0] ?? "?"}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-[hsl(var(--blitz-pink))] text-white text-[9px] font-black uppercase tracking-wider">
-                  P1
-                </span>
-              </div>
+          <div className="flex items-center gap-3">
+            <Avatar className="w-20 h-20 border-2 border-[hsl(var(--blitz-pink))]">
+              <AvatarImage src={me?.avatar_url ?? undefined} className="object-cover" />
+              <AvatarFallback className="bg-white text-[hsl(var(--blitz-forest))] text-2xl font-black">
+                {me?.name?.[0] ?? "?"}
+              </AvatarFallback>
+            </Avatar>
+            <div className="w-14 h-14 bg-[hsl(var(--blitz-pink))] flex items-center justify-center shadow-[0_0_30px_hsl(var(--blitz-pink))] rounded-full">
+              <Zap className="w-8 h-8 text-white fill-white" />
             </div>
-
-            {/* Electric impact between them */}
-            <div className="relative z-20 mx-1">
-              <div className="relative w-16 h-16 bg-[hsl(var(--blitz-pink))] flex items-center justify-center shadow-[0_0_30px_hsl(var(--blitz-pink))]"
-                   style={{ clipPath: "polygon(50% 0, 100% 38%, 78% 38%, 100% 100%, 50% 70%, 0 100%, 22% 38%, 0 38%)" }}>
-                <Zap className="w-9 h-9 text-white fill-white" strokeWidth={3} />
-              </div>
-              {/* Spark line tendrils */}
-              <div className="absolute top-1/2 -left-10 -translate-y-1/2 h-[3px] w-10 bg-[hsl(var(--blitz-pink))] origin-right animate-blitz-spark shadow-[0_0_12px_hsl(var(--blitz-pink))]" />
-              <div className="absolute top-1/2 -right-10 -translate-y-1/2 h-[3px] w-10 bg-[hsl(var(--blitz-pink))] origin-left animate-blitz-spark shadow-[0_0_12px_hsl(var(--blitz-pink))]" />
-            </div>
-
-            <div className="animate-blitz-slam-right -ml-4 z-10">
-              <div className="relative">
-                <Avatar className="w-24 h-24 rounded-none border-2 border-[hsl(var(--blitz-pink))]" style={{ clipPath: "polygon(8% 0, 100% 0, 92% 100%, 0 100%)" }}>
-                  <AvatarImage src={other?.avatar_url ?? undefined} className="object-cover" />
-                  <AvatarFallback className="rounded-none bg-white text-[hsl(var(--blitz-forest))] text-3xl font-black">
-                    {other?.name?.[0] ?? "?"}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-[hsl(var(--blitz-pink))] text-white text-[9px] font-black uppercase tracking-wider">
-                  P2
-                </span>
-              </div>
-            </div>
+            <Avatar className="w-20 h-20 border-2 border-[hsl(var(--blitz-pink))]">
+              <AvatarImage src={firstOther?.avatar_url ?? undefined} className="object-cover" />
+              <AvatarFallback className="bg-white text-[hsl(var(--blitz-forest))] text-2xl font-black">
+                {firstOther?.name?.[0] ?? "?"}
+              </AvatarFallback>
+            </Avatar>
           </div>
-        </div>
-
-        {/* Headline + mission card */}
-        <div className="relative z-10 px-6 pb-10 space-y-5">
           <div className="text-center space-y-1">
-            <h1 className="text-6xl font-black uppercase text-white leading-[0.85] animate-blitz-headline whitespace-pre-line">
-              {t("blitzMatch.youOn")}
+            <h1 className="text-5xl font-black uppercase text-white leading-none">
+              {activity || "BLITZ"}
             </h1>
-            <p className="text-[11px] font-black uppercase tracking-[0.4em] text-[hsl(var(--blitz-pink))] pt-2">
-              {t("blitzMatch.meetupLocked")}
+            <p className="text-sm text-white/70 mt-2">
+              {participantIds.length} Teilnehmer im Chat
             </p>
-          </div>
-
-          {/* Mission / Plan card — sharp, no rounded softness */}
-          <div className="relative border-2 border-[hsl(var(--blitz-pink))] bg-black/30 backdrop-blur-sm p-4">
-            <div className="absolute -top-2.5 left-3 px-2 bg-[hsl(var(--blitz-forest))] text-[10px] font-black uppercase tracking-[0.3em] text-[hsl(var(--blitz-pink))]">
-              {t("blitzMatch.mission")}
-            </div>
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-[10px] font-black uppercase tracking-widest text-white/50">{t("blitzMatch.activity")}</p>
-                <p className="text-xl font-black uppercase text-white truncate">{activity || "—"}</p>
-              </div>
-              <div className="text-right shrink-0">
-                <p className="text-[10px] font-black uppercase tracking-widest text-white/50">{t("blitzMatch.with")}</p>
-                <p className="text-sm font-bold uppercase text-white truncate max-w-[120px]">
-                  {other?.name ?? t("blitzMatch.player2")}
-                </p>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -279,16 +253,31 @@ const BlitzMatch = () => {
         <button onClick={() => navigate("/blitz")} className="p-2 -ml-2">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <div className="flex items-center gap-2">
-          <Avatar className="w-9 h-9 border border-[hsl(var(--blitz-pink))]">
-            <AvatarImage src={other?.avatar_url ?? undefined} />
-            <AvatarFallback className="bg-[hsl(var(--blitz-pink))] text-white text-sm font-bold">
-              {other?.name?.[0] ?? "?"}
-            </AvatarFallback>
-          </Avatar>
-          <div className="leading-tight">
-            <p className="font-bold text-sm">{other?.name ?? t("blitzMatch.fallbackName")}</p>
-            <p className="text-[10px] uppercase tracking-wider text-white/60">{activity}</p>
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="flex -space-x-2">
+            {otherProfiles.slice(0, 3).map((p) => (
+              <Avatar key={p.user_id} className="w-8 h-8 border-2 border-[hsl(var(--blitz-forest))]">
+                <AvatarImage src={p.avatar_url ?? undefined} />
+                <AvatarFallback className="bg-[hsl(var(--blitz-pink))] text-white text-xs font-bold">
+                  {p.name?.[0] ?? "?"}
+                </AvatarFallback>
+              </Avatar>
+            ))}
+            {otherProfiles.length > 3 && (
+              <div className="w-8 h-8 rounded-full bg-white/20 border-2 border-[hsl(var(--blitz-forest))] flex items-center justify-center text-[10px] font-black">
+                +{otherProfiles.length - 3}
+              </div>
+            )}
+          </div>
+          <div className="leading-tight min-w-0">
+            <p className="font-bold text-sm truncate flex items-center gap-1">
+              <Zap className="w-3 h-3 fill-[hsl(var(--blitz-pink))] text-[hsl(var(--blitz-pink))]" />
+              {headerTitle}
+            </p>
+            <p className="text-[10px] uppercase tracking-wider text-white/60 truncate flex items-center gap-1">
+              <Users className="w-2.5 h-2.5" />
+              {participantIds.length} · {headerSub}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -308,7 +297,7 @@ const BlitzMatch = () => {
                 : "bg-[hsl(var(--blitz-pink))] text-white shadow-[0_0_20px_hsl(var(--blitz-pink)/0.5)]"
             }`}
           >
-            {String(m).padStart(2, "0")}:{String(s).padStart(2, "0")}
+            {String(mm).padStart(2, "0")}:{String(ss).padStart(2, "0")}
           </div>
         </div>
       </div>
@@ -321,6 +310,7 @@ const BlitzMatch = () => {
         )}
         {messages.map((msg) => {
           const mine = msg.sender_id === user.id;
+          const senderName = profilesMap.get(msg.sender_id)?.name?.split(" ")[0];
           return (
             <div
               key={msg.id}
@@ -333,6 +323,11 @@ const BlitzMatch = () => {
                     : "bg-white/10 text-white rounded-bl-sm"
                 }`}
               >
+                {!mine && senderName && (
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-white/70 mb-0.5">
+                    {senderName}
+                  </p>
+                )}
                 <p className="text-sm break-words whitespace-pre-wrap">{msg.message}</p>
               </div>
             </div>

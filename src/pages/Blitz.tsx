@@ -192,8 +192,8 @@ const Blitz = () => {
         activity={matchMoment?.activity}
         myName={myProfile?.name ?? null}
         myAvatar={myProfile?.avatar_url ?? null}
-        otherName={matchMoment?.other_name ?? null}
-        otherAvatar={matchMoment?.other_avatar ?? null}
+        otherName={matchMoment?.preview_names?.[0] ?? null}
+        otherAvatar={matchMoment?.preview_avatars?.[0] ?? null}
         onOpenChat={() => {
           const id = matchMoment?.id;
           setMatchMoment(null);

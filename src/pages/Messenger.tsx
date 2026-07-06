@@ -52,6 +52,11 @@ const Messenger = () => {
       )
       .on(
         "postgres_changes",
+        { event: "*", schema: "public", table: "blitz_match_participants" },
+        () => queryClient.invalidateQueries({ queryKey: ["dm-conversations", user.id] })
+      )
+      .on(
+        "postgres_changes",
         { event: "INSERT", schema: "public", table: "direct_messages" },
         () => queryClient.invalidateQueries({ queryKey: ["dm-conversations", user.id] })
       )
@@ -126,24 +131,32 @@ const Messenger = () => {
         });
       }
 
-      // Load active Blitz matches and append as chats
-      const { data: matches } = await supabase
-        .from("blitz_matches")
-        .select("id, host_id, participant_id, status, chat_expires_at, blitz_request_id, updated_at")
-        .or(`host_id.eq.${user.id},participant_id.eq.${user.id}`)
-        .eq("status", "active")
-        .gt("chat_expires_at", new Date().toISOString())
-        .order("updated_at", { ascending: false });
+      // Load active Blitz group matches (where I'm a participant) and append as chats
+      const { data: myParts } = await supabase
+        .from("blitz_match_participants")
+        .select("match_id")
+        .eq("user_id", user.id);
+      const myMatchIds = Array.from(new Set((myParts ?? []).map((p: any) => p.match_id)));
+
+      const { data: matches } = myMatchIds.length
+        ? await supabase
+            .from("blitz_matches")
+            .select("id, host_id, status, chat_expires_at, blitz_request_id, updated_at")
+            .in("id", myMatchIds)
+            .eq("status", "active")
+            .gt("chat_expires_at", new Date().toISOString())
+            .order("updated_at", { ascending: false })
+        : { data: [] as any[] };
 
       if (matches && matches.length > 0) {
         const matchIds = matches.map((m: any) => m.id);
-        const otherIds = matches.map((m: any) =>
-          m.host_id === user.id ? m.participant_id : m.host_id
-        );
         const requestIds = matches.map((m: any) => m.blitz_request_id);
 
-        const [{ data: blitzProfiles }, { data: blitzMsgs }, { data: blitzReqs }] = await Promise.all([
-          supabase.from("profiles").select("user_id, name, avatar_url").in("user_id", otherIds),
+        const [{ data: allParts }, { data: blitzMsgs }, { data: blitzReqs }] = await Promise.all([
+          supabase
+            .from("blitz_match_participants")
+            .select("match_id, user_id")
+            .in("match_id", matchIds),
           supabase
             .from("blitz_chat_messages")
             .select("match_id, message, created_at, sender_id")
@@ -152,9 +165,23 @@ const Messenger = () => {
           supabase.from("blitz_requests").select("id, activity").in("id", requestIds),
         ]);
 
+        const otherIds = Array.from(
+          new Set(
+            (allParts ?? [])
+              .map((p: any) => p.user_id)
+              .filter((id: string) => id !== user.id)
+          )
+        );
+        const { data: blitzProfiles } = otherIds.length
+          ? await supabase.from("profiles").select("user_id, name, avatar_url").in("user_id", otherIds)
+          : { data: [] as any[] };
+
         for (const m of matches as any[]) {
-          const otherId = m.host_id === user.id ? m.participant_id : m.host_id;
-          const profile = blitzProfiles?.find((p: any) => p.user_id === otherId);
+          const partsForMatch = (allParts ?? []).filter((p: any) => p.match_id === m.id);
+          const otherIdsForMatch = partsForMatch
+            .map((p: any) => p.user_id)
+            .filter((id: string) => id !== user.id);
+          const firstOther = blitzProfiles?.find((p: any) => p.user_id === otherIdsForMatch[0]);
           const lastMsg = blitzMsgs?.find((msg: any) => msg.match_id === m.id);
           const activity = blitzReqs?.find((r: any) => r.id === m.blitz_request_id)?.activity;
           const lastAt = lastMsg?.created_at || m.updated_at;
@@ -163,18 +190,24 @@ const Messenger = () => {
             lastMsg.sender_id !== user.id &&
             isConversationUnread(`blitz_${m.id}`, lastAt, user.id);
 
+          const title =
+            partsForMatch.length > 2
+              ? `${activity ?? "Blitz"} · ${partsForMatch.length} 👥`
+              : firstOther?.name || activity || t('messenger.match');
+
           results.push({
             id: `blitz_${m.id}`,
             matchId: m.id,
-            other_user_id: otherId,
-            other_name: profile?.name || t('messenger.match'),
-            other_avatar: profile?.avatar_url || null,
+            other_user_id: otherIdsForMatch[0] ?? "",
+            other_name: title,
+            other_avatar: firstOther?.avatar_url || null,
             last_message: lastMsg?.message || `⚡ ${activity || t('messenger.match')}`,
             last_message_at: lastAt,
             isUnread: unread,
             isBlitz: true,
             blitzActivity: activity,
             expiresAt: m.chat_expires_at,
+            participantCount: partsForMatch.length,
           });
         }
       }
