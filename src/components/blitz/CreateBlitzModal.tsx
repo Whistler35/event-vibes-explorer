@@ -154,7 +154,7 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-w-md p-0 overflow-hidden border-0 bg-[hsl(var(--blitz-forest))] text-white [&>button]:text-white [&>button]:opacity-90 [&>button]:hover:opacity-100"
+        className="max-w-md p-0 border-0 bg-[hsl(var(--blitz-forest))] text-white max-h-[90dvh] overflow-y-auto [&>button]:text-white [&>button]:opacity-90 [&>button]:hover:opacity-100"
       >
         <div className="px-6 pt-10 pb-8 space-y-6">
           <div className="flex items-center gap-3">

@@ -472,8 +472,8 @@ const Auth = () => {
                   const err = await nativeOAuth('google');
                   if (err) console.error(err);
                 } else {
-                  const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: 'https://evendle.com/auth/callback' } });
-                  if (error) { toast.error(t('auth.errors.googleFailed')); console.error(error); }
+                  const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+                  if (result.error) { toast.error(t('auth.errors.googleFailed')); console.error(result.error); }
                 }
                 setSocialLoading(false);
               }}>
