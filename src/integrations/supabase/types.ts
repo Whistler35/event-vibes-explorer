@@ -101,6 +101,7 @@ export type Database = {
           longitude: number | null
           radius_km: number
           status: Database["public"]["Enums"]["blitz_status"]
+          target_user_ids: string[] | null
           updated_at: string
         }
         Insert: {
@@ -116,6 +117,7 @@ export type Database = {
           longitude?: number | null
           radius_km?: number
           status?: Database["public"]["Enums"]["blitz_status"]
+          target_user_ids?: string[] | null
           updated_at?: string
         }
         Update: {
@@ -131,6 +133,7 @@ export type Database = {
           longitude?: number | null
           radius_km?: number
           status?: Database["public"]["Enums"]["blitz_status"]
+          target_user_ids?: string[] | null
           updated_at?: string
         }
         Relationships: []
@@ -955,6 +958,8 @@ export type Database = {
           instagram_username: string | null
           interests: string[]
           name: string
+          phone: string | null
+          phone_hash: string | null
           photos: string[]
           updated_at: string
           user_id: string
@@ -971,6 +976,8 @@ export type Database = {
           instagram_username?: string | null
           interests?: string[]
           name: string
+          phone?: string | null
+          phone_hash?: string | null
           photos?: string[]
           updated_at?: string
           user_id: string
@@ -987,6 +994,8 @@ export type Database = {
           instagram_username?: string | null
           interests?: string[]
           name?: string
+          phone?: string | null
+          phone_hash?: string | null
           photos?: string[]
           updated_at?: string
           user_id?: string
