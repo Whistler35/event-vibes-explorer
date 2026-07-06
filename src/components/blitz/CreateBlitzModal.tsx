@@ -233,35 +233,85 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
             <label className="text-sm font-bold uppercase tracking-wide text-white/70">
               Sichtbarkeit
             </label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               {([
-                { value: "public", label: "Öffentlich", desc: "Alle in der Nähe", Icon: Globe2 },
-                { value: "friends", label: "Nur Freunde", desc: "Nur deine Freunde", Icon: Users },
-              ] as const).map(({ value, label, desc, Icon }) => {
+                { value: "public", label: "Öffentlich", Icon: Globe2 },
+                { value: "friends", label: "Freunde", Icon: Users },
+                { value: "selected", label: "Auswählen", Icon: UserCheck },
+              ] as const).map(({ value, label, Icon }) => {
                 const active = audience === value;
                 return (
                   <button
                     key={value}
                     type="button"
                     onClick={() => setAudience(value)}
-                    className={`p-3 rounded-xl text-left transition border-2 ${
+                    className={`p-3 rounded-xl text-center transition border-2 ${
                       active
                         ? "bg-[hsl(var(--blitz-pink))] border-[hsl(var(--blitz-pink))] text-white shadow-[0_0_20px_hsl(var(--blitz-pink)/0.5)]"
                         : "bg-white/5 border-white/10 text-white/80 hover:border-white/30"
                     }`}
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col items-center gap-1">
                       <Icon className="w-4 h-4" />
-                      <span className="font-black text-sm uppercase tracking-wide">{label}</span>
+                      <span className="font-black text-[11px] uppercase tracking-wide">{label}</span>
                     </div>
-                    <p className={`text-[11px] mt-1 ${active ? "text-white/80" : "text-white/50"}`}>
-                      {desc}
-                    </p>
                   </button>
                 );
               })}
             </div>
+
+            {audience === "selected" && (
+              <div className="mt-2 rounded-xl bg-white/5 border border-white/10 p-2 max-h-56 overflow-y-auto space-y-1">
+                {friends.length === 0 ? (
+                  <p className="text-xs text-white/60 text-center py-6">
+                    Du hast noch keine Freunde auf EVENDLE.
+                  </p>
+                ) : (
+                  friends.map((f) => {
+                    const selected = selectedFriendIds.includes(f.user_id);
+                    const avatar =
+                      f.avatar_url ||
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(f.name || "?")}&background=173518&color=fff&size=80`;
+                    return (
+                      <button
+                        key={f.user_id}
+                        type="button"
+                        onClick={() => toggleFriend(f.user_id)}
+                        className={`w-full flex items-center gap-3 px-2 py-2 rounded-lg transition ${
+                          selected ? "bg-[hsl(var(--blitz-pink))]/30" : "hover:bg-white/5"
+                        }`}
+                      >
+                        <img
+                          src={avatar}
+                          alt={f.name}
+                          className="w-8 h-8 rounded-full object-cover"
+                        />
+                        <span className="flex-1 text-left text-sm font-semibold text-white truncate">
+                          {f.name}
+                        </span>
+                        <span
+                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                            selected
+                              ? "bg-[hsl(var(--blitz-pink))] border-[hsl(var(--blitz-pink))]"
+                              : "border-white/30"
+                          }`}
+                        >
+                          {selected && <Check className="w-3 h-3 text-white" />}
+                        </span>
+                      </button>
+                    );
+                  })
+                )}
+                {selectedFriendIds.length > 0 && (
+                  <p className="text-[10px] text-white/60 text-center pt-2 uppercase tracking-widest font-bold">
+                    {selectedFriendIds.length} ausgewählt
+                  </p>
+                )}
+              </div>
+            )}
           </div>
+
+
 
           <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 flex items-center gap-3">
             {locating ? (
