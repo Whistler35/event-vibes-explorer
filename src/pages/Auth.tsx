@@ -472,8 +472,11 @@ const Auth = () => {
                   const err = await nativeOAuth('google');
                   if (err) console.error(err);
                 } else {
-                  const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-                  if (result.error) { toast.error(t('auth.errors.googleFailed')); console.error(result.error); }
+                  const { error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: { redirectTo: `${window.location.origin}/auth/callback` },
+                  });
+                  if (error) { toast.error(t('auth.errors.googleFailed')); console.error(error); }
                 }
                 setSocialLoading(false);
               }}>
@@ -493,7 +496,10 @@ const Auth = () => {
                   const err = await nativeAppleSignIn();
                   if (err) { toast.error(t('auth.errors.appleFailed')); console.error(err); }
                 } else {
-                  const { error } = await lovable.auth.signInWithOAuth("apple", { redirect_uri: window.location.origin });
+                  const { error } = await supabase.auth.signInWithOAuth({
+                    provider: 'apple',
+                    options: { redirectTo: `${window.location.origin}/auth/callback` },
+                  });
                   if (error) { toast.error(t('auth.errors.appleFailed')); console.error(error); }
                 }
                 setSocialLoading(false);
