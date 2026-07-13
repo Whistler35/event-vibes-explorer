@@ -171,17 +171,17 @@ const Profile = () => {
             </div>
             <div className="flex space-x-1">
               {isHost && (
-                <Button variant="ghost" size="icon" className={isHost ? "text-primary" : "text-white/80 hover:text-white hover:bg-white/10"} onClick={() => navigate("/host/dashboard")}>
+                <Button variant="ghost" size="icon" className="text-[hsl(var(--blitz-forest))]" onClick={() => navigate("/host/dashboard")}>
                   <Building2 className="w-5 h-5" />
                 </Button>
               )}
-              <Button variant="ghost" size="icon" className={isHost ? "text-primary" : "text-white/80 hover:text-white hover:bg-white/10"} onClick={() => navigate("/tickets")} title={t("profile.myTickets")}>
+              <Button variant="ghost" size="icon" className="text-[hsl(var(--blitz-forest))]" onClick={() => navigate("/tickets")} title={t("profile.myTickets")}>
                 <Ticket className="w-5 h-5" />
               </Button>
-              <Button variant="ghost" size="icon" className={isHost ? "text-muted-foreground" : "text-white/80 hover:text-white hover:bg-white/10"} onClick={() => navigate("/profile/edit")}>
+              <Button variant="ghost" size="icon" className="text-muted-foreground" onClick={() => navigate("/profile/edit")}>
                 <Settings className="w-5 h-5" />
               </Button>
-              <Button variant="ghost" size="icon" className={isHost ? "text-muted-foreground" : "text-white/80 hover:text-white hover:bg-white/10"} onClick={handleLogout}>
+              <Button variant="ghost" size="icon" className="text-muted-foreground" onClick={handleLogout}>
                 <LogOut className="w-5 h-5" />
               </Button>
             </div>
