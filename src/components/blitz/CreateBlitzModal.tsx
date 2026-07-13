@@ -180,7 +180,7 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
               onChange={(e) => setActivity(e.target.value)}
               placeholder="e.g. Tennis, Coffee…"
               maxLength={80}
-              className="w-full min-w-0 bg-transparent border-b border-white/25 focus:border-[hsl(var(--bolt))] outline-none text-lg sm:text-xl font-black placeholder:text-white/25 py-3 transition"
+              className="block w-full min-w-0 max-w-full bg-transparent border-b border-white/25 focus:border-[hsl(var(--bolt))] outline-none text-base sm:text-lg font-black placeholder:text-white/25 py-3 transition truncate"
             />
           </div>
 
