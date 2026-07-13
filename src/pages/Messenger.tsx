@@ -68,9 +68,21 @@ const Messenger = () => {
         { event: "INSERT", schema: "public", table: "blitz_chat_messages" },
         () => queryClient.invalidateQueries({ queryKey: ["dm-conversations", user.id] })
       )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "blitz_requests", filter: `user_id=eq.${user.id}` },
+        () => queryClient.invalidateQueries({ queryKey: ["dm-conversations", user.id] })
+      )
       .subscribe();
+
+    // Re-evaluate every 30s so expired huddles disappear without page reload.
+    const interval = setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: ["dm-conversations", user.id] });
+    }, 30000);
+
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(interval);
     };
   }, [user, queryClient]);
 
