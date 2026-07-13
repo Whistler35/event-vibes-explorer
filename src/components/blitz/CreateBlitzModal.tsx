@@ -333,6 +333,7 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
             )}
           </div>
         </div>
+        </div>
 
         {/* Sticky bottom CTA — always visible */}
         <div
