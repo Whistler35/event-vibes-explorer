@@ -158,13 +158,15 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
       >
         <div className="max-h-[92dvh] overflow-y-auto">
         <div className="px-6 pt-10 pb-32 space-y-6">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-[hsl(var(--blitz-forest-deep))]/60 flex items-center justify-center">
-              <Zap className="w-6 h-6 text-[hsl(var(--bolt))] fill-[hsl(var(--bolt))]" />
+          <div className="flex items-center gap-3 pr-8">
+            <div className="w-11 h-11 shrink-0 rounded-2xl bg-[hsl(var(--blitz-forest-deep))]/60 flex items-center justify-center">
+              <Zap className="w-5 h-5 text-[hsl(var(--bolt))] fill-[hsl(var(--bolt))]" />
             </div>
-            <div>
-              <p className="text-[11px] uppercase tracking-[0.3em] text-white/55 font-black">Blitz</p>
-              <h2 className="text-2xl font-black leading-tight">Spontaneous Request</h2>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] uppercase tracking-[0.3em] text-white/55 font-black">Blitz</p>
+              <h2 className="font-display text-xl sm:text-2xl font-bold leading-tight truncate">
+                Spontaneous Request
+              </h2>
             </div>
           </div>
 
@@ -176,9 +178,9 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
               autoFocus
               value={activity}
               onChange={(e) => setActivity(e.target.value)}
-              placeholder="e.g. Tennis, Bouldering, Coffee…"
+              placeholder="e.g. Tennis, Coffee…"
               maxLength={80}
-              className="w-full bg-transparent border-b border-white/25 focus:border-[hsl(var(--bolt))] outline-none text-2xl font-black placeholder:text-white/25 py-3 transition"
+              className="w-full min-w-0 bg-transparent border-b border-white/25 focus:border-[hsl(var(--bolt))] outline-none text-lg sm:text-xl font-black placeholder:text-white/25 py-3 transition"
             />
           </div>
 
