@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import Layout from "@/components/Layout";
 import { MessageCircle, LogIn, Zap, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { isHuddleActive } from "@/lib/blitzHuddle";
 
 interface ConversationWithProfile {
   id: string;
@@ -24,6 +25,8 @@ interface ConversationWithProfile {
   isEventGroup?: boolean;
   eventId?: string;
   participantCount?: number;
+  isPendingBlitz?: boolean;
+  blitzRequestId?: string;
 }
 
 const isConversationUnread = (convoId: string, lastMessageAt: string | null, userId: string, senderId?: string): boolean => {
@@ -65,9 +68,21 @@ const Messenger = () => {
         { event: "INSERT", schema: "public", table: "blitz_chat_messages" },
         () => queryClient.invalidateQueries({ queryKey: ["dm-conversations", user.id] })
       )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "blitz_requests", filter: `user_id=eq.${user.id}` },
+        () => queryClient.invalidateQueries({ queryKey: ["dm-conversations", user.id] })
+      )
       .subscribe();
+
+    // Re-evaluate every 30s so expired huddles disappear without page reload.
+    const interval = setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: ["dm-conversations", user.id] });
+    }, 30000);
+
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(interval);
     };
   }, [user, queryClient]);
 
@@ -210,6 +225,39 @@ const Messenger = () => {
             participantCount: partsForMatch.length,
           });
         }
+      }
+
+      // Own active Blitz requests → show a pending huddle even before any match exists
+      const nowIso = new Date().toISOString();
+      const { data: myRequests } = await (supabase as any)
+        .from("blitz_requests")
+        .select("id, activity, expires_at, status, created_at")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .gt("expires_at", nowIso);
+
+      const matchedRequestIds = new Set(
+        (matches ?? []).map((m: any) => m.blitz_request_id).filter(Boolean)
+      );
+
+      for (const req of (myRequests ?? []) as any[]) {
+        if (matchedRequestIds.has(req.id)) continue;
+        if (!isHuddleActive({ expires_at: req.expires_at, status: req.status })) continue;
+        results.push({
+          id: `pending_blitz_${req.id}`,
+          blitzRequestId: req.id,
+          other_user_id: "",
+          other_name: req.activity ?? t('messenger.match'),
+          other_avatar: null,
+          last_message: t('messenger.waitingForParticipants'),
+          last_message_at: req.created_at,
+          isUnread: false,
+          isBlitz: true,
+          isPendingBlitz: true,
+          blitzActivity: req.activity,
+          expiresAt: req.expires_at,
+          participantCount: 1,
+        });
       }
 
       // Load event group chats (where user participates)
@@ -358,11 +406,13 @@ const Messenger = () => {
     <div
       key={conversation.id}
       onClick={() =>
-        conversation.isBlitz
-          ? navigate(`/blitz/match/${conversation.matchId}`)
-          : conversation.isEventGroup
-            ? navigate(`/event/${conversation.eventId}/chat`)
-            : navigate(`/dm/${conversation.id}`)
+        conversation.isPendingBlitz
+          ? navigate("/blitz")
+          : conversation.isBlitz
+            ? navigate(`/blitz/match/${conversation.matchId}`)
+            : conversation.isEventGroup
+              ? navigate(`/event/${conversation.eventId}/chat`)
+              : navigate(`/dm/${conversation.id}`)
       }
       className="flex items-center gap-4 p-4 rounded-3xl cursor-pointer transition bg-card hover:bg-card/90 shadow-[0_6px_18px_-8px_rgba(15,20,16,0.10)]"
     >
