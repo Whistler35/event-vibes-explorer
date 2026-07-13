@@ -248,63 +248,112 @@ const BlitzMatch = () => {
   }
 
   return (
-    <div className="h-[100dvh] bg-[hsl(var(--blitz-forest))] text-white flex flex-col" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
-      <div className="flex items-center justify-between p-4 border-b border-white/10 shrink-0">
-        <button onClick={() => navigate("/blitz")} className="p-2 -ml-2">
-          <ArrowLeft className="w-5 h-5" />
+    <div className="h-[100dvh] bg-background text-foreground flex flex-col" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 pt-3 pb-2 shrink-0">
+        <button
+          onClick={() => navigate("/blitz")}
+          className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-[0_4px_12px_-4px_rgba(0,0,0,0.1)]"
+          aria-label="Back"
+        >
+          <ArrowLeft className="w-5 h-5 text-[hsl(var(--blitz-forest))]" />
         </button>
-        <div className="flex items-center gap-2 min-w-0">
-          <div className="flex -space-x-2">
-            {otherProfiles.slice(0, 3).map((p) => (
-              <Avatar key={p.user_id} className="w-8 h-8 border-2 border-[hsl(var(--blitz-forest))]">
-                <AvatarImage src={p.avatar_url ?? undefined} />
-                <AvatarFallback className="bg-[hsl(var(--blitz-pink))] text-white text-xs font-bold">
-                  {p.name?.[0] ?? "?"}
-                </AvatarFallback>
-              </Avatar>
-            ))}
-            {otherProfiles.length > 3 && (
-              <div className="w-8 h-8 rounded-full bg-white/20 border-2 border-[hsl(var(--blitz-forest))] flex items-center justify-center text-[10px] font-black">
-                +{otherProfiles.length - 3}
-              </div>
-            )}
-          </div>
-          <div className="leading-tight min-w-0">
-            <p className="font-bold text-sm truncate flex items-center gap-1">
-              <Zap className="w-3 h-3 fill-[hsl(var(--blitz-pink))] text-[hsl(var(--blitz-pink))]" />
-              {headerTitle}
-            </p>
-            <p className="text-[10px] uppercase tracking-wider text-white/60 truncate flex items-center gap-1">
-              <Users className="w-2.5 h-2.5" />
-              {participantIds.length} · {headerSub}
-            </p>
-          </div>
+        <div
+          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-black ${
+            expired
+              ? "bg-white text-muted-foreground"
+              : "bg-[hsl(var(--bolt))] text-[hsl(var(--blitz-forest))]"
+          }`}
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--blitz-forest))]" />
+          {participantIds.length} IN
         </div>
-        <div className="flex items-center gap-2">
+      </div>
+
+      {/* Title + host */}
+      <div className="px-5 pt-2 pb-4 shrink-0">
+        <h1 className="text-4xl font-black tracking-tight text-foreground leading-tight">
+          {headerTitle}?
+        </h1>
+        <div className="mt-3 flex items-center gap-2">
+          <Avatar className="w-8 h-8">
+            <AvatarImage src={otherProfiles[0]?.avatar_url ?? undefined} />
+            <AvatarFallback className="bg-[hsl(var(--blitz-forest))] text-white text-[10px] font-black">
+              {otherProfiles[0]?.name?.[0] ?? "?"}
+            </AvatarFallback>
+          </Avatar>
+          <p className="text-sm text-muted-foreground">
+            <span className="text-foreground font-black">
+              {otherProfiles[0]?.name?.split(" ")[0] ?? "Host"}
+            </span>{" "}
+            is hosting
+          </p>
+        </div>
+
+        <div className="mt-4 flex items-center gap-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-sm text-sm">
+            <Zap className="w-3.5 h-3.5 fill-[hsl(var(--blitz-forest))] text-[hsl(var(--blitz-forest))]" />
+            <span className="font-black tabular-nums">
+              {String(mm).padStart(2, "0")}:{String(ss).padStart(2, "0")}
+            </span>
+          </div>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-sm text-sm">
+            <Users className="w-3.5 h-3.5" />
+            <span className="font-semibold">{participantIds.length} Teilnehmer</span>
+          </div>
           {isAdmin && (
             <button
               onClick={handleAdminDelete}
               aria-label={t("blitzMatch.adminDeleteAria")}
-              className="w-9 h-9 rounded-full bg-red-500/90 hover:bg-red-500 flex items-center justify-center transition"
+              className="ml-auto w-9 h-9 rounded-full bg-red-500/90 hover:bg-red-500 flex items-center justify-center transition"
             >
               <Trash2 className="w-4 h-4 text-white" />
             </button>
           )}
-          <div
-            className={`px-3 py-1.5 rounded-full font-black tabular-nums text-sm ${
-              expired
-                ? "bg-white/10 text-white/40"
-                : "bg-[hsl(var(--blitz-pink))] text-white shadow-[0_0_20px_hsl(var(--blitz-pink)/0.5)]"
-            }`}
-          >
-            {String(mm).padStart(2, "0")}:{String(ss).padStart(2, "0")}
-          </div>
         </div>
       </div>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 space-y-3 pb-32">
+      {/* Who's in */}
+      <div className="px-5 pb-4 shrink-0">
+        <p className="text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground mb-2">
+          Who's in
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {participantIds.map((id) => {
+            const p = profilesMap.get(id);
+            const isHost = id === match.host_id;
+            return (
+              <div
+                key={id}
+                className="inline-flex items-center gap-2 pl-1 pr-3 py-1 rounded-full bg-white shadow-sm"
+              >
+                <Avatar className="w-7 h-7">
+                  <AvatarImage src={p?.avatar_url ?? undefined} />
+                  <AvatarFallback className="bg-[hsl(var(--blitz-forest))] text-white text-[10px] font-black">
+                    {p?.name?.[0] ?? "?"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="leading-tight">
+                  <p className="text-xs font-black">{p?.name?.split(" ")[0] ?? "?"}</p>
+                  <p className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">
+                    {isHost ? "HOST" : "IN"}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Huddle chat */}
+      <div className="px-5 pb-2 shrink-0">
+        <p className="text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground">
+          The Huddle
+        </p>
+      </div>
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 pb-40 space-y-2">
         {messages.length === 0 && (
-          <div className="text-center text-white/50 text-sm py-12">
+          <div className="text-center text-muted-foreground text-sm py-12">
             {t("blitzMatch.emptyChat")}
           </div>
         )}
@@ -314,21 +363,23 @@ const BlitzMatch = () => {
           return (
             <div
               key={msg.id}
-              className={`flex ${mine ? "justify-end" : "justify-start"}`}
+              className={`w-full ${mine ? "flex justify-end" : ""}`}
             >
               <div
-                className={`max-w-[75%] px-4 py-2 rounded-2xl ${
+                className={`max-w-[85%] px-4 py-3 rounded-2xl shadow-sm ${
                   mine
-                    ? "bg-[hsl(var(--blitz-pink))] text-white rounded-br-sm"
-                    : "bg-white/10 text-white rounded-bl-sm"
+                    ? "bg-[hsl(var(--blitz-forest))] text-white rounded-br-md"
+                    : "bg-white text-foreground rounded-bl-md"
                 }`}
               >
                 {!mine && senderName && (
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-white/70 mb-0.5">
+                  <p className="text-[11px] font-black text-[hsl(var(--blitz-forest))] mb-0.5">
                     {senderName}
                   </p>
                 )}
-                <p className="text-sm break-words whitespace-pre-wrap">{msg.message}</p>
+                <p className="text-sm break-words whitespace-pre-wrap leading-snug">
+                  {msg.message}
+                </p>
               </div>
             </div>
           );
@@ -337,26 +388,30 @@ const BlitzMatch = () => {
 
       <form
         onSubmit={handleSend}
-        className="fixed left-0 right-0 bottom-0 p-3 border-t border-white/10 flex items-center gap-2 bg-[hsl(var(--blitz-forest))] z-20"
+        className="fixed left-0 right-0 bottom-0 px-4 pt-3 pb-4 flex items-center gap-2 z-20"
         style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}
       >
-        <Input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder={expired ? t("blitzMatch.chatExpired") : t("blitzMatch.typeSomething")}
-          disabled={expired}
-          className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-white/40"
-        />
-        <button
-          type="submit"
-          disabled={!input.trim() || expired}
-          className="w-11 h-11 rounded-full bg-[hsl(var(--blitz-pink))] flex items-center justify-center disabled:opacity-30 shadow-[0_0_20px_hsl(var(--blitz-pink)/0.5)]"
-        >
-          <Send className="w-4 h-4 text-white" />
-        </button>
+        <div className="flex-1 flex items-center gap-2 bg-white rounded-full pl-5 pr-2 py-2 shadow-[0_8px_20px_-6px_rgba(0,0,0,0.12)]">
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder={expired ? t("blitzMatch.chatExpired") : "Say something…"}
+            disabled={expired}
+            className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground text-sm"
+          />
+          <button
+            type="submit"
+            disabled={!input.trim() || expired}
+            className="w-10 h-10 rounded-full bg-[hsl(var(--blitz-forest))] flex items-center justify-center disabled:opacity-30 shadow-sm"
+            aria-label="Send"
+          >
+            <Zap className="w-4 h-4 fill-[hsl(var(--bolt))] text-[hsl(var(--bolt))]" />
+          </button>
+        </div>
       </form>
     </div>
   );
 };
 
 export default BlitzMatch;
+
