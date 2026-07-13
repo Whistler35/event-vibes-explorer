@@ -156,8 +156,6 @@ const Profile = () => {
   const profileInstagramUrl = getInstagramUrl(profile?.instagram_username);
   const photos = profile?.photos || [];
   const interests = profile?.interests || [];
-  const score = stats.blitzSent + stats.participatedCount;
-  const level = activityLevel(score);
 
   return (
     <Layout>
