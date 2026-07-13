@@ -364,10 +364,12 @@ const Messenger = () => {
             ? navigate(`/event/${conversation.eventId}/chat`)
             : navigate(`/dm/${conversation.id}`)
       }
-      className="flex items-center gap-4 p-4 rounded-3xl cursor-pointer transition-colors bg-card hover:bg-card/80"
+      className="flex items-center gap-4 p-4 rounded-3xl cursor-pointer transition bg-card hover:bg-card/90 shadow-[0_6px_18px_-8px_rgba(15,20,16,0.10)]"
     >
-      <div className={`relative w-12 h-12 ${conversation.isEventGroup ? "rounded-2xl" : "rounded-full"} overflow-hidden flex-shrink-0 bg-muted`}>
-        {conversation.isEventGroup && !conversation.other_avatar ? (
+      <div className={`relative w-12 h-12 ${conversation.isBlitz || conversation.isEventGroup ? "rounded-2xl" : "rounded-full"} overflow-hidden flex-shrink-0 bg-[hsl(var(--muted))] flex items-center justify-center`}>
+        {conversation.isBlitz ? (
+          <Zap className="w-6 h-6 text-[hsl(var(--blitz-forest))] fill-[hsl(var(--blitz-forest))]" />
+        ) : conversation.isEventGroup && !conversation.other_avatar ? (
           <div className="w-full h-full flex items-center justify-center bg-primary">
             <Users className="w-6 h-6 text-primary-foreground" />
           </div>
@@ -378,37 +380,28 @@ const Messenger = () => {
             className="w-full h-full object-cover"
           />
         )}
-        {conversation.isBlitz && (
-          <div className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-primary flex items-center justify-center border-2 border-background">
-            <Zap className="w-2.5 h-2.5 text-primary-foreground fill-primary-foreground" />
-          </div>
-        )}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
-          <h3 className={`truncate ${conversation.isUnread ? "font-bold text-foreground" : "font-semibold text-foreground"}`}>
+          <h3 className={`truncate ${conversation.isUnread ? "font-black text-foreground" : "font-bold text-foreground"}`}>
             {conversation.other_name}
           </h3>
-          <span className="text-xs text-muted-foreground flex-shrink-0">
+          <span className="text-xs text-muted-foreground flex-shrink-0 font-semibold">
             {conversation.isEventGroup && conversation.participantCount
               ? `${conversation.participantCount} 👥`
               : formatTime(conversation.last_message_at)}
           </span>
         </div>
-        {conversation.isBlitz && conversation.blitzActivity && (
-          <p className="text-[11px] uppercase tracking-wider text-primary font-bold mt-0.5 flex items-center gap-1">
-            <Zap className="w-3 h-3 fill-primary" /> {conversation.blitzActivity}
-          </p>
-        )}
         <p className={`text-sm truncate mt-0.5 ${conversation.isUnread ? "text-foreground" : "text-muted-foreground"}`}>
           {conversation.last_message || t('messenger.noMessage')}
         </p>
       </div>
       {conversation.isUnread && (
-        <span className="w-2.5 h-2.5 rounded-full bg-primary flex-shrink-0" />
+        <span className="w-2.5 h-2.5 rounded-full bg-[hsl(var(--bolt))] flex-shrink-0" />
       )}
     </div>
   );
+
 
   return (
     <Layout>
