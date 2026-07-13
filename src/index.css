@@ -179,7 +179,6 @@ All colors MUST be HSL.
   }
 
   html {
-    @apply dark;
     -webkit-text-size-adjust: 100%;
   }
 
@@ -187,6 +186,7 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
     overscroll-behavior-y: none;
     -webkit-overflow-scrolling: touch;
+    font-feature-settings: "ss01", "cv11";
   }
 }
 
