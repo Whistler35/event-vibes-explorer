@@ -227,6 +227,39 @@ const Messenger = () => {
         }
       }
 
+      // Own active Blitz requests → show a pending huddle even before any match exists
+      const nowIso = new Date().toISOString();
+      const { data: myRequests } = await supabase
+        .from("blitz_requests")
+        .select("id, activity, expires_at, status, created_at")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .gt("expires_at", nowIso);
+
+      const matchedRequestIds = new Set(
+        (matches ?? []).map((m: any) => m.blitz_request_id).filter(Boolean)
+      );
+
+      for (const req of (myRequests ?? []) as any[]) {
+        if (matchedRequestIds.has(req.id)) continue;
+        if (!isHuddleActive({ expires_at: req.expires_at, status: req.status })) continue;
+        results.push({
+          id: `pending_blitz_${req.id}`,
+          blitzRequestId: req.id,
+          other_user_id: "",
+          other_name: req.activity ?? t('messenger.match'),
+          other_avatar: null,
+          last_message: t('messenger.waitingForParticipants'),
+          last_message_at: req.created_at,
+          isUnread: false,
+          isBlitz: true,
+          isPendingBlitz: true,
+          blitzActivity: req.activity,
+          expiresAt: req.expires_at,
+          participantCount: 1,
+        });
+      }
+
       // Load event group chats (where user participates)
       const { data: myParticipations } = await supabase
         .from("event_participants")
