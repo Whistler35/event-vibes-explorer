@@ -12,6 +12,7 @@ import FriendSearch from "@/components/FriendSearch";
 type Step = 0 | 1 | 2 | 3 | 4;
 
 const TOTAL_STEPS = 5;
+type Screen = "flow" | "ready";
 
 const INTERESTS = [
   "Tennis", "Fußball", "Padel", "Basketball", "Volleyball",
@@ -29,6 +30,7 @@ export default function Onboarding() {
   const { subscribe } = usePushNotifications();
 
   const [step, setStep] = useState<Step>(0);
+  const [screen, setScreen] = useState<Screen>("flow");
   const [name, setName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -113,7 +115,7 @@ export default function Onboarding() {
         : await supabase.from("profiles").insert(payload as any);
       if (error) throw error;
       toast.success("Willkommen bei EVENDLE ⚡");
-      navigate("/blitz", { replace: true });
+      setScreen("ready");
     } catch (err: any) {
       toast.error(err.message || "Speichern fehlgeschlagen");
     } finally {
@@ -128,6 +130,53 @@ export default function Onboarding() {
   };
 
   const avatarPreview = avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(name || "?")}&background=173518&color=fff&size=400`;
+
+  if (screen === "ready") {
+    const firstName = (name.trim().split(" ")[0]) || "friend";
+    return (
+      <div
+        className="fixed inset-0 flex flex-col text-white"
+        style={{
+          background:
+            "radial-gradient(120% 80% at 50% 0%, hsl(var(--blitz-forest-mid)) 0%, hsl(var(--blitz-forest-dark)) 55%, hsl(var(--blitz-forest-deep)) 100%)",
+          paddingTop: "env(safe-area-inset-top)",
+          paddingBottom: "env(safe-area-inset-bottom)",
+        }}
+      >
+        <div className="flex-1 flex flex-col items-center justify-center px-8 gap-8">
+          <div className="relative w-32 h-32 rounded-full bg-[hsl(var(--bolt))] flex items-center justify-center animate-blitz-pulse">
+            <Zap className="w-16 h-16 text-[hsl(var(--ink))] fill-[hsl(var(--ink))]" strokeWidth={2} />
+          </div>
+          <div className="text-center space-y-3">
+            <p className="text-[11px] font-semibold tracking-[0.4em] text-[hsl(var(--bolt))]">
+              EVENDLE
+            </p>
+            <h1 className="font-display text-[40px] font-bold leading-[1.05] tracking-tight">
+              You're in, {firstName}.
+            </h1>
+            <p className="text-white/70 text-base leading-relaxed max-w-xs mx-auto">
+              Send your first Blitz — or just see what's happening around you.
+            </p>
+          </div>
+        </div>
+        <div className="px-6 pb-8 space-y-3">
+          <Button
+            onClick={() => navigate("/blitz?create=1", { replace: true })}
+            className="w-full h-14 rounded-full bg-[hsl(var(--bolt))] text-[hsl(var(--ink))] hover:bg-[hsl(var(--bolt))]/90 font-bold text-base"
+            style={{ boxShadow: "0 10px 30px hsl(var(--bolt) / 0.25)" }}
+          >
+            <Zap className="w-5 h-5 mr-2 fill-[hsl(var(--ink))]" /> Send a Blitz
+          </Button>
+          <button
+            onClick={() => navigate("/blitz", { replace: true })}
+            className="w-full h-14 rounded-full border border-white/20 text-white font-semibold text-[15px] active:scale-[0.98] transition"
+          >
+            Just look around
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[hsl(var(--blitz-forest))] text-white flex flex-col">
