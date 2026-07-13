@@ -167,7 +167,7 @@ const Profile = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <img src={evendleLogo} alt="Evendle" className="w-9 h-9 object-contain rounded-md" />
-              <span className={`${isHost ? "text-foreground" : "text-white"} text-xl font-bold`}>EVENDLE</span>
+              <span className="text-foreground text-xl font-black">EVENDLE</span>
             </div>
             <div className="flex space-x-1">
               {isHost && (
