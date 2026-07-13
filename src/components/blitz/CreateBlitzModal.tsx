@@ -195,7 +195,7 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
                   <button
                     key={d.value}
                     onClick={() => setDuration(d.value)}
-                    className={`py-5 rounded-2xl font-black text-xl transition border-2 ${
+                    className={`py-4 rounded-2xl font-black text-lg transition border-2 ${
                       active
                         ? "bg-[hsl(var(--bolt))]/10 border-[hsl(var(--bolt))] text-[hsl(var(--bolt))]"
                         : "bg-white/5 border-white/10 text-white/80"
