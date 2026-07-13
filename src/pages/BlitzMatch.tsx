@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Zap, Trash2, Users } from "lucide-react";
+import { ArrowLeft, Zap, Trash2, Users, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -38,6 +38,7 @@ const BlitzMatch = () => {
   const { isAdmin } = useIsAdmin();
   const [match, setMatch] = useState<Match | null>(null);
   const [activity, setActivity] = useState<string>("");
+  const [city, setCity] = useState<string>("");
   const [participantIds, setParticipantIds] = useState<string[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [profilesMap, setProfilesMap] = useState<Map<string, Profile>>(new Map());
@@ -63,10 +64,11 @@ const BlitzMatch = () => {
 
       const { data: req } = await supabase
         .from("blitz_requests")
-        .select("activity")
+        .select("activity, city")
         .eq("id", m.blitz_request_id)
         .maybeSingle();
       setActivity(req?.activity ?? "");
+      setCity((req as any)?.city ?? "");
 
       const { data: parts } = await supabase
         .from("blitz_match_participants")
@@ -271,7 +273,7 @@ const BlitzMatch = () => {
 
       {/* Title + host */}
       <div className="px-5 pt-2 pb-4 shrink-0">
-        <h1 className="text-4xl font-black tracking-tight text-foreground leading-tight">
+        <h1 className="font-display text-4xl font-bold tracking-tight text-foreground leading-tight">
           {headerTitle}?
         </h1>
         <div className="mt-3 flex items-center gap-2">
@@ -289,16 +291,22 @@ const BlitzMatch = () => {
           </p>
         </div>
 
-        <div className="mt-4 flex items-center gap-2">
+        <div className="mt-4 flex items-center gap-2 flex-wrap">
           <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-sm text-sm">
             <Zap className="w-3.5 h-3.5 fill-[hsl(var(--blitz-forest))] text-[hsl(var(--blitz-forest))]" />
             <span className="font-black tabular-nums">
               {String(mm).padStart(2, "0")}:{String(ss).padStart(2, "0")}
             </span>
           </div>
+          {city && (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-sm text-sm">
+              <MapPin className="w-3.5 h-3.5 text-[hsl(var(--blitz-forest))]" />
+              <span className="font-semibold">{city}</span>
+            </div>
+          )}
           <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-sm text-sm">
             <Users className="w-3.5 h-3.5" />
-            <span className="font-semibold">{participantIds.length} Teilnehmer</span>
+            <span className="font-semibold">{participantIds.length}</span>
           </div>
           {isAdmin && (
             <button
@@ -309,6 +317,16 @@ const BlitzMatch = () => {
               <Trash2 className="w-4 h-4 text-white" />
             </button>
           )}
+        </div>
+
+        {/* Map preview — Evendle 2.0 striped placeholder */}
+        <div className="mt-4 relative rounded-2xl overflow-hidden evendle-map-stripes h-40 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full bg-[hsl(var(--blitz-forest))] flex items-center justify-center shadow-lg">
+            <span className="w-3 h-3 rounded-full bg-[hsl(var(--bolt))]" />
+          </div>
+          <p className="absolute bottom-2 left-3 right-3 text-[11px] font-mono text-muted-foreground truncate">
+            map preview{city ? ` — ${city}` : ""}
+          </p>
         </div>
       </div>
 

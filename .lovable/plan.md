@@ -1,130 +1,71 @@
-## Ziel
+## Vergleich mit Evendle 2.0 — kurz
 
-Visuelles Redesign der bestehenden App passend zu den 10 hochgeladenen Screenshots. Ausschließlich Styling/Layout — keine Änderungen an Supabase, Auth, Datenmodell, Hooks, Queries, Routen oder Business-Logik.
+Struktur & Farben stimmen weitgehend (Forest / Lime / Cream, BLITZ-Tabs, Huddle mit „+ Invite more friends", floatende Bottom-Nav). Es fehlen aber ein paar sehr sichtbare Dinge, die Evendle 2.0 seinen Look geben. Genau die will ich in diesem Plan angleichen — **ohne** Businesslogik, Supabase oder Auth-Flow zu ändern.
 
-## Design-Sprache (aus den Screenshots abgeleitet)
+## Was noch nicht passt
 
-- **Palette**
-  - Background hell: `#F1EFE8` (warmes Off-White / Bone)
-  - Forest Dark: `#1E3323` (Karten, Header, primär)
-  - Bolt/Lime Accent: `#D4F26A` (CTA, Badges, aktiver Zustand)
-  - Ink: `#0E1410` (Typo auf Hell)
-  - Muted Ink: `#8A9186`
-  - Card White: `#FFFFFF` mit weichem Schatten
-  - Chat-Avatare farbig (Terracotta `#C86A4A`, Steel Blue `#3E6E86`, Plum `#5B4E7A`) — bleiben wie aktuell generiert
-- **Typografie**
-  - Display / Headlines: geometrisch-humanistisch, sehr fett (aktuell nutzen wir bereits sowas Ähnliches — beibehalten, nur Gewichte/Tracking justieren). Große Headlines `text-4xl`–`text-6xl` mit `font-black` und leicht negativem Tracking.
-  - Uppercase-Labels (`EVENDLE BLITZ`, `WHO'S IN`, `MY BLITZ`) mit `tracking-[0.25em]` und `text-xs`, muted.
-  - Body: normaler Sans, `font-medium` für Sekundäres.
-- **Formen / Radius**
-  - Karten: `rounded-3xl` (24–28px)
-  - Pills / Segmented Control / Buttons: vollständig `rounded-full`
-  - Bottom-Nav: floating Pill mit weißer Fläche und Schatten
-- **Schatten**
-  - Karten: weich, niedrig (`0 8px 24px rgba(0,0,0,0.06)`)
-  - Lime-CTA & aktiver Bottom-Nav-Blitz-Button: sanfter Lime-Glow
-- **Motion**: keine Änderung — bestehende Blitz-Animationen bleiben.
+1. **Typografie fehlt komplett**
+   Space Grotesk (Display) + Instrument Sans (Body) sind nirgendwo geladen. Alle Headlines rendern in einem System-Sans → die charakteristische Evendle-Anmutung geht verloren.
 
-## Design-Tokens (in `src/index.css`)
+2. **Farbtokens teils approximiert**
+   Nur `#1E3323` (Forest) und `#C8F14F` (Lime) stimmen exakt. `#F4F3ED` (Cream), `#131711` (Ink) und `#79826F` (Muted) sind mit leicht anderen Werten (`#F1EFE8` etc.) hinterlegt → Hintergrund und Texte kippen minimal.
 
-Nur Werte anpassen, keine Tokens umbenennen (damit alle Konsumenten weiter funktionieren):
+3. **BlitzMatch (Huddle) — Map-Preview fehlt**
+   Referenz zeigt eine gestreifte/„pixelige" Map-Karte mit Punkt + Untertitel „map preview — Inn river steps, 650 m away". Aktuell kein Map-Block, keine Ort-Pill neben dem Timer.
 
-- `--background` → Bone `#F1EFE8`
-- `--foreground` → Ink `#0E1410`
-- `--card` → `#FFFFFF`
-- `--primary` → Forest `#1E3323`
-- `--primary-foreground` → Bone
-- `--muted-foreground` → `#8A9186`
-- `--bolt` → `#D4F26A` (aktualisieren)
-- `--blitz-forest` bleibt, Wert auf `#1E3323` justieren
-- Neuer Utility-Layer: `.surface-forest`, `.surface-card`, `.pill-lime`, `.label-caps` — optional, um wiederholte Klassen zu bündeln
+4. **Onboarding — „Ready"-Screen fehlt**
+   Nach dem letzten Step springt die App direkt auf `/blitz`. Referenz hat einen kurzen „You're in, Jakob."-Moment mit pulsierendem Lime-Bolt.
 
-`html { @apply dark; }` wird entfernt — App läuft im Light-Mode (die Screenshots sind hell). Dark-Tokens bleiben als Fallback bestehen.
+5. **Landing benutzt Inline-Hex statt Tokens**
+   `Landing.tsx` hat `#15271B`, `#C8F14F`, `#131711` hart im JSX. Nach dem Token-Fix soll sie diese Werte über CSS-Variablen ziehen.
 
-## Betroffene Screens (nur visuelles Refactor der Klassen/Struktur, Props & Handler unverändert)
+6. **Profile — vorbereiteter Forest-Look ungenutzt**
+   `.profile-blitz-bg`, `.blitz-stat-card`, `.profile-avatar-halo` sind in `index.css` definiert, aber `Profile.tsx` rendert plain. Referenz-Profil ist deutlich grafischer.
 
-1. **Bottom Navigation** (`src/components/BottomNavigation.tsx`)
-   - Floating white Pill, große Icons, mittig der Blitz-CTA als Lime-Kreis mit Glow, Label `BLITZ` darunter. Chats-Badge als kleiner Lime-Kreis oben rechts am Icon.
+## Was ich ändern werde
 
-2. **Blitz Landing / My Blitz + Discover** (`src/pages/Blitz.tsx`, `ActiveBlitzScreen.tsx`, `DiscoveryDeck.tsx`)
-   - Segmented Control „MY BLITZ / DISCOVER" oben als Pill mit dunkler aktiver Hälfte.
-   - Große Forest-Karte mit uppercase Label, Riesen-Headline `FEELING SPONTANEOUS?`, Bolt-Icon zentriert, Footer-Label `TAP TO BLITZ`.
-   - Discover-Karte: Forest-Karte mit Aktivitäts-Icon-Tile (Lime auf dunklem Grün), Titel, Host-Zeile, Location, „X, Y are in" Avatar-Cluster; darunter runde X/✓ Action-Buttons (weiß / lime).
-   - Active-Blitz-Karte: Label + Aktivität, „You are hosting · ends in …", Sparkle-Add-Icon, „JP Jakob is in", CTA-Text „TAP TO OPEN HUDDLE" + Lime-Pill „⚡ ends in 1h 59m" darunter.
+### Schritt 1 — Fonts einbauen
+- In `index.html` Preconnect + Google-Fonts-Link für **Space Grotesk (500/600/700)** und **Instrument Sans (400/500/600/700)**.
+- In `tailwind.config.ts` `fontFamily.display = ["Space Grotesk", …]` und `fontFamily.sans = ["Instrument Sans", …]` erweitern.
+- In `src/index.css` `body { font-family: "Instrument Sans", … }` und Utility `.font-display` für Headlines.
+- Große Titel in Landing, Auth, Onboarding, Blitz, BlitzMatch, Profile auf `font-display` + entsprechende Gewichte umstellen.
 
-3. **Create Blitz Modal** (`src/components/blitz/CreateBlitzModal.tsx`)
-   - Dark Forest Sheet, Header mit Lime-Tile + „BLITZ / Spontaneous Request".
-   - Input als unterstrichenes Feld (kein Border-Rechteck), großer Placeholder.
-   - Dauer-Auswahl als drei gleich große Karten, aktiv = Lime-Outline + Lime-Text.
-   - Radius-Slider mit Lime-Fill, aktueller Wert lime unter dem Slider.
-   - Sichtbarkeit: 3 Kacheln „Öffentlich / Freunde / Auswählen" — aktive lime umrandet. Wichtig: der „BLITZ NOW"-Button bleibt **immer** sichtbar am unteren Rand (fix positioniert, safe-area padding). Bestehender Fix aus vorheriger Iteration bleibt erhalten.
+### Schritt 2 — Farbtokens exakt setzen
+- In `src/index.css` die Kernfarben auf die Evendle-2.0-Werte ziehen:
+  - `--background` → `#F4F3ED`
+  - `--foreground` / `--ink` → `#131711`
+  - `--muted-foreground` → `#79826F`
+  - `--blitz-forest` bleibt `#1E3323`, ergänzen: `--blitz-forest-dark #15271B`, `--blitz-forest-mid #2C4632`
+  - `--bolt` bleibt `#C8F14F`
+- Inline-Hex in `Landing.tsx` durch diese Tokens ersetzen.
 
-4. **Freunde auswählen Sheet** (im CreateBlitzModal-Flow / FriendSearch)
-   - Sektionen „CLOSE FRIENDS", „RECENT PLANS WITH", „FROM YOUR CONTACTS".
-   - Close-Friends-Karte: Forest, Avatar-Cluster, Titel + „6 people", großer Lime „Blitz them" Button.
-   - Recent/Contacts: weiße Cards mit Avatar, Name, Sublabel und Pill-Button (`Blitz` lime / `Add` outline).
+### Schritt 3 — BlitzMatch: Map-Preview + Ort-Pill
+- In `src/pages/BlitzMatch.tsx` unterhalb Titel/Host eine **Ort-Pill** neben der Timer-Pill (Pin-Icon + Ortsname aus `blitz_requests`).
+- Darunter ein **Map-Preview-Block** im Referenz-Stil: cream Rechteck mit diagonalen Streifen (CSS `repeating-linear-gradient`), zentriertem Forest-Punkt mit Lime-Kern, Footer-Text „map preview — {Ort}, {Distanz} away". Distanz erstmal statisch/omitted falls kein Wert.
+- Kein Mapbox-Load — bewusst als illustratives Placeholder gehalten (matcht Referenz exakt).
 
-5. **Blitz Match / Huddle-Detail** (`src/pages/BlitzMatch.tsx`)
-   - Heller Screen. Zurück-Pfeil links, Lime-Pill „3 IN" rechts oben.
-   - Riesen-Titel „Spritz at the Inn?", Host-Zeile mit Avatar.
-   - Zwei Info-Pills (Zeit, Location) in weiß.
-   - Map-Preview als abgerundete Karte mit Streifen-Placeholder + Zentrum-Dot (bestehende Map bleibt, nur Rahmen/Radius/Caption angepasst).
-   - „WHO'S IN" Chip-Grid (Avatar + Name + Rolle wie HOST/IN/MAYBE).
-   - „+ Invite more friends" Outline-Pill über volle Breite.
-   - „THE HUDDLE" Chat-Bubbles: weiße Karten, Absendername farbig, Text ink; Composer unten mit Lime-Send-Button (Blitz-Icon).
+### Schritt 4 — Onboarding „Ready"-Screen
+- In `src/pages/Onboarding.tsx` neuen Terminal-Step `ready` einfügen: dunkler Forest-Full-Bleed, pulsierender Lime-Bolt (`animate-blitz-pulse`), Titel **„You're in, {Vorname}."** + Sub „Send your first Blitz.", zwei Buttons: **„Send a Blitz"** (Lime) → `/blitz` + Create-Modal, **„Just look around"** (outlined) → `/blitz`.
+- `finish()` wechselt zu diesem Step, statt sofort zu navigieren.
 
-6. **Chats-Liste** (`src/pages/Messenger.tsx`)
-   - Großer Titel „Chats", Sublabel „Your active Blitz huddles.".
-   - Zeilen als weiße Karten: quadratisches Icon-Tile links (Aktivitäts-Emoji/Icon), Titel, letzte Nachricht, Zeit rechts + Unread-Dot lime. Sortierung/Unread-Logik bleibt bestehen.
+### Schritt 5 — Landing-Politur
+- Alle Inline-Hex durch `hsl(var(--…))` ersetzen.
+- Headline auf `font-display font-bold tracking-tight` — sonst identisch.
 
-7. **Profile** (`src/pages/Profile.tsx`)
-   - Heller Screen, großer Avatar zentriert, Name, `@handle · Stadt`.
-   - Drei weiße Stat-Karten (Blitzes sent / Joined / Friends).
-   - „USUALLY UP FOR" Section mit outline Chips + „Edit"-Link.
-   - Friends-Search-Feld als weiße Pill.
-   - Close-Friends-Forest-Card mit „Blitz them"-Lime-Button.
-   - Recent Plans / Contacts wie oben.
-   - Bestehende Datenquellen (Stats-Hook, Friends-Hook, InterestChips) unverändert weiterverwendet.
+### Schritt 6 — Profile-Forest-Look aktivieren
+- `Profile.tsx`-Root bekommt `profile-blitz-bg`, Stat-Cards `blitz-stat-card`, Avatar `profile-avatar-halo` — Klassen sind schon in `index.css` vorhanden, müssen nur angewandt werden.
+- Text-Farben in weiß/lime für Kontrast auf Forest anpassen.
 
-8. **Onboarding letzter Step + „You're in"** (`src/pages/Onboarding.tsx`)
-   - „Find your people." Headline, weiße Kachel „Connect contacts" mit Forest-Allow-Button, zweite Kachel mit Share-Link + Outline-Share-Button, unten großer Lime „Done" + Textlink „Not now".
-   - „You're in, Jakob." Screen: dunkler Forest-Grund mit radialem Glow, großer Lime Blitz-Kreis mit Pulse (bestehende Animationen), Headline + Subline, Lime-CTA „Send my first Blitz" + Outline „Look around first".
+## Was ich bewusst NICHT anfasse
 
-## Was NICHT angefasst wird
+- Auth-Flow / OAuth / Test-User
+- Supabase-Schema, RLS, Edge-Functions
+- Blitz-Erstellung, Discovery-Matching, Chat-Persistenz
+- CreateBlitzModal-Felder (Aktivität bleibt Textfeld — Umbau auf Tile-Grid wäre ein Feature-Change, kein UI-Angleich)
+- i18n-Schlüssel bleiben — nur Fallback-Texte für die neuen Screens werden auf Englisch gesetzt (matcht Referenz)
 
-- `src/integrations/supabase/*` (Client, Types)
-- Auth-Flows (`Auth.tsx`, `AuthCallback.tsx`, `nativeGoogleAuth`, Lovable-OAuth-Bridge) — nur wenn Farbklassen offensichtlich brechen, sonst zero touch
-- Alle Hooks (`useBlitz*`, `useMyPendingSwipes`, `useNotifications`, …)
-- Migrations / RLS / Edge Functions
-- Router, Routen, Deep Links
-- Business-Logik in Handlern, Mutations, Realtime-Subscriptions
+## Verifikation
 
-## Mobile / Safe-Area
-
-- `Layout.tsx` behält `env(safe-area-inset-top/bottom)`.
-- Bottom-Nav bleibt fixed mit `pb-safe`.
-- Alle Screens: `max-w-md mx-auto` Container beibehalten, horizontales Padding `px-5`.
-- Kein `overflow-x`, `overscroll-behavior: contain` bleibt.
-- Buttons ≥ 48px Touch-Target.
-
-## Vorgehen (schrittweise)
-
-1. Tokens & globale Styles (`index.css`, `tailwind.config.ts` falls nötig) — Light-Mode aktivieren, Farben justieren.
-2. `BottomNavigation` neu stylen.
-3. Blitz-Hauptscreen + `ActiveBlitzScreen` + `DiscoveryDeck` visuell anpassen.
-4. `CreateBlitzModal` + Friend-Select-Sheet.
-5. `BlitzMatch` (Huddle) inkl. Map-Rahmen und Chat-Bubbles.
-6. `Messenger` Liste.
-7. `Profile`.
-8. `Onboarding` finale Steps + „You're in" Screen.
-9. Visueller Check per Playwright-Screenshots (Mobile Viewport 390×844) für alle Screens; Konsole auf Fehler prüfen.
-
-## Verifikation nach Umsetzung
-
-- Login (Email + Google + Apple) unverändert erreichbar
-- Blitz erstellen / swipen / matchen / chatten funktioniert wie vorher
-- Bottom-Nav-Routing, Zurück-Navigation, Deep Links
-- Chats + Unread-Badge korrekt
-- Keine Console-Errors, keine horizontalen Scrolls auf 390px
-
-Bei Konflikt Design ↔ Funktion gewinnt Funktion — Design wird angepasst, Handler/Queries bleiben.
+- Playwright-Screenshots auf 390×844 für Landing, Onboarding-Ready, Blitz, BlitzMatch, Profile → mit den Referenz-Uploads gegenprüfen.
+- TypeCheck + Console frei von Errors.
+- Fonts wirklich geladen (Network-Tab zeigt Google-Fonts-Requests, Rendered-Font-Check im DevTools).
