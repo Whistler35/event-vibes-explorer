@@ -229,7 +229,7 @@ const Messenger = () => {
 
       // Own active Blitz requests → show a pending huddle even before any match exists
       const nowIso = new Date().toISOString();
-      const { data: myRequests } = await supabase
+      const { data: myRequests } = await (supabase as any)
         .from("blitz_requests")
         .select("id, activity, expires_at, status, created_at")
         .eq("user_id", user.id)
