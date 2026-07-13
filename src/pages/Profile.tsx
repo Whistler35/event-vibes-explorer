@@ -60,7 +60,7 @@ const useActivityLevel = () => {
 const Profile = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
-  const activityLevel = useActivityLevel();
+  
   const { isAdmin, count: pendingCount } = usePendingEventsCount();
   const { isHost } = useIsHost();
   const navigate = useNavigate();
