@@ -3,7 +3,7 @@ import evendleLogo from "@/assets/evendle-logo.jpeg";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, ShieldCheck, LogIn, Building2, Globe, ExternalLink, Ticket, Zap, ThumbsUp, Flame } from "lucide-react";
+import { LogOut, Settings, ShieldCheck, LogIn, Building2, Globe, ExternalLink, Ticket } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePendingEventsCount } from "@/hooks/usePendingEventsCount";
 import { useIsHost } from "@/hooks/useIsHost";
