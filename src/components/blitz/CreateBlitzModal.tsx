@@ -156,15 +156,17 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
       <DialogContent
         className="w-[calc(100vw-1rem)] max-w-md p-0 border-0 bg-[hsl(var(--blitz-forest))] text-white max-h-[92dvh] overflow-hidden rounded-[28px] relative [&>button]:text-white [&>button]:opacity-90 [&>button]:hover:opacity-100 [&>button]:z-10"
       >
-        <div className="max-h-[92dvh] overflow-y-auto">
-        <div className="px-6 pt-10 pb-32 space-y-6">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-[hsl(var(--blitz-forest-deep))]/60 flex items-center justify-center">
-              <Zap className="w-6 h-6 text-[hsl(var(--bolt))] fill-[hsl(var(--bolt))]" />
+        <div className="max-h-[92dvh] overflow-y-auto overscroll-contain">
+        <div className="px-5 pt-8 pb-32 space-y-5">
+          <div className="flex items-center gap-3 pr-8">
+            <div className="w-11 h-11 shrink-0 rounded-2xl bg-[hsl(var(--blitz-forest-deep))]/60 flex items-center justify-center">
+              <Zap className="w-5 h-5 text-[hsl(var(--bolt))] fill-[hsl(var(--bolt))]" />
             </div>
-            <div>
-              <p className="text-[11px] uppercase tracking-[0.3em] text-white/55 font-black">Blitz</p>
-              <h2 className="text-2xl font-black leading-tight">Spontaneous Request</h2>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] uppercase tracking-[0.3em] text-white/55 font-black">Blitz</p>
+              <h2 className="font-display text-xl sm:text-2xl font-bold leading-tight truncate">
+                Spontaneous Request
+              </h2>
             </div>
           </div>
 
@@ -176,9 +178,9 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
               autoFocus
               value={activity}
               onChange={(e) => setActivity(e.target.value)}
-              placeholder="e.g. Tennis, Bouldering, Coffee…"
+              placeholder="e.g. Tennis, Coffee…"
               maxLength={80}
-              className="w-full bg-transparent border-b border-white/25 focus:border-[hsl(var(--bolt))] outline-none text-2xl font-black placeholder:text-white/25 py-3 transition"
+              className="w-full min-w-0 bg-transparent border-b border-white/25 focus:border-[hsl(var(--bolt))] outline-none text-lg sm:text-xl font-black placeholder:text-white/25 py-3 transition"
             />
           </div>
 
@@ -193,7 +195,7 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
                   <button
                     key={d.value}
                     onClick={() => setDuration(d.value)}
-                    className={`py-5 rounded-2xl font-black text-xl transition border-2 ${
+                    className={`py-4 rounded-2xl font-black text-lg transition border-2 ${
                       active
                         ? "bg-[hsl(var(--bolt))]/10 border-[hsl(var(--bolt))] text-[hsl(var(--bolt))]"
                         : "bg-white/5 border-white/10 text-white/80"
