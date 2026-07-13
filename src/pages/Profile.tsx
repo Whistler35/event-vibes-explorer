@@ -188,7 +188,7 @@ const Profile = () => {
           {isAdmin && (
             <button
               onClick={() => navigate("/admin/events")}
-              className="w-full flex items-center justify-between p-4 rounded-2xl bg-[hsl(var(--blitz-pink))] text-white hover:opacity-95 transition shadow-md"
+              className="w-full flex items-center justify-between p-4 rounded-2xl bg-[hsl(var(--blitz-forest))] text-white hover:opacity-95 transition shadow-md"
             >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
