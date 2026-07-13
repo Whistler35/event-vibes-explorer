@@ -200,7 +200,7 @@ const Profile = () => {
                 </div>
               </div>
               {pendingCount > 0 && (
-                <span className="bg-white text-[hsl(var(--blitz-pink))] text-xs font-bold rounded-full min-w-6 h-6 px-2 flex items-center justify-center">
+                <span className="bg-[hsl(var(--bolt))] text-[hsl(var(--blitz-forest))] text-xs font-bold rounded-full min-w-6 h-6 px-2 flex items-center justify-center">
                   {pendingCount}
                 </span>
               )}
