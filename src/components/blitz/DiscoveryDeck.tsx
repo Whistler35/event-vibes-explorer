@@ -366,10 +366,10 @@ const DiscoveryDeck = ({ city, onStartOwn }: DiscoveryDeckProps) => {
         </button>
         <button
           onClick={() => handleSwipe("right")}
-          className="w-16 h-16 rounded-full bg-[hsl(var(--blitz-pink))] flex items-center justify-center shadow-[0_0_30px_hsl(var(--blitz-pink)/0.6)] hover:scale-110 active:scale-95 transition"
+          className="w-16 h-16 rounded-full bg-[hsl(var(--bolt))] flex items-center justify-center shadow-[0_10px_28px_-8px_hsl(var(--bolt)/0.7)] hover:scale-110 active:scale-95 transition"
           aria-label="Send request"
         >
-          <Check className="w-7 h-7 text-white" />
+          <Check className="w-7 h-7 text-[hsl(var(--blitz-forest))]" strokeWidth={3} />
         </button>
       </div>
     </div>
