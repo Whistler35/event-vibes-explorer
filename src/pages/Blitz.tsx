@@ -97,7 +97,7 @@ const Blitz = () => {
 
             <button
               onClick={() => navigate("/auth")}
-              className="relative px-8 py-4 rounded-2xl bg-[hsl(var(--blitz-pink))] text-white font-black uppercase tracking-wider shadow-[0_8px_32px_hsl(var(--blitz-pink)/0.5)] hover:scale-105 transition"
+              className="relative px-8 py-4 rounded-full bg-[hsl(var(--bolt))] text-[hsl(var(--blitz-forest))] font-black uppercase tracking-wider shadow-[0_12px_32px_-8px_hsl(var(--bolt)/0.6)] hover:scale-105 transition"
             >
               {t('blitz.loginToBlitz')}
             </button>
@@ -109,26 +109,26 @@ const Blitz = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
-      <div className="px-4 pt-4 space-y-4">
-        {/* Tab Switcher */}
-        <div className="flex p-1 rounded-full bg-muted">
+    <div className="min-h-screen bg-background pb-32" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+      <div className="max-w-md mx-auto px-5 pt-6 space-y-5">
+        {/* Segmented Control */}
+        <div className="flex p-1 rounded-full bg-[hsl(var(--muted))]">
           <button
             onClick={() => setTab("request")}
-            className={`flex-1 py-2.5 rounded-full text-sm font-black uppercase tracking-wider transition ${
+            className={`flex-1 py-3 rounded-full text-sm font-black uppercase tracking-[0.2em] transition ${
               tab === "request"
-                ? "bg-[hsl(var(--blitz-forest))] text-white shadow-md"
-                : "text-muted-foreground"
+                ? "bg-[hsl(var(--blitz-forest))] text-white shadow-sm"
+                : "text-[hsl(var(--blitz-forest))]/50"
             }`}
           >
             {t('blitz.myBlitz')}
           </button>
           <button
             onClick={() => setTab("discover")}
-            className={`flex-1 py-2.5 rounded-full text-sm font-black uppercase tracking-wider transition ${
+            className={`flex-1 py-3 rounded-full text-sm font-black uppercase tracking-[0.2em] transition ${
               tab === "discover"
-                ? "bg-[hsl(var(--blitz-pink))] text-white shadow-md"
-                : "text-muted-foreground"
+                ? "bg-[hsl(var(--blitz-forest))] text-white shadow-sm"
+                : "text-[hsl(var(--blitz-forest))]/50"
             }`}
           >
             {t('blitz.discover')}
@@ -140,39 +140,38 @@ const Blitz = () => {
 
         {tab === "request" ? (
           loading ? (
-            <div className="h-[70vh] rounded-3xl bg-muted animate-pulse" />
+            <div className="h-[70vh] rounded-[28px] bg-muted animate-pulse" />
           ) : request ? (
             <div className="space-y-4">
               <IncomingRequestsList blitzRequestId={request.id} />
               <ActiveBlitzScreen request={request} onEnded={reload} />
             </div>
           ) : (
-            <div className="relative overflow-hidden rounded-3xl bg-[hsl(var(--blitz-forest))] text-white p-8 min-h-[65vh] flex flex-col items-center justify-between text-center">
-              <div className="absolute -top-10 -right-10 w-60 h-60 rounded-full bg-[hsl(var(--blitz-pink))] blur-3xl opacity-30" />
-              <div className="absolute -bottom-10 -left-10 w-60 h-60 rounded-full bg-[hsl(var(--blitz-pink))] blur-3xl opacity-25" />
-
-              <div className="relative pt-6 space-y-2">
-                <p className="text-xs uppercase tracking-[0.3em] text-white/60 font-bold">{t('blitz.tagline')}</p>
-                <h1 className="text-5xl font-black uppercase leading-none whitespace-pre-line">
+            <button
+              onClick={() => setCreateOpen(true)}
+              className="w-full relative overflow-hidden rounded-[28px] bg-[hsl(var(--blitz-forest))] text-white p-8 min-h-[65vh] flex flex-col items-center justify-between text-center active:scale-[0.99] transition"
+              aria-label={t('blitz.createNew')}
+            >
+              <div className="pt-4 space-y-4">
+                <p className="text-[11px] uppercase tracking-[0.35em] text-white/55 font-bold">
+                  EVENDLE BLITZ
+                </p>
+                <h1 className="text-[44px] leading-[0.95] font-black uppercase tracking-tight whitespace-pre-line">
                   {t('blitz.spontaneousFeeling')}
                 </h1>
-                <p className="text-white/70 mt-3 max-w-xs mx-auto">
+                <p className="text-white/65 text-[15px] max-w-[280px] mx-auto leading-snug">
                   {t('blitz.teaserAlt')}
                 </p>
               </div>
 
-              <button
-                onClick={() => setCreateOpen(true)}
-                className="relative w-32 h-32 rounded-full bg-[hsl(var(--blitz-pink))] flex items-center justify-center shadow-[0_0_60px_hsl(var(--blitz-pink)/0.6)] hover:scale-105 active:scale-95 transition animate-blitz-pulse"
-                aria-label={t('blitz.createNew')}
-              >
-                <Zap className="w-16 h-16 text-white fill-white" />
-              </button>
+              <div className="relative flex items-center justify-center py-6">
+                <Zap className="w-24 h-24 text-white fill-white drop-shadow-[0_8px_24px_rgba(212,242,106,0.35)]" />
+              </div>
 
-              <p className="relative text-sm font-black uppercase tracking-[0.25em] pb-4">
+              <p className="text-[13px] font-black uppercase tracking-[0.4em] text-white/85 pb-2">
                 {t('blitz.tapToBlitz')}
               </p>
-            </div>
+            </button>
           )
         ) : (
           <DiscoveryDeck
@@ -184,6 +183,7 @@ const Blitz = () => {
           />
         )}
       </div>
+
 
       <CreateBlitzModal open={createOpen} onOpenChange={setCreateOpen} onCreated={reload} />
 

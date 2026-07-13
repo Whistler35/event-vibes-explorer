@@ -1,16 +1,31 @@
 import { useEffect, useState } from "react";
-import { Zap, X } from "lucide-react";
+import { Sparkles, X } from "lucide-react";
 import { BlitzRequest, cancelBlitzRequest } from "@/hooks/useBlitzRequest";
-import { getActivityFontClass } from "@/lib/blitzText";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Zap } from "lucide-react";
 
 interface ActiveBlitzScreenProps {
   request: BlitzRequest;
   onEnded: () => void;
 }
 
+const formatRemaining = (ms: number) => {
+  const totalMinutes = Math.max(0, Math.floor(ms / 60000));
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+};
+
 const ActiveBlitzScreen = ({ request, onEnded }: ActiveBlitzScreenProps) => {
   const [now, setNow] = useState(Date.now());
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
@@ -19,10 +34,7 @@ const ActiveBlitzScreen = ({ request, onEnded }: ActiveBlitzScreenProps) => {
 
   const expiresAt = new Date(request.expires_at).getTime();
   const remainingMs = Math.max(0, expiresAt - now);
-  const totalSeconds = Math.floor(remainingMs / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  const timeLabel = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  const remainingLabel = formatRemaining(remainingMs);
 
   useEffect(() => {
     if (remainingMs === 0) {
@@ -31,65 +43,106 @@ const ActiveBlitzScreen = ({ request, onEnded }: ActiveBlitzScreenProps) => {
     }
   }, [remainingMs, onEnded]);
 
-  const handleCancel = async () => {
+  const { data: me } = useQuery({
+    queryKey: ["own-profile-mini-active", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      if (!user) return null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("name, avatar_url")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      return data as { name: string | null; avatar_url: string | null } | null;
+    },
+  });
+
+  // Look up active match to jump into the huddle
+  const { data: myMatch } = useQuery({
+    queryKey: ["active-blitz-match", request.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("blitz_matches")
+        .select("id")
+        .eq("blitz_request_id", request.id)
+        .eq("status", "active")
+        .maybeSingle();
+      return data as { id: string } | null;
+    },
+  });
+
+  const openHuddle = () => {
+    if (myMatch?.id) navigate(`/blitz/match/${myMatch.id}`);
+  };
+
+  const handleCancel = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm("Diesen Blitz beenden?")) return;
     try {
       await cancelBlitzRequest(request.id);
       toast("Blitz cancelled");
       onEnded();
-    } catch (e: any) {
-      toast.error(e.message || "Error");
+    } catch (err: any) {
+      toast.error(err.message || "Error");
     }
   };
 
+  const firstName = me?.name?.split(" ")[0] ?? "Du";
+
   return (
-    <div className="relative h-[calc(100dvh-220px)] sm:h-[calc(100dvh-240px)] md:h-[calc(100dvh-260px)] min-h-[380px] sm:min-h-[420px] md:min-h-[440px] max-h-[560px] sm:max-h-[620px] md:max-h-[680px] overflow-hidden rounded-3xl bg-[hsl(var(--blitz-forest))] text-white">
-      <div className="absolute inset-0 pointer-events-none opacity-30">
-        <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-[hsl(var(--blitz-pink))] blur-3xl" />
-        <div className="absolute bottom-10 -right-10 w-80 h-80 rounded-full bg-[hsl(var(--blitz-pink))] blur-3xl opacity-70" />
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-40 h-40 rounded-full bg-[hsl(var(--blitz-pink))] blur-2xl" />
-      </div>
-
-      <Zap className="absolute top-4 right-4 sm:top-6 sm:right-5 w-6 h-6 sm:w-7 sm:h-7 text-[hsl(var(--blitz-pink))] fill-[hsl(var(--blitz-pink))] opacity-60 animate-pulse pointer-events-none" />
-      <Zap className="absolute top-1/2 left-3 sm:left-4 w-4 h-4 sm:w-5 sm:h-5 text-[hsl(var(--blitz-pink))] fill-[hsl(var(--blitz-pink))] opacity-40 animate-pulse pointer-events-none" style={{ animationDelay: "0.5s" }} />
-
-      <div className="relative z-10 flex flex-col items-center justify-between h-full px-4 sm:px-6 py-4 sm:py-6 text-center">
-        <div className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.3em] text-white/60 font-bold">Live Blitz</p>
-          <div className="flex items-center justify-center gap-2">
-            <Zap className="w-6 h-6 text-[hsl(var(--blitz-pink))] fill-[hsl(var(--blitz-pink))]" />
-            <span className="text-sm font-bold text-[hsl(var(--blitz-pink))] uppercase tracking-widest">Active</span>
-          </div>
-        </div>
-
-        <div className="space-y-3 my-auto">
-          <h1 className={`${getActivityFontClass(request.activity)} font-black uppercase leading-tight tracking-tight break-words max-w-full px-2`}>
-            {request.activity}?
-          </h1>
-
-          <div className="flex items-baseline justify-center gap-2">
-            <div className="text-5xl font-black tabular-nums text-[hsl(var(--blitz-pink))] drop-shadow-[0_0_20px_hsl(var(--blitz-pink)/0.6)] leading-none">
-              {timeLabel}
-            </div>
-            <p className="text-xs uppercase tracking-widest text-white/60 font-bold">left</p>
-          </div>
-
-          <div className="flex flex-col items-center gap-0.5">
-            {request.city && (
-              <p className="text-sm text-white/70 font-medium">📍 {request.city}</p>
-            )}
-            <p className="text-[10px] uppercase tracking-widest text-white/50 font-bold">
-              Radius {request.radius_km} km
-            </p>
-          </div>
-        </div>
-
+    <div className="relative">
+      <button
+        type="button"
+        onClick={openHuddle}
+        className="w-full text-left relative overflow-hidden rounded-[28px] bg-[hsl(var(--blitz-forest))] text-white p-8 min-h-[62vh] flex flex-col items-center justify-between active:scale-[0.99] transition"
+      >
         <button
           onClick={handleCancel}
-          className="flex items-center gap-2 px-6 py-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white font-bold text-sm uppercase tracking-wide transition"
+          aria-label="Blitz beenden"
+          className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center backdrop-blur-sm"
         >
-          <X className="w-4 h-4" />
-          Cancel
+          <X className="w-4 h-4 text-white/80" />
         </button>
+
+        <div className="text-center pt-4 space-y-3">
+          <p className="text-[11px] uppercase tracking-[0.35em] text-white/55 font-bold">
+            EVENDLE BLITZ
+          </p>
+          <h1 className="text-6xl font-black leading-none tracking-tight break-words">
+            {request.activity}
+          </h1>
+          <p className="text-white/65 text-[15px]">
+            You are hosting · ends in {remainingLabel}
+          </p>
+        </div>
+
+        <div className="relative w-28 h-28 rounded-full bg-[hsl(var(--blitz-forest-deep))]/60 flex items-center justify-center">
+          <div className="absolute inset-0 rounded-full bg-[hsl(var(--bolt))]/10 blur-2xl" />
+          <Sparkles className="relative w-12 h-12 text-[hsl(var(--bolt))]" strokeWidth={2} />
+        </div>
+
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex items-center gap-3">
+            <Avatar className="w-10 h-10 border-2 border-white">
+              <AvatarImage src={me?.avatar_url ?? undefined} />
+              <AvatarFallback className="bg-[hsl(var(--blitz-forest-deep))] text-white text-xs font-black">
+                {firstName[0]?.toUpperCase() ?? "?"}
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-white/85 text-sm font-medium">{firstName} is in</span>
+          </div>
+          <p className="text-[13px] font-black uppercase tracking-[0.4em] text-white/85 pt-4">
+            Tap to open huddle
+          </p>
+        </div>
+      </button>
+
+      {/* Timer pill sitting on top of the bottom nav */}
+      <div className="flex justify-center -mt-4 relative z-10">
+        <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-[hsl(var(--blitz-forest))] text-[hsl(var(--bolt))] font-black text-sm shadow-[0_10px_20px_-6px_rgba(0,0,0,0.25)]">
+          <Zap className="w-4 h-4 fill-[hsl(var(--bolt))]" />
+          ends in {remainingLabel}
+        </div>
       </div>
     </div>
   );

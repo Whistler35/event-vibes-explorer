@@ -154,21 +154,22 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-w-md p-0 border-0 bg-[hsl(var(--blitz-forest))] text-white max-h-[90dvh] overflow-y-auto [&>button]:text-white [&>button]:opacity-90 [&>button]:hover:opacity-100"
+        className="max-w-md p-0 border-0 bg-[hsl(var(--blitz-forest))] text-white max-h-[92dvh] overflow-hidden rounded-t-[28px] sm:rounded-[28px] relative [&>button]:text-white [&>button]:opacity-90 [&>button]:hover:opacity-100 [&>button]:z-10"
       >
-        <div className="px-6 pt-10 pb-8 space-y-6">
+        <div className="max-h-[92dvh] overflow-y-auto">
+        <div className="px-6 pt-10 pb-32 space-y-6">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-[hsl(var(--blitz-pink))] flex items-center justify-center shadow-[0_0_24px_hsl(var(--blitz-pink)/0.6)]">
-              <Zap className="w-7 h-7 text-white fill-white" />
+            <div className="w-12 h-12 rounded-2xl bg-[hsl(var(--blitz-forest-deep))]/60 flex items-center justify-center">
+              <Zap className="w-6 h-6 text-[hsl(var(--bolt))] fill-[hsl(var(--bolt))]" />
             </div>
             <div>
-              <p className="text-xs uppercase tracking-widest text-white/60 font-bold">Blitz</p>
-              <h2 className="text-2xl font-black leading-none">Spontaneous Request</h2>
+              <p className="text-[11px] uppercase tracking-[0.3em] text-white/55 font-black">Blitz</p>
+              <h2 className="text-2xl font-black leading-tight">Spontaneous Request</h2>
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold uppercase tracking-wide text-white/70">
+            <label className="text-[11px] font-black uppercase tracking-[0.25em] text-white/55">
               What are you up for?
             </label>
             <input
@@ -177,12 +178,12 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
               onChange={(e) => setActivity(e.target.value)}
               placeholder="e.g. Tennis, Bouldering, Coffee…"
               maxLength={80}
-              className="w-full bg-transparent border-b-2 border-white/30 focus:border-[hsl(var(--blitz-pink))] outline-none text-3xl font-black placeholder:text-white/30 py-2 transition"
+              className="w-full bg-transparent border-b border-white/25 focus:border-[hsl(var(--bolt))] outline-none text-2xl font-black placeholder:text-white/25 py-3 transition"
             />
           </div>
 
           <div className="space-y-3">
-            <label className="text-sm font-bold uppercase tracking-wide text-white/70">
+            <label className="text-[11px] font-black uppercase tracking-[0.25em] text-white/55">
               How long?
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -192,10 +193,10 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
                   <button
                     key={d.value}
                     onClick={() => setDuration(d.value)}
-                    className={`py-3 rounded-xl font-black text-lg transition border-2 ${
+                    className={`py-5 rounded-2xl font-black text-xl transition border-2 ${
                       active
-                        ? "bg-[hsl(var(--blitz-pink))] border-[hsl(var(--blitz-pink))] text-white shadow-[0_0_20px_hsl(var(--blitz-pink)/0.5)]"
-                        : "bg-white/5 border-white/10 text-white/80 hover:border-white/30"
+                        ? "bg-[hsl(var(--bolt))]/10 border-[hsl(var(--bolt))] text-[hsl(var(--bolt))]"
+                        : "bg-white/5 border-white/10 text-white/80"
                     }`}
                   >
                     {d.label}
@@ -206,14 +207,9 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
           </div>
 
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-bold uppercase tracking-wide text-white/70">
-                Radius
-              </label>
-              <span className="text-2xl font-black text-[hsl(var(--blitz-pink))] tabular-nums">
-                {radius} km
-              </span>
-            </div>
+            <label className="text-[11px] font-black uppercase tracking-[0.25em] text-white/55">
+              Radius
+            </label>
             <input
               type="range"
               min={RADIUS_MIN}
@@ -221,16 +217,17 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
               step={RADIUS_STEP}
               value={radius}
               onChange={(e) => setRadius(Number(e.target.value))}
-              className="w-full accent-[hsl(var(--blitz-pink))] cursor-pointer"
+              className="w-full accent-[hsl(var(--bolt))] cursor-pointer"
             />
-            <div className="flex justify-between text-[10px] uppercase tracking-widest text-white/40 font-bold">
-              <span>{RADIUS_MIN} km</span>
-              <span>{RADIUS_MAX} km</span>
+            <div className="flex justify-between text-[11px] uppercase tracking-widest font-black">
+              <span className="text-white/40">{RADIUS_MIN} KM</span>
+              <span className="text-[hsl(var(--bolt))]">{radius} KM</span>
+              <span className="text-white/40">{RADIUS_MAX} KM</span>
             </div>
           </div>
 
           <div className="space-y-3">
-            <label className="text-sm font-bold uppercase tracking-wide text-white/70">
+            <label className="text-[11px] font-black uppercase tracking-[0.25em] text-white/55">
               Sichtbarkeit
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -245,14 +242,14 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
                     key={value}
                     type="button"
                     onClick={() => setAudience(value)}
-                    className={`p-3 rounded-xl text-center transition border-2 ${
+                    className={`p-3 rounded-2xl text-center transition border-2 ${
                       active
-                        ? "bg-[hsl(var(--blitz-pink))] border-[hsl(var(--blitz-pink))] text-white shadow-[0_0_20px_hsl(var(--blitz-pink)/0.5)]"
-                        : "bg-white/5 border-white/10 text-white/80 hover:border-white/30"
+                        ? "bg-[hsl(var(--bolt))]/10 border-[hsl(var(--bolt))] text-[hsl(var(--bolt))]"
+                        : "bg-white/5 border-white/10 text-white/80"
                     }`}
                   >
-                    <div className="flex flex-col items-center gap-1">
-                      <Icon className="w-4 h-4" />
+                    <div className="flex flex-col items-center gap-1.5">
+                      <Icon className="w-5 h-5" />
                       <span className="font-black text-[11px] uppercase tracking-wide">{label}</span>
                     </div>
                   </button>
@@ -261,7 +258,7 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
             </div>
 
             {audience === "selected" && (
-              <div className="mt-2 rounded-xl bg-white/5 border border-white/10 p-2 max-h-56 overflow-y-auto space-y-1">
+              <div className="mt-2 rounded-2xl bg-white/5 border border-white/10 p-2 max-h-56 overflow-y-auto space-y-1">
                 {friends.length === 0 ? (
                   <p className="text-xs text-white/60 text-center py-6">
                     Du hast noch keine Freunde auf EVENDLE.
@@ -271,32 +268,28 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
                     const selected = selectedFriendIds.includes(f.user_id);
                     const avatar =
                       f.avatar_url ||
-                      `https://ui-avatars.com/api/?name=${encodeURIComponent(f.name || "?")}&background=173518&color=fff&size=80`;
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(f.name || "?")}&background=1E3323&color=fff&size=80`;
                     return (
                       <button
                         key={f.user_id}
                         type="button"
                         onClick={() => toggleFriend(f.user_id)}
-                        className={`w-full flex items-center gap-3 px-2 py-2 rounded-lg transition ${
-                          selected ? "bg-[hsl(var(--blitz-pink))]/30" : "hover:bg-white/5"
+                        className={`w-full flex items-center gap-3 px-2 py-2 rounded-xl transition ${
+                          selected ? "bg-[hsl(var(--bolt))]/15" : "hover:bg-white/5"
                         }`}
                       >
-                        <img
-                          src={avatar}
-                          alt={f.name}
-                          className="w-8 h-8 rounded-full object-cover"
-                        />
+                        <img src={avatar} alt={f.name} className="w-8 h-8 rounded-full object-cover" />
                         <span className="flex-1 text-left text-sm font-semibold text-white truncate">
                           {f.name}
                         </span>
                         <span
                           className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                             selected
-                              ? "bg-[hsl(var(--blitz-pink))] border-[hsl(var(--blitz-pink))]"
+                              ? "bg-[hsl(var(--bolt))] border-[hsl(var(--bolt))]"
                               : "border-white/30"
                           }`}
                         >
-                          {selected && <Check className="w-3 h-3 text-white" />}
+                          {selected && <Check className="w-3 h-3 text-[hsl(var(--blitz-forest))]" strokeWidth={3} />}
                         </span>
                       </button>
                     );
@@ -311,9 +304,7 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
             )}
           </div>
 
-
-
-          <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 flex items-center gap-3">
+          <div className="rounded-2xl bg-white/5 border border-white/10 px-4 py-3 flex items-center gap-3">
             {locating ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin text-white/70" />
@@ -321,7 +312,7 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
               </>
             ) : coords ? (
               <>
-                <MapPin className="w-5 h-5 text-[hsl(var(--blitz-pink))]" />
+                <MapPin className="w-5 h-5 text-[hsl(var(--bolt))]" />
                 <span className="text-sm text-white/80">
                   Location active · visible within {radius} km
                 </span>
@@ -334,20 +325,26 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
                 </div>
                 <button
                   onClick={requestLocation}
-                  className="text-xs font-black uppercase tracking-wider text-[hsl(var(--blitz-pink))]"
+                  className="px-3 py-1.5 rounded-full bg-[hsl(var(--bolt))] text-[hsl(var(--blitz-forest))] text-[11px] font-black uppercase tracking-wider"
                 >
                   Allow
                 </button>
               </>
             )}
           </div>
+        </div>
+        </div>
 
+        {/* Sticky bottom CTA — always visible */}
+        <div
+          className="absolute left-0 right-0 bottom-0 px-6 pt-3 pb-[calc(env(safe-area-inset-bottom)+1rem)] bg-gradient-to-t from-[hsl(var(--blitz-forest))] via-[hsl(var(--blitz-forest))] to-transparent"
+        >
           <button
             onClick={handleSubmit}
             disabled={!canSubmit}
-            className="w-full mt-2 py-5 rounded-2xl bg-[hsl(var(--blitz-pink))] text-white font-black text-xl tracking-wider uppercase shadow-[0_8px_32px_hsl(var(--blitz-pink)/0.5)] hover:scale-[1.02] active:scale-[0.98] transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full py-5 rounded-full bg-[hsl(var(--bolt))] text-[hsl(var(--blitz-forest))] font-black text-lg tracking-[0.15em] uppercase shadow-[0_12px_32px_-8px_hsl(var(--bolt)/0.6)] active:scale-[0.98] transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            <Zap className="w-6 h-6 fill-white" />
+            <Zap className="w-5 h-5 fill-[hsl(var(--blitz-forest))]" />
             {submitting ? "Blitzing…" : "Blitz now"}
           </button>
         </div>
@@ -357,3 +354,4 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
 };
 
 export default CreateBlitzModal;
+
