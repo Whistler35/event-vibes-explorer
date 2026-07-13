@@ -97,7 +97,7 @@ const Blitz = () => {
 
             <button
               onClick={() => navigate("/auth")}
-              className="relative px-8 py-4 rounded-2xl bg-[hsl(var(--blitz-pink))] text-white font-black uppercase tracking-wider shadow-[0_8px_32px_hsl(var(--blitz-pink)/0.5)] hover:scale-105 transition"
+              className="relative px-8 py-4 rounded-full bg-[hsl(var(--bolt))] text-[hsl(var(--blitz-forest))] font-black uppercase tracking-wider shadow-[0_12px_32px_-8px_hsl(var(--bolt)/0.6)] hover:scale-105 transition"
             >
               {t('blitz.loginToBlitz')}
             </button>
