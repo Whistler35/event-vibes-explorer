@@ -161,8 +161,8 @@ const Profile = () => {
 
   return (
     <Layout>
-      <div className={`${isHost ? "" : "profile-blitz-bg min-h-screen"}`}>
-        <div className="p-4 space-y-6">
+      <div className="min-h-screen">
+        <div className="max-w-md mx-auto p-5 space-y-6">
           {/* Top bar */}
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
