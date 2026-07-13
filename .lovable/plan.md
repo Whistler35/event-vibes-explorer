@@ -1,71 +1,36 @@
-## Vergleich mit Evendle 2.0 — kurz
+## Fixes
 
-Struktur & Farben stimmen weitgehend (Forest / Lime / Cream, BLITZ-Tabs, Huddle mit „+ Invite more friends", floatende Bottom-Nav). Es fehlen aber ein paar sehr sichtbare Dinge, die Evendle 2.0 seinen Look geben. Genau die will ich in diesem Plan angleichen — **ohne** Businesslogik, Supabase oder Auth-Flow zu ändern.
+### 1) 404-Flash "Wer bist du?" beheben
+Ursache: `NotFound` (Route `*`) rendert momentan eine ungebrandete graue Seite. Beim ersten Rendern eines unbekannten Pfades ist zusätzlich `AuthContext` noch am Laden – dadurch kann kurz die Onboarding-Seite (Titel „Wer bist du?") oder ein Layout-Placeholder aufblitzen, wenn Redirect-Logik greift.
 
-## Was noch nicht passt
+Fix:
+- `NotFound` an das Evendle Design anpassen (Forest-Hintergrund, Bolt-Akzent, „EVENDLE" Wortmarke, klare 404-Message + Button „Zurück zu Blitz").
+- In `NotFound` auf `useAuth().loading` warten und in diesem Fall einen neutralen Forest-Splash rendern (kein Redirect, kein Onboarding-Flash).
+- Sicherstellen, dass `Suspense`-Fallback ebenfalls Forest-Hintergrund verwendet (kein weißer/Onboarding-Flash).
 
-1. **Typografie fehlt komplett**
-   Space Grotesk (Display) + Instrument Sans (Body) sind nirgendwo geladen. Alle Headlines rendern in einem System-Sans → die charakteristische Evendle-Anmutung geht verloren.
+### 2) Eigener Blitz-Huddle erscheint unter „Chats"
+Ist heute nur sichtbar, sobald bereits ein `blitz_match` existiert. Ziel: sobald der User selbst einen Blitz erstellt, erscheint der zugehörige Huddle-Chat sofort in `/messenger` – auch bevor jemand gematcht hat.
 
-2. **Farbtokens teils approximiert**
-   Nur `#1E3323` (Forest) und `#C8F14F` (Lime) stimmen exakt. `#F4F3ED` (Cream), `#131711` (Ink) und `#79826F` (Muted) sind mit leicht anderen Werten (`#F1EFE8` etc.) hinterlegt → Hintergrund und Texte kippen minimal.
+Fix in `src/pages/Messenger.tsx`:
+- Zusätzliche Query auf `blitz_requests` des aktuellen Users mit `status = 'active'` und `expires_at > now()`.
+- Für jeden aktiven eigenen Request, für den es noch keinen `blitz_match`-Eintrag in der Liste gibt, einen synthetischen Huddle-Eintrag anhängen:
+  - Titel: `activity` des Requests
+  - Untertitel: „Warte auf Teilnehmer…" (bzw. i18n)
+  - Klick → navigiert zur Blitz-Seite (bzw. zum Match, sobald vorhanden)
+  - Ablauf-Countdown analog zu Match-Chats
+- Realtime bereits auf `blitz_matches` / `blitz_chat_messages` gesetzt – zusätzlich Subscription auf `blitz_requests` (INSERT/UPDATE) für den eigenen User, damit die Liste sofort aktualisiert.
 
-3. **BlitzMatch (Huddle) — Map-Preview fehlt**
-   Referenz zeigt eine gestreifte/„pixelige" Map-Karte mit Punkt + Untertitel „map preview — Inn river steps, 650 m away". Aktuell kein Map-Block, keine Ort-Pill neben dem Timer.
+### 3) Abgelaufene Huddles ausblenden (zentrale Logik)
+Bereits teilweise vorhanden (Filter `status='active'` + `chat_expires_at > now()`), aber:
+- Client-seitig zusätzlich alle 30s neu evaluieren, damit ein Huddle direkt aus der Liste verschwindet, wenn `chat_expires_at` im aktiven UI überschritten wird (setInterval → `queryClient.invalidateQueries`).
+- Gemeinsame Helper-Funktion `isHuddleActive(match | request)` in `src/lib/blitzText.ts` (oder neue `blitzHuddle.ts`), die in Messenger, `MyMatchesBanner` und ggf. `ActiveBlitzScreen` gleich verwendet wird → konsistente Sichtbarkeitslogik.
+- Für den Fall, dass ein eigener Request abgelaufen ist, wird er ebenfalls NICHT mehr in der Chat-Liste angezeigt.
 
-4. **Onboarding — „Ready"-Screen fehlt**
-   Nach dem letzten Step springt die App direkt auf `/blitz`. Referenz hat einen kurzen „You're in, Jakob."-Moment mit pulsierendem Lime-Bolt.
+## Betroffene Dateien
+- `src/pages/NotFound.tsx` – Redesign + Auth-Loading-Guard
+- `src/App.tsx` – Suspense-Fallback vereinheitlichen (Forest)
+- `src/pages/Messenger.tsx` – eigenen Blitz-Request als Huddle-Eintrag, Realtime + Interval-Refresh, gemeinsame Helper-Nutzung
+- `src/lib/blitzHuddle.ts` *(neu)* – `isHuddleActive` Helper
+- `src/i18n/locales/de.json` & `en.json` – neue Strings (404, „Warte auf Teilnehmer…")
 
-5. **Landing benutzt Inline-Hex statt Tokens**
-   `Landing.tsx` hat `#15271B`, `#C8F14F`, `#131711` hart im JSX. Nach dem Token-Fix soll sie diese Werte über CSS-Variablen ziehen.
-
-6. **Profile — vorbereiteter Forest-Look ungenutzt**
-   `.profile-blitz-bg`, `.blitz-stat-card`, `.profile-avatar-halo` sind in `index.css` definiert, aber `Profile.tsx` rendert plain. Referenz-Profil ist deutlich grafischer.
-
-## Was ich ändern werde
-
-### Schritt 1 — Fonts einbauen
-- In `index.html` Preconnect + Google-Fonts-Link für **Space Grotesk (500/600/700)** und **Instrument Sans (400/500/600/700)**.
-- In `tailwind.config.ts` `fontFamily.display = ["Space Grotesk", …]` und `fontFamily.sans = ["Instrument Sans", …]` erweitern.
-- In `src/index.css` `body { font-family: "Instrument Sans", … }` und Utility `.font-display` für Headlines.
-- Große Titel in Landing, Auth, Onboarding, Blitz, BlitzMatch, Profile auf `font-display` + entsprechende Gewichte umstellen.
-
-### Schritt 2 — Farbtokens exakt setzen
-- In `src/index.css` die Kernfarben auf die Evendle-2.0-Werte ziehen:
-  - `--background` → `#F4F3ED`
-  - `--foreground` / `--ink` → `#131711`
-  - `--muted-foreground` → `#79826F`
-  - `--blitz-forest` bleibt `#1E3323`, ergänzen: `--blitz-forest-dark #15271B`, `--blitz-forest-mid #2C4632`
-  - `--bolt` bleibt `#C8F14F`
-- Inline-Hex in `Landing.tsx` durch diese Tokens ersetzen.
-
-### Schritt 3 — BlitzMatch: Map-Preview + Ort-Pill
-- In `src/pages/BlitzMatch.tsx` unterhalb Titel/Host eine **Ort-Pill** neben der Timer-Pill (Pin-Icon + Ortsname aus `blitz_requests`).
-- Darunter ein **Map-Preview-Block** im Referenz-Stil: cream Rechteck mit diagonalen Streifen (CSS `repeating-linear-gradient`), zentriertem Forest-Punkt mit Lime-Kern, Footer-Text „map preview — {Ort}, {Distanz} away". Distanz erstmal statisch/omitted falls kein Wert.
-- Kein Mapbox-Load — bewusst als illustratives Placeholder gehalten (matcht Referenz exakt).
-
-### Schritt 4 — Onboarding „Ready"-Screen
-- In `src/pages/Onboarding.tsx` neuen Terminal-Step `ready` einfügen: dunkler Forest-Full-Bleed, pulsierender Lime-Bolt (`animate-blitz-pulse`), Titel **„You're in, {Vorname}."** + Sub „Send your first Blitz.", zwei Buttons: **„Send a Blitz"** (Lime) → `/blitz` + Create-Modal, **„Just look around"** (outlined) → `/blitz`.
-- `finish()` wechselt zu diesem Step, statt sofort zu navigieren.
-
-### Schritt 5 — Landing-Politur
-- Alle Inline-Hex durch `hsl(var(--…))` ersetzen.
-- Headline auf `font-display font-bold tracking-tight` — sonst identisch.
-
-### Schritt 6 — Profile-Forest-Look aktivieren
-- `Profile.tsx`-Root bekommt `profile-blitz-bg`, Stat-Cards `blitz-stat-card`, Avatar `profile-avatar-halo` — Klassen sind schon in `index.css` vorhanden, müssen nur angewandt werden.
-- Text-Farben in weiß/lime für Kontrast auf Forest anpassen.
-
-## Was ich bewusst NICHT anfasse
-
-- Auth-Flow / OAuth / Test-User
-- Supabase-Schema, RLS, Edge-Functions
-- Blitz-Erstellung, Discovery-Matching, Chat-Persistenz
-- CreateBlitzModal-Felder (Aktivität bleibt Textfeld — Umbau auf Tile-Grid wäre ein Feature-Change, kein UI-Angleich)
-- i18n-Schlüssel bleiben — nur Fallback-Texte für die neuen Screens werden auf Englisch gesetzt (matcht Referenz)
-
-## Verifikation
-
-- Playwright-Screenshots auf 390×844 für Landing, Onboarding-Ready, Blitz, BlitzMatch, Profile → mit den Referenz-Uploads gegenprüfen.
-- TypeCheck + Console frei von Errors.
-- Fonts wirklich geladen (Network-Tab zeigt Google-Fonts-Requests, Rendered-Font-Check im DevTools).
+Keine Datenbank-Änderungen nötig.
