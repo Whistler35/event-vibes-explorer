@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import Layout from "@/components/Layout";
 import { MessageCircle, LogIn, Zap, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { isHuddleActive } from "@/lib/blitzHuddle";
 
 interface ConversationWithProfile {
   id: string;
@@ -24,6 +25,8 @@ interface ConversationWithProfile {
   isEventGroup?: boolean;
   eventId?: string;
   participantCount?: number;
+  isPendingBlitz?: boolean;
+  blitzRequestId?: string;
 }
 
 const isConversationUnread = (convoId: string, lastMessageAt: string | null, userId: string, senderId?: string): boolean => {
