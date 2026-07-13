@@ -184,7 +184,8 @@
     "someone": "Jemand",
     "unknown": "Unbekannt",
     "match": "Match",
-    "blitz": "Blitz"
+    "blitz": "Blitz",
+    "waitingForParticipants": "⚡ Warte auf Teilnehmer…"
   },
   "directChat": {
     "noMessages": "Noch keine Nachrichten. Sag Hallo! 👋",

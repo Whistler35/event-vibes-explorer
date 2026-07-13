@@ -184,7 +184,8 @@
     "someone": "Someone",
     "unknown": "Unknown",
     "match": "Match",
-    "blitz": "Blitz"
+    "blitz": "Blitz",
+    "waitingForParticipants": "⚡ Waiting for participants…"
   },
   "directChat": {
     "noMessages": "No messages yet. Say hi! 👋",
