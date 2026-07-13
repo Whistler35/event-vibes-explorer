@@ -342,6 +342,29 @@ const BlitzMatch = () => {
             );
           })}
         </div>
+
+        <button
+          onClick={async () => {
+            const url = `${window.location.origin}/blitz/${match.id}`;
+            try {
+              if (navigator.share) {
+                await navigator.share({
+                  title: activity || "Blitz",
+                  text: `Join my Blitz${activity ? `: ${activity}` : ""}`,
+                  url,
+                });
+              } else {
+                await navigator.clipboard.writeText(url);
+                toast.success("Einladungslink kopiert");
+              }
+            } catch {
+              /* user cancelled */
+            }
+          }}
+          className="mt-3 w-full rounded-full py-3 text-[13px] font-semibold text-[hsl(var(--blitz-forest))] border border-[hsl(var(--blitz-forest))]/20 hover:bg-white/60 active:scale-[0.98] transition"
+        >
+          + Invite more friends
+        </button>
       </div>
 
       {/* Huddle chat */}
