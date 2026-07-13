@@ -262,19 +262,16 @@ const Profile = () => {
             </div>
           ) : (
             <>
-              {/* Immersive header */}
+              {/* Header — avatar + name */}
               <div className="flex flex-col items-center text-center pt-2">
-                <div className="relative">
-                  <div className="absolute inset-0 -m-6 profile-avatar-halo rounded-full" />
-                  <div className="relative w-40 h-40 rounded-full overflow-hidden ring-4 ring-[hsl(var(--blitz-pink))] shadow-[0_20px_40px_-10px_rgba(255,45,120,0.45)]">
-                    <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
-                  </div>
+                <div className="relative w-36 h-36 rounded-full overflow-hidden ring-4 ring-[hsl(var(--blitz-forest))] shadow-[0_20px_40px_-16px_rgba(30,51,35,0.35)]">
+                  <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
                 </div>
 
-                <h1 className="text-white text-3xl font-extrabold mt-5 tracking-tight">
+                <h1 className="text-foreground text-3xl font-black mt-5 tracking-tight">
                   {displayName}
                 </h1>
-                <p className="text-[hsl(var(--blitz-pink))] font-semibold text-sm mt-1">
+                <p className="text-muted-foreground text-sm mt-1">
                   {t("profile.blitzReady")}
                 </p>
               </div>
@@ -287,45 +284,40 @@ const Profile = () => {
                 onChange={(next) => setProfile((p) => (p ? { ...p, photos: next } : p))}
               />
 
-              {/* Stats */}
+              {/* Stats — 3 white cards */}
               <div className="grid grid-cols-3 gap-2.5">
                 <button
                   onClick={() => navigate("/blitz")}
-                  className="blitz-stat-card rounded-2xl p-3 flex flex-col items-center gap-1.5 text-center"
+                  className="rounded-2xl bg-card p-4 flex flex-col items-center gap-1 text-center shadow-[0_6px_18px_-8px_rgba(15,20,16,0.10)]"
                 >
-                  <div className="w-11 h-11 rounded-full bg-[hsl(var(--blitz-pink))] text-white flex items-center justify-center font-extrabold text-lg shadow-lg">
-                    {stats.blitzSent}
-                  </div>
-                  <p className="text-white/85 text-[11px] font-semibold leading-tight">{t("profile.blitzSent")} ⚡</p>
+                  <p className="text-3xl font-black tabular-nums text-foreground leading-none">{stats.blitzSent}</p>
+                  <p className="text-muted-foreground text-[11px] font-semibold leading-tight mt-1">{t("profile.blitzSent")}</p>
                 </button>
                 <button
                   onClick={() => setStatsSheet({ open: true, tab: "participated" })}
-                  className="blitz-stat-card rounded-2xl p-3 flex flex-col items-center gap-1.5 text-center"
+                  className="rounded-2xl bg-card p-4 flex flex-col items-center gap-1 text-center shadow-[0_6px_18px_-8px_rgba(15,20,16,0.10)]"
                 >
-                  <div className="w-11 h-11 rounded-full bg-[hsl(var(--blitz-pink))] text-white flex items-center justify-center font-extrabold text-lg shadow-lg">
-                    {stats.participatedCount}
-                  </div>
-                  <p className="text-white/85 text-[11px] font-semibold leading-tight">{t("profile.participated")} <ThumbsUp className="inline w-3 h-3 -mt-0.5" /></p>
+                  <p className="text-3xl font-black tabular-nums text-foreground leading-none">{stats.participatedCount}</p>
+                  <p className="text-muted-foreground text-[11px] font-semibold leading-tight mt-1">{t("profile.participated")}</p>
                 </button>
-                <div className="blitz-stat-card rounded-2xl p-3 flex flex-col items-center gap-1.5 text-center">
-                  <div className="w-11 h-11 rounded-full bg-[hsl(var(--blitz-pink))] text-white flex items-center justify-center shadow-lg">
-                    <Zap className="w-5 h-5 fill-white" />
-                  </div>
-                  <p className="text-white/85 text-[11px] font-semibold leading-tight">
-                    {t("profile.activity")}: {level} <Flame className="inline w-3 h-3 -mt-0.5 text-orange-400" />
-                  </p>
-                </div>
+                <button
+                  onClick={() => setStatsSheet({ open: true, tab: "friends" })}
+                  className="rounded-2xl bg-card p-4 flex flex-col items-center gap-1 text-center shadow-[0_6px_18px_-8px_rgba(15,20,16,0.10)]"
+                >
+                  <p className="text-3xl font-black tabular-nums text-foreground leading-none">{stats.friendsCount}</p>
+                  <p className="text-muted-foreground text-[11px] font-semibold leading-tight mt-1">{t("profile.friends")}</p>
+                </button>
               </div>
 
               {/* About / Interests */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-white font-bold text-lg">{t("profile.whatIDo")}</h3>
-                  <button onClick={() => navigate("/profile/edit")} className="text-white/60 text-xs underline">{t("profile.edit")}</button>
+                  <h3 className="text-muted-foreground font-black text-[11px] uppercase tracking-[0.25em]">{t("profile.whatIDo")}</h3>
+                  <button onClick={() => navigate("/profile/edit")} className="text-[hsl(var(--blitz-forest))] text-sm font-bold">{t("profile.edit")}</button>
                 </div>
                 <InterestChips interests={interests} onEdit={() => navigate("/profile/edit")} />
                 {profile?.bio && (
-                  <p className="text-white/75 text-sm leading-relaxed">{profile.bio}</p>
+                  <p className="text-foreground/80 text-sm leading-relaxed">{profile.bio}</p>
                 )}
               </div>
 
@@ -333,7 +325,7 @@ const Profile = () => {
               {profile?.fun_fact && (
                 <div className="flex justify-center pt-2">
                   <div className="fun-fact-sticker rounded-2xl px-5 py-4 max-w-[88%]">
-                    <p className="text-[hsl(var(--blitz-pink))] font-extrabold text-sm uppercase tracking-wider">
+                    <p className="text-[hsl(var(--blitz-forest))] font-extrabold text-sm uppercase tracking-wider">
                       {t("profile.funFact")}
                     </p>
                     <p className="text-[#2a1a00] font-semibold mt-1 text-base leading-snug">
@@ -356,7 +348,7 @@ const Profile = () => {
                   href={profileInstagramUrl}
                   target="_blank"
                   rel="noopener noreferrer external"
-                  className="block bg-white/5 border border-white/10 rounded-2xl p-3 hover:bg-white/10 transition"
+                  className="block bg-card rounded-2xl p-3 hover:bg-card/80 transition shadow-[0_6px_18px_-8px_rgba(15,20,16,0.10)]"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -364,13 +356,13 @@ const Profile = () => {
                         <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
                       </div>
                       <div>
-                        <p className="text-white font-semibold text-sm">{profile?.instagram_username}</p>
+                        <p className="text-foreground font-semibold text-sm">{profile?.instagram_username}</p>
                         {profile?.instagram_followers && (
-                          <p className="text-white/60 text-xs">{profile.instagram_followers}</p>
+                          <p className="text-muted-foreground text-xs">{profile.instagram_followers}</p>
                         )}
                       </div>
                     </div>
-                    <ExternalLink className="w-4 h-4 text-white/60" />
+                    <ExternalLink className="w-4 h-4 text-muted-foreground" />
                   </div>
                 </a>
               )}
