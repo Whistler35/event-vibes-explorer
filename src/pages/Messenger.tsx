@@ -406,11 +406,13 @@ const Messenger = () => {
     <div
       key={conversation.id}
       onClick={() =>
-        conversation.isBlitz
-          ? navigate(`/blitz/match/${conversation.matchId}`)
-          : conversation.isEventGroup
-            ? navigate(`/event/${conversation.eventId}/chat`)
-            : navigate(`/dm/${conversation.id}`)
+        conversation.isPendingBlitz
+          ? navigate("/blitz")
+          : conversation.isBlitz
+            ? navigate(`/blitz/match/${conversation.matchId}`)
+            : conversation.isEventGroup
+              ? navigate(`/event/${conversation.eventId}/chat`)
+              : navigate(`/dm/${conversation.id}`)
       }
       className="flex items-center gap-4 p-4 rounded-3xl cursor-pointer transition bg-card hover:bg-card/90 shadow-[0_6px_18px_-8px_rgba(15,20,16,0.10)]"
     >
