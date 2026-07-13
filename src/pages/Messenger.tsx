@@ -405,29 +405,33 @@ const Messenger = () => {
 
   return (
     <Layout>
-      <div className="p-4 space-y-6">
+      <div className="max-w-md mx-auto p-5 space-y-5">
         {/* Header */}
-        <h1 className="text-3xl font-black tracking-tight text-foreground">Chats</h1>
+        <div className="pt-2">
+          <h1 className="text-4xl font-black tracking-tight text-foreground">Chats</h1>
+          <p className="text-sm text-muted-foreground mt-1">Your active Blitz huddles.</p>
+        </div>
 
         {/* EVENDLE Welcome Chat */}
         <div
           onClick={() => navigate("/dm/evendle-welcome")}
-          className="flex items-center gap-4 p-4 rounded-3xl cursor-pointer transition-colors bg-card hover:bg-card/80"
+          className="flex items-center gap-4 p-4 rounded-3xl cursor-pointer transition bg-card hover:bg-card/90 shadow-[0_6px_18px_-8px_rgba(15,20,16,0.10)]"
         >
-          <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-lg">E</span>
+          <div className="relative w-12 h-12 rounded-2xl overflow-hidden flex-shrink-0 bg-[hsl(var(--blitz-forest))] flex items-center justify-center">
+            <span className="text-white font-black text-lg">E</span>
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
-              <h3 className={`truncate ${isEvenldeUnread ? "font-bold" : "font-semibold"} text-foreground`}>EVENDLE</h3>
-              <span className="text-xs text-muted-foreground">{t('messenger.team')}</span>
+              <h3 className={`truncate ${isEvenldeUnread ? "font-black" : "font-bold"} text-foreground`}>EVENDLE</h3>
+              <span className="text-xs text-muted-foreground font-semibold">{t('messenger.team')}</span>
             </div>
             <p className={`text-sm truncate mt-0.5 ${isEvenldeUnread ? "text-foreground" : "text-muted-foreground"}`}>
               {t('messenger.welcome')}
             </p>
           </div>
-          {isEvenldeUnread && <span className="w-2.5 h-2.5 rounded-full bg-primary flex-shrink-0" />}
+          {isEvenldeUnread && <span className="w-2.5 h-2.5 rounded-full bg-[hsl(var(--bolt))] flex-shrink-0" />}
         </div>
+
 
         {isLoading ? (
           <div className="space-y-2">
