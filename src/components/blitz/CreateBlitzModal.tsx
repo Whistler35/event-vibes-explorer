@@ -344,7 +344,7 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
 
         {/* Sticky bottom CTA — always visible */}
         <div
-          className="absolute left-0 right-0 bottom-0 px-6 pt-3 pb-[calc(env(safe-area-inset-bottom)+1rem)] bg-gradient-to-t from-[hsl(var(--blitz-forest))] via-[hsl(var(--blitz-forest))] to-transparent"
+          className="shrink-0 px-6 pt-3 pb-[calc(env(safe-area-inset-bottom)+1rem)] bg-[hsl(var(--blitz-forest))] border-t border-white/5"
         >
           <button
             onClick={handleSubmit}
