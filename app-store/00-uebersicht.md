@@ -11,6 +11,9 @@ Reihenfolge der Dateien = grobe Reihenfolge der Arbeit.
 | `03-review-blocker.md` | **Wichtig:** Funktionen, die noch fehlen und die Apple verlangt (Blockieren, Melden, Konto löschen, AGB) |
 | `04-xcode-schritte.md` | Signierung in Xcode + Archive + Upload, Schritt für Schritt |
 | `05-pflicht-funktionen-anwenden.md` | Blockieren/Melden/Löschen: SQL in Supabase ausführen + Testanleitung |
+| `06-oauth-und-push-status.md` | Google/Apple-Login + Push: was geprüft ist, was noch fehlt |
+| `07-screenshots.md` | Screenshot-Größen und was zu zeigen ist |
+| `08-offene-fragen.md` | **Gesammelte Fragen an dich** + deine nächsten Aktionen |
 
 ## Statusüberblick
 
@@ -27,21 +30,20 @@ Reihenfolge der Dateien = grobe Reihenfolge der Arbeit.
 
 ### ✅ Erledigt (Stand 09.09.2026)
 - Apple-Account: **Einzelperson**, Team ID `7DY4J52V8L`, gültig bis Mai 2027
-- **Blockieren / Melden / Konto löschen**: gebaut, DB-Migration von Lovable ausgeführt, Typen regeneriert, nativer iOS-Build grün
-- DB-Fakt: aktives Supabase-Projekt ist `yhetszgeflsldahfuwen` (nicht der Wert in config.toml)
-- **App-Icon** eingebaut (dein Logo, 1024², Apple-konform) – „Mark-only"-Variante wäre schöner (optional)
-- **Datenschutzerklärung + AGB** mit echten Daten gefüllt (`public/datenschutz.html`, `public/agb.html`) – nur Supabase-Serverregion noch offen
+- **Blockieren / Melden / Konto löschen**: gebaut, DB-Migration von Lovable ausgeführt, Typen regeneriert
+- **Konto-Typ-Auswahl** (Privat/Professional Host) aus der Registrierung entfernt – nur noch normale User
+- **App-Icon** eingebaut (dein Logo)
+- **Datenschutzerklärung + AGB + Impressum** mit echten Daten gefüllt (`public/*.html`), In-App-Links im Login & Profil
+- **Google/Apple-Login geprüft**: Provider auf Supabase aktiv, native Flows korrekt codiert (offene Punkte → `08-offene-fragen.md` B1–B3)
+- **Push geprüft**: Web-Push vorhanden; iOS-APNs-Push fehlt noch (Arbeitspaket nach Release, `06-...md`)
+- Nach jeder Änderung: Web-Build + TypeScript + **nativer iOS-Build grün**
 - Alle Commits auf GitHub, GitHub = Lovable = lokal in sync
 
 ### 🔜 Als Nächstes – von dir
-1. In Lovable **„Veröffentlichen"** → damit `evendle.com/datenschutz.html` und `/agb.html` live gehen. Danach beide URLs im Browser testen.
-2. **Xcode**: Account einloggen, signieren, Archive, Upload → `04-xcode-schritte.md`
-3. **App Store Connect**: App anlegen + Texte/Fragebögen → `01-listing-texte.md`, `02-app-datenschutz-fragebogen.md`
-4. Screenshots vom iPhone (oder aus der Lovable-Vorschau eingeloggt)
-5. Demo-Account für die Apple-Prüfung anlegen (E-Mail bestätigt)
+→ **Alles in `08-offene-fragen.md`**: kurze Fragen (A), Punkte für Jakob (B), Web-Login-Test (C),
+Demo-Account (D) und deine Aktionen (E: Veröffentlichen, Xcode, App Store Connect, Screenshots).
 
 ### 🔜 Optional / später – von mir
 - „Mark-only" App-Icon, sobald du die Symbol-Datei einzeln lieferst
-- In-App-Links zu Datenschutz/AGB (Apple sieht das gern)
+- iOS-Push: APNs-Zweig in der Edge Function bauen (sobald APNs-Key da ist)
 - Kleine Admin-Ansicht für eingegangene Meldungen
-- Impressum-Seite (§ 5 ECG, für AT Pflicht auf der Website)

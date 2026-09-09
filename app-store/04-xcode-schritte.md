@@ -40,10 +40,11 @@ Im selben Tab **Signing & Capabilities** sollten diese „Capabilities" stehen (
 - **Sign in with Apple**  (Pflicht – Login-Funktion)
 - **Push Notifications**  (für die Benachrichtigungen)
 
-> Für Push brauchst du zusätzlich einmalig einen **APNs-Auth-Key** im Apple Developer Portal
-> (Certificates, Identifiers & Profiles → Keys → +). Den Key (.p8) hinterlegst du später bei deinem
-> Push-Dienst. Für die reine App-Store-Freigabe ist der Key nicht zwingend – die App wird auch ohne
-> funktionierendes Push abgenommen. Wir können das nach dem ersten Release nachziehen.
+> **Push Notifications:** Die Capability hier in Xcode hinzuzufügen ist ok, aber **iOS-Push funktioniert
+> aktuell noch nicht** (kein Sende-Code für APNs, kein APNs-Key). Details + To-do-Liste:
+> `06-oauth-und-push-status.md`. Kein App-Store-Blocker – Apple nimmt die App auch ohne Push ab.
+> Wenn du die Capability jetzt hinzufügst und beim Signieren ein Fehler zu „aps-environment" kommt,
+> nimm sie wieder raus – wir rüsten Push komplett nach dem ersten Release nach.
 
 ## 4. Gerät/Ziel wählen
 
