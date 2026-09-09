@@ -48,20 +48,30 @@ Portal und Supabase-Dashboard möglich — dort hat nur Jakob Zugang).
 | Plattform | Status | Details |
 |-----------|--------|---------|
 | **Web (evendle.com)** | 🟡 vorhanden, Config prüfen | Service Worker + Web-Push + VAPID. Funktioniert, **wenn** in den Supabase Edge-Function-Secrets `VAPID_PUBLIC_KEY` **und** `VAPID_PRIVATE_KEY` gesetzt sind. `VITE_VAPID_PUBLIC_KEY` ist in `.env` → privater Key vermutlich auch gesetzt, bitte in Supabase bestätigen. |
-| **iOS-App (APNs)** | ❌ **funktioniert derzeit nicht** | Zwei Lücken: siehe unten |
+| **iOS-App (APNs)** | 🟡 Code jetzt fertig, 3 Schritte von dir offen | siehe unten |
 
-### Warum iOS-Push aktuell nicht geht
-1. **Kein Sende-Code für APNs.** Die Edge Function `send-push-notification` verschickt **nur Web-Push** (`web-push`-Library, `endpoint`/`p256dh`/`auth`). Das gespeicherte native `device_token` wird komplett ignoriert. Es gibt keinen Code, der eine APNs-Nachricht an iPhones schickt.
-2. **Keine Push-Capability im iOS-Projekt.** `App.entitlements` hat kein `aps-environment`, `Info.plist` kein `UIBackgroundModes: remote-notification`. Die App kann sich also gar nicht erst bei APNs registrieren.
+### Was ich schon gebaut habe (09.09.2026)
+1. **APNs-Sendecode** in `supabase/functions/send-push-notification/index.ts` – neuer Zweig:
+   signiert ein ES256-JWT mit dem .p8-Key und schickt die Nachricht per HTTP/2 an
+   `api.push.apple.com/3/device/<token>`. Web-Push bleibt unverändert. Tote Tokens
+   (410 / BadDeviceToken) werden automatisch aus `push_subscriptions` gelöscht.
+2. **Bug gefixt** in `src/hooks/usePushNotifications.ts`: das Speichern der Push-Anmeldung
+   nutzte einen `onConflict`-Schlüssel, den es in der DB nicht gibt (`user_id`) →
+   Anmeldung schlug still fehl. Jetzt: nativ `user_id,device_token`, Web `endpoint`.
 
-### Was iOS-Push bräuchte (separates Arbeitspaket, **kein App-Store-Blocker**)
-- Apple: **APNs-Auth-Key (.p8)** erstellen (Developer Portal → Keys), Key-ID + Team-ID notieren
-- Xcode: Capability **„Push Notifications"** hinzufügen (aktiviert `aps-environment` + App-ID-Capability)
-- `Info.plist`: `UIBackgroundModes` → `remote-notification`
-- Edge Function `send-push-notification` um einen **APNs-HTTP/2-Zweig** erweitern (JWT mit dem .p8 signieren, an `api.push.apple.com` senden) — für alle `push_subscriptions`-Zeilen mit `device_token`
-- Supabase-Secrets: `APNS_KEY_ID`, `APNS_TEAM_ID`, `APNS_PRIVATE_KEY`, `APNS_BUNDLE_ID=com.evendle.app`
+### Was noch von dir / Jakob kommen muss
+| # | Wo | Aktion |
+|---|----|--------|
+| P1 | **Apple Developer Portal** → Certificates, IDs & Profiles → **Keys** → **+** | Neuen Key mit **„Apple Push Notifications service (APNs)"** anlegen. Die Datei `AuthKey_XXXXXXXXXX.p8` **einmalig herunterladen** (geht nur einmal!) und die **Key-ID** (10 Zeichen) notieren. |
+| P2 | **Apple Developer Portal** → Identifiers → App-ID `com.evendle.app` | Capability **„Push Notifications"** aktivieren (Häkchen, Save). |
+| P3 | **Xcode** → Target „App" → Signing & Capabilities → **+ Capability** | **„Push Notifications"** hinzufügen. Das schreibt `aps-environment` in `App.entitlements`. **Erst danach** lässt sich mit aktivem Push signieren. |
+| P4 | **Supabase** → Edge Functions → **Secrets** | Setzen: `APNS_KEY_ID` = Key-ID aus P1 · `APNS_TEAM_ID` = `7DY4J52V8L` · `APNS_PRIVATE_KEY` = **kompletter Inhalt der .p8-Datei** (mit `-----BEGIN PRIVATE KEY-----` … `-----END PRIVATE KEY-----`) · `APNS_BUNDLE_ID` = `com.evendle.app` · `APNS_HOST` = `api.push.apple.com` |
+| P5 | Edge Function neu deployen | Lovable oder Jakob deployt `send-push-notification` neu, damit der neue Code live ist. |
 
-> Apple nimmt die App **auch ohne funktionierendes Push** ab. Wir können iOS-Push nach dem ersten Release nachrüsten. Ich kann den APNs-Zweig der Edge Function bauen, sobald der .p8-Key da ist.
+> Reihenfolge egal, aber alle 5 müssen erledigt sein, damit iOS-Push geht.
+> **Sandbox-Hinweis:** Ein Build direkt aus Xcode aufs eigene iPhone nutzt die APNs-**Sandbox**
+> (`APNS_HOST = api.sandbox.push.apple.com`). Ein Build aus TestFlight/App Store nutzt **Produktion**
+> (`api.push.apple.com`). Zum Testen auf dem eigenen Gerät ggf. `APNS_HOST` temporär umstellen.
 
-### Kleiner Nebenbefund (nicht dringend)
-`push_subscriptions` hat `UNIQUE (user_id, device_token)`, der Native-Code macht aber `upsert(..., { onConflict: 'user_id' })`. Das passt nicht exakt zusammen und war laut Git-Historie schon mehrfach in Arbeit. Sollte beim iOS-Push-Arbeitspaket mitgeräumt werden.
+### Web-Push
+Unverändert vorhanden; braucht `VAPID_PUBLIC_KEY` + `VAPID_PRIVATE_KEY` als Edge-Function-Secrets (→ B4).

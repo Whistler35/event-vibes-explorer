@@ -5,16 +5,20 @@ Diese Punkte brauchen deine Antwort oder deinen/Jakobs Zugriff.
 
 ---
 
-## A) Kurze Entscheidungen von dir
+## A) Entscheidungen – ERLEDIGT ✅
 
-| # | Frage | Vorschlag / Default |
+| # | Frage | Antwort (eingebaut) |
 |---|-------|---------------------|
-| A1 | **App-Name im Store** (muss weltweit eindeutig sein) | „EVENDLE" – falls belegt: „EVENDLE – Events & Leute" |
-| A2 | **Mindestalter** der App (steht in Datenschutz, AGB, Impressum, Altersfreigabe) | 16 Jahre. Ok? Oder 13 / 18? |
-| A3 | **Support-/Kontakt-E-Mail** für den Store & die Rechtstexte | Ich habe `datenschutz@evendle.com`, `abuse@evendle.com`, `hello@evendle.com`, `support@evendle.com` eingesetzt. Existieren die (bzw. leiten sie an dich weiter)? Wenn nicht: alles auf `benjamin@evendle.com` ändern? |
-| A4 | **Gewerbe / UID-Nummer** (fürs Impressum) | Hast du ein angemeldetes Gewerbe / eine UID? Wenn nein, lösche ich die Zeilen im Impressum. |
-| A5 | **iOS-Push später** – ok, wenn wir die App **ohne** funktionierende iOS-Benachrichtigungen einreichen und Push danach nachrüsten? | Ja (empfohlen). Details `06-oauth-und-push-status.md`. |
-| A6 | **Icon** bleibt vorerst das Logo mit Schriftzug? | Ja, laut deiner Nachricht. Mark-only später. |
+| A1 | App-Name | **EVENDLE** |
+| A2 | Mindestalter | **16** (überall so) |
+| A3 | Kontakt-E-Mail | alle Rollen-Adressen → **benjamin@evendle.com** ersetzt |
+| A6 | Icon | Logo mit Schriftzug bleibt, Mark-only später |
+
+### Noch offen aus A:
+| # | Frage |
+|---|-------|
+| A4 | **Gewerbe / UID?** Hast du ein angemeldetes Gewerbe / eine UID-Nummer? Wenn **nein**, lösche ich die entsprechenden Zeilen im Impressum. Wenn **ja**, brauche ich die Nummern. |
+| A5 | **iOS-Push:** Du willst vor der Einreichung fertiges Push. Code ist gebaut. Es fehlen **5 Schritte P1–P5** (APNs-Key erstellen + Xcode-Capability + Supabase-Secrets), siehe `06-oauth-und-push-status.md`. Die brauchen deinen/Jakobs Apple- & Supabase-Zugang. |
 
 ---
 

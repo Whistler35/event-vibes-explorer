@@ -45,6 +45,7 @@ async function subscribeNative(): Promise<boolean> {
       const [userId, coords] = await Promise.all([getUserId(), getCurrentPosition()])
       if (!userId) { resolve(false); return }
 
+      // A user may have several devices; the unique key is (user_id, device_token).
       const { error } = await supabase.from('push_subscriptions').upsert({
         user_id:      userId,
         platform:     Capacitor.getPlatform(),
@@ -52,7 +53,7 @@ async function subscribeNative(): Promise<boolean> {
         latitude:     coords?.latitude  ?? null,
         longitude:    coords?.longitude ?? null,
         user_agent:   navigator.userAgent,
-      }, { onConflict: 'user_id' })
+      }, { onConflict: 'user_id,device_token' })
       if (error) console.error('push_subscriptions upsert (native):', error)
       resolve(!error)
     })
@@ -107,13 +108,14 @@ async function subscribeWeb(): Promise<boolean> {
 
     const { error } = await supabase.from('push_subscriptions').upsert({
       user_id:    userId,
+      platform:   'web',
       endpoint:   json.endpoint,
       p256dh:     json.keys.p256dh,
       auth:       json.keys.auth,
       latitude:   coords?.latitude  ?? null,
       longitude:  coords?.longitude ?? null,
       user_agent: navigator.userAgent,
-    }, { onConflict: 'user_id' })
+    }, { onConflict: 'endpoint' })
     if (error) console.error('push_subscriptions upsert (web):', error)
     return !error
   } catch (err) {

@@ -21,11 +21,101 @@ interface RequestBody {
   notification: PushPayload
 }
 
+// ─── APNs (native iOS) ──────────────────────────────────────────────────────
+// Needs these Edge-Function secrets:
+//   APNS_KEY_ID       – 10-char Key ID of the APNs Auth Key
+//   APNS_TEAM_ID      – Apple Team ID (7DY4J52V8L)
+//   APNS_PRIVATE_KEY  – full contents of the AuthKey_XXXX.p8 file (PEM, with header/footer)
+//   APNS_BUNDLE_ID    – com.evendle.app  (defaults to that)
+//   APNS_HOST         – api.push.apple.com (prod, default) | api.sandbox.push.apple.com (dev builds)
+
+const APNS_KEY_ID = Deno.env.get('APNS_KEY_ID')
+const APNS_TEAM_ID = Deno.env.get('APNS_TEAM_ID')
+const APNS_PRIVATE_KEY = Deno.env.get('APNS_PRIVATE_KEY')
+const APNS_BUNDLE_ID = Deno.env.get('APNS_BUNDLE_ID') ?? 'com.evendle.app'
+const APNS_HOST = Deno.env.get('APNS_HOST') ?? 'api.push.apple.com'
+const apnsConfigured = !!(APNS_KEY_ID && APNS_TEAM_ID && APNS_PRIVATE_KEY)
+
+function b64url(bytes: Uint8Array): string {
+  let s = ''
+  for (const b of bytes) s += String.fromCharCode(b)
+  return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
+function pemToPkcs8(pem: string): Uint8Array {
+  const b64 = pem
+    .replace(/-----BEGIN [^-]+-----/g, '')
+    .replace(/-----END [^-]+-----/g, '')
+    .replace(/\s+/g, '')
+  const raw = atob(b64)
+  return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)))
+}
+
+let cachedJwt: { token: string; iat: number } | null = null
+
+async function getApnsJwt(): Promise<string> {
+  const now = Math.floor(Date.now() / 1000)
+  // APNs accepts a token for 1h; regenerate at most every ~40 min.
+  if (cachedJwt && now - cachedJwt.iat < 40 * 60) return cachedJwt.token
+
+  const header = b64url(new TextEncoder().encode(JSON.stringify({ alg: 'ES256', kid: APNS_KEY_ID })))
+  const claims = b64url(new TextEncoder().encode(JSON.stringify({ iss: APNS_TEAM_ID, iat: now })))
+  const signingInput = `${header}.${claims}`
+
+  const key = await crypto.subtle.importKey(
+    'pkcs8',
+    pemToPkcs8(APNS_PRIVATE_KEY!),
+    { name: 'ECDSA', namedCurve: 'P-256' },
+    false,
+    ['sign'],
+  )
+  const sig = new Uint8Array(
+    await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, key, new TextEncoder().encode(signingInput)),
+  )
+  const token = `${signingInput}.${b64url(sig)}`
+  cachedJwt = { token, iat: now }
+  return token
+}
+
+async function sendApns(
+  deviceToken: string,
+  n: PushPayload,
+): Promise<{ ok: boolean; stale: boolean; status: number; reason?: string }> {
+  const jwt = await getApnsJwt()
+  const payload = {
+    aps: {
+      alert: { title: n.title, body: n.body ?? '' },
+      sound: 'default',
+      'mutable-content': 1,
+    },
+    url: n.url,
+    ...(n.data ?? {}),
+  }
+  const res = await fetch(`https://${APNS_HOST}/3/device/${deviceToken}`, {
+    method: 'POST',
+    headers: {
+      authorization: `bearer ${jwt}`,
+      'apns-topic': APNS_BUNDLE_ID,
+      'apns-push-type': 'alert',
+      'apns-priority': '10',
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  })
+  if (res.status === 200) return { ok: true, stale: false, status: 200 }
+  let reason = ''
+  try {
+    reason = (await res.json())?.reason ?? ''
+  } catch { /* ignore */ }
+  // 410 Unregistered, or 400 BadDeviceToken → the token is dead
+  const stale = res.status === 410 || reason === 'BadDeviceToken' || reason === 'Unregistered'
+  return { ok: false, stale, status: res.status, reason }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
-
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
@@ -36,16 +126,18 @@ Deno.serve(async (req) => {
   try {
     const vapidPublic = Deno.env.get('VAPID_PUBLIC_KEY')
     const vapidPrivate = Deno.env.get('VAPID_PRIVATE_KEY')
-    const vapidSubject = Deno.env.get('VAPID_SUBJECT') ?? 'mailto:admin@evendle.app'
+    const vapidSubject = Deno.env.get('VAPID_SUBJECT') ?? 'mailto:admin@evendle.com'
+    const webPushConfigured = !!(vapidPublic && vapidPrivate)
+    if (webPushConfigured) {
+      webpush.setVapidDetails(vapidSubject, vapidPublic!, vapidPrivate!)
+    }
 
-    if (!vapidPublic || !vapidPrivate) {
+    if (!webPushConfigured && !apnsConfigured) {
       return new Response(
-        JSON.stringify({ error: 'VAPID keys not configured' }),
+        JSON.stringify({ error: 'Neither Web Push (VAPID) nor APNs is configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
       )
     }
-
-    webpush.setVapidDetails(vapidSubject, vapidPublic, vapidPrivate)
 
     let body: RequestBody
     try {
@@ -63,7 +155,6 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
-
     if (!body?.notification || typeof body.notification.title !== 'string') {
       return new Response(
         JSON.stringify({ error: 'notification.title is required' }),
@@ -79,7 +170,7 @@ Deno.serve(async (req) => {
 
     const { data: subs, error: subsErr } = await supabase
       .from('push_subscriptions')
-      .select('id, endpoint, p256dh, auth')
+      .select('id, platform, device_token, endpoint, p256dh, auth')
       .eq('user_id', body.userId)
 
     if (subsErr) {
@@ -88,7 +179,6 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
-
     if (!subs || subs.length === 0) {
       return new Response(
         JSON.stringify({ sent: 0, message: 'No push subscriptions for user' }),
@@ -96,26 +186,43 @@ Deno.serve(async (req) => {
       )
     }
 
-    const payload = JSON.stringify(body.notification)
+    const n = body.notification
+    const webPayload = JSON.stringify(n)
     let sent = 0
     let failed = 0
     const staleIds: string[] = []
 
     await Promise.all(
-      subs.map(async (s) => {
+      subs.map(async (s: any) => {
         try {
-          await webpush.sendNotification(
-            { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
-            payload,
-          )
-          sent++
+          // Native iOS row (has an APNs device token)
+          if (s.device_token) {
+            if (!apnsConfigured) { failed++; return }
+            const r = await sendApns(s.device_token, n)
+            if (r.ok) sent++
+            else {
+              failed++
+              if (r.stale) staleIds.push(s.id)
+              console.error('APNs send failed', { status: r.status, reason: r.reason })
+            }
+            return
+          }
+          // Web push row (has an endpoint)
+          if (s.endpoint) {
+            if (!webPushConfigured) { failed++; return }
+            await webpush.sendNotification(
+              { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
+              webPayload,
+            )
+            sent++
+            return
+          }
+          failed++
         } catch (err: any) {
           failed++
           const status = err?.statusCode
-          if (status === 404 || status === 410) {
-            staleIds.push(s.id)
-          }
-          console.error('push send failed', { endpoint: s.endpoint, status, message: err?.message })
+          if (status === 404 || status === 410) staleIds.push(s.id)
+          console.error('push send failed', { id: s.id, status, message: err?.message })
         }
       }),
     )

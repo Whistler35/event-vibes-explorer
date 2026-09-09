@@ -7,16 +7,15 @@
 
 ## App-Name (max. 30 Zeichen, muss im App Store einzigartig sein)
 
-Vorschläge – nimm den ersten, der noch frei ist:
+**Entscheidung: `EVENDLE`.**
 
 ```
 EVENDLE
 ```
+
+Falls App Store Connect meldet, der Name sei vergeben – Fallback:
 ```
 EVENDLE – Events & Leute
-```
-```
-EVENDLE: Events & Treffen
 ```
 
 ## Untertitel / Subtitle (max. 30 Zeichen)
@@ -56,7 +55,7 @@ WARUM EVENDLE
 
 Lade EVENDLE herunter und mach mehr aus deiner Freizeit – heute noch.
 
-Fragen oder Feedback? Schreib uns an support@evendle.com
+Fragen oder Feedback? Schreib uns an benjamin@evendle.com
 ```
 
 ## Schlüsselwörter / Keywords (max. 100 Zeichen, mit Komma getrennt, KEINE Leerzeichen)
