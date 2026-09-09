@@ -5,8 +5,10 @@ funktioniert, muss **einmal** die Datenbank erweitert werden. Kein Terminal nöt
 
 ## Schritt 1 – SQL in Supabase ausführen
 
-1. Öffne <https://supabase.com/dashboard/project/wrqckgrnshklyaiilprz/sql/new>
+1. Öffne <https://supabase.com/dashboard/project/yhetszgeflsldahfuwen/sql/new>
    (bzw. Supabase-Dashboard → Projekt EVENDLE → **SQL Editor** → **New query**)
+   — Hinweis: Das aktive Supabase-Projekt ist `yhetszgeflsldahfuwen` (steht so in `.env`).
+   Die `project_id` in `supabase/config.toml` ist veraltet und wird nicht verwendet.
 2. Öffne im Projekt die Datei
    **`supabase/migrations/20260909120000_apple_review_moderation.sql`**
    und kopiere den **kompletten Inhalt**
