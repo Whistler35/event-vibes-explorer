@@ -12,7 +12,7 @@ export async function blockUser(targetUserId: string): Promise<void> {
   if (user.id === targetUserId) throw new Error("Du kannst dich nicht selbst blockieren");
 
   const { error } = await supabase
-    .from("blocked_users" as any)
+    .from("blocked_users")
     .insert({ blocker_id: user.id, blocked_id: targetUserId } as any);
 
   // Ignore "already blocked" (unique violation)
@@ -26,7 +26,7 @@ export async function unblockUser(targetUserId: string): Promise<void> {
   if (!user) throw new Error("Nicht angemeldet");
 
   const { error } = await supabase
-    .from("blocked_users" as any)
+    .from("blocked_users")
     .delete()
     .eq("blocker_id", user.id)
     .eq("blocked_id", targetUserId);
@@ -41,7 +41,7 @@ export async function hasBlocked(targetUserId: string): Promise<boolean> {
   if (!user) return false;
 
   const { data } = await supabase
-    .from("blocked_users" as any)
+    .from("blocked_users")
     .select("id")
     .eq("blocker_id", user.id)
     .eq("blocked_id", targetUserId)
@@ -60,8 +60,8 @@ export async function getBlockedIds(): Promise<Set<string>> {
   if (!user) return new Set();
 
   const [{ data: iBlocked }, { data: blockedMe }] = await Promise.all([
-    supabase.from("blocked_users" as any).select("blocked_id").eq("blocker_id", user.id),
-    supabase.from("blocked_users" as any).select("blocker_id").eq("blocked_id", user.id),
+    supabase.from("blocked_users").select("blocked_id").eq("blocker_id", user.id),
+    supabase.from("blocked_users").select("blocker_id").eq("blocked_id", user.id),
   ]);
 
   const ids = new Set<string>();
@@ -97,7 +97,7 @@ export async function submitReport(params: {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Nicht angemeldet");
 
-  const { error } = await supabase.from("reports" as any).insert({
+  const { error } = await supabase.from("reports").insert({
     reporter_id: user.id,
     reported_user_id: params.reportedUserId,
     reported_message_id: params.reportedMessageId ?? null,
@@ -117,7 +117,7 @@ export async function submitReport(params: {
  * Backed by the `delete_own_account` Postgres function (SECURITY DEFINER).
  */
 export async function deleteOwnAccount(): Promise<void> {
-  const { error } = await supabase.rpc("delete_own_account" as any);
+  const { error } = await supabase.rpc("delete_own_account");
   if (error) throw error;
   await supabase.auth.signOut();
 }
