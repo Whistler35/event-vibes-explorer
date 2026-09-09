@@ -202,6 +202,27 @@ export type Database = {
           },
         ]
       }
+      blocked_users: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           chat_id: string
@@ -1076,6 +1097,42 @@ export type Database = {
         }
         Relationships: []
       }
+      reports: {
+        Row: {
+          context: string
+          created_at: string
+          details: string | null
+          id: string
+          reason: string
+          reported_message_id: string | null
+          reported_user_id: string | null
+          reporter_id: string
+          status: string
+        }
+        Insert: {
+          context?: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason: string
+          reported_message_id?: string | null
+          reported_user_id?: string | null
+          reporter_id: string
+          status?: string
+        }
+        Update: {
+          context?: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason?: string
+          reported_message_id?: string | null
+          reported_user_id?: string | null
+          reporter_id?: string
+          status?: string
+        }
+        Relationships: []
+      }
       site_visits: {
         Row: {
           id: string
@@ -1411,6 +1468,7 @@ export type Database = {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
       }
+      delete_own_account: { Args: never; Returns: undefined }
       disablelongtransactions: { Args: never; Returns: string }
       dropgeometrycolumn:
         | {
@@ -1567,6 +1625,7 @@ export type Database = {
         Args: { _match_id: string; _user_id: string }
         Returns: boolean
       }
+      is_blocked_between: { Args: { a: string; b: string }; Returns: boolean }
       longtransactionsenabled: { Args: never; Returns: boolean }
       move_to_dlq: {
         Args: {
