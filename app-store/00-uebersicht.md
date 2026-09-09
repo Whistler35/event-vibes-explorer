@@ -25,19 +25,23 @@ Reihenfolge der Dateien = grobe Reihenfolge der Arbeit.
 - Nutzungsbedingungen als Entwurf: `public/agb.html`
 - Store-Texte, Datenschutz-Fragebogen, Xcode-Anleitung (dieser Ordner)
 
-### ✅ Neu erledigt
-- Apple-Account geprüft: **Einzelperson**, Team ID `7DY4J52V8L`, gültig bis Mai 2027
-- **Blockieren / Melden / Konto löschen** komplett gebaut (Code + DB-Migration), Web-Build grün, TypeScript fehlerfrei
+### ✅ Erledigt (Stand 09.09.2026)
+- Apple-Account: **Einzelperson**, Team ID `7DY4J52V8L`, gültig bis Mai 2027
+- **Blockieren / Melden / Konto löschen**: gebaut, DB-Migration von Lovable ausgeführt, Typen regeneriert, nativer iOS-Build grün
+- DB-Fakt: aktives Supabase-Projekt ist `yhetszgeflsldahfuwen` (nicht der Wert in config.toml)
+- **App-Icon** eingebaut (dein Logo, 1024², Apple-konform) – „Mark-only"-Variante wäre schöner (optional)
+- **Datenschutzerklärung + AGB** mit echten Daten gefüllt (`public/datenschutz.html`, `public/agb.html`) – nur Supabase-Serverregion noch offen
+- Alle Commits auf GitHub, GitHub = Lovable = lokal in sync
 
 ### 🔜 Als Nächstes – von dir
-1. **SQL in Supabase ausführen** → `05-pflicht-funktionen-anwenden.md` (5 Min, kein Terminal)
-2. Die 3 Funktionen testen (Anleitung in derselben Datei)
-3. Logo als `icon-source.png` in den Projekt-Hauptordner legen
-4. `public/datenschutz.html` und `public/agb.html`: grün markierte Platzhalter ausfüllen (Adresse: Dr. Langerstraße 14, 4694 Ohlsdorf)
-5. Optional Live-Vorschau: `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer`
+1. In Lovable **„Veröffentlichen"** → damit `evendle.com/datenschutz.html` und `/agb.html` live gehen. Danach beide URLs im Browser testen.
+2. **Xcode**: Account einloggen, signieren, Archive, Upload → `04-xcode-schritte.md`
+3. **App Store Connect**: App anlegen + Texte/Fragebögen → `01-listing-texte.md`, `02-app-datenschutz-fragebogen.md`
+4. Screenshots vom iPhone (oder aus der Lovable-Vorschau eingeloggt)
+5. Demo-Account für die Apple-Prüfung anlegen (E-Mail bestätigt)
 
-### 🔜 Als Nächstes – von mir
-- App-Icon aus deinem Logo in allen Größen erzeugen (sobald `icon-source.png` da ist)
-- Screenshots aus dem Simulator erzeugen
-- Finale Kontrolle vor dem Archive
-- Optional: kleine Admin-Ansicht für eingegangene Meldungen
+### 🔜 Optional / später – von mir
+- „Mark-only" App-Icon, sobald du die Symbol-Datei einzeln lieferst
+- In-App-Links zu Datenschutz/AGB (Apple sieht das gern)
+- Kleine Admin-Ansicht für eingegangene Meldungen
+- Impressum-Seite (§ 5 ECG, für AT Pflicht auf der Website)
