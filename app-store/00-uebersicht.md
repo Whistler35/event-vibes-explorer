@@ -10,6 +10,7 @@ Reihenfolge der Dateien = grobe Reihenfolge der Arbeit.
 | `02-app-datenschutz-fragebogen.md` | Vorausgefüllte Antworten für Apples „App-Datenschutz"-Fragebogen |
 | `03-review-blocker.md` | **Wichtig:** Funktionen, die noch fehlen und die Apple verlangt (Blockieren, Melden, Konto löschen, AGB) |
 | `04-xcode-schritte.md` | Signierung in Xcode + Archive + Upload, Schritt für Schritt |
+| `05-pflicht-funktionen-anwenden.md` | Blockieren/Melden/Löschen: SQL in Supabase ausführen + Testanleitung |
 
 ## Statusüberblick
 
@@ -24,15 +25,19 @@ Reihenfolge der Dateien = grobe Reihenfolge der Arbeit.
 - Nutzungsbedingungen als Entwurf: `public/agb.html`
 - Store-Texte, Datenschutz-Fragebogen, Xcode-Anleitung (dieser Ordner)
 
-### 🔜 Als Nächstes – von dir
-1. **Entscheidung:** Blockieren/Melden/Konto-Löschen – baue ich das im Code, oder Lovable? (`03-review-blocker.md`)
-2. Apple-Account-Typ in App Store Connect nachsehen (Individual vs. Firma)
-3. Logo als `icon-source.png` in den Projekt-Hauptordner legen
-4. `public/datenschutz.html` und `public/agb.html`: grün markierte Platzhalter ausfüllen
-5. Optional für Live-Vorschau: `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer`
+### ✅ Neu erledigt
+- Apple-Account geprüft: **Einzelperson**, Team ID `7DY4J52V8L`, gültig bis Mai 2027
+- **Blockieren / Melden / Konto löschen** komplett gebaut (Code + DB-Migration), Web-Build grün, TypeScript fehlerfrei
 
-### 🔜 Als Nächstes – von mir (nach deiner Entscheidung zu Punkt 1)
-- Blockieren/Melden/Konto-Löschen umsetzen (falls „ich")
-- App-Icon aus deinem Logo in allen Größen erzeugen
+### 🔜 Als Nächstes – von dir
+1. **SQL in Supabase ausführen** → `05-pflicht-funktionen-anwenden.md` (5 Min, kein Terminal)
+2. Die 3 Funktionen testen (Anleitung in derselben Datei)
+3. Logo als `icon-source.png` in den Projekt-Hauptordner legen
+4. `public/datenschutz.html` und `public/agb.html`: grün markierte Platzhalter ausfüllen (Adresse: Dr. Langerstraße 14, 4694 Ohlsdorf)
+5. Optional Live-Vorschau: `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer`
+
+### 🔜 Als Nächstes – von mir
+- App-Icon aus deinem Logo in allen Größen erzeugen (sobald `icon-source.png` da ist)
 - Screenshots aus dem Simulator erzeugen
 - Finale Kontrolle vor dem Archive
+- Optional: kleine Admin-Ansicht für eingegangene Meldungen
