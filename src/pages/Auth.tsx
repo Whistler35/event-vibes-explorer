@@ -473,6 +473,14 @@ const Auth = () => {
               {isLogin ? t('auth.switchToRegister') : t('auth.switchToLogin')}
             </button>
           </div>
+
+          <p className="text-center text-xs text-muted-foreground pt-2">
+            <a href="https://www.evendle.com/datenschutz.html" target="_blank" rel="noopener" className="hover:underline">Datenschutz</a>
+            <span className="mx-1.5">·</span>
+            <a href="https://www.evendle.com/agb.html" target="_blank" rel="noopener" className="hover:underline">AGB</a>
+            <span className="mx-1.5">·</span>
+            <a href="https://www.evendle.com/impressum.html" target="_blank" rel="noopener" className="hover:underline">Impressum</a>
+          </p>
         </form>
       </div>
     </div>
