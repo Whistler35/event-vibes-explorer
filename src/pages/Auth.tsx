@@ -7,12 +7,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Camera, Upload, User, Building2, Check, ArrowLeft, Eye, EyeOff, Mail } from 'lucide-react';
+import { Camera, Upload, ArrowLeft, Eye, EyeOff, Mail } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 import evendleLogo from '@/assets/evendle-logo.jpeg';
-import { cn } from '@/lib/utils';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { Capacitor } from '@capacitor/core';
 
@@ -94,8 +93,6 @@ const nativeOAuth = async (provider: 'google' | 'apple') => {
   return null;
 };
 
-type UserRole = 'private' | 'professional_host';
-
 const Auth = () => {
   const { t } = useTranslation();
   const [isLogin, setIsLogin] = useState(true);
@@ -116,10 +113,6 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState(false);
   const [signupSuccessEmail, setSignupSuccessEmail] = useState<string | null>(null);
-  const [selectedRole, setSelectedRole] = useState<UserRole>('private');
-  const [companyName, setCompanyName] = useState('');
-  const [hostWebsite, setHostWebsite] = useState('');
-  const [hostInstagram, setHostInstagram] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { signIn, user } = useAuth();
@@ -172,18 +165,10 @@ const Auth = () => {
           navigate('/');
         }
       } else {
-        if (selectedRole === 'professional_host') {
-          if (!name) {
-            toast.error(t('auth.errors.enterName'));
-            setLoading(false);
-            return;
-          }
-        } else {
-          if (!name || !birthday || !country) {
-            toast.error(t('auth.errors.fillRequired'));
-            setLoading(false);
-            return;
-          }
+        if (!name || !birthday || !country) {
+          toast.error(t('auth.errors.fillRequired'));
+          setLoading(false);
+          return;
         }
 
         if (password !== confirmPassword) {
@@ -197,24 +182,19 @@ const Auth = () => {
           return;
         }
 
-        const metadata: Record<string, any> = { name };
-        if (selectedRole === 'professional_host') {
-          metadata.is_professional_host = true;
-          if (companyName) metadata.company_name = companyName;
-          if (hostWebsite) metadata.website_url = hostWebsite;
-          if (hostInstagram) metadata.instagram_username = hostInstagram;
-        } else {
-          const birthDate = new Date(birthday);
-          const today = new Date();
-          let calculatedAge = today.getFullYear() - birthDate.getFullYear();
-          const m = today.getMonth() - birthDate.getMonth();
-          if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) calculatedAge--;
-          metadata.birthday = birthday;
-          metadata.age = calculatedAge;
-          metadata.country = country;
-          metadata.bio = bio;
-          metadata.fun_fact = funFact;
-        }
+        const birthDate = new Date(birthday);
+        const today = new Date();
+        let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) calculatedAge--;
+        const metadata: Record<string, any> = {
+          name,
+          birthday,
+          age: calculatedAge,
+          country,
+          bio,
+          fun_fact: funFact,
+        };
 
         const { error: signUpError, data } = await supabase.auth.signUp({
           email,
@@ -346,8 +326,6 @@ const Auth = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {!isLogin && <RoleSelector selected={selectedRole} onSelect={setSelectedRole} />}
-
           {!isLogin && (
             <div className="flex flex-col items-center space-y-4">
               <div className="relative">
@@ -410,51 +388,30 @@ const Auth = () => {
                   <Input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} required className="bg-card border-border text-foreground" />
                 </div>
 
-                {selectedRole === 'professional_host' && (
-                  <>
-                    <div className="space-y-2">
-                      <Label htmlFor="companyName" className="text-foreground">{t('auth.companyName')}</Label>
-                      <Input id="companyName" type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder={t('auth.companyPh')} className="bg-card border-border text-foreground" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="hostWebsite" className="text-foreground">{t('auth.website')}</Label>
-                      <Input id="hostWebsite" type="url" value={hostWebsite} onChange={(e) => setHostWebsite(e.target.value)} placeholder="https://your-website.com" className="bg-card border-border text-foreground" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="hostInstagram" className="text-foreground">{t('auth.instagram')}</Label>
-                      <Input id="hostInstagram" type="text" value={hostInstagram} onChange={(e) => setHostInstagram(e.target.value)} placeholder="@your_handle" className="bg-card border-border text-foreground" />
-                    </div>
-                  </>
-                )}
-
-                {selectedRole !== 'professional_host' && (
-                  <>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="birthday" className="text-foreground">{t('auth.birthday')} *</Label>
-                        <Input id="birthday" type="date" value={birthday} onChange={(e) => setBirthday(e.target.value)} required max={new Date(new Date().setFullYear(new Date().getFullYear() - 12)).toISOString().split('T')[0]} min="1900-01-01" className="bg-card border-border text-foreground" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="country" className="text-foreground">{t('auth.country')} *</Label>
-                        <Input id="country" type="text" value={country} onChange={(e) => setCountry(e.target.value)} required className="bg-card border-border text-foreground" />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="bio" className="text-foreground">{t('auth.aboutMe')}</Label>
-                      <Textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value)} placeholder={t('auth.aboutMePlaceholder')} className="bg-card border-border text-foreground min-h-[80px]" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="funFact" className="text-foreground">{t('auth.funFact')}</Label>
-                      <Textarea id="funFact" value={funFact} onChange={(e) => setFunFact(e.target.value)} placeholder={t('auth.funFactPlaceholder')} className="bg-card border-border text-foreground min-h-[80px]" />
-                    </div>
-                  </>
-                )}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="birthday" className="text-foreground">{t('auth.birthday')} *</Label>
+                    <Input id="birthday" type="date" value={birthday} onChange={(e) => setBirthday(e.target.value)} required max={new Date(new Date().setFullYear(new Date().getFullYear() - 12)).toISOString().split('T')[0]} min="1900-01-01" className="bg-card border-border text-foreground" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="country" className="text-foreground">{t('auth.country')} *</Label>
+                    <Input id="country" type="text" value={country} onChange={(e) => setCountry(e.target.value)} required className="bg-card border-border text-foreground" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="bio" className="text-foreground">{t('auth.aboutMe')}</Label>
+                  <Textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value)} placeholder={t('auth.aboutMePlaceholder')} className="bg-card border-border text-foreground min-h-[80px]" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="funFact" className="text-foreground">{t('auth.funFact')}</Label>
+                  <Textarea id="funFact" value={funFact} onChange={(e) => setFunFact(e.target.value)} placeholder={t('auth.funFactPlaceholder')} className="bg-card border-border text-foreground min-h-[80px]" />
+                </div>
               </>
             )}
           </div>
 
           <Button type="submit" disabled={loading} className="w-full">
-            {loading ? t('common.loading') : isLogin ? t('auth.loginCta') : selectedRole === 'professional_host' ? t('auth.registerHostCta') : t('auth.registerCta')}
+            {loading ? t('common.loading') : isLogin ? t('auth.loginCta') : t('auth.registerCta')}
           </Button>
 
           <div className="relative">
@@ -521,32 +478,5 @@ const Auth = () => {
     </div>
   );
 };
-
-function RoleSelector({ selected, onSelect }: { selected: UserRole; onSelect: (role: UserRole) => void }) {
-  const { t } = useTranslation();
-  return (
-    <div className="space-y-2">
-      <Label className="text-foreground">{t('auth.roleTitle')}</Label>
-      <div className="grid grid-cols-2 gap-3">
-        <button type="button" onClick={() => onSelect('private')}
-          className={cn('relative flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all',
-            selected === 'private' ? 'border-primary bg-primary/5' : 'border-border bg-card hover:border-muted-foreground/40')}>
-          {selected === 'private' && (<div className="absolute top-2 right-2 rounded-full bg-primary p-0.5"><Check className="w-3 h-3 text-primary-foreground" /></div>)}
-          <User className="w-8 h-8 text-primary" />
-          <span className="text-sm font-semibold text-foreground">{t('auth.rolePrivate')}</span>
-          <span className="text-xs text-muted-foreground">{t('auth.rolePrivateSub')}</span>
-        </button>
-        <button type="button" onClick={() => onSelect('professional_host')}
-          className={cn('relative flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all',
-            selected === 'professional_host' ? 'border-primary bg-primary/5' : 'border-border bg-card hover:border-muted-foreground/40')}>
-          {selected === 'professional_host' && (<div className="absolute top-2 right-2 rounded-full bg-primary p-0.5"><Check className="w-3 h-3 text-primary-foreground" /></div>)}
-          <Building2 className="w-8 h-8 text-primary" />
-          <span className="text-sm font-semibold text-foreground">{t('auth.roleHost')}</span>
-          <span className="text-xs text-muted-foreground">{t('auth.roleHostSub')}</span>
-        </button>
-      </div>
-    </div>
-  );
-}
 
 export default Auth;
