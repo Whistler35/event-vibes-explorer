@@ -8,6 +8,7 @@ import { ArrowLeft, Zap, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { markConversationRead } from "@/hooks/useUnreadDMCount";
+import UserActionsMenu from "@/components/moderation/UserActionsMenu";
 
 interface Message {
   id: string;
@@ -166,9 +167,22 @@ const DirectChat = () => {
         >
           <ArrowLeft className="w-5 h-5 text-[hsl(var(--blitz-forest))]" />
         </button>
-        <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-black bg-[hsl(var(--bolt))] text-[hsl(var(--blitz-forest))]">
-          <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--blitz-forest))]" />
-          2 IN
+        <div className="flex items-center gap-2">
+          <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-black bg-[hsl(var(--bolt))] text-[hsl(var(--blitz-forest))]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--blitz-forest))]" />
+            2 IN
+          </div>
+          {otherProfile?.user_id && (
+            <UserActionsMenu
+              targetUserId={otherProfile.user_id}
+              targetUserName={otherProfile.name ?? undefined}
+              context="direct_message"
+              onBlockChange={(b) => {
+                if (b) navigate("/messenger");
+              }}
+              className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-[0_4px_12px_-4px_rgba(0,0,0,0.1)] text-[hsl(var(--blitz-forest))]"
+            />
+          )}
         </div>
       </div>
 

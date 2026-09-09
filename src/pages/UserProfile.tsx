@@ -27,6 +27,7 @@ import ProfileStatsSheet from "@/components/ProfileStatsSheet";
 import HostRating from "@/components/HostRating";
 import { getInstagramUrl } from "@/lib/utils";
 import InterestChips from "@/components/profile/InterestChips";
+import UserActionsMenu from "@/components/moderation/UserActionsMenu";
 import PhotoStrip from "@/components/profile/PhotoStrip";
 import FriendsCarousel from "@/components/profile/FriendsCarousel";
 import RecentActivities from "@/components/profile/RecentActivities";
@@ -332,6 +333,20 @@ const UserProfile = () => {
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <h1 className={`${isHost ? "text-foreground" : "text-white"} text-xl font-bold`}>{t("userProfile.profile")}</h1>
+            {user && !isOwnProfile && userId && (
+              <div className="ml-auto">
+                <UserActionsMenu
+                  targetUserId={userId}
+                  targetUserName={displayName}
+                  context="profile"
+                  className={
+                    isHost
+                      ? "w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted"
+                      : "w-10 h-10 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10"
+                  }
+                />
+              </div>
+            )}
           </div>
 
           {isHost ? (

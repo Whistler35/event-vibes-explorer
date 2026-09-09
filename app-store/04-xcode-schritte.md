@@ -17,7 +17,7 @@ Das öffnet `ios/App/App.xcworkspace` in Xcode. **Immer das `.xcworkspace` öffn
 
 1. Xcode-Menü → **Settings…** (⌘,) → Tab **Accounts**
 2. Unten links **+** → **Apple ID** → mit deiner Apple-ID einloggen (die mit der bezahlten Developer-Mitgliedschaft)
-3. Nach dem Login erscheint dein Team, z. B. „Benjamin Maxwald (Individual)" oder dein Firmenname
+3. Nach dem Login erscheint dein Team: **„Benjamin Maxwald (Individual)"**, Team ID **`7DY4J52V8L`**
 4. Fenster schließen
 
 ## 2. Signierung einschalten

@@ -9,6 +9,7 @@ import Layout from "@/components/Layout";
 import { MessageCircle, LogIn, Zap, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { isHuddleActive } from "@/lib/blitzHuddle";
+import { getBlockedIds } from "@/lib/moderation";
 
 interface ConversationWithProfile {
   id: string;
@@ -93,13 +94,22 @@ const Messenger = () => {
     queryFn: async () => {
       if (!user) return [];
 
-      const { data: convos, error } = await supabase
-        .from("direct_conversations")
-        .select("*")
-        .or(`participant1_id.eq.${user.id},participant2_id.eq.${user.id}`)
-        .order("updated_at", { ascending: false });
+      const [{ data: convosRaw, error }, blockedIds] = await Promise.all([
+        supabase
+          .from("direct_conversations")
+          .select("*")
+          .or(`participant1_id.eq.${user.id},participant2_id.eq.${user.id}`)
+          .order("updated_at", { ascending: false }),
+        getBlockedIds(),
+      ]);
 
-      if (error || !convos) return [];
+      if (error || !convosRaw) return [];
+
+      const convos = convosRaw.filter((c: any) => {
+        const otherId =
+          c.participant1_id === user.id ? c.participant2_id : c.participant1_id;
+        return !blockedIds.has(otherId);
+      });
 
       const otherUserIds = convos.map((c: any) =>
         c.participant1_id === user.id ? c.participant2_id : c.participant1_id

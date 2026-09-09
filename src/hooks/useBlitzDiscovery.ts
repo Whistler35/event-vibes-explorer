@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { getBlockedIds } from "@/lib/moderation";
 
 export interface DiscoveryBlitz {
   id: string;
@@ -67,10 +68,10 @@ export function useBlitzDiscovery(_city?: string | null) {
     }
     setLoading(true);
 
-    const { data: swipes } = await supabase
-      .from("blitz_swipes")
-      .select("blitz_request_id")
-      .eq("swiper_id", user.id);
+    const [{ data: swipes }, blockedIds] = await Promise.all([
+      supabase.from("blitz_swipes").select("blitz_request_id").eq("swiper_id", user.id),
+      getBlockedIds(),
+    ]);
     const swipedIds = new Set((swipes ?? []).map((s) => s.blitz_request_id));
 
     const { data: requests } = await supabase
@@ -87,7 +88,13 @@ export function useBlitzDiscovery(_city?: string | null) {
       .limit(100);
 
     const withDistance = (requests ?? [])
-      .filter((r) => !swipedIds.has(r.id) && r.latitude != null && r.longitude != null)
+      .filter(
+        (r) =>
+          !swipedIds.has(r.id) &&
+          !blockedIds.has(r.host_id) &&
+          r.latitude != null &&
+          r.longitude != null
+      )
       .map((r) => ({
         ...r,
         distance_km: haversineKm(viewerCoords.lat, viewerCoords.lng, r.latitude!, r.longitude!),

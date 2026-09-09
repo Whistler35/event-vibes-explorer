@@ -5,11 +5,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Camera, Loader2 } from "lucide-react";
+import { ArrowLeft, Camera, Loader2, Trash2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { deleteOwnAccount } from "@/lib/moderation";
 
 const EditProfile = () => {
   const { t } = useTranslation();
@@ -21,6 +33,24 @@ const EditProfile = () => {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirm.trim().toUpperCase() !== "LÖSCHEN") {
+      toast.error('Bitte "LÖSCHEN" eintippen, um zu bestätigen');
+      return;
+    }
+    setDeleting(true);
+    try {
+      await deleteOwnAccount();
+      toast.success("Dein Konto wurde gelöscht.");
+      navigate("/");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Konto konnte nicht gelöscht werden");
+      setDeleting(false);
+    }
+  };
 
   const [form, setForm] = useState({
     name: "",
@@ -334,6 +364,61 @@ const EditProfile = () => {
           {saving ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
           {t('editProfile.save')}
         </Button>
+
+        {/* Danger zone */}
+        <div className="border-t border-border pt-6 mt-2">
+          <h3 className="text-foreground font-bold text-lg mb-1">Konto</h3>
+          <p className="text-sm text-muted-foreground mb-3">
+            Wenn du dein Konto löschst, werden dein Profil, deine Nachrichten und
+            deine Aktivitäten dauerhaft entfernt. Das kann nicht rückgängig
+            gemacht werden.
+          </p>
+          <AlertDialog
+            onOpenChange={(o) => {
+              if (!o) setDeleteConfirm("");
+            }}
+          >
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full h-12 rounded-xl border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive font-bold"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Konto löschen
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Konto endgültig löschen?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Diese Aktion ist dauerhaft. Alle deine Daten (Profil,
+                  Nachrichten, Blitz-Einträge) werden gelöscht. Tippe zur
+                  Bestätigung <strong>LÖSCHEN</strong> ein.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <Input
+                value={deleteConfirm}
+                onChange={(e) => setDeleteConfirm(e.target.value)}
+                placeholder="LÖSCHEN"
+                className="bg-muted border-border text-foreground"
+                autoFocus
+              />
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={deleting}>Abbrechen</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleDeleteAccount();
+                  }}
+                  disabled={deleting || deleteConfirm.trim().toUpperCase() !== "LÖSCHEN"}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  {deleting ? "Wird gelöscht…" : "Endgültig löschen"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
     </Layout>
   );

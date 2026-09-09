@@ -76,8 +76,9 @@ events,leute kennenlernen,spontan,treffen,ausgehen,freunde finden,in der nähe,k
 ## Copyright
 
 ```
-2026 <DEIN NAME ODER FIRMENNAME>
+2026 Benjamin Maxwald
 ```
+(Account ist „Einzelperson/Individual" → als Anbietername erscheint im App Store „Benjamin Maxwald".)
 
 ## Kategorien
 
