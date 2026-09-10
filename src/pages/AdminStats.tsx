@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ArrowLeft, RefreshCw, Zap, Users, Heart, MessageSquare, Flag,
   ShieldCheck, UserPlus, Trash2, Search,
@@ -31,6 +33,16 @@ interface Person {
   user_id: string;
   name: string;
   avatar_url: string | null;
+}
+
+type ListKind = "users" | "blitzes" | "matches" | "swipes" | "messages" | "reports";
+
+interface ListRow {
+  id: string;
+  title: string;
+  subtitle: string;
+  meta: string;
+  created_at: string;
 }
 
 const RANGE_LABEL: Record<Range, string> = {
@@ -63,6 +75,27 @@ const AdminStats = () => {
   const [q, setQ] = useState("");
   const [results, setResults] = useState<Person[]>([]);
   const [roleBusy, setRoleBusy] = useState(false);
+
+  // Drill-down detail sheet
+  const [detail, setDetail] = useState<{ open: boolean; kind: ListKind; title: string }>({
+    open: false, kind: "users", title: "",
+  });
+  const [detailRows, setDetailRows] = useState<ListRow[]>([]);
+  const [detailLoading, setDetailLoading] = useState(false);
+
+  const openDetail = async (kind: ListKind, title: string) => {
+    setDetail({ open: true, kind, title });
+    setDetailLoading(true);
+    setDetailRows([]);
+    const { data, error } = await supabase.rpc("admin_list" as any, {
+      p_kind: kind,
+      p_from: rangeStart(range),
+      p_limit: 300,
+    });
+    if (error) toast.error(error.message);
+    else setDetailRows((data as unknown as ListRow[]) ?? []);
+    setDetailLoading(false);
+  };
 
   useEffect(() => {
     if (!adminLoading && !isAdmin) navigate("/", { replace: true });
@@ -153,12 +186,12 @@ const AdminStats = () => {
     if (!stats) return [];
     const suffix = range === "all" ? "" : ` (${RANGE_LABEL[range]})`;
     return [
-      { icon: Users, label: "Nutzer gesamt", value: stats.users_total, sub: `+${stats.users_new} neu${suffix}` },
-      { icon: Zap, label: `Blitze${suffix}`, value: stats.blitz_new, sub: `${stats.blitz_total} gesamt · ${stats.blitz_active} aktiv` },
-      { icon: Heart, label: `Matches${suffix}`, value: stats.matches_new, sub: `${stats.matches_total} gesamt` },
-      { icon: RefreshCw, label: `Swipes${suffix}`, value: stats.swipes_new, sub: `davon ${stats.swipes_right_new}× rechts` },
-      { icon: MessageSquare, label: `Nachrichten${suffix}`, value: stats.blitz_messages_new + stats.dm_messages_new, sub: `${stats.blitz_messages_new} Blitz · ${stats.dm_messages_new} DM` },
-      { icon: Flag, label: "Offene Meldungen", value: stats.reports_open, sub: stats.reports_open > 0 ? "prüfen" : "alles ok" },
+      { icon: Users, kind: "users" as ListKind, label: "Nutzer gesamt", value: stats.users_total, sub: `+${stats.users_new} neu${suffix}` },
+      { icon: Zap, kind: "blitzes" as ListKind, label: `Blitze${suffix}`, value: stats.blitz_new, sub: `${stats.blitz_total} gesamt · ${stats.blitz_active} aktiv` },
+      { icon: Heart, kind: "matches" as ListKind, label: `Matches${suffix}`, value: stats.matches_new, sub: `${stats.matches_total} gesamt` },
+      { icon: RefreshCw, kind: "swipes" as ListKind, label: `Swipes${suffix}`, value: stats.swipes_new, sub: `davon ${stats.swipes_right_new}× interessiert` },
+      { icon: MessageSquare, kind: "messages" as ListKind, label: `Nachrichten${suffix}`, value: stats.blitz_messages_new + stats.dm_messages_new, sub: `${stats.blitz_messages_new} Blitz · ${stats.dm_messages_new} DM` },
+      { icon: Flag, kind: "reports" as ListKind, label: "Offene Meldungen", value: stats.reports_open, sub: stats.reports_open > 0 ? "prüfen" : "alles ok" },
     ];
   }, [stats, range]);
 
@@ -215,14 +248,18 @@ const AdminStats = () => {
         ) : (
           <div className="grid grid-cols-2 gap-3">
             {cards.map((c) => (
-              <div key={c.label} className="rounded-2xl bg-card p-4 shadow-sm">
+              <button
+                key={c.label}
+                onClick={() => openDetail(c.kind, c.label)}
+                className="rounded-2xl bg-card p-4 shadow-sm text-left active:scale-[0.98] transition"
+              >
                 <div className="flex items-center gap-2 text-muted-foreground mb-2">
                   <c.icon className="w-4 h-4" />
                   <span className="text-xs font-semibold">{c.label}</span>
                 </div>
                 <p className="text-2xl font-bold leading-none">{c.value.toLocaleString("de-DE")}</p>
                 <p className="text-[11px] text-muted-foreground mt-1">{c.sub}</p>
-              </div>
+              </button>
             ))}
           </div>
         )}
@@ -297,6 +334,48 @@ const AdminStats = () => {
           </p>
         </div>
       </div>
+
+      <Sheet open={detail.open} onOpenChange={(o) => setDetail((d) => ({ ...d, open: o }))}>
+        <SheetContent side="bottom" className="h-[80vh] rounded-t-3xl p-0">
+          <SheetHeader className="p-4 pb-2">
+            <SheetTitle className="text-base">
+              {detail.title}
+              {!detailLoading && (
+                <span className="text-muted-foreground font-normal"> · {detailRows.length}</span>
+              )}
+            </SheetTitle>
+            <p className="text-[11px] text-muted-foreground">
+              {range === "all" ? "seit Beginn" : `letzte ${RANGE_LABEL[range]}`} · max. 300
+            </p>
+          </SheetHeader>
+          <ScrollArea className="h-[calc(80vh-88px)] px-4 pb-6">
+            {detailLoading ? (
+              <p className="text-muted-foreground text-center py-10 text-sm">Lädt…</p>
+            ) : detailRows.length === 0 ? (
+              <p className="text-muted-foreground text-center py-10 text-sm">Keine Einträge im Zeitraum.</p>
+            ) : (
+              <div className="divide-y divide-border">
+                {detailRows.map((r) => (
+                  <div key={r.id} className="py-2.5 flex items-start gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold truncate">{r.title || "—"}</p>
+                      {r.subtitle && (
+                        <p className="text-xs text-muted-foreground truncate">{r.subtitle}</p>
+                      )}
+                    </div>
+                    <div className="text-right shrink-0">
+                      {r.meta && <p className="text-[11px] font-medium">{r.meta}</p>}
+                      <p className="text-[11px] text-muted-foreground">
+                        {new Date(r.created_at).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "2-digit" })}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </ScrollArea>
+        </SheetContent>
+      </Sheet>
     </Layout>
   );
 };
