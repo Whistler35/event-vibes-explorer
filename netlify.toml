@@ -1,0 +1,8 @@
+# evendle.com build config. The repo also has a stale bun.lock from Lovable's
+# sandbox; it was removed so Netlify uses npm + package-lock.json.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
