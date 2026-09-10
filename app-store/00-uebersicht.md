@@ -32,7 +32,7 @@
 |---|-----|-----|-------|
 | 1 | **App Store Connect ausfüllen** (Beschreibung, Keywords, Datenschutz-Fragebogen, Altersfreigabe, Preise) | du (Texte fertig) | `01`, `02` |
 | 2 | **Screenshots** vom iPhone (echte, gefüllte Screens) | du | `07` |
-| 3 | **Datenschutz-Seite live auf evendle.com** – läuft auf **Netlify** (nicht Lovable!), zeigt alten Build. Deploy klären. | du/Jakob | – |
+| 3 | ~~Datenschutz-Seite live auf evendle.com~~ ✅ **ERLEDIGT 10.09.** Netlify-Build repariert (bun-Lockfiles raus, package-lock gefixt, netlify.toml). Auto-Deploy ab jetzt aktiv. | – | – |
 | 4 | **Push fertig P1–P5**: APNs-Key erstellen · App-ID-Capability · Xcode-Capability (erledigt) · Supabase-Secrets · Edge-Function neu deployen | du (P1–P3) + Jakob (P4–P5) | `06` |
 | 5 | **OAuth-Konsolen prüfen B1–B3** (Google Cloud Redirect-URI, Supabase Redirect-URLs, Apple Client-IDs) + **B4** (VAPID-Secret) + **B5** (Supabase-Region) | Jakob | `08` |
 | 6 | **Web-Login testen (C)** auf evendle.com | du | `08` |
