@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { COUNTRIES } from "@/lib/countries";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Camera, Loader2, Trash2 } from "lucide-react";
@@ -247,12 +249,19 @@ const EditProfile = () => {
             </div>
             <div>
               <Label className="text-foreground font-medium">{t('editProfile.country')} *</Label>
-              <Input
-                value={form.country}
-                onChange={(e) => setForm(prev => ({ ...prev, country: e.target.value }))}
-                placeholder="🇩🇪"
-                className="mt-1 bg-muted border-border text-foreground"
-              />
+              <Select
+                value={form.country || undefined}
+                onValueChange={(v) => setForm(prev => ({ ...prev, country: v }))}
+              >
+                <SelectTrigger className="mt-1 bg-muted border-border text-foreground">
+                  <SelectValue placeholder={t('editProfile.country')} />
+                </SelectTrigger>
+                <SelectContent className="max-h-72">
+                  {COUNTRIES.map((c) => (
+                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               {errors.country && <p className="text-destructive text-xs mt-1">{errors.country}</p>}
             </div>
           </div>

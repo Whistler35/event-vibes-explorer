@@ -18,7 +18,6 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import InterestChips from "@/components/profile/InterestChips";
 import PhotoStrip from "@/components/profile/PhotoStrip";
 import FriendsCarousel from "@/components/profile/FriendsCarousel";
-import RecentActivities from "@/components/profile/RecentActivities";
 import { useTranslation } from "react-i18next";
 
 interface ProfileData {
@@ -159,7 +158,7 @@ const Profile = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen">
+      <div className={`min-h-screen ${isHost ? "" : "profile-blitz-bg"}`}>
         <div className="max-w-md mx-auto p-5 space-y-6">
           {/* Top bar */}
           <div className="flex items-center justify-between">
@@ -325,9 +324,6 @@ const Profile = () => {
 
               {/* Friends carousel */}
               <FriendsCarousel userId={user.id} onAddFriend={() => setShowFriendsSheet(true)} />
-
-              {/* Recent activities */}
-              <RecentActivities userId={user.id} />
 
               {/* Instagram link if present */}
               {profileInstagramUrl && (

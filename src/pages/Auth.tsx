@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { COUNTRIES } from '@/lib/countries';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Camera, Upload, ArrowLeft, Eye, EyeOff, Mail } from 'lucide-react';
 import { toast } from 'sonner';
@@ -394,7 +396,16 @@ const Auth = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="country" className="text-foreground">{t('auth.country')} *</Label>
-                    <Input id="country" type="text" value={country} onChange={(e) => setCountry(e.target.value)} required className="bg-card border-border text-foreground" />
+                    <Select value={country} onValueChange={setCountry}>
+                      <SelectTrigger id="country" className="bg-card border-border text-foreground">
+                        <SelectValue placeholder={t('auth.country')} />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-72">
+                        {COUNTRIES.map((c) => (
+                          <SelectItem key={c} value={c}>{c}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
                 <div className="space-y-2">
