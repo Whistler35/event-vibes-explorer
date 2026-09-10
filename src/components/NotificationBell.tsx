@@ -105,21 +105,16 @@ const NotificationBell = () => {
   const handleClick = (notif: AppNotification) => {
     if (!notif.is_read) markAsRead(notif.id);
 
+    // Event-related notification types are no longer navigable (events feature
+    // removed in the Lovable rebuild 3f3307a); those branches just close the popup.
     if (notif.type === "new_dm" && notif.data?.conversation_id) {
       navigate(`/dm/${notif.data.conversation_id}`);
-    } else if ((notif.type === "friend_event_created" || notif.type === "friend_joined_event") && notif.data?.event_id) {
-      navigate(`/event/${notif.data.event_id}`);
     } else if (notif.type === "friend_request") {
       const uid = notif.data?.requester_id || notif.data?.friend_id;
       if (uid) navigate(`/user/${uid}`);
       else navigate("/profile");
     } else if (notif.type === "friend_accepted" && notif.data?.friend_id) {
       navigate(`/user/${notif.data.friend_id}`);
-    } else if ((notif.type === "event_approved" || notif.type === "event_rejected" || notif.type === "join_request_accepted") && notif.data?.event_id) {
-      navigate(`/event/${notif.data.event_id}`);
-    } else if (notif.type === "new_event_pending") {
-      navigate("/admin/events");
-      navigate("/admin/events");
     } else if (notif.type === "blitz_match" && notif.data?.match_id) {
       navigate(`/blitz/match/${notif.data.match_id}`);
     } else if (notif.type === "blitz_request") {

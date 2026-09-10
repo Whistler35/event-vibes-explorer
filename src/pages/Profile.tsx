@@ -3,7 +3,7 @@ import evendleLogo from "@/assets/evendle-logo.jpeg";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, ShieldCheck, LogIn, Building2, Globe, ExternalLink, Ticket } from "lucide-react";
+import { LogOut, Settings, ShieldCheck, LogIn, Building2, Globe, ExternalLink } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { useIsHost } from "@/hooks/useIsHost";
@@ -168,14 +168,8 @@ const Profile = () => {
               <span className="text-foreground text-xl font-black">EVENDLE</span>
             </div>
             <div className="flex space-x-1">
-              {isHost && (
-                <Button variant="ghost" size="icon" className="text-[hsl(var(--blitz-forest))]" onClick={() => navigate("/host/dashboard")}>
-                  <Building2 className="w-5 h-5" />
-                </Button>
-              )}
-              <Button variant="ghost" size="icon" className="text-[hsl(var(--blitz-forest))]" onClick={() => navigate("/tickets")} title={t("profile.myTickets")}>
-                <Ticket className="w-5 h-5" />
-              </Button>
+              {/* Host-Dashboard und Tickets-Buttons entfernt: die Seiten /host/dashboard
+                  und /tickets wurden beim Lovable-Umbau (3f3307a) gelöscht -> waren tote Links. */}
               <Button variant="ghost" size="icon" className="text-muted-foreground" onClick={() => navigate("/profile/edit")}>
                 <Settings className="w-5 h-5" />
               </Button>
