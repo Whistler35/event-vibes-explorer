@@ -73,7 +73,7 @@ function parseJwtClaims(token: string): Record<string, unknown> | null {
 async function moveToDlq(
   supabase: SupabaseClient,
   queue: string,
-  msg: { msg_id: number; message: Record<string, unknown> },
+  msg: { msg_id: number; message: Json },
   reason: string
 ): Promise<void> {
   const payload = msg.message as EmailPayload
