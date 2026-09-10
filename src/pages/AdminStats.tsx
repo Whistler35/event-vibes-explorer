@@ -3,7 +3,12 @@ import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
-import { ArrowLeft, RefreshCw, Zap, Users, Heart, MessageSquare, Flag } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import {
+  ArrowLeft, RefreshCw, Zap, Users, Heart, MessageSquare, Flag,
+  ShieldCheck, UserPlus, Trash2, Search,
+} from "lucide-react";
 
 type Range = "today" | "7d" | "30d" | "all";
 
@@ -20,6 +25,12 @@ interface Stats {
   blitz_messages_new: number;
   dm_messages_new: number;
   reports_open: number;
+}
+
+interface Person {
+  user_id: string;
+  name: string;
+  avatar_url: string | null;
 }
 
 const RANGE_LABEL: Record<Range, string> = {
@@ -40,11 +51,18 @@ function rangeStart(r: Range): string | null {
 
 const AdminStats = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { isAdmin, loading: adminLoading } = useIsAdmin();
   const [range, setRange] = useState<Range>("7d");
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Admin management
+  const [admins, setAdmins] = useState<Person[]>([]);
+  const [q, setQ] = useState("");
+  const [results, setResults] = useState<Person[]>([]);
+  const [roleBusy, setRoleBusy] = useState(false);
 
   useEffect(() => {
     if (!adminLoading && !isAdmin) navigate("/", { replace: true });
@@ -59,10 +77,77 @@ const AdminStats = () => {
     setLoading(false);
   };
 
+  const loadAdmins = async () => {
+    const { data: roles } = await supabase
+      .from("user_roles")
+      .select("user_id")
+      .eq("role", "admin");
+    const ids = (roles ?? []).map((r: any) => r.user_id);
+    if (ids.length === 0) { setAdmins([]); return; }
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("user_id, name, avatar_url")
+      .in("user_id", ids);
+    // keep admins without a profile row visible too
+    const byId = new Map((profiles ?? []).map((p: any) => [p.user_id, p]));
+    setAdmins(ids.map((id) => byId.get(id) ?? { user_id: id, name: "(ohne Profil)", avatar_url: null }));
+  };
+
   useEffect(() => {
-    if (isAdmin) load(range);
+    if (isAdmin) { load(range); loadAdmins(); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin, range]);
+
+  // debounced user search
+  useEffect(() => {
+    const term = q.trim();
+    if (term.length < 2) { setResults([]); return; }
+    const t = setTimeout(async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("user_id, name, avatar_url")
+        .ilike("name", `%${term}%`)
+        .limit(10);
+      const adminIds = new Set(admins.map((a) => a.user_id));
+      setResults(((data ?? []) as Person[]).filter((p) => !adminIds.has(p.user_id)));
+    }, 300);
+    return () => clearTimeout(t);
+  }, [q, admins]);
+
+  const promote = async (p: Person) => {
+    setRoleBusy(true);
+    const { error } = await supabase.from("user_roles").insert({ user_id: p.user_id, role: "admin" } as any);
+    setRoleBusy(false);
+    if (error && !/(duplicate|unique)/i.test(error.message)) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(`${p.name} ist jetzt Admin`);
+    setQ("");
+    setResults([]);
+    loadAdmins();
+  };
+
+  const demote = async (p: Person) => {
+    if (p.user_id === user?.id) {
+      toast.error("Du kannst dich nicht selbst als Admin entfernen.");
+      return;
+    }
+    if (admins.length <= 1) {
+      toast.error("Es muss mindestens ein Admin bleiben.");
+      return;
+    }
+    setRoleBusy(true);
+    const { error } = await supabase
+      .from("user_roles")
+      .delete()
+      .eq("user_id", p.user_id)
+      .eq("role", "admin");
+    setRoleBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success(`${p.name} ist kein Admin mehr`);
+    loadAdmins();
+  };
 
   const cards = useMemo(() => {
     if (!stats) return [];
@@ -77,9 +162,12 @@ const AdminStats = () => {
     ];
   }, [stats, range]);
 
+  const avatar = (p: Person) =>
+    p.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=1E3323&color=fff&size=80`;
+
   return (
     <Layout>
-      <div className="p-4 space-y-5">
+      <div className="p-4 space-y-6">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
@@ -90,7 +178,7 @@ const AdminStats = () => {
           </button>
           <h1 className="text-xl font-bold">Admin · Statistiken</h1>
           <button
-            onClick={() => load(range)}
+            onClick={() => { load(range); loadAdmins(); }}
             className="ml-auto w-10 h-10 rounded-full bg-card flex items-center justify-center shadow-sm"
             aria-label="Aktualisieren"
           >
@@ -140,11 +228,74 @@ const AdminStats = () => {
         )}
 
         {stats && (
-          <p className="text-[11px] text-muted-foreground text-center pt-2">
+          <p className="text-[11px] text-muted-foreground text-center">
             Zeitraum: {range === "all" ? "seit Beginn" : `letzte ${RANGE_LABEL[range]}`} ·
             {" "}Stand {new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
           </p>
         )}
+
+        {/* ── Admins verwalten ─────────────────────────────── */}
+        <div className="rounded-2xl bg-card p-4 shadow-sm space-y-3">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-[hsl(var(--blitz-forest))]" />
+            <h2 className="text-sm font-bold">Admins</h2>
+            <span className="text-xs text-muted-foreground">({admins.length})</span>
+          </div>
+
+          <div className="space-y-1.5">
+            {admins.map((a) => (
+              <div key={a.user_id} className="flex items-center gap-3 py-1.5">
+                <img src={avatar(a)} alt="" className="w-8 h-8 rounded-full object-cover" />
+                <span className="text-sm font-medium flex-1 truncate">{a.name}</span>
+                {a.user_id === user?.id ? (
+                  <span className="text-[11px] text-muted-foreground">du</span>
+                ) : (
+                  <button
+                    onClick={() => demote(a)}
+                    disabled={roleBusy}
+                    className="text-destructive/80 hover:text-destructive p-1.5 disabled:opacity-40"
+                    aria-label="Admin entfernen"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="pt-1">
+            <div className="flex items-center gap-2 bg-muted rounded-xl px-3 py-2">
+              <Search className="w-4 h-4 text-muted-foreground shrink-0" />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Nutzer suchen, um Admin zu machen…"
+                className="bg-transparent outline-none text-sm w-full"
+              />
+            </div>
+            {results.length > 0 && (
+              <div className="mt-2 space-y-1">
+                {results.map((r) => (
+                  <div key={r.user_id} className="flex items-center gap-3 py-1.5">
+                    <img src={avatar(r)} alt="" className="w-8 h-8 rounded-full object-cover" />
+                    <span className="text-sm flex-1 truncate">{r.name}</span>
+                    <button
+                      onClick={() => promote(r)}
+                      disabled={roleBusy}
+                      className="flex items-center gap-1 text-xs font-semibold text-[hsl(var(--blitz-forest))] hover:opacity-80 px-2 py-1 disabled:opacity-40"
+                    >
+                      <UserPlus className="w-3.5 h-3.5" /> Admin
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <p className="text-[11px] text-muted-foreground">
+            Admins sehen diese Statistik-Seite und können weitere Admins ernennen. Ändert nichts am Login.
+          </p>
+        </div>
       </div>
     </Layout>
   );

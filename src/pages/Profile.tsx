@@ -300,7 +300,7 @@ const Profile = () => {
                 </div>
                 <InterestChips interests={interests} onEdit={() => navigate("/profile/edit")} />
                 {profile?.bio && (
-                  <p className="text-foreground/80 text-sm leading-relaxed">{profile.bio}</p>
+                  <p className="text-white/85 text-sm leading-relaxed">{profile.bio}</p>
                 )}
               </div>
 
