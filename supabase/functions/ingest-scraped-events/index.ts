@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -29,7 +29,7 @@ function isValidIso(s: unknown): s is string {
 }
 
 async function uploadImage(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
   imageUrl: string,
 ): Promise<string | null> {
   try {
