@@ -271,21 +271,21 @@ const Profile = () => {
               <div className="grid grid-cols-3 gap-2.5">
                 <button
                   onClick={() => setStatsSheet({ open: true, tab: "sent" })}
-                  className="rounded-2xl bg-card p-4 flex flex-col items-center gap-1 text-center shadow-[0_6px_18px_-8px_rgba(15,20,16,0.10)]"
+                  className="rounded-2xl bg-white/10 border border-white/10 p-4 flex flex-col items-center gap-1 text-center"
                 >
                   <p className="text-3xl font-black tabular-nums text-foreground leading-none">{stats.blitzSent}</p>
                   <p className="text-muted-foreground text-[11px] font-semibold leading-tight mt-1">{t("profile.blitzSent")}</p>
                 </button>
                 <button
                   onClick={() => setStatsSheet({ open: true, tab: "joined" })}
-                  className="rounded-2xl bg-card p-4 flex flex-col items-center gap-1 text-center shadow-[0_6px_18px_-8px_rgba(15,20,16,0.10)]"
+                  className="rounded-2xl bg-white/10 border border-white/10 p-4 flex flex-col items-center gap-1 text-center"
                 >
                   <p className="text-3xl font-black tabular-nums text-foreground leading-none">{stats.blitzJoined}</p>
                   <p className="text-muted-foreground text-[11px] font-semibold leading-tight mt-1">Mitgemacht</p>
                 </button>
                 <button
                   onClick={() => setStatsSheet({ open: true, tab: "friends" })}
-                  className="rounded-2xl bg-card p-4 flex flex-col items-center gap-1 text-center shadow-[0_6px_18px_-8px_rgba(15,20,16,0.10)]"
+                  className="rounded-2xl bg-white/10 border border-white/10 p-4 flex flex-col items-center gap-1 text-center"
                 >
                   <p className="text-3xl font-black tabular-nums text-foreground leading-none">{stats.friendsCount}</p>
                   <p className="text-muted-foreground text-[11px] font-semibold leading-tight mt-1">{t("profile.friends")}</p>
@@ -296,7 +296,7 @@ const Profile = () => {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-muted-foreground font-black text-[11px] uppercase tracking-[0.25em]">{t("profile.whatIDo")}</h3>
-                  <button onClick={() => navigate("/profile/edit")} className="text-[hsl(var(--blitz-forest))] text-sm font-bold">{t("profile.edit")}</button>
+                  <button onClick={() => navigate("/profile/edit")} className="text-[hsl(var(--bolt))] text-sm font-bold">{t("profile.edit")}</button>
                 </div>
                 <InterestChips interests={interests} onEdit={() => navigate("/profile/edit")} />
                 {profile?.bio && (
@@ -328,7 +328,7 @@ const Profile = () => {
                   href={profileInstagramUrl}
                   target="_blank"
                   rel="noopener noreferrer external"
-                  className="block bg-card rounded-2xl p-3 hover:bg-card/80 transition shadow-[0_6px_18px_-8px_rgba(15,20,16,0.10)]"
+                  className="block bg-white/10 border border-white/10 rounded-2xl p-3 hover:bg-white/[0.14] transition"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">

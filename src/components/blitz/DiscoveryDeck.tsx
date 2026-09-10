@@ -293,7 +293,7 @@ const DiscoveryDeck = ({ city, onStartOwn }: DiscoveryDeckProps) => {
 
   if (!hasLocation && locError) {
     return (
-      <div className="h-[calc(100vh-220px)] rounded-3xl bg-[hsl(var(--blitz-forest))] text-white flex flex-col items-center justify-center text-center p-8 gap-4">
+      <div className="min-h-[65vh] rounded-3xl bg-[hsl(var(--blitz-forest))] text-white flex flex-col items-center justify-center text-center p-8 gap-4">
         <MapPin className="w-16 h-16 text-[hsl(var(--blitz-pink))] opacity-60" />
         <h2 className="text-3xl font-black uppercase">Location required</h2>
         <p className="text-white/70 max-w-xs">{locError}</p>
@@ -303,7 +303,7 @@ const DiscoveryDeck = ({ city, onStartOwn }: DiscoveryDeckProps) => {
 
   if (loading || !hasLocation) {
     return (
-      <div className="h-[calc(100vh-220px)] rounded-3xl bg-muted flex items-center justify-center">
+      <div className="min-h-[65vh] rounded-3xl bg-muted flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     );
@@ -313,7 +313,7 @@ const DiscoveryDeck = ({ city, onStartOwn }: DiscoveryDeckProps) => {
 
   if (remaining.length === 0) {
     return (
-      <div className="h-[calc(100vh-220px)] rounded-3xl bg-[hsl(var(--blitz-forest))] text-white flex flex-col items-center justify-center text-center p-8 gap-4">
+      <div className="min-h-[65vh] rounded-3xl bg-[hsl(var(--blitz-forest))] text-white flex flex-col items-center justify-center text-center p-8 gap-4">
         <Zap className="w-16 h-16 text-[hsl(var(--blitz-pink))] fill-[hsl(var(--blitz-pink))] opacity-60" />
         <h2 className="text-3xl font-black uppercase">Keine Blitzes</h2>
         <p className="text-white/70 max-w-xs">
