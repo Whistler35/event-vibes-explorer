@@ -1449,6 +1449,10 @@ export type Database = {
         Returns: Json
       }
       admin_stats: { Args: { p_from?: string }; Returns: Json }
+      blitz_join: {
+        Args: { p_blitz_request_id: string; p_direction?: string }
+        Returns: Json
+      }
       call_push_notification: {
         Args: {
           p_body: string
