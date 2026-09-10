@@ -1,6 +1,6 @@
 import { sendLovableEmail } from 'npm:@lovable.dev/email-js'
 import { createClient, SupabaseClient } from 'npm:@supabase/supabase-js@2'
-import type { Database } from '../../../src/integrations/supabase/types.ts'
+import type { Database, Json } from '../../../src/integrations/supabase/types.ts'
 
 const MAX_RETRIES = 5
 const DEFAULT_BATCH_SIZE = 10
