@@ -10,7 +10,6 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Camera, Upload, ArrowLeft, Eye, EyeOff, Mail } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { lovable } from '@/integrations/lovable/index';
 import evendleLogo from '@/assets/evendle-logo.jpeg';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { Capacitor } from '@capacitor/core';
@@ -429,11 +428,14 @@ const Auth = () => {
                   const err = await nativeOAuth('google');
                   if (err) console.error(err);
                 } else {
-                  const { lovable } = await import('@/integrations/lovable');
-                  const result = await lovable.auth.signInWithOAuth('google', {
-                    redirect_uri: `${window.location.origin}/auth/callback`,
+                  // Web: go straight through Supabase. The Lovable auth wrapper
+                  // routes via a proxy path that 404s on the custom domain.
+                  const { error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: { redirectTo: `${window.location.origin}/auth/callback` },
                   });
-                  if (result.error) { toast.error(t('auth.errors.googleFailed')); console.error(result.error); }
+                  if (error) { toast.error(t('auth.errors.googleFailed')); console.error(error); setSocialLoading(false); }
+                  return; // browser is redirecting away
                 }
                 setSocialLoading(false);
               }}>
@@ -453,11 +455,13 @@ const Auth = () => {
                   const err = await nativeAppleSignIn();
                   if (err) { toast.error(t('auth.errors.appleFailed')); console.error(err); }
                 } else {
-                  const { lovable } = await import('@/integrations/lovable');
-                  const result = await lovable.auth.signInWithOAuth('apple', {
-                    redirect_uri: `${window.location.origin}/auth/callback`,
+                  // Web: go straight through Supabase (see Google button above).
+                  const { error } = await supabase.auth.signInWithOAuth({
+                    provider: 'apple',
+                    options: { redirectTo: `${window.location.origin}/auth/callback` },
                   });
-                  if (result.error) { toast.error(t('auth.errors.appleFailed')); console.error(result.error); }
+                  if (error) { toast.error(t('auth.errors.appleFailed')); console.error(error); setSocialLoading(false); }
+                  return; // browser is redirecting away
                 }
                 setSocialLoading(false);
               }}>
