@@ -53,7 +53,7 @@ const AdminStats = () => {
   const load = async (r: Range) => {
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase.rpc("admin_stats" as any, { p_from: rangeStart(r) });
+    const { data, error } = await supabase.rpc("admin_stats", { p_from: rangeStart(r) });
     if (error) setError(error.message);
     else setStats(data as unknown as Stats);
     setLoading(false);
