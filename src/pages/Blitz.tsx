@@ -11,7 +11,6 @@ import ActiveBlitzScreen from "@/components/blitz/ActiveBlitzScreen";
 import DiscoveryDeck from "@/components/blitz/DiscoveryDeck";
 import NotificationBell from "@/components/NotificationBell";
 import IncomingRequestsList from "@/components/blitz/IncomingRequestsList";
-import MyMatchesBanner from "@/components/blitz/MyMatchesBanner";
 import MyPendingSwipesList from "@/components/blitz/MyPendingSwipesList";
 import MatchMoment from "@/components/blitz/MatchMoment";
 import { supabase } from "@/integrations/supabase/client";
@@ -144,8 +143,19 @@ const Blitz = () => {
           </button>
         </div>
 
-        <div className="shrink-0 empty:hidden">
-          <MyMatchesBanner />
+        <div className="shrink-0 empty:hidden space-y-2">
+          {matches.length > 0 && (
+            <button
+              onClick={() => navigate("/messenger")}
+              className="w-full flex items-center gap-2 px-4 py-3 rounded-full bg-[hsl(var(--blitz-forest))] text-white text-sm font-black shadow-[0_10px_24px_-10px_rgba(30,51,35,0.4)] active:scale-[0.99] transition"
+            >
+              <Zap className="w-4 h-4 fill-[hsl(var(--bolt))] text-[hsl(var(--bolt))] shrink-0" />
+              <span className="flex-1 text-left">
+                {matches.length === 1 ? "1 aktiver Huddle" : `${matches.length} aktive Huddles`}
+              </span>
+              <span className="text-[hsl(var(--bolt))]">→</span>
+            </button>
+          )}
           <MyPendingSwipesList />
         </div>
 
