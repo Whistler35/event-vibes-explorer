@@ -354,6 +354,14 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
             <Zap className="w-5 h-5 fill-[hsl(var(--blitz-forest))]" />
             {submitting ? "Blitzing…" : "Blitz now"}
           </button>
+          <button
+            type="button"
+            onClick={() => onOpenChange(false)}
+            disabled={submitting}
+            className="w-full mt-2 py-3 text-white/60 hover:text-white text-sm font-semibold tracking-wide transition disabled:opacity-40"
+          >
+            Abbrechen
+          </button>
         </div>
       </DialogContent>
     </Dialog>

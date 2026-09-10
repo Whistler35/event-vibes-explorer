@@ -9,6 +9,7 @@ import { useMyBlitzMatches, type BlitzMatch } from "@/hooks/useBlitzMatching";
 import CreateBlitzModal from "@/components/blitz/CreateBlitzModal";
 import ActiveBlitzScreen from "@/components/blitz/ActiveBlitzScreen";
 import DiscoveryDeck from "@/components/blitz/DiscoveryDeck";
+import NotificationBell from "@/components/NotificationBell";
 import IncomingRequestsList from "@/components/blitz/IncomingRequestsList";
 import MyMatchesBanner from "@/components/blitz/MyMatchesBanner";
 import MyPendingSwipesList from "@/components/blitz/MyPendingSwipesList";
@@ -111,6 +112,11 @@ const Blitz = () => {
   return (
     <div className="min-h-screen bg-background pb-32" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
       <div className="max-w-md mx-auto px-5 pt-6 space-y-5">
+        <div className="flex items-center justify-between">
+          <span className="text-[hsl(var(--blitz-forest))] text-lg font-black tracking-tight">EVENDLE</span>
+          <NotificationBell />
+        </div>
+
         {/* Segmented Control */}
         <div className="flex p-1 rounded-full bg-[hsl(var(--muted))]">
           <button

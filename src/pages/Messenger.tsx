@@ -10,6 +10,7 @@ import { MessageCircle, LogIn, Zap, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { isHuddleActive } from "@/lib/blitzHuddle";
 import { getBlockedIds } from "@/lib/moderation";
+import NotificationBell from "@/components/NotificationBell";
 
 interface ConversationWithProfile {
   id: string;
@@ -384,9 +385,12 @@ const Messenger = () => {
     <Layout>
       <div className="max-w-md mx-auto p-5 space-y-5">
         {/* Header */}
-        <div className="pt-2">
-          <h1 className="text-4xl font-black tracking-tight text-foreground">Chats</h1>
-          <p className="text-sm text-muted-foreground mt-1">Your active Blitz huddles.</p>
+        <div className="pt-2 flex items-start justify-between">
+          <div>
+            <h1 className="text-4xl font-black tracking-tight text-foreground">Chats</h1>
+            <p className="text-sm text-muted-foreground mt-1">Your active Blitz huddles.</p>
+          </div>
+          <NotificationBell />
         </div>
 
         {/* EVENDLE Welcome Chat */}

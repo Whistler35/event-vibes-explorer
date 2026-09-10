@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Sparkles, X } from "lucide-react";
+import { X } from "lucide-react";
 import { BlitzRequest, cancelBlitzRequest } from "@/hooks/useBlitzRequest";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -57,7 +57,7 @@ const ActiveBlitzScreen = ({ request, onEnded }: ActiveBlitzScreenProps) => {
     },
   });
 
-  // Look up active match to jump into the huddle
+  // Look up the (most recent) match for this blitz to jump into the huddle
   const { data: myMatch } = useQuery({
     queryKey: ["active-blitz-match", request.id],
     queryFn: async () => {
@@ -65,14 +65,15 @@ const ActiveBlitzScreen = ({ request, onEnded }: ActiveBlitzScreenProps) => {
         .from("blitz_matches")
         .select("id")
         .eq("blitz_request_id", request.id)
-        .eq("status", "active")
-        .maybeSingle();
-      return data as { id: string } | null;
+        .order("created_at", { ascending: false })
+        .limit(1);
+      return (data?.[0] as { id: string } | undefined) ?? null;
     },
   });
 
   const openHuddle = () => {
     if (myMatch?.id) navigate(`/blitz/match/${myMatch.id}`);
+    else toast("Noch niemand dabei – warte auf Anfragen 👀");
   };
 
   const handleCancel = async (e: React.MouseEvent) => {
@@ -114,11 +115,6 @@ const ActiveBlitzScreen = ({ request, onEnded }: ActiveBlitzScreenProps) => {
           <p className="text-white/65 text-[15px]">
             You are hosting · ends in {remainingLabel}
           </p>
-        </div>
-
-        <div className="relative w-28 h-28 rounded-full bg-[hsl(var(--blitz-forest-deep))]/60 flex items-center justify-center">
-          <div className="absolute inset-0 rounded-full bg-[hsl(var(--bolt))]/10 blur-2xl" />
-          <Sparkles className="relative w-12 h-12 text-[hsl(var(--bolt))]" strokeWidth={2} />
         </div>
 
         <div className="flex flex-col items-center gap-3">
