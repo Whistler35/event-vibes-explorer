@@ -106,7 +106,7 @@ const EditProfile = () => {
     if (!form.country.trim()) newErrors.country = t('editProfile.errors.country');
     if (!form.bio.trim()) newErrors.bio = t('editProfile.errors.bio');
     if (!form.fun_fact.trim()) newErrors.fun_fact = t('editProfile.errors.fun_fact');
-    if (!avatarPreview && !form.avatar_url) newErrors.avatar = t('editProfile.errors.avatar');
+    // Profile photo is optional – a generated avatar is shown as fallback.
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };

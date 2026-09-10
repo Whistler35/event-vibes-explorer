@@ -124,7 +124,7 @@ export default function Onboarding() {
   };
 
   const canNext = () => {
-    if (step === 0) return !!name.trim() && !!avatarUrl;
+    if (step === 0) return !!name.trim(); // profile photo is optional
     if (step === 1) return interests.length >= 3;
     return true;
   };
@@ -192,7 +192,7 @@ export default function Onboarding() {
           <div className="space-y-6 pt-4">
             <div>
               <h1 className="text-3xl font-extrabold tracking-tight">Wer bist du?</h1>
-              <p className="text-white/70 text-sm mt-1">Foto & Vorname – so erkennen dich deine Blitz-Buddys.</p>
+              <p className="text-white/70 text-sm mt-1">Vorname reicht – ein Foto ist optional (kannst du später im Profil ergänzen).</p>
             </div>
             <div className="flex flex-col items-center gap-3 pt-2">
               <div className="relative">
@@ -208,6 +208,16 @@ export default function Onboarding() {
                 </button>
                 <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
               </div>
+              {avatarUrl ? (
+                <button
+                  onClick={() => setAvatarUrl(null)}
+                  className="text-white/50 text-xs underline"
+                >
+                  Foto entfernen
+                </button>
+              ) : (
+                <p className="text-white/40 text-xs">Foto überspringen ist ok 🙂</p>
+              )}
             </div>
             <div>
               <label className="text-sm font-semibold text-white/80">Vorname</label>
