@@ -43,17 +43,19 @@ const NotificationBell = () => {
   const navigate = useNavigate();
 
   const respondFriendRequest = async (notif: AppNotification, accept: boolean) => {
-    const requesterId = notif.data?.requester_id || notif.data?.friend_id;
-    if (!requesterId || !user) return;
+    if (!user) return;
+    // The friend_request payload has changed over time — accept every shape.
+    const friendshipId = notif.data?.friendship_id;
+    const requesterId =
+      notif.data?.from_user_id || notif.data?.requester_id || notif.data?.friend_id;
+    if (!friendshipId && !requesterId) return;
     setPendingIds((s) => new Set(s).add(notif.id));
     try {
-      const { data: fr, error: frErr } = await supabase
-        .from("friendships")
-        .select("id")
-        .eq("requester_id", requesterId)
-        .eq("addressee_id", user.id)
-        .eq("status", "pending")
-        .maybeSingle();
+      let query = supabase.from("friendships").select("id").eq("status", "pending");
+      query = friendshipId
+        ? query.eq("id", friendshipId)
+        : query.eq("requester_id", requesterId).eq("addressee_id", user.id);
+      const { data: fr, error: frErr } = await query.maybeSingle();
       if (frErr) throw frErr;
       if (!fr) {
         toast.error("Anfrage nicht mehr verfügbar");
@@ -110,11 +112,14 @@ const NotificationBell = () => {
     if (notif.type === "new_dm" && notif.data?.conversation_id) {
       navigate(`/dm/${notif.data.conversation_id}`);
     } else if (notif.type === "friend_request") {
-      const uid = notif.data?.requester_id || notif.data?.friend_id;
+      const uid =
+        notif.data?.from_user_id || notif.data?.requester_id || notif.data?.friend_id;
       if (uid) navigate(`/user/${uid}`);
       else navigate("/profile");
-    } else if (notif.type === "friend_accepted" && notif.data?.friend_id) {
-      navigate(`/user/${notif.data.friend_id}`);
+    } else if (notif.type === "friend_accepted") {
+      const uid =
+        notif.data?.friend_id || notif.data?.from_user_id || notif.data?.requester_id;
+      if (uid) navigate(`/user/${uid}`);
     } else if (notif.type === "blitz_match" && notif.data?.match_id) {
       navigate(`/blitz/match/${notif.data.match_id}`);
     } else if (notif.type === "blitz_request") {
