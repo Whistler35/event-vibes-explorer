@@ -41,6 +41,14 @@
 | 9 | Vor dem finalen Build: `IPHONEOS_DEPLOYMENT_TARGET` 14 → 15 + `pod install` + neu archivieren (nur eine Warnung, bis Frühjahr 2027 Zeit) | Claude + du | – |
 | 10 | **„Für Prüfung einreichen"** klicken | du | – |
 
+
+### 🆕 10.09. nachmittags
+- **Web-Google-Login gefixt** (Code: direkt supabase.auth statt Lovable-Wrapper) – funktioniert auf evendle.com
+- **Neue Blitz-Admin-Seite** `/admin` (Statistiken: Nutzer, Blitze, Matches, Swipes, Nachrichten, offene Meldungen; Zeitfilter Heute/7d/30d/Gesamt). `admin_stats`-DB-Funktion via Lovable eingespielt.
+- **Tote Links entfernt** (vom Lovable-Umbau 06.07. übrig): Tickets-Button, Host-Dashboard-Button, Event-Benachrichtigungen, alter Admin-Link → keine 404 mehr
+- **Netlify-Build repariert** (siehe #3); Auto-Deploy läuft
+- Web-Apple-Login hakt an Apples Checkbox-UI (kein App-Store-Blocker – App nutzt nativen Apple-Login)
+
 ### Build-Status prüfen
 App Store Connect → App **EVENDLE** → Tab **TestFlight**: wenn Build 1 **nicht mehr „Processing"** zeigt, ist er fertig verarbeitet und lässt sich der Version 1.0 zuordnen. (Dauert 15–60 Min nach Upload – morgen längst fertig.)
 
