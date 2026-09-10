@@ -1,68 +1,69 @@
 # App Store Connect – Texte zum Kopieren
 
-> Sprache primär: **Deutsch (DE)**. Englische Version können wir später ergänzen.
-> Alle Felder findest du in App Store Connect unter **Meine Apps → EVENDLE → (Version 1.0) → App-Informationen** bzw. **1.0 Vorbereitung für die Einreichung**.
+> Sprache primär: **Deutsch (DE)**. Englische Version später.
+> Felder in App Store Connect unter **Meine Apps → EVENDLE → App-Informationen** bzw. **1.0 Vorbereitung für die Einreichung**.
+>
+> **Positionierung:** EVENDLE ist **kein** Event-Verzeichnis und **keine** Dating-App. Es geht ausschließlich um **spontanes „Blitzen"** – jetzt gerade eine Aktivität anstoßen und Menschen in der Nähe finden, die dasselbe vorhaben. Ziel: raus aus dem Handy, echte Treffen im Hier und Jetzt. Nirgends im Text „Events entdecken", „Veranstaltungen" o. Ä.
 
 ---
 
-## App-Name (max. 30 Zeichen, muss im App Store einzigartig sein)
-
-**Entscheidung: `EVENDLE`.**
+## App-Name (max. 30 Zeichen, im App Store einzigartig)
 
 ```
 EVENDLE
 ```
 
-Falls App Store Connect meldet, der Name sei vergeben – Fallback:
+Falls vergeben – Fallback:
 ```
-EVENDLE – Events & Leute
+EVENDLE – Spontan treffen
 ```
 
 ## Untertitel / Subtitle (max. 30 Zeichen)
 
 ```
-Events & spontane Treffen
+Spontan Leute treffen, jetzt
 ```
 
-## Werbetext / Promotional Text (max. 170 Zeichen, jederzeit änderbar ohne neues Review)
+## Werbetext / Promotional Text (max. 170 Zeichen, jederzeit ohne Review änderbar)
 
 ```
-Finde Events in deiner Nähe und lerne über „Blitz“ spontan Leute kennen, die gerade auch Lust auf etwas haben. Kostenlos, ohne Werbung.
+Lust auf jetzt? Schick einen Blitz und triff in Minuten Leute in deiner Nähe, die spontan dasselbe vorhaben. Weniger planen, mehr erleben. Kostenlos, ohne Werbung.
 ```
 
 ## Beschreibung / Description (max. 4000 Zeichen)
 
 ```
-EVENDLE bringt dich mit Menschen und Events in deiner Umgebung zusammen – unkompliziert und im richtigen Moment.
+EVENDLE ist die App für alles, worauf du JETZT GERADE Lust hast.
 
-EVENTS ENTDECKEN
-Sieh auf einen Blick, was in deiner Stadt passiert. Stöbere durch Veranstaltungen, finde heraus, wer hingeht, und plane deinen Abend.
+Kaffee? Eine Runde laufen? Spontan auf ein Bier, ins Kino, an den See? Statt tagelang zu planen oder im Gruppenchat zu versanden, schickst du einen Blitz – und findest in Minuten Leute in deiner Nähe, die genau darauf auch Lust haben.
 
-BLITZ – SPONTAN LEUTE TREFFEN
-Du hast jetzt gerade Lust auf einen Kaffee, einen Spaziergang oder ein Konzert? Mit „Blitz“ zeigst du das – und findest andere in der Nähe, die gerade dasselbe wollen. Kein wochenlanges Planen, sondern Treffen im Hier und Jetzt.
-
-MATCHES & NACHRICHTEN
-Wenn es auf beiden Seiten passt, könnt ihr direkt in der App schreiben und euch verabreden.
-
-DEIN PROFIL
-Zeig mit ein paar Angaben und einem Foto, wer du bist und worauf du Lust hast.
+SO FUNKTIONIERT'S
+1. Blitz senden: Sag, was du vorhast und wie lange du Zeit hast.
+2. Leute finden: Andere in deiner Nähe sehen deinen Blitz und fragen an – oder du entdeckst ihre und wischst nach rechts.
+3. Huddle: Wenn es passt, landet ihr automatisch in einem gemeinsamen Chat. Kurz abstimmen, losziehen.
+4. Danach ist der Chat vorbei – es geht ums echte Treffen, nicht ums Schreiben.
 
 WARUM EVENDLE
+• Für den Moment gemacht – keine Terminplanung Wochen im Voraus
+• Weniger Scrollen, mehr erleben – die App bringt dich raus, nicht ans Handy
+• Mit Freunden bist du sofort im Huddle, ganz ohne Anfrage
 • Kostenlos und ohne Werbung
 • Kein Verkauf deiner Daten, keine Tracking-SDKs
 • Anmeldung mit Apple oder Google in Sekunden
-• Standort nur, wenn du „Blitz“ aktiv nutzt
+• Standort nur, wenn du Blitz aktiv nutzt – andere sehen nur die ungefähre Entfernung, nie deine genaue Position
 
-Lade EVENDLE herunter und mach mehr aus deiner Freizeit – heute noch.
+EVENDLE ist für alle, die das Gefühl kennen: „Ich hätte jetzt Lust auf was – aber mit wem?"
 
 Fragen oder Feedback? Schreib uns an benjamin@evendle.com
 ```
 
-## Schlüsselwörter / Keywords (max. 100 Zeichen, mit Komma getrennt, KEINE Leerzeichen)
+## Schlüsselwörter / Keywords (max. 100 Zeichen, kommagetrennt, KEINE Leerzeichen nach Komma)
 
 ```
-events,leute kennenlernen,spontan,treffen,ausgehen,freunde finden,in der nähe,konzerte,community,dating
+blitz,spontan,treffen,leute,aktivität,ausgehen,freunde,kennenlernen,nähe,gemeinsam,offline,jetzt
 ```
+
+(Bewusst **ohne** „events", „konzerte", „dating" – falsche Erwartung.)
 
 ## URLs
 
@@ -77,7 +78,6 @@ events,leute kennenlernen,spontan,treffen,ausgehen,freunde finden,in der nähe,k
 ```
 2026 Benjamin Maxwald
 ```
-(Account ist „Einzelperson/Individual" → als Anbietername erscheint im App Store „Benjamin Maxwald".)
 
 ## Kategorien
 
@@ -88,32 +88,31 @@ events,leute kennenlernen,spontan,treffen,ausgehen,freunde finden,in der nähe,k
 
 ## App-Store-Symbol
 
-Wird automatisch aus dem 1024×1024-Icon im Build übernommen (kein separater Upload nötig).
+Wird automatisch aus dem 1024×1024-Icon im Build übernommen (kein separater Upload).
 
 ---
 
 ## Altersfreigabe / Age Rating – Fragebogen-Antworten
 
-App Store Connect stellt einen Fragebogen. Antworten für EVENDLE:
-
 | Frage | Antwort |
 |-------|---------|
-| Gewalt (Cartoon / realistisch) | Nein / Keine |
+| Gewalt (Cartoon / realistisch) | Keine |
 | Schreckens- / Horror-Themen | Nein |
 | Sexuell anzügliche Inhalte / Nacktheit | Nein |
 | Profanität / derber Humor | Nein |
 | Alkohol, Tabak, Drogen | Nein |
 | Glücksspiel (simuliert) | Nein |
 | Medizinische / Behandlungsinfos | Nein |
-| **Uneingeschränkter Web-Zugriff** | **Nein** (die App zeigt nur eigene Inhalte, keinen offenen Browser) |
-| **Nutzergenerierte Inhalte / soziale Funktionen** | **Ja** – Profile, Nachrichten, „Blitz“ |
-| → Moderation vorhanden? | **Ja** – Nutzer können melden & blockieren; wir prüfen Meldungen |
-| Kontrollen für nutzergenerierte Inhalte | Melde- und Blockierfunktion aktiv |
+| **Uneingeschränkter Web-Zugriff** | **Nein** (App zeigt nur eigene Inhalte, kein offener Browser) |
+| **Nutzergenerierte Inhalte / soziale Funktionen** | **Ja** – Profile, Nachrichten, Blitz/Huddle-Chats |
+| → Moderation vorhanden? | **Ja** – Nutzer können melden & blockieren; Meldungen werden geprüft |
+| Kontrollen für nutzergenerierte Inhalte | Melde- und Blockierfunktion aktiv, In-App-Konto­löschung |
 | Standort-Sharing mit anderen Nutzern | Nur ungefähre Nähe, keine exakte Adresse |
 
-**Erwartetes Ergebnis: 12+** (wegen sozialer Funktionen / nutzergenerierter Inhalte; ähnlich wie andere Kennenlern-Apps).
+**Erwartetes Ergebnis: 12+** (wegen sozialer Funktionen / nutzergenerierter Inhalte).
 
-> ⚠️ Wichtig für Apple Review: Weil Nutzer miteinander Kontakt aufnehmen können, verlangt Apple (Guideline 1.2)
-> zwingend: (a) Möglichkeit, Inhalte zu **melden**, (b) Nutzer zu **blockieren**, (c) eine **EULA/Nutzungsbedingungen**
-> mit „keine Toleranz für anstößige Inhalte oder missbräuchliches Verhalten“, (d) eine Kontaktmöglichkeit.
-> Ob Melden/Blockieren in der aktuellen App-Version vorhanden ist, prüfen wir separat – siehe `03-review-checkliste.md`.
+> ⚠️ Apple Review (Guideline 1.2): Da Nutzer Kontakt aufnehmen, verlangt Apple zwingend
+> (a) **Melden** von Inhalten/Nutzern, (b) **Blockieren**, (c) **EULA/Nutzungsbedingungen** mit
+> „keine Toleranz für anstößige Inhalte oder missbräuchliches Verhalten", (d) Kontaktmöglichkeit.
+> Alle vier sind in Build 1.0 (2) vorhanden (Melden/Blockieren im Profil + Chat, Konto­löschung in
+> „Profil bearbeiten", AGB/EULA + Impressum auf evendle.com, Kontakt benjamin@evendle.com).

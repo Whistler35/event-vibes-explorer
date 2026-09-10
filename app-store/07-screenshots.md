@@ -16,12 +16,14 @@ Alles andere leitet App Store Connect automatisch ab.
 
 ## Was zeigen (Reihenfolge = Wichtigkeit)
 
-1. **Blitz-Feed** – „jemand in der Nähe hat gerade Lust auf …"
-2. **Ein Match / eine Blitz-Bestätigung**
-3. **Chat / Huddle** mit einer Konversation
-4. **Event-Ansicht** – Veranstaltungen entdecken
+1. **Blitz erstellen** – „Worauf hast du jetzt Lust?" (die grüne Karte)
+2. **Entdecken / Swipe-Deck** – Blitze von Leuten in der Nähe
+3. **Match-Moment / Blitz-Bestätigung**
+4. **Huddle-Chat** mit einer echten Konversation
 5. **Profil** mit Foto und Interessen
 6. optional: Onboarding-Screen mit dem Nutzenversprechen
+
+> Keine Event-/Veranstaltungs-Screens – die App ist rein auf spontanes Blitzen ausgelegt.
 
 > Bitte **echte, gefüllte Screens** – Apple lehnt reine Login-/Leerscreens teils ab.
 > Am einfachsten: auf deinem iPhone einloggen, Screens aufnehmen (Seitentaste + Leiser).
