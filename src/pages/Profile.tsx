@@ -42,9 +42,8 @@ interface HostProfileData {
 
 interface Stats {
   friendsCount: number;
-  hostedCount: number;
-  participatedCount: number;
   blitzSent: number;
+  blitzJoined: number;
 }
 
 const useActivityLevel = () => {
@@ -67,8 +66,8 @@ const Profile = () => {
   const [hostProfile, setHostProfile] = useState<HostProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [showFriendsSheet, setShowFriendsSheet] = useState(false);
-  const [statsSheet, setStatsSheet] = useState<{ open: boolean; tab: "hosted" | "participated" | "friends" }>({ open: false, tab: "hosted" });
-  const [stats, setStats] = useState<Stats>({ friendsCount: 0, hostedCount: 0, participatedCount: 0, blitzSent: 0 });
+  const [statsSheet, setStatsSheet] = useState<{ open: boolean; tab: "sent" | "joined" | "friends" }>({ open: false, tab: "sent" });
+  const [stats, setStats] = useState<Stats>({ friendsCount: 0, blitzSent: 0, blitzJoined: 0 });
 
   useEffect(() => {
     if (!user) {
@@ -92,20 +91,18 @@ const Profile = () => {
         .maybeSingle() as any;
       if (hostData) setHostProfile(hostData);
 
-      const [friendsRes, hostedRes, participatedRes, blitzRes] = await Promise.all([
+      const [friendsRes, blitzRes, joinedRes] = await Promise.all([
         supabase.from("friendships").select("id", { count: "exact", head: true })
           .eq("status", "accepted")
           .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`),
-        supabase.from("events").select("id", { count: "exact", head: true }).eq("created_by", user.id),
-        supabase.from("event_participants").select("id", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("blitz_requests").select("id", { count: "exact", head: true }).eq("host_id", user.id),
+        supabase.from("blitz_match_participants").select("id", { count: "exact", head: true }).eq("user_id", user.id),
       ]);
 
       setStats({
         friendsCount: friendsRes.count || 0,
-        hostedCount: hostedRes.count || 0,
-        participatedCount: participatedRes.count || 0,
         blitzSent: blitzRes.count || 0,
+        blitzJoined: joinedRes.count || 0,
       });
 
       setLoading(false);
@@ -215,9 +212,9 @@ const Profile = () => {
                 </Badge>
               </div>
               <div className="flex justify-center gap-8">
-                <button onClick={() => setStatsSheet({ open: true, tab: "hosted" })} className="text-center">
-                  <p className="text-foreground text-xl font-bold">{stats.hostedCount}</p>
-                  <p className="text-muted-foreground text-xs">{t("profile.hosted")}</p>
+                <button onClick={() => setStatsSheet({ open: true, tab: "sent" })} className="text-center">
+                  <p className="text-foreground text-xl font-bold">{stats.blitzSent}</p>
+                  <p className="text-muted-foreground text-xs">Blitze</p>
                 </button>
                 <div className="text-center">
                   <HostRating hostUserId={user.id} size="sm" />
@@ -273,18 +270,18 @@ const Profile = () => {
               {/* Stats — 3 white cards */}
               <div className="grid grid-cols-3 gap-2.5">
                 <button
-                  onClick={() => navigate("/blitz")}
+                  onClick={() => setStatsSheet({ open: true, tab: "sent" })}
                   className="rounded-2xl bg-card p-4 flex flex-col items-center gap-1 text-center shadow-[0_6px_18px_-8px_rgba(15,20,16,0.10)]"
                 >
                   <p className="text-3xl font-black tabular-nums text-foreground leading-none">{stats.blitzSent}</p>
                   <p className="text-muted-foreground text-[11px] font-semibold leading-tight mt-1">{t("profile.blitzSent")}</p>
                 </button>
                 <button
-                  onClick={() => setStatsSheet({ open: true, tab: "participated" })}
+                  onClick={() => setStatsSheet({ open: true, tab: "joined" })}
                   className="rounded-2xl bg-card p-4 flex flex-col items-center gap-1 text-center shadow-[0_6px_18px_-8px_rgba(15,20,16,0.10)]"
                 >
-                  <p className="text-3xl font-black tabular-nums text-foreground leading-none">{stats.participatedCount}</p>
-                  <p className="text-muted-foreground text-[11px] font-semibold leading-tight mt-1">{t("profile.participated")}</p>
+                  <p className="text-3xl font-black tabular-nums text-foreground leading-none">{stats.blitzJoined}</p>
+                  <p className="text-muted-foreground text-[11px] font-semibold leading-tight mt-1">Mitgemacht</p>
                 </button>
                 <button
                   onClick={() => setStatsSheet({ open: true, tab: "friends" })}

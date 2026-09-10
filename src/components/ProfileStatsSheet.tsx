@@ -3,23 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Calendar, MapPin } from "lucide-react";
+import { Zap, MapPin, CalendarDays } from "lucide-react";
 
-type Tab = "hosted" | "participated" | "friends";
+type Tab = "sent" | "joined" | "friends";
 
-interface Props {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  userId: string;
-  activeTab: Tab;
-}
-
-interface EventItem {
+interface BlitzItem {
   id: string;
-  title: string;
-  event_date: string;
-  location_name: string;
-  image_url: string | null;
+  activity: string;
+  city: string | null;
+  created_at: string;
 }
 
 interface FriendItem {
@@ -28,11 +20,18 @@ interface FriendItem {
   avatar_url: string | null;
 }
 
+interface Props {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  userId: string;
+  activeTab: Tab;
+}
+
 const ProfileStatsSheet = ({ open, onOpenChange, userId, activeTab }: Props) => {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>(activeTab);
-  const [hostedEvents, setHostedEvents] = useState<EventItem[]>([]);
-  const [participatedEvents, setParticipatedEvents] = useState<EventItem[]>([]);
+  const [sent, setSent] = useState<BlitzItem[]>([]);
+  const [joined, setJoined] = useState<BlitzItem[]>([]);
   const [friends, setFriends] = useState<FriendItem[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -45,41 +44,51 @@ const ProfileStatsSheet = ({ open, onOpenChange, userId, activeTab }: Props) => 
     setLoading(true);
 
     const fetchData = async () => {
-      // Hosted events
-      const { data: hosted } = await supabase
-        .from("events")
-        .select("id, title, event_date, location_name, image_url")
-        .eq("created_by", userId)
-        .order("event_date", { ascending: false })
+      // Blitze, die ich gesendet habe
+      const { data: sentData } = await supabase
+        .from("blitz_requests")
+        .select("id, activity, city, created_at")
+        .eq("host_id", userId)
+        .order("created_at", { ascending: false })
         .limit(50);
-      setHostedEvents((hosted as EventItem[]) || []);
+      setSent((sentData as BlitzItem[]) || []);
 
-      // Participated events
+      // Blitze, bei denen ich mitgemacht habe
       const { data: parts } = await supabase
-        .from("event_participants")
-        .select("event_id")
+        .from("blitz_match_participants")
+        .select("match_id")
         .eq("user_id", userId);
-      if (parts && parts.length > 0) {
-        const ids = parts.map((p) => p.event_id);
-        const { data: events } = await supabase
-          .from("events")
-          .select("id, title, event_date, location_name, image_url")
-          .in("id", ids)
-          .order("event_date", { ascending: false });
-        setParticipatedEvents((events as EventItem[]) || []);
+      const matchIds = (parts || []).map((p: any) => p.match_id);
+      if (matchIds.length) {
+        const { data: matches } = await supabase
+          .from("blitz_matches")
+          .select("blitz_request_id, created_at")
+          .in("id", matchIds);
+        const reqIds = Array.from(
+          new Set((matches || []).map((m: any) => m.blitz_request_id).filter(Boolean))
+        );
+        if (reqIds.length) {
+          const { data: reqs } = await supabase
+            .from("blitz_requests")
+            .select("id, activity, city, created_at")
+            .in("id", reqIds)
+            .order("created_at", { ascending: false });
+          setJoined((reqs as BlitzItem[]) || []);
+        } else {
+          setJoined([]);
+        }
       } else {
-        setParticipatedEvents([]);
+        setJoined([]);
       }
 
-      // Friends
+      // Freunde
       const { data: friendships } = await supabase
         .from("friendships")
         .select("requester_id, addressee_id")
         .eq("status", "accepted")
         .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`);
-
       if (friendships && friendships.length > 0) {
-        const friendIds = friendships.map((f) =>
+        const friendIds = friendships.map((f: any) =>
           f.requester_id === userId ? f.addressee_id : f.requester_id
         );
         const { data: profiles } = await supabase
@@ -98,8 +107,8 @@ const ProfileStatsSheet = ({ open, onOpenChange, userId, activeTab }: Props) => 
   }, [open, userId]);
 
   const tabs: { key: Tab; label: string }[] = [
-    { key: "hosted", label: "Gehostet" },
-    { key: "participated", label: "Teilgenommen" },
+    { key: "sent", label: "Gesendet" },
+    { key: "joined", label: "Mitgemacht" },
     { key: "friends", label: "Freunde" },
   ];
 
@@ -107,46 +116,41 @@ const ProfileStatsSheet = ({ open, onOpenChange, userId, activeTab }: Props) => 
     new Date(d).toLocaleDateString("de-DE", { day: "2-digit", month: "short", year: "numeric" });
 
   const getAvatar = (name: string, url: string | null) =>
-    url || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=ff5722&color=fff&size=100`;
+    url || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1E3323&color=fff&size=100`;
 
-  const handleNavigate = (path: string) => {
-    onOpenChange(false);
-    navigate(path);
-  };
-
-  const renderEventCard = (event: EventItem) => (
-    <button
-      key={event.id}
-      onClick={() => handleNavigate(`/event/${event.id}`)}
-      className="flex items-center gap-3 p-3 rounded-xl w-full text-left hover:bg-card/80 transition-colors"
+  const renderBlitzCard = (b: BlitzItem) => (
+    <div
+      key={b.id}
+      className="flex items-center gap-3 p-3 rounded-xl w-full text-left"
     >
-      <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-muted">
-        {event.image_url ? (
-          <img src={event.image_url} alt={event.title} className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Calendar className="w-6 h-6 text-muted-foreground" />
-          </div>
-        )}
+      <div className="w-12 h-12 rounded-xl flex-shrink-0 bg-[hsl(var(--blitz-forest))]/10 flex items-center justify-center">
+        <Zap className="w-5 h-5 text-[hsl(var(--blitz-forest))]" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-foreground font-semibold text-sm truncate">{event.title}</p>
-        <div className="flex items-center gap-1 mt-0.5">
-          <Calendar className="w-3 h-3 text-muted-foreground" />
-          <span className="text-muted-foreground text-xs">{formatDate(event.event_date)}</span>
-        </div>
-        <div className="flex items-center gap-1 mt-0.5">
-          <MapPin className="w-3 h-3 text-muted-foreground" />
-          <span className="text-muted-foreground text-xs truncate">{event.location_name}</span>
+        <p className="text-foreground font-semibold text-sm truncate">{b.activity}</p>
+        <div className="flex items-center gap-3 mt-0.5">
+          <span className="flex items-center gap-1 text-muted-foreground text-xs">
+            <CalendarDays className="w-3 h-3" />
+            {formatDate(b.created_at)}
+          </span>
+          {b.city && (
+            <span className="flex items-center gap-1 text-muted-foreground text-xs truncate">
+              <MapPin className="w-3 h-3" />
+              {b.city}
+            </span>
+          )}
         </div>
       </div>
-    </button>
+    </div>
   );
 
   const renderFriend = (friend: FriendItem) => (
     <button
       key={friend.user_id}
-      onClick={() => handleNavigate(`/user/${friend.user_id}`)}
+      onClick={() => {
+        onOpenChange(false);
+        navigate(`/user/${friend.user_id}`);
+      }}
       className="flex items-center gap-3 p-3 rounded-xl w-full text-left hover:bg-card/80 transition-colors"
     >
       <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
@@ -156,40 +160,49 @@ const ProfileStatsSheet = ({ open, onOpenChange, userId, activeTab }: Props) => 
     </button>
   );
 
-  const currentList = tab === "hosted" ? hostedEvents : tab === "participated" ? participatedEvents : friends;
-  const emptyText = tab === "friends" ? "Noch keine Freunde" : "Noch keine Events";
+  const emptyText =
+    tab === "friends"
+      ? "Noch keine Freunde"
+      : tab === "sent"
+        ? "Noch keine Blitze gesendet"
+        : "Noch bei keinem Blitz mitgemacht";
+
+  const currentEmpty =
+    (tab === "sent" && sent.length === 0) ||
+    (tab === "joined" && joined.length === 0) ||
+    (tab === "friends" && friends.length === 0);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="h-[75vh] rounded-t-3xl p-0">
         <SheetHeader className="p-4 pb-0">
-          <SheetTitle className="sr-only">Statistiken</SheetTitle>
+          <SheetTitle className="sr-only">Blitz-Statistiken</SheetTitle>
           <div className="flex gap-2">
-            {tabs.map((t) => (
+            {tabs.map((tt) => (
               <button
-                key={t.key}
-                onClick={() => setTab(t.key)}
+                key={tt.key}
+                onClick={() => setTab(tt.key)}
                 className={`flex-1 py-2 rounded-full text-sm font-medium transition-colors ${
-                  tab === t.key
+                  tab === tt.key
                     ? "bg-primary text-primary-foreground"
                     : "bg-card text-muted-foreground"
                 }`}
               >
-                {t.label}
+                {tt.label}
               </button>
             ))}
           </div>
         </SheetHeader>
         <ScrollArea className="h-[calc(75vh-80px)] px-4 pt-3">
           {loading ? (
-            <p className="text-muted-foreground text-center py-8 text-sm">Laden...</p>
-          ) : currentList.length === 0 ? (
+            <p className="text-muted-foreground text-center py-8 text-sm">Laden…</p>
+          ) : currentEmpty ? (
             <p className="text-muted-foreground text-center py-8 text-sm">{emptyText}</p>
           ) : (
             <div className="space-y-1 pb-4">
               {tab === "friends"
                 ? friends.map(renderFriend)
-                : (tab === "hosted" ? hostedEvents : participatedEvents).map(renderEventCard)}
+                : (tab === "sent" ? sent : joined).map(renderBlitzCard)}
             </div>
           )}
         </ScrollArea>

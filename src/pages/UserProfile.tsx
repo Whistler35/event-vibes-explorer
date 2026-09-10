@@ -30,7 +30,6 @@ import InterestChips from "@/components/profile/InterestChips";
 import UserActionsMenu from "@/components/moderation/UserActionsMenu";
 import PhotoStrip from "@/components/profile/PhotoStrip";
 import FriendsCarousel from "@/components/profile/FriendsCarousel";
-import RecentActivities from "@/components/profile/RecentActivities";
 
 interface ProfileData {
   name: string;
@@ -75,15 +74,14 @@ const UserProfile = () => {
   const [isHost, setIsHost] = useState(false);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
-    hostedCount: 0,
-    participatedCount: 0,
     friendsCount: 0,
     blitzSent: 0,
+    blitzJoined: 0,
   });
   const [statsSheet, setStatsSheet] = useState<{
     open: boolean;
-    tab: "hosted" | "participated" | "friends";
-  }>({ open: false, tab: "hosted" });
+    tab: "sent" | "joined" | "friends";
+  }>({ open: false, tab: "sent" });
   const [friendship, setFriendship] = useState<Friendship | null>(null);
   const [friendActionLoading, setFriendActionLoading] = useState(false);
 
@@ -187,24 +185,19 @@ const UserProfile = () => {
         if (hostData) setHostProfile(hostData);
       }
 
-      const [friendsRes, hostedRes, participatedRes, blitzRes] = await Promise.all([
+      const [friendsRes, blitzRes, joinedRes] = await Promise.all([
         supabase
           .from("friendships")
           .select("id", { count: "exact", head: true })
           .eq("status", "accepted")
           .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`),
-        supabase.from("events").select("id", { count: "exact", head: true }).eq("created_by", userId),
-        supabase
-          .from("event_participants")
-          .select("id", { count: "exact", head: true })
-          .eq("user_id", userId),
         supabase.from("blitz_requests").select("id", { count: "exact", head: true }).eq("host_id", userId),
+        supabase.from("blitz_match_participants").select("id", { count: "exact", head: true }).eq("user_id", userId),
       ]);
       setStats({
         friendsCount: friendsRes.count || 0,
-        hostedCount: hostedRes.count || 0,
-        participatedCount: participatedRes.count || 0,
         blitzSent: blitzRes.count || 0,
+        blitzJoined: joinedRes.count || 0,
       });
 
       setLoading(false);
@@ -245,7 +238,7 @@ const UserProfile = () => {
   const profileInstagramUrl = getInstagramUrl(profile.instagram_username);
   const photos = profile.photos || [];
   const interests = profile.interests || [];
-  const score = stats.blitzSent + stats.participatedCount;
+  const score = stats.blitzSent + stats.blitzJoined;
   const level = t(activityLevelKey(score));
   const isOwnProfile = user?.id === userId;
 
@@ -371,9 +364,9 @@ const UserProfile = () => {
               </div>
 
               <div className="flex justify-center gap-8">
-                <button onClick={() => setStatsSheet({ open: true, tab: "hosted" })} className="text-center">
-                  <p className="text-foreground text-xl font-bold">{stats.hostedCount}</p>
-                  <p className="text-muted-foreground text-xs">{t("userProfile.hosted")}</p>
+                <button onClick={() => setStatsSheet({ open: true, tab: "sent" })} className="text-center">
+                  <p className="text-foreground text-xl font-bold">{stats.blitzSent}</p>
+                  <p className="text-muted-foreground text-xs">Blitze</p>
                 </button>
                 <div className="text-center">
                   <HostRating hostUserId={userId} interactive={!!user && user.id !== userId} />
@@ -442,14 +435,14 @@ const UserProfile = () => {
                   <p className="text-white/85 text-[11px] font-semibold leading-tight">{t("userProfile.blitzSent")}</p>
                 </div>
                 <button
-                  onClick={() => setStatsSheet({ open: true, tab: "participated" })}
+                  onClick={() => setStatsSheet({ open: true, tab: "joined" })}
                   className="blitz-stat-card rounded-2xl p-3 flex flex-col items-center gap-1.5 text-center"
                 >
                   <div className="w-11 h-11 rounded-full bg-[hsl(var(--blitz-pink))] text-white flex items-center justify-center font-extrabold text-lg shadow-lg">
-                    {stats.participatedCount}
+                    {stats.blitzJoined}
                   </div>
                   <p className="text-white/85 text-[11px] font-semibold leading-tight">
-                    {t("userProfile.participated")} <ThumbsUp className="inline w-3 h-3 -mt-0.5" />
+                    Mitgemacht <ThumbsUp className="inline w-3 h-3 -mt-0.5" />
                   </p>
                 </button>
                 <div className="blitz-stat-card rounded-2xl p-3 flex flex-col items-center gap-1.5 text-center">
@@ -490,11 +483,7 @@ const UserProfile = () => {
 
               {/* Friends carousel */}
               <FriendsCarousel userId={userId} />
-
-              {/* Recent activities */}
-              <RecentActivities userId={userId} />
-
-              {/* Instagram */}
+{/* Instagram */}
               {profileInstagramUrl && (
                 <a
                   href={profileInstagramUrl}
