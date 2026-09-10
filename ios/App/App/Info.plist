@@ -67,7 +67,7 @@
 	<key>GIDClientID</key>
 	<string>172064364995-jimhmvn5njc39u8rtm30qnfmf223o5es.apps.googleusercontent.com</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>EVENDLE nutzt deinen Standort, um Events und spontane Treffen (Blitz) in deiner Nähe zu finden und dir passende Vorschläge zu machen.</string>
+	<string>EVENDLE nutzt deinen Standort, um spontane Treffen (Blitz) in deiner Nähe zu finden. Andere sehen nur die ungefähre Entfernung, nie deine genaue Position.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>EVENDLE braucht Zugriff auf die Kamera, damit du ein Profilfoto direkt aufnehmen kannst.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

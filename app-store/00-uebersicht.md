@@ -1,8 +1,11 @@
 # EVENDLE → App Store: Übersicht & Fortschritt
 
+> **➡️ Zum Einreichen: `EINREICHEN-morgen.md` — das ist der komplette Schritt-für-Schritt-Ablauf (Push, Demo-Account, App Store Connect, Datenschutz, Einreichen). Alles andere hier ist Hintergrund.**
+
 | Datei | Inhalt |
 |-------|--------|
-| `00-uebersicht.md` | dieses Dokument – **hier startest du** |
+| `EINREICHEN-morgen.md` | **DER Ablauf zum Einreichen – hier startest du** |
+| `00-uebersicht.md` | dieses Dokument – Fortschritt/Hintergrund |
 | `01-listing-texte.md` | Store-Texte (Name, Beschreibung, Keywords, Kategorien, Altersfreigabe) – zum Kopieren |
 | `02-app-datenschutz-fragebogen.md` | Vorausgefüllte Antworten für Apples „App-Datenschutz"-Fragebogen |
 | `03-review-blocker.md` | (erledigt) Apple-Pflichtfunktionen – jetzt alle gebaut |
