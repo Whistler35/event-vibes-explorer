@@ -35,7 +35,7 @@
 | 3 | ~~Datenschutz-Seite live auf evendle.com~~ ✅ **ERLEDIGT 10.09.** Netlify-Build repariert (bun-Lockfiles raus, package-lock gefixt, netlify.toml). Auto-Deploy ab jetzt aktiv. | – | – |
 | 4 | **Push fertig P1–P5**: APNs-Key erstellen · App-ID-Capability · Xcode-Capability (erledigt) · Supabase-Secrets · Edge-Function neu deployen | du (P1–P3) + Jakob (P4–P5) | `06` |
 | 5 | **OAuth-Konsolen prüfen B1–B3** (Google Cloud Redirect-URI, Supabase Redirect-URLs, Apple Client-IDs) + **B4** (VAPID-Secret) + **B5** (Supabase-Region) | Jakob | `08` |
-| 6 | **Web-Login testen (C)** auf evendle.com | du | `08` |
+| 6 | ~~Web-Login testen (C)~~ ✅ **Google-Web geht** (10.09., nach Code-Fix `1f9b263`: direkter supabase.auth statt Lovable-Wrapper). Apple-Web hakt am Apple-UI (kein Blocker). | – | – |
 | 7 | **Demo-Account (D)** für Apple-Prüfer – Claude gibt SQL für Lovable | du | `08` |
 | 8 | **TestFlight-Test** am iPhone: Login + Push wirklich prüfen | du | – |
 | 9 | Vor dem finalen Build: `IPHONEOS_DEPLOYMENT_TARGET` 14 → 15 + `pod install` + neu archivieren (nur eine Warnung, bis Frühjahr 2027 Zeit) | Claude + du | – |
