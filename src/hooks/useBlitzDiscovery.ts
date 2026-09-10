@@ -143,7 +143,7 @@ export async function swipeBlitz(
   blitzRequestId: string,
   direction: "left" | "right"
 ): Promise<SwipeResult> {
-  const { data, error } = await supabase.rpc("blitz_join" as any, {
+  const { data, error } = await supabase.rpc("blitz_join", {
     p_blitz_request_id: blitzRequestId,
     p_direction: direction,
   });
