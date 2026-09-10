@@ -16,6 +16,7 @@ import AuthCallback from "./pages/AuthCallback";
 import ResetPassword from "./pages/ResetPassword";
 import UserProfile from "./pages/UserProfile";
 import EditProfile from "./pages/EditProfile";
+import AdminStats from "./pages/AdminStats";
 import NotFound from "./pages/NotFound";
 import { Capacitor } from "@capacitor/core";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
@@ -110,6 +111,7 @@ const App = () => (
               <Route path="/dm/:conversationId" element={<DirectChat />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/profile/edit" element={<EditProfile />} />
+              <Route path="/admin" element={<AdminStats />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/reset-password" element={<ResetPassword />} />

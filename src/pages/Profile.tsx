@@ -5,7 +5,7 @@ import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { LogOut, Settings, ShieldCheck, LogIn, Building2, Globe, ExternalLink, Ticket } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { usePendingEventsCount } from "@/hooks/usePendingEventsCount";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { useIsHost } from "@/hooks/useIsHost";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -61,7 +61,7 @@ const Profile = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
   
-  const { isAdmin, count: pendingCount } = usePendingEventsCount();
+  const { isAdmin } = useIsAdmin();
   const { isHost } = useIsHost();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<ProfileData | null>(null);
@@ -187,7 +187,7 @@ const Profile = () => {
 
           {isAdmin && (
             <button
-              onClick={() => navigate("/admin/events")}
+              onClick={() => navigate("/admin")}
               className="w-full flex items-center justify-between p-4 rounded-2xl bg-[hsl(var(--blitz-forest))] text-white hover:opacity-95 transition shadow-md"
             >
               <div className="flex items-center gap-3">
@@ -195,15 +195,10 @@ const Profile = () => {
                   <ShieldCheck className="w-5 h-5" />
                 </div>
                 <div className="text-left">
-                  <p className="font-bold text-sm">{t("profile.adminArea")}</p>
-                  <p className="text-xs opacity-90">{t("profile.adminAreaSub")}</p>
+                  <p className="font-bold text-sm">Admin · Statistiken</p>
+                  <p className="text-xs opacity-90">Blitze, Nutzer, Matches</p>
                 </div>
               </div>
-              {pendingCount > 0 && (
-                <span className="bg-[hsl(var(--bolt))] text-[hsl(var(--blitz-forest))] text-xs font-bold rounded-full min-w-6 h-6 px-2 flex items-center justify-center">
-                  {pendingCount}
-                </span>
-              )}
             </button>
           )}
 
