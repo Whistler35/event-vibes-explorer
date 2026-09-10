@@ -1444,6 +1444,7 @@ export type Database = {
             }
             Returns: string
           }
+      admin_stats: { Args: { p_from?: string }; Returns: Json }
       call_push_notification: {
         Args: {
           p_body: string
