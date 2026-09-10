@@ -217,6 +217,7 @@ interface DiscoveryDeckProps {
 }
 
 const DiscoveryDeck = ({ city, onStartOwn }: DiscoveryDeckProps) => {
+  const navigate = useNavigate();
   const { items, loading, reload, locError, hasLocation } = useBlitzDiscovery(city);
   const { isAdmin } = useIsAdmin();
   const [index, setIndex] = useState(0);
@@ -234,7 +235,12 @@ const DiscoveryDeck = ({ city, onStartOwn }: DiscoveryDeckProps) => {
     if (!item) return;
     setIndex((i) => i + 1);
     try {
-      const swipeId = await swipeBlitz(item.id, dir);
+      const { swipeId, matched, matchId } = await swipeBlitz(item.id, dir);
+      if (dir === "right" && matched && matchId) {
+        toast("⚡ MATCH!", { description: "Ihr seid befreundet – du bist direkt im Huddle." });
+        navigate(`/blitz/match/${matchId}`);
+        return;
+      }
       if (dir === "right") {
         toast("⚡ Anfrage gesendet!", {
           description: `Wartet auf ${item.host_name ?? "den Host"}.`,
@@ -293,7 +299,7 @@ const DiscoveryDeck = ({ city, onStartOwn }: DiscoveryDeckProps) => {
 
   if (!hasLocation && locError) {
     return (
-      <div className="min-h-[65vh] rounded-3xl bg-[hsl(var(--blitz-forest))] text-white flex flex-col items-center justify-center text-center p-8 gap-4">
+      <div className="h-full min-h-[380px] rounded-3xl bg-[hsl(var(--blitz-forest))] text-white flex flex-col items-center justify-center text-center p-8 gap-4">
         <MapPin className="w-16 h-16 text-[hsl(var(--blitz-pink))] opacity-60" />
         <h2 className="text-3xl font-black uppercase">Location required</h2>
         <p className="text-white/70 max-w-xs">{locError}</p>
@@ -303,7 +309,7 @@ const DiscoveryDeck = ({ city, onStartOwn }: DiscoveryDeckProps) => {
 
   if (loading || !hasLocation) {
     return (
-      <div className="min-h-[65vh] rounded-3xl bg-muted flex items-center justify-center">
+      <div className="h-full min-h-[380px] rounded-3xl bg-muted flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     );
@@ -313,7 +319,7 @@ const DiscoveryDeck = ({ city, onStartOwn }: DiscoveryDeckProps) => {
 
   if (remaining.length === 0) {
     return (
-      <div className="min-h-[65vh] rounded-3xl bg-[hsl(var(--blitz-forest))] text-white flex flex-col items-center justify-center text-center p-8 gap-4">
+      <div className="h-full min-h-[380px] rounded-3xl bg-[hsl(var(--blitz-forest))] text-white flex flex-col items-center justify-center text-center p-8 gap-4">
         <Zap className="w-16 h-16 text-[hsl(var(--blitz-pink))] fill-[hsl(var(--blitz-pink))] opacity-60" />
         <h2 className="text-3xl font-black uppercase">Keine Blitzes</h2>
         <p className="text-white/70 max-w-xs">
@@ -341,7 +347,7 @@ const DiscoveryDeck = ({ city, onStartOwn }: DiscoveryDeckProps) => {
 
   return (
     <div className="space-y-4">
-      <div className="relative h-[calc(100vh-280px)] min-h-[500px]">
+      <div className="relative h-full min-h-[440px]">
         {remaining
           .map((item, i) => (
             <SwipeCard

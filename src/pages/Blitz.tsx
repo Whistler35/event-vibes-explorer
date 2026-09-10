@@ -110,15 +110,18 @@ const Blitz = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-32" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
-      <div className="max-w-md mx-auto px-5 pt-6 space-y-5">
-        <div className="flex items-center justify-between">
+    <div
+      className="h-[100dvh] bg-background flex flex-col overflow-hidden"
+      style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'calc(env(safe-area-inset-bottom) + 5.5rem)' }}
+    >
+      <div className="max-w-md w-full mx-auto px-5 pt-5 flex-1 min-h-0 flex flex-col gap-4">
+        <div className="flex items-center justify-between shrink-0">
           <span className="text-[hsl(var(--blitz-forest))] text-lg font-black tracking-tight">EVENDLE</span>
           <NotificationBell />
         </div>
 
         {/* Segmented Control */}
-        <div className="flex p-1 rounded-full bg-[hsl(var(--muted))]">
+        <div className="flex p-1 rounded-full bg-[hsl(var(--muted))] shrink-0">
           <button
             onClick={() => setTab("request")}
             className={`flex-1 py-3 rounded-full text-sm font-black uppercase tracking-[0.2em] transition ${
@@ -141,12 +144,15 @@ const Blitz = () => {
           </button>
         </div>
 
-        <MyMatchesBanner />
-        <MyPendingSwipesList />
+        <div className="shrink-0 empty:hidden">
+          <MyMatchesBanner />
+          <MyPendingSwipesList />
+        </div>
 
+        <div className="flex-1 min-h-0 overflow-y-auto">
         {tab === "request" ? (
           loading ? (
-            <div className="h-[70vh] rounded-[28px] bg-muted animate-pulse" />
+            <div className="h-full min-h-[380px] rounded-[28px] bg-muted animate-pulse" />
           ) : request ? (
             <div className="space-y-4">
               <IncomingRequestsList blitzRequestId={request.id} />
@@ -155,7 +161,7 @@ const Blitz = () => {
           ) : (
             <button
               onClick={() => setCreateOpen(true)}
-              className="w-full relative overflow-hidden rounded-[28px] bg-[hsl(var(--blitz-forest))] text-white p-8 min-h-[65vh] flex flex-col items-center justify-between text-center active:scale-[0.99] transition"
+              className="w-full h-full min-h-[380px] relative overflow-hidden rounded-[28px] bg-[hsl(var(--blitz-forest))] text-white p-8 flex flex-col items-center justify-between text-center active:scale-[0.99] transition"
               aria-label={t('blitz.createNew')}
             >
               <div className="pt-4 space-y-4">
@@ -188,8 +194,8 @@ const Blitz = () => {
             }}
           />
         )}
+        </div>
       </div>
-
 
       <CreateBlitzModal open={createOpen} onOpenChange={setCreateOpen} onCreated={reload} />
 

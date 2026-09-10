@@ -132,26 +132,24 @@ export function useBlitzDiscovery(_city?: string | null) {
   return { items, loading, reload: load, locError, hasLocation: !!viewerCoords };
 }
 
+export interface SwipeResult {
+  swipeId: string | null;
+  /** true when the swiper is a friend of the host → joined the huddle instantly */
+  matched: boolean;
+  matchId: string | null;
+}
+
 export async function swipeBlitz(
   blitzRequestId: string,
   direction: "left" | "right"
-): Promise<string | null> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Not authenticated");
-
-  const { data, error } = await supabase
-    .from("blitz_swipes")
-    .insert({
-      blitz_request_id: blitzRequestId,
-      swiper_id: user.id,
-      direction,
-    })
-    .select("id")
-    .single();
-  if (error && !error.message.includes("duplicate")) throw error;
-  return data?.id ?? null;
+): Promise<SwipeResult> {
+  const { data, error } = await supabase.rpc("blitz_join" as any, {
+    p_blitz_request_id: blitzRequestId,
+    p_direction: direction,
+  });
+  if (error) throw error;
+  const r = (data ?? {}) as { matched?: boolean; match_id?: string; swipe_id?: string };
+  return { swipeId: r.swipe_id ?? null, matched: !!r.matched, matchId: r.match_id ?? null };
 }
 
 export async function undoSwipe(swipeId: string) {
