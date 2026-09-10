@@ -87,7 +87,7 @@ const AdminStats = () => {
     setDetail({ open: true, kind, title });
     setDetailLoading(true);
     setDetailRows([]);
-    const { data, error } = await supabase.rpc("admin_list" as any, {
+    const { data, error } = await supabase.rpc("admin_list", {
       p_kind: kind,
       p_from: rangeStart(range),
       p_limit: 300,
