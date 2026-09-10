@@ -216,10 +216,13 @@ const Messenger = () => {
             lastMsg.sender_id !== user.id &&
             isConversationUnread(`blitz_${m.id}`, lastAt, user.id);
 
+          // A huddle is always named after its Blitz. Only fall back to a
+          // participant's name if the Blitz somehow has no activity text.
+          const huddleName = activity || firstOther?.name || t('messenger.match');
           const title =
             partsForMatch.length > 2
-              ? `${activity ?? "Blitz"} · ${partsForMatch.length} 👥`
-              : firstOther?.name || activity || t('messenger.match');
+              ? `${huddleName} · ${partsForMatch.length} 👥`
+              : huddleName;
 
           results.push({
             id: `blitz_${m.id}`,

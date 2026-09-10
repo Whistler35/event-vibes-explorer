@@ -44,10 +44,7 @@ const MyMatchesBanner = () => {
             <p className="font-black uppercase text-xs tracking-wider text-[hsl(var(--bolt))] flex items-center gap-1">
               <Zap className="w-3 h-3 fill-[hsl(var(--bolt))]" /> Match aktiv · {m.participant_count} 👥
             </p>
-            <p className="font-bold truncate">
-              {m.activity ?? "Blitz"}
-              {m.preview_names.length > 0 && ` · ${m.preview_names.join(", ")}`}
-            </p>
+            <p className="font-bold truncate">{m.activity ?? "Blitz"}</p>
           </div>
           <div className="font-black tabular-nums text-lg">
             <Countdown target={m.chat_expires_at} />

@@ -329,10 +329,14 @@ const BlitzMatch = () => {
           {participantIds.map((id) => {
             const p = profilesMap.get(id);
             const isHost = id === match.host_id;
+            const isMe = id === user.id;
             return (
-              <div
+              <button
                 key={id}
-                className="inline-flex items-center gap-2 pl-1 pr-3 py-1 rounded-full bg-white shadow-sm"
+                type="button"
+                onClick={() => { if (!isMe) navigate(`/user/${id}`); }}
+                disabled={isMe}
+                className="inline-flex items-center gap-2 pl-1 pr-3 py-1 rounded-full bg-white shadow-sm enabled:active:scale-[0.97] enabled:hover:bg-white/80 transition disabled:cursor-default"
               >
                 <Avatar className="w-7 h-7">
                   <AvatarImage src={p?.avatar_url ?? undefined} />
@@ -340,13 +344,13 @@ const BlitzMatch = () => {
                     {p?.name?.[0] ?? "?"}
                   </AvatarFallback>
                 </Avatar>
-                <div className="leading-tight">
-                  <p className="text-xs font-black">{p?.name?.split(" ")[0] ?? "?"}</p>
+                <div className="leading-tight text-left">
+                  <p className="text-xs font-black">{isMe ? "Du" : p?.name?.split(" ")[0] ?? "?"}</p>
                   <p className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">
                     {isHost ? "HOST" : "IN"}
                   </p>
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>
@@ -403,9 +407,13 @@ const BlitzMatch = () => {
                 }`}
               >
                 {!mine && senderName && (
-                  <p className="text-[11px] font-black text-[hsl(var(--blitz-forest))] mb-0.5">
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/user/${msg.sender_id}`)}
+                    className="text-[11px] font-black text-[hsl(var(--blitz-forest))] mb-0.5 hover:underline"
+                  >
                     {senderName}
-                  </p>
+                  </button>
                 )}
                 <p className="text-sm break-words whitespace-pre-wrap leading-snug">
                   {msg.message}
