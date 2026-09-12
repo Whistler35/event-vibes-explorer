@@ -30,6 +30,8 @@ import InterestChips from "@/components/profile/InterestChips";
 import UserActionsMenu from "@/components/moderation/UserActionsMenu";
 import PhotoStrip from "@/components/profile/PhotoStrip";
 import FriendsCarousel from "@/components/profile/FriendsCarousel";
+import FriendSearch from "@/components/FriendSearch";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 interface ProfileData {
   name: string;
@@ -84,6 +86,7 @@ const UserProfile = () => {
   }>({ open: false, tab: "sent" });
   const [friendship, setFriendship] = useState<Friendship | null>(null);
   const [friendActionLoading, setFriendActionLoading] = useState(false);
+  const [showFriendsSheet, setShowFriendsSheet] = useState(false);
 
   const handleStartDM = async () => {
     if (!user || !userId) {
@@ -482,7 +485,11 @@ const UserProfile = () => {
               )}
 
               {/* Friends carousel */}
-              <FriendsCarousel userId={userId} />
+              <FriendsCarousel
+                userId={userId}
+                isOwnProfile={isOwnProfile}
+                onAddFriend={() => setShowFriendsSheet(true)}
+              />
 {/* Instagram */}
               {profileInstagramUrl && (
                 <a
@@ -518,6 +525,17 @@ const UserProfile = () => {
         userId={userId}
         activeTab={statsSheet.tab}
       />
+
+      <Sheet open={showFriendsSheet} onOpenChange={setShowFriendsSheet}>
+        <SheetContent side="bottom" className="h-[80vh] rounded-t-3xl">
+          <SheetHeader>
+            <SheetTitle>{t("profile.findFriends")}</SheetTitle>
+          </SheetHeader>
+          <div className="mt-4 overflow-y-auto h-[calc(80vh-64px)] pb-6">
+            <FriendSearch />
+          </div>
+        </SheetContent>
+      </Sheet>
     </Layout>
   );
 };

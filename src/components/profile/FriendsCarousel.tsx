@@ -13,9 +13,10 @@ interface Friend {
 interface Props {
   userId: string;
   onAddFriend?: () => void;
+  isOwnProfile?: boolean;
 }
 
-const FriendsCarousel = ({ userId, onAddFriend }: Props) => {
+const FriendsCarousel = ({ userId, onAddFriend, isOwnProfile = true }: Props) => {
   const navigate = useNavigate();
   const [friends, setFriends] = useState<Friend[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +53,7 @@ const FriendsCarousel = ({ userId, onAddFriend }: Props) => {
       <div className="flex items-center justify-between px-4">
         <h3 className="text-white font-bold text-lg flex items-center gap-2">
           <Users className="w-5 h-5 text-[hsl(var(--blitz-pink))]" />
-          Deine Blitz-Community
+          {isOwnProfile ? "Deine Blitz-Community" : "Blitz-Community"}
           <span className="text-white/60 font-medium">({friends.length})</span>
         </h3>
       </div>
