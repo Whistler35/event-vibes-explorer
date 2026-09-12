@@ -56,10 +56,19 @@ const nativeAppleSignIn = async (): Promise<Error | null> => {
   const identityToken = result.response?.identityToken;
   if (!identityToken) return new Error('No identityToken from Apple');
 
+  // Apple only ever sends givenName/familyName on the user's very first
+  // authorization for this app — capture it now so handle_new_user() can use
+  // a real name instead of falling back to the (often privaterelay) email.
+  const fullName = [result.response?.givenName, result.response?.familyName]
+    .filter(Boolean)
+    .join(' ')
+    .trim();
+
   const { error } = await supabase.auth.signInWithIdToken({
     provider: 'apple',
     token: identityToken,
     nonce: rawNonce,
+    ...(fullName ? { options: { data: { name: fullName } } } : {}),
   });
   return error ?? null;
 };

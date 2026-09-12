@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { acceptBlitzRequest, rejectBlitzRequest } from "@/hooks/useBlitzMatching";
 
 type FilterKey = "all" | "unread" | "messages" | "events" | "friends" | "blitz";
 
@@ -82,6 +83,42 @@ const NotificationBell = () => {
   };
 
 
+  const respondBlitzRequest = async (notif: AppNotification, accept: boolean) => {
+    const swipeId = notif.data?.swipe_id;
+    const blitzRequestId = notif.data?.blitz_request_id;
+    const swiperId = notif.data?.swiper_id;
+    if (!swipeId || !blitzRequestId || !swiperId) return;
+    setPendingIds((s) => new Set(s).add(notif.id));
+    try {
+      if (accept) {
+        await acceptBlitzRequest({
+          swipe_id: swipeId,
+          blitz_request_id: blitzRequestId,
+          swiper_id: swiperId,
+          swiper_name: null,
+          swiper_avatar: null,
+          swiper_bio: null,
+          activity: "",
+          created_at: "",
+        });
+        toast.success("Blitz-Anfrage angenommen");
+      } else {
+        await rejectBlitzRequest(swipeId);
+        toast("Anfrage abgelehnt");
+      }
+      if (!notif.is_read) markAsRead(notif.id);
+      refetch?.();
+    } catch (e: any) {
+      toast.error(e.message ?? "Fehler");
+    } finally {
+      setPendingIds((s) => {
+        const n = new Set(s);
+        n.delete(notif.id);
+        return n;
+      });
+    }
+  };
+
   const filtered = notifications.filter((n) => {
     if (filter === "all") return true;
     if (filter === "unread") return !n.is_read;
@@ -123,7 +160,9 @@ const NotificationBell = () => {
     } else if (notif.type === "blitz_match" && notif.data?.match_id) {
       navigate(`/blitz/match/${notif.data.match_id}`);
     } else if (notif.type === "blitz_request") {
-      navigate("/blitz");
+      const uid = notif.data?.swiper_id;
+      if (uid) navigate(`/user/${uid}`);
+      else navigate("/blitz");
     }
     setOpen(false);
   };
@@ -217,13 +256,18 @@ const NotificationBell = () => {
                     <p className={`text-xs mt-0.5 line-clamp-2 ${!notif.is_read ? "text-foreground/80" : "text-muted-foreground"}`}>
                       {notif.body}
                     </p>
-                    {notif.type === "friend_request" && (
+                    {(notif.type === "friend_request" || notif.type === "blitz_request") && (
                       <div className="flex gap-2 mt-2" onClick={(e) => e.stopPropagation()}>
                         <Button
                           size="sm"
                           className="h-8 px-3 text-xs"
                           disabled={pendingIds.has(notif.id)}
-                          onClick={(e) => { e.stopPropagation(); respondFriendRequest(notif, true); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            notif.type === "friend_request"
+                              ? respondFriendRequest(notif, true)
+                              : respondBlitzRequest(notif, true);
+                          }}
                         >
                           <Check className="w-3.5 h-3.5 mr-1" /> Annehmen
                         </Button>
@@ -232,7 +276,12 @@ const NotificationBell = () => {
                           variant="outline"
                           className="h-8 px-3 text-xs"
                           disabled={pendingIds.has(notif.id)}
-                          onClick={(e) => { e.stopPropagation(); respondFriendRequest(notif, false); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            notif.type === "friend_request"
+                              ? respondFriendRequest(notif, false)
+                              : respondBlitzRequest(notif, false);
+                          }}
                         >
                           <X className="w-3.5 h-3.5 mr-1" /> Ablehnen
                         </Button>
