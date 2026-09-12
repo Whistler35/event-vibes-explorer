@@ -6,6 +6,7 @@ import { useBlitzDiscovery, swipeBlitz, undoSwipe, DiscoveryBlitz } from "@/hook
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { supabase } from "@/integrations/supabase/client";
 import { getActivityFontClass } from "@/lib/blitzText";
+import { asBlitzQuestion } from "@/lib/utils";
 import { toast } from "sonner";
 
 const SWIPE_THRESHOLD = 100;
@@ -179,7 +180,7 @@ const SwipeCard = ({ item, onSwipe, onAdminDelete, isTop, isAdmin }: CardProps) 
           </div>
 
           <h2 className={`${fontClass} text-5xl font-black leading-[0.95] tracking-tight break-words max-w-full`}>
-            {item.activity}?
+            {asBlitzQuestion(item.activity)}
           </h2>
 
           <button

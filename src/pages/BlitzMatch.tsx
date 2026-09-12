@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { ArrowLeft, Zap, Trash2, Users, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { asBlitzQuestion } from "@/lib/utils";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
@@ -274,7 +275,7 @@ const BlitzMatch = () => {
       {/* Title + host */}
       <div className="px-5 pt-2 pb-4 shrink-0">
         <h1 className="font-display text-4xl font-bold tracking-tight text-foreground leading-tight">
-          {headerTitle}?
+          {asBlitzQuestion(headerTitle)}
         </h1>
         <div className="mt-3 flex items-center gap-2">
           <Avatar className="w-8 h-8">

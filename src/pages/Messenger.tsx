@@ -72,7 +72,7 @@ const Messenger = () => {
       )
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "blitz_requests", filter: `user_id=eq.${user.id}` },
+        { event: "*", schema: "public", table: "blitz_requests", filter: `host_id=eq.${user.id}` },
         () => queryClient.invalidateQueries({ queryKey: ["dm-conversations", user.id] })
       )
       .subscribe();
@@ -104,9 +104,10 @@ const Messenger = () => {
         getBlockedIds(),
       ]);
 
-      if (error || !convosRaw) return [];
-
-      const convos = convosRaw.filter((c: any) => {
+      // Note: no early-return here even when the user has zero direct
+      // conversations — Blitz huddles (appended further below) are a
+      // separate source and must still be shown.
+      const convos = error || !convosRaw ? [] : convosRaw.filter((c: any) => {
         const otherId =
           c.participant1_id === user.id ? c.participant2_id : c.participant1_id;
         return !blockedIds.has(otherId);
@@ -116,12 +117,12 @@ const Messenger = () => {
         c.participant1_id === user.id ? c.participant2_id : c.participant1_id
       );
 
-      if (otherUserIds.length === 0) return [];
-
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("user_id, name, avatar_url")
-        .in("user_id", otherUserIds);
+      const { data: profiles } = otherUserIds.length
+        ? await supabase
+            .from("profiles")
+            .select("user_id, name, avatar_url")
+            .in("user_id", otherUserIds)
+        : { data: [] as any[] };
 
       const results: ConversationWithProfile[] = [];
 
@@ -246,7 +247,7 @@ const Messenger = () => {
       const { data: myRequests } = await (supabase as any)
         .from("blitz_requests")
         .select("id, activity, expires_at, status, created_at")
-        .eq("user_id", user.id)
+        .eq("host_id", user.id)
         .eq("status", "active")
         .gt("expires_at", nowIso);
 

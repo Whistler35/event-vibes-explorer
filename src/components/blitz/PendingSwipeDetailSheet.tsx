@@ -5,6 +5,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { getActivityFontClass } from "@/lib/blitzText";
+import { asBlitzQuestion } from "@/lib/utils";
 import { withdrawSwipe, PendingSwipe } from "@/hooks/useMyPendingSwipes";
 import { toast } from "sonner";
 
@@ -93,7 +94,7 @@ const PendingSwipeDetailSheet = ({ swipe, onOpenChange, onWithdrawn }: Props) =>
 
             <div className="flex flex-col items-center justify-center text-center space-y-5 py-6">
               <h2 className={`${fontClass} font-black uppercase leading-tight tracking-tight break-words max-w-full`}>
-                {swipe.activity}?
+                {asBlitzQuestion(swipe.activity)}
               </h2>
               <div className="space-y-1">
                 <div className="text-5xl font-black tabular-nums text-[hsl(var(--blitz-pink))] drop-shadow-[0_0_20px_hsl(var(--blitz-pink)/0.6)]">
