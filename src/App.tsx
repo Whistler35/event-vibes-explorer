@@ -19,13 +19,16 @@ import EditProfile from "./pages/EditProfile";
 import AdminStats from "./pages/AdminStats";
 import NotFound from "./pages/NotFound";
 import { Capacitor } from "@capacitor/core";
+import { useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { usePushNotifications } from "./hooks/usePushNotifications";
+import { getNotificationRoute } from "./lib/notificationRouting";
 
 const queryClient = new QueryClient();
 
 function PushSetup() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { subscribe, refreshLocation } = usePushNotifications();
   const prevUserIdRef = useRef<string | null>(null);
 
@@ -37,6 +40,26 @@ function PushSetup() {
       prevUserIdRef.current = null;
     }
   }, [user, subscribe]);
+
+  // Tapping the OS push banner/lock-screen notification (app closed or
+  // backgrounded) doesn't go through NotificationBell at all — it needs its
+  // own listener to deep-link, using the same routing table.
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    let removeListener: (() => void) | undefined;
+    import("@capacitor/push-notifications").then(({ PushNotifications }) => {
+      PushNotifications.addListener("pushNotificationActionPerformed", (action) => {
+        const data = action.notification?.data as Record<string, any> | undefined;
+        const type = data?.type;
+        if (!type) return;
+        const route = getNotificationRoute(type, data);
+        if (route) navigate(route.path, route.state ? { state: route.state } : undefined);
+      }).then((handle) => {
+        removeListener = () => handle.remove();
+      });
+    });
+    return () => removeListener?.();
+  }, [navigate]);
 
   useEffect(() => {
     if (!user) return;

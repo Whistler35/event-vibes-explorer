@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { acceptBlitzRequest, rejectBlitzRequest } from "@/hooks/useBlitzMatching";
+import { getNotificationRoute } from "@/lib/notificationRouting";
 
 type FilterKey = "all" | "unread" | "messages" | "events" | "friends" | "blitz";
 
@@ -146,31 +147,8 @@ const NotificationBell = () => {
   const handleClick = (notif: AppNotification) => {
     if (!notif.is_read) markAsRead(notif.id);
 
-    // Event-related notification types are no longer navigable (events feature
-    // removed in the Lovable rebuild 3f3307a); those branches just close the popup.
-    if (notif.type === "new_dm" && notif.data?.conversation_id) {
-      navigate(`/dm/${notif.data.conversation_id}`);
-    } else if (notif.type === "friend_request") {
-      const uid =
-        notif.data?.from_user_id || notif.data?.requester_id || notif.data?.friend_id;
-      if (uid) navigate(`/user/${uid}`);
-      else navigate("/profile");
-    } else if (notif.type === "friend_accepted") {
-      const uid =
-        notif.data?.friend_id || notif.data?.from_user_id || notif.data?.requester_id;
-      if (uid) navigate(`/user/${uid}`);
-    } else if (
-      (notif.type === "blitz_match" || notif.type === "blitz_chat_message") &&
-      notif.data?.match_id
-    ) {
-      navigate(`/blitz/match/${notif.data.match_id}`);
-    } else if (notif.type === "blitz_request") {
-      // Take the host straight to the incoming-requests list on "Mein Blitz"
-      // so they can accept/decline right there.
-      navigate("/blitz", { state: { tab: "request" } });
-    } else if (notif.type === "new_blitz_nearby") {
-      navigate("/blitz", { state: { tab: "discover" } });
-    }
+    const route = getNotificationRoute(notif.type, notif.data);
+    if (route) navigate(route.path, route.state ? { state: route.state } : undefined);
     setOpen(false);
   };
 
