@@ -25,16 +25,34 @@ interface RequestBody {
 // Needs these Edge-Function secrets:
 //   APNS_KEY_ID       – 10-char Key ID of the APNs Auth Key
 //   APNS_TEAM_ID      – Apple Team ID (7DY4J52V8L)
-//   APNS_PRIVATE_KEY  – full contents of the AuthKey_XXXX.p8 file (PEM, with header/footer)
 //   APNS_BUNDLE_ID    – com.evendle.app  (defaults to that)
 //   APNS_HOST         – api.push.apple.com (prod, default) | api.sandbox.push.apple.com (dev builds)
+// APNS_PRIVATE_KEY (the multi-line .p8 PEM) is NOT a Secret — the Cloud
+// Secrets form corrupts multi-line values. It lives in the database instead,
+// in public.app_secrets (key='APNS_PRIVATE_KEY'), set via the SQL editor.
 
 const APNS_KEY_ID = Deno.env.get('APNS_KEY_ID')
 const APNS_TEAM_ID = Deno.env.get('APNS_TEAM_ID')
-const APNS_PRIVATE_KEY = Deno.env.get('APNS_PRIVATE_KEY')
 const APNS_BUNDLE_ID = Deno.env.get('APNS_BUNDLE_ID') ?? 'com.evendle.app'
 const APNS_HOST = Deno.env.get('APNS_HOST') ?? 'api.push.apple.com'
-const apnsConfigured = !!(APNS_KEY_ID && APNS_TEAM_ID && APNS_PRIVATE_KEY)
+
+// The Cloud "Secrets" form corrupts multi-line values (confirmed: the first
+// character of the pasted PEM was replaced by a stray bullet, reproducibly,
+// on every re-entry attempt). The private key lives in public.app_secrets
+// instead (set via the SQL editor, which handles multi-line text correctly);
+// only the service-role client below can read it. Cached per warm instance.
+let cachedPrivateKey: string | null = null
+async function getApnsPrivateKey(supabase: ReturnType<typeof createClient>): Promise<string | null> {
+  if (cachedPrivateKey) return cachedPrivateKey
+  const { data, error } = await supabase
+    .from('app_secrets')
+    .select('value')
+    .eq('key', 'APNS_PRIVATE_KEY')
+    .maybeSingle()
+  if (error || !data?.value) return null
+  cachedPrivateKey = data.value
+  return cachedPrivateKey
+}
 
 function b64url(bytes: Uint8Array): string {
   let s = ''
@@ -67,7 +85,7 @@ function pemToPkcs8(pem: string): Uint8Array {
 
 let cachedJwt: { token: string; iat: number } | null = null
 
-async function getApnsJwt(): Promise<string> {
+async function getApnsJwt(privateKey: string): Promise<string> {
   const now = Math.floor(Date.now() / 1000)
   // APNs accepts a token for 1h; regenerate at most every ~40 min.
   if (cachedJwt && now - cachedJwt.iat < 40 * 60) return cachedJwt.token
@@ -78,7 +96,7 @@ async function getApnsJwt(): Promise<string> {
 
   const key = await crypto.subtle.importKey(
     'pkcs8',
-    pemToPkcs8(APNS_PRIVATE_KEY!) as unknown as ArrayBufferView,
+    pemToPkcs8(privateKey) as unknown as ArrayBufferView,
     { name: 'ECDSA', namedCurve: 'P-256' },
     false,
     ['sign'],
@@ -94,8 +112,9 @@ async function getApnsJwt(): Promise<string> {
 async function sendApns(
   deviceToken: string,
   n: PushPayload,
+  privateKey: string,
 ): Promise<{ ok: boolean; stale: boolean; status: number; reason?: string }> {
-  const jwt = await getApnsJwt()
+  const jwt = await getApnsJwt(privateKey)
   const payload = {
     aps: {
       alert: { title: n.title, body: n.body ?? '' },
@@ -146,6 +165,15 @@ Deno.serve(async (req) => {
       webpush.setVapidDetails(vapidSubject, vapidPublic!, vapidPrivate!)
     }
 
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+      { auth: { persistSession: false } },
+    )
+
+    const apnsPrivateKey = await getApnsPrivateKey(supabase)
+    const apnsConfigured = !!(APNS_KEY_ID && APNS_TEAM_ID && apnsPrivateKey)
+
     if (!webPushConfigured && !apnsConfigured) {
       return new Response(
         JSON.stringify({ error: 'Neither Web Push (VAPID) nor APNs is configured' }),
@@ -176,12 +204,6 @@ Deno.serve(async (req) => {
       )
     }
 
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-      { auth: { persistSession: false } },
-    )
-
     const { data: subs, error: subsErr } = await supabase
       .from('push_subscriptions')
       .select('id, platform, device_token, endpoint, p256dh, auth')
@@ -211,8 +233,8 @@ Deno.serve(async (req) => {
         try {
           // Native iOS row (has an APNs device token)
           if (s.device_token) {
-            if (!apnsConfigured) { failed++; return }
-            const r = await sendApns(s.device_token, n)
+            if (!apnsConfigured || !apnsPrivateKey) { failed++; return }
+            const r = await sendApns(s.device_token, n, apnsPrivateKey)
             if (r.ok) sent++
             else {
               failed++
