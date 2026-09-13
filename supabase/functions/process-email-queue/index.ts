@@ -73,10 +73,10 @@ function parseJwtClaims(token: string): Record<string, unknown> | null {
 async function moveToDlq(
   supabase: SupabaseClient,
   queue: string,
-  msg: { msg_id: number; message: Json },
+  msg: { msg_id: number; message: Json; enqueued_at?: string },
   reason: string
 ): Promise<void> {
-  const payload = msg.message as EmailPayload
+  const payload = (msg.message ?? {}) as unknown as EmailPayload
   await supabase.from('email_send_log').insert({
     message_id: payload.message_id,
     template_name: payload.label || queue,
@@ -88,7 +88,7 @@ async function moveToDlq(
     source_queue: queue,
     dlq_name: `${queue}_dlq`,
     message_id: msg.msg_id,
-    payload,
+    payload: msg.message as Json,
   })
   if (error) {
     console.error('Failed to move message to DLQ', { queue, msg_id: msg.msg_id, reason, error })
@@ -173,11 +173,12 @@ Deno.serve(async (req) => {
     const messageIds = Array.from(
       new Set(
         messages
-          .map((msg) =>
-            msg?.message?.message_id && typeof msg.message.message_id === 'string'
-              ? msg.message.message_id
+          .map((msg) => {
+            const payload = (msg.message ?? {}) as unknown as EmailPayload
+            return payload.message_id && typeof payload.message_id === 'string'
+              ? payload.message_id
               : null
-          )
+          })
           .filter((id): id is string => Boolean(id))
       )
     )
@@ -207,8 +208,8 @@ Deno.serve(async (req) => {
     }
 
     for (let i = 0; i < messages.length; i++) {
-      const msg = messages[i]
-      const payload = msg.message as EmailPayload
+      const msg = messages[i] as { msg_id: number; message: Json; read_ct: number; enqueued_at?: string }
+      const payload = (msg.message ?? {}) as unknown as EmailPayload
       const failedAttempts =
         payload?.message_id && typeof payload.message_id === 'string'
           ? (failedAttemptsByMessageId.get(payload.message_id) ?? 0)
@@ -263,6 +264,13 @@ Deno.serve(async (req) => {
           }
           continue
         }
+      }
+
+      // Guard: skip malformed messages missing required fields.
+      if (!payload.to || !payload.from || !payload.subject || (!payload.html && !payload.text)) {
+        console.warn('Skipping malformed email message', { queue, msg_id: msg.msg_id, payload })
+        await moveToDlq(supabase, queue, msg, 'Malformed email message: missing required fields')
+        continue
       }
 
       try {

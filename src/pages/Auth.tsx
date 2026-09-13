@@ -68,9 +68,21 @@ const nativeAppleSignIn = async (): Promise<Error | null> => {
     provider: 'apple',
     token: identityToken,
     nonce: rawNonce,
-    ...(fullName ? { options: { data: { name: fullName } } } : {}),
   });
-  return error ?? null;
+  if (error) return error;
+
+  // signInWithIdToken does not accept user metadata in its options, so update
+  // the profile directly after a successful Apple sign-in.
+  if (fullName) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase.from('profiles').upsert(
+        { user_id: user.id, name: fullName },
+        { onConflict: 'user_id' }
+      );
+    }
+  }
+  return null;
 };
 
 const nativeOAuth = async (provider: 'google' | 'apple') => {
