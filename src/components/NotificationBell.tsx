@@ -22,7 +22,7 @@ const FILTERS: { key: FilterKey; label: string }[] = [
 ];
 
 const TYPE_GROUPS: Record<Exclude<FilterKey, "all" | "unread">, string[]> = {
-  messages: ["new_dm"],
+  messages: ["new_dm", "blitz_chat_message"],
   events: [
     "friend_event_created",
     "friend_joined_event",
@@ -128,6 +128,7 @@ const NotificationBell = () => {
   const getIcon = (type: string) => {
     switch (type) {
       case "new_dm": return <MessageCircle className="w-5 h-5 text-primary" />;
+      case "blitz_chat_message": return <MessageCircle className="w-5 h-5 text-[hsl(var(--blitz-pink))]" />;
       case "friend_event_created": return <Calendar className="w-5 h-5 text-primary" />;
       case "friend_joined_event": return <Users className="w-5 h-5 text-primary" />;
       case "friend_request": return <UserPlus className="w-5 h-5 text-primary" />;
@@ -157,7 +158,10 @@ const NotificationBell = () => {
       const uid =
         notif.data?.friend_id || notif.data?.from_user_id || notif.data?.requester_id;
       if (uid) navigate(`/user/${uid}`);
-    } else if (notif.type === "blitz_match" && notif.data?.match_id) {
+    } else if (
+      (notif.type === "blitz_match" || notif.type === "blitz_chat_message") &&
+      notif.data?.match_id
+    ) {
       navigate(`/blitz/match/${notif.data.match_id}`);
     } else if (notif.type === "blitz_request") {
       const uid = notif.data?.swiper_id;
