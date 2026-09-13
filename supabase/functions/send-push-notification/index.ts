@@ -47,6 +47,20 @@ function pemToPkcs8(pem: string): Uint8Array {
     .replace(/-----BEGIN [^-]+-----/g, '')
     .replace(/-----END [^-]+-----/g, '')
     .replace(/\s+/g, '')
+
+  // Diagnostics only — never log the key itself, just enough to tell whether
+  // the APNS_PRIVATE_KEY secret is malformed (wrong length / stray character)
+  // without a fresh archive+redeploy cycle per guess.
+  const badCharMatch = b64.match(/[^A-Za-z0-9+/=]/)
+  if (badCharMatch) {
+    console.error('APNS_PRIVATE_KEY diagnostic: invalid character found', {
+      rawLength: pem.length,
+      cleanedLength: b64.length,
+      badCharCodePoint: badCharMatch[0].codePointAt(0),
+      badCharIndex: badCharMatch.index,
+    })
+  }
+
   const raw = atob(b64)
   return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)))
 }
