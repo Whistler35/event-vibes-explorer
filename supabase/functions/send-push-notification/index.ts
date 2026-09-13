@@ -36,11 +36,14 @@ const APNS_TEAM_ID = Deno.env.get('APNS_TEAM_ID')
 const APNS_BUNDLE_ID = Deno.env.get('APNS_BUNDLE_ID') ?? 'com.evendle.app'
 const APNS_HOST = Deno.env.get('APNS_HOST') ?? 'api.push.apple.com'
 
-// The Cloud "Secrets" form corrupts multi-line values (confirmed: the first
-// character of the pasted PEM was replaced by a stray bullet, reproducibly,
-// on every re-entry attempt). The private key lives in public.app_secrets
-// instead (set via the SQL editor, which handles multi-line text correctly);
-// only the service-role client below can read it. Cached per warm instance.
+// Storing the raw "-----BEGIN PRIVATE KEY-----" PEM anywhere in Lovable
+// (Secrets form, chat, even the SQL editor) gets it silently corrupted —
+// confirmed: the first character was replaced by a stray bullet (U+2022),
+// byte-identical, no matter the entry path. Lovable appears to pattern-match
+// "looks like a private key" and mangle it everywhere. Workaround: the value
+// stored in public.app_secrets is the PEM base64-encoded ONE MORE TIME as a
+// plain opaque blob (no recognizable "-----BEGIN"), which doesn't trigger
+// whatever is doing this — decode that outer layer here before use.
 let cachedPrivateKey: string | null = null
 async function getApnsPrivateKey(supabase: ReturnType<typeof createClient>): Promise<string | null> {
   if (cachedPrivateKey) return cachedPrivateKey
@@ -50,7 +53,7 @@ async function getApnsPrivateKey(supabase: ReturnType<typeof createClient>): Pro
     .eq('key', 'APNS_PRIVATE_KEY')
     .maybeSingle()
   if (error || !data?.value) return null
-  cachedPrivateKey = data.value
+  cachedPrivateKey = atob(data.value.trim())
   return cachedPrivateKey
 }
 
