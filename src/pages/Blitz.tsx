@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Zap } from "lucide-react";
 import BottomNavigation from "@/components/BottomNavigation";
 import { useAuth } from "@/contexts/AuthContext";
@@ -21,11 +21,14 @@ type Tab = "request" | "discover";
 const Blitz = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, loading: authLoading } = useAuth();
   const { request, loading, reload } = useActiveBlitzRequest();
   const [createOpen, setCreateOpen] = useState(false);
-  // Default = Discovery mode (users open the app straight into discovering blitzes)
-  const [tab, setTab] = useState<Tab>("discover");
+  // Default = Discovery mode (users open the app straight into discovering
+  // blitzes), unless a notification tap requested a specific tab.
+  const requestedTab = (location.state as { tab?: Tab } | null)?.tab;
+  const [tab, setTab] = useState<Tab>(requestedTab ?? "discover");
   const [city, setCity] = useState<string | null>(null);
   const { matches } = useMyBlitzMatches();
   const seenMatchIds = useRef<Set<string>>(new Set());
@@ -45,6 +48,12 @@ const Blitz = () => {
       return data as { name: string | null; avatar_url: string | null } | null;
     },
   });
+
+  // Also react when already mounted on /blitz and a notification tap comes
+  // in with a fresh state (navigate() to the same path doesn't remount).
+  useEffect(() => {
+    if (requestedTab) setTab(requestedTab);
+  }, [requestedTab]);
 
   useEffect(() => {
     try {

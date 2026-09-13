@@ -32,7 +32,7 @@ const TYPE_GROUPS: Record<Exclude<FilterKey, "all" | "unread">, string[]> = {
     "join_request_accepted",
   ],
   friends: ["friend_request", "friend_accepted"],
-  blitz: ["blitz_match", "blitz_request"],
+  blitz: ["blitz_match", "blitz_request", "new_blitz_nearby"],
 };
 
 const NotificationBell = () => {
@@ -138,6 +138,7 @@ const NotificationBell = () => {
       case "event_rejected": return <XCircle className="w-5 h-5 text-destructive" />;
       case "blitz_match": return <Zap className="w-5 h-5 text-[hsl(var(--blitz-pink))] fill-[hsl(var(--blitz-pink))]" />;
       case "blitz_request": return <Zap className="w-5 h-5 text-[hsl(var(--blitz-pink))]" />;
+      case "new_blitz_nearby": return <Zap className="w-5 h-5 text-[hsl(var(--blitz-forest))]" />;
       default: return <Bell className="w-5 h-5 text-primary" />;
     }
   };
@@ -164,9 +165,11 @@ const NotificationBell = () => {
     ) {
       navigate(`/blitz/match/${notif.data.match_id}`);
     } else if (notif.type === "blitz_request") {
-      const uid = notif.data?.swiper_id;
-      if (uid) navigate(`/user/${uid}`);
-      else navigate("/blitz");
+      // Take the host straight to the incoming-requests list on "Mein Blitz"
+      // so they can accept/decline right there.
+      navigate("/blitz", { state: { tab: "request" } });
+    } else if (notif.type === "new_blitz_nearby") {
+      navigate("/blitz", { state: { tab: "discover" } });
     }
     setOpen(false);
   };
