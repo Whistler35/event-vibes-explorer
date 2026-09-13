@@ -1,6 +1,15 @@
 import { useEffect, useCallback, useRef } from 'react'
 import { Capacitor } from '@capacitor/core'
 import { supabase } from '@/integrations/supabase/client'
+import { toast } from 'sonner'
+
+// TEMPORARY: on-screen push-registration diagnostics for the native rollout.
+// Remove once device_token is reliably populating in push_subscriptions.
+const PUSH_DEBUG = true
+function pushDebug(msg: string) {
+  console.log('[push-debug]', msg)
+  if (PUSH_DEBUG) toast(`Push: ${msg}`, { duration: 8000 })
+}
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string
 const IS_NATIVE = Capacitor.isNativePlatform()
@@ -32,18 +41,24 @@ function getCurrentPosition(): Promise<GeolocationCoordinates | null> {
 // ─── Native path (APNs / FCM via @capacitor/push-notifications) ─────────────
 
 async function subscribeNative(): Promise<boolean> {
+  pushDebug('subscribeNative() gestartet')
   const { PushNotifications } = await import('@capacitor/push-notifications')
 
   const { receive } = await PushNotifications.requestPermissions()
+  pushDebug(`requestPermissions() → ${receive}`)
   if (receive !== 'granted') return false
 
   return new Promise((resolve) => {
-    const timer = setTimeout(() => resolve(false), 10_000)
+    const timer = setTimeout(() => {
+      pushDebug('TIMEOUT nach 10s — weder registration noch registrationError kam an')
+      resolve(false)
+    }, 10_000)
 
     PushNotifications.addListener('registration', async ({ value: token }) => {
       clearTimeout(timer)
+      pushDebug(`registration OK, Token: ${token.slice(0, 12)}…`)
       const [userId, coords] = await Promise.all([getUserId(), getCurrentPosition()])
-      if (!userId) { resolve(false); return }
+      if (!userId) { pushDebug('kein eingeloggter userId — abgebrochen'); resolve(false); return }
 
       // A user may have several devices; the unique key is (user_id, device_token).
       const { error } = await supabase.from('push_subscriptions').upsert({
@@ -54,17 +69,24 @@ async function subscribeNative(): Promise<boolean> {
         longitude:    coords?.longitude ?? null,
         user_agent:   navigator.userAgent,
       }, { onConflict: 'user_id,device_token' })
-      if (error) console.error('push_subscriptions upsert (native):', error)
+      if (error) {
+        console.error('push_subscriptions upsert (native):', error)
+        pushDebug(`DB-Upsert FEHLGESCHLAGEN: ${error.message}`)
+      } else {
+        pushDebug('Token erfolgreich in push_subscriptions gespeichert ✅')
+      }
       resolve(!error)
     })
 
     PushNotifications.addListener('registrationError', ({ error }) => {
       clearTimeout(timer)
       console.error('Capacitor push registration error:', error)
+      pushDebug(`registrationError: ${JSON.stringify(error)}`)
       resolve(false)
     })
 
     PushNotifications.register()
+    pushDebug('register() aufgerufen, warte auf Antwort…')
   })
 }
 
