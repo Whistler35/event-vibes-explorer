@@ -4,8 +4,8 @@ import { supabase } from '@/integrations/supabase/client'
 import { toast } from 'sonner'
 
 // TEMPORARY: on-screen push-registration diagnostics for the native rollout.
-// Remove once device_token is reliably populating in push_subscriptions.
-const PUSH_DEBUG = true
+// Flip PUSH_DEBUG to true locally if push registration needs debugging again.
+const PUSH_DEBUG = false
 function pushDebug(msg: string) {
   console.log('[push-debug]', msg)
   if (PUSH_DEBUG) toast(`Push: ${msg}`, { duration: 8000 })
