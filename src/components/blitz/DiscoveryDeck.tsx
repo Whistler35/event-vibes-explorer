@@ -191,7 +191,7 @@ const SwipeCard = ({ item, onSwipe, onAdminDelete, isTop, isAdmin }: CardProps) 
             aria-label={`Profil von ${item.host_name ?? "Host"} öffnen`}
           >
             <Avatar className="w-8 h-8 border border-white/20">
-              <AvatarImage src={item.host_avatar ?? undefined} />
+              <AvatarImage src={item.host_avatar ?? undefined} loading="lazy" />
               <AvatarFallback className="bg-[hsl(var(--blitz-forest-deep))] text-white text-[10px] font-black">
                 {item.host_name?.[0] ?? "?"}
               </AvatarFallback>

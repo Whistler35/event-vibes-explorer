@@ -60,7 +60,7 @@ const PhotoStrip = ({ userId, photos, editable = false, onChange }: Props) => {
               onClick={() => setPreview(url)}
               className="w-16 h-16 rounded-2xl overflow-hidden ring-2 ring-white/15"
             >
-              <img src={url} alt="" className="w-full h-full object-cover" />
+              <img src={url} alt="" loading="lazy" className="w-full h-full object-cover" />
             </button>
             {editable && (
               <button

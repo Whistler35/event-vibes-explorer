@@ -154,7 +154,7 @@ const ProfileStatsSheet = ({ open, onOpenChange, userId, activeTab }: Props) => 
       className="flex items-center gap-3 p-3 rounded-xl w-full text-left hover:bg-card/80 transition-colors"
     >
       <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
-        <img src={getAvatar(friend.name, friend.avatar_url)} alt={friend.name} className="w-full h-full object-cover" />
+        <img src={getAvatar(friend.name, friend.avatar_url)} alt={friend.name} loading="lazy" className="w-full h-full object-cover" />
       </div>
       <p className="text-foreground font-semibold text-sm">{friend.name}</p>
     </button>

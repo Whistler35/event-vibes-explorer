@@ -54,7 +54,7 @@ const IncomingRequestsList = ({ blitzRequestId }: Props) => {
             className="flex items-center gap-3 p-3 rounded-xl bg-muted/40"
           >
             <Avatar className="w-12 h-12">
-              <AvatarImage src={it.swiper_avatar ?? undefined} />
+              <AvatarImage src={it.swiper_avatar ?? undefined} loading="lazy" />
               <AvatarFallback className="bg-[hsl(var(--blitz-forest))] text-white font-bold">
                 {it.swiper_name?.[0] ?? "?"}
               </AvatarFallback>

@@ -359,6 +359,7 @@ const Messenger = () => {
           <img
             src={getAvatarUrl(conversation.other_name, conversation.other_avatar)}
             alt={conversation.other_name}
+            loading="lazy"
             className="w-full h-full object-cover"
           />
         )}

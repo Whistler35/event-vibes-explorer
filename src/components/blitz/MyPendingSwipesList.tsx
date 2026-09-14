@@ -57,7 +57,7 @@ const MyPendingSwipesList = () => {
           className="w-full flex items-center gap-3 p-2 rounded-xl bg-card hover:bg-muted/60 active:scale-[0.99] transition text-left"
         >
           <Avatar className="w-9 h-9 border border-[hsl(var(--blitz-pink))]/40">
-            <AvatarImage src={s.host_avatar ?? undefined} />
+            <AvatarImage src={s.host_avatar ?? undefined} loading="lazy" />
             <AvatarFallback className="bg-[hsl(var(--blitz-forest))] text-white text-xs font-black">
               {s.host_name?.[0] ?? "?"}
             </AvatarFallback>

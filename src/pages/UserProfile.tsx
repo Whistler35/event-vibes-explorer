@@ -501,7 +501,7 @@ const UserProfile = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full overflow-hidden">
-                        <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+                        <img src={avatarUrl} alt="" loading="lazy" className="w-full h-full object-cover" />
                       </div>
                       <div>
                         <p className="text-white font-semibold text-sm">{profile.instagram_username}</p>

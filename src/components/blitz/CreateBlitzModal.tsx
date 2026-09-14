@@ -285,7 +285,7 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
                           selected ? "bg-[hsl(var(--bolt))]/15" : "hover:bg-white/5"
                         }`}
                       >
-                        <img src={avatar} alt={f.name} className="w-8 h-8 rounded-full object-cover" />
+                        <img src={avatar} alt={f.name} loading="lazy" className="w-8 h-8 rounded-full object-cover" />
                         <span className="flex-1 text-left text-sm font-semibold text-white truncate">
                           {f.name}
                         </span>

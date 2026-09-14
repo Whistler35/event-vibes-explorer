@@ -69,7 +69,7 @@ const FriendsCarousel = ({ userId, onAddFriend, isOwnProfile = true }: Props) =>
                 className="shrink-0 w-32 rounded-2xl bg-white/5 border border-white/10 p-3 text-left hover:bg-white/10 transition"
               >
                 <div className="w-14 h-14 rounded-full overflow-hidden ring-2 ring-[hsl(var(--blitz-pink))]/40 mx-auto">
-                  <img src={avatar(f)} alt={f.name} className="w-full h-full object-cover" />
+                  <img src={avatar(f)} alt={f.name} loading="lazy" className="w-full h-full object-cover" />
                 </div>
                 <p className="text-white font-bold text-sm mt-2 text-center truncate">{f.name}</p>
                 <p className="text-white/60 text-xs text-center truncate">

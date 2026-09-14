@@ -71,7 +71,7 @@ const RecentActivities = ({ userId }: { userId: string }) => {
           >
             <div className="h-24 bg-white/10 overflow-hidden">
               {e.image_url ? (
-                <img src={e.image_url} alt={e.title} className="w-full h-full object-cover" />
+                <img src={e.image_url} alt={e.title} loading="lazy" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
                   <Calendar className="w-8 h-8 text-white/40" />

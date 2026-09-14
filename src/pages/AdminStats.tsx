@@ -282,7 +282,7 @@ const AdminStats = () => {
           <div className="space-y-1.5">
             {admins.map((a) => (
               <div key={a.user_id} className="flex items-center gap-3 py-1.5">
-                <img src={avatar(a)} alt="" className="w-8 h-8 rounded-full object-cover" />
+                <img src={avatar(a)} alt="" loading="lazy" className="w-8 h-8 rounded-full object-cover" />
                 <span className="text-sm font-medium flex-1 truncate">{a.name}</span>
                 {a.user_id === user?.id ? (
                   <span className="text-[11px] text-muted-foreground">du</span>
@@ -314,7 +314,7 @@ const AdminStats = () => {
               <div className="mt-2 space-y-1">
                 {results.map((r) => (
                   <div key={r.user_id} className="flex items-center gap-3 py-1.5">
-                    <img src={avatar(r)} alt="" className="w-8 h-8 rounded-full object-cover" />
+                    <img src={avatar(r)} alt="" loading="lazy" className="w-8 h-8 rounded-full object-cover" />
                     <span className="text-sm flex-1 truncate">{r.name}</span>
                     <button
                       onClick={() => promote(r)}

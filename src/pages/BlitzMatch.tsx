@@ -358,7 +358,7 @@ const BlitzMatch = () => {
                 className="inline-flex items-center gap-2 pl-1 pr-3 py-1 rounded-full bg-white shadow-sm enabled:active:scale-[0.97] enabled:hover:bg-white/80 transition disabled:cursor-default"
               >
                 <Avatar className="w-7 h-7">
-                  <AvatarImage src={p?.avatar_url ?? undefined} />
+                  <AvatarImage src={p?.avatar_url ?? undefined} loading="lazy" />
                   <AvatarFallback className="bg-[hsl(var(--blitz-forest))] text-white text-[10px] font-black">
                     {p?.name?.[0] ?? "?"}
                   </AvatarFallback>

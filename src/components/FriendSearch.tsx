@@ -192,6 +192,7 @@ const FriendSearch: React.FC = () => {
                   <img
                     src={getAvatarUrl(profile)}
                     alt={profile.name}
+                    loading="lazy"
                     className="w-10 h-10 rounded-full object-cover cursor-pointer"
                     onClick={() => navigate(`/user/${profile.user_id}`)}
                   />
@@ -239,6 +240,7 @@ const FriendSearch: React.FC = () => {
                 <img
                   src={getAvatarUrl(profile)}
                   alt={profile.name}
+                  loading="lazy"
                   className="w-10 h-10 rounded-full object-cover cursor-pointer"
                   onClick={() => navigate(`/user/${profile.user_id}`)}
                 />
@@ -282,6 +284,7 @@ const FriendSearch: React.FC = () => {
                 <img
                   src={getAvatarUrl(profile)}
                   alt={profile.name}
+                  loading="lazy"
                   className="w-10 h-10 rounded-full object-cover cursor-pointer"
                   onClick={() => navigate(`/user/${profile.user_id}`)}
                 />
