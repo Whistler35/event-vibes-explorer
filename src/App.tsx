@@ -1,23 +1,26 @@
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+// Landing is the first thing logged-out users see, so it stays eagerly
+// bundled (no extra loading flash on cold start). Everything else loads on
+// demand — a user only ever needs one or two of these pages per session.
 import Landing from "./pages/Landing";
-import Onboarding from "./pages/Onboarding";
-import Blitz from "./pages/Blitz";
-import BlitzMatch from "./pages/BlitzMatch";
-import Messenger from "./pages/Messenger";
-import DirectChat from "./pages/DirectChat";
-import Profile from "./pages/Profile";
-import Auth from "./pages/Auth";
-import AuthCallback from "./pages/AuthCallback";
-import ResetPassword from "./pages/ResetPassword";
-import UserProfile from "./pages/UserProfile";
-import EditProfile from "./pages/EditProfile";
-import AdminStats from "./pages/AdminStats";
-import NotFound from "./pages/NotFound";
+const Onboarding = lazy(() => import("./pages/Onboarding"));
+const Blitz = lazy(() => import("./pages/Blitz"));
+const BlitzMatch = lazy(() => import("./pages/BlitzMatch"));
+const Messenger = lazy(() => import("./pages/Messenger"));
+const DirectChat = lazy(() => import("./pages/DirectChat"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Auth = lazy(() => import("./pages/Auth"));
+const AuthCallback = lazy(() => import("./pages/AuthCallback"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const UserProfile = lazy(() => import("./pages/UserProfile"));
+const EditProfile = lazy(() => import("./pages/EditProfile"));
+const AdminStats = lazy(() => import("./pages/AdminStats"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 import { Capacitor } from "@capacitor/core";
 import { useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
