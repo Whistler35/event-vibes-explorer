@@ -47,6 +47,12 @@ const BlitzMatch = () => {
   const [now, setNow] = useState(Date.now());
   const [showMatchSplash, setShowMatchSplash] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // Read inside the realtime effect without making it a dependency — that
+  // effect must only ever (re)subscribe on matchId, never churn the socket
+  // every time profilesMap changes (which happens right after mount and was
+  // dropping messages that arrived in the brief unsubscribe/resubscribe gap).
+  const profilesMapRef = useRef(profilesMap);
+  useEffect(() => { profilesMapRef.current = profilesMap; }, [profilesMap]);
 
   useEffect(() => {
     if (!matchId || !user) return;
@@ -110,7 +116,10 @@ const BlitzMatch = () => {
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "blitz_chat_messages", filter: `match_id=eq.${matchId}` },
-        (payload) => setMessages((prev) => [...prev, payload.new as ChatMessage])
+        (payload) => {
+          const incoming = payload.new as ChatMessage;
+          setMessages((prev) => (prev.some((m) => m.id === incoming.id) ? prev : [...prev, incoming]));
+        }
       )
       .on(
         "postgres_changes",
@@ -122,7 +131,7 @@ const BlitzMatch = () => {
             .eq("match_id", matchId);
           const ids = Array.from(new Set((parts ?? []).map((p: any) => p.user_id)));
           setParticipantIds(ids);
-          const missing = ids.filter((id) => !profilesMap.has(id));
+          const missing = ids.filter((id) => !profilesMapRef.current.has(id));
           if (missing.length) {
             const { data: profs } = await supabase
               .from("profiles")
@@ -140,7 +149,7 @@ const BlitzMatch = () => {
     return () => {
       supabase.removeChannel(ch);
     };
-  }, [matchId, profilesMap]);
+  }, [matchId]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -177,12 +186,21 @@ const BlitzMatch = () => {
     if (!input.trim() || expired) return;
     const text = input.trim();
     setInput("");
-    const { error } = await supabase.from("blitz_chat_messages").insert({
-      match_id: match.id,
-      sender_id: user.id,
-      message: text,
-    });
-    if (error) toast.error(error.message);
+    // Show it instantly instead of waiting on the realtime round-trip; the
+    // INSERT event that follows is deduped by id (see the channel effect).
+    const { data, error } = await supabase
+      .from("blitz_chat_messages")
+      .insert({ match_id: match.id, sender_id: user.id, message: text })
+      .select()
+      .single();
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    if (data) {
+      const inserted = data as ChatMessage;
+      setMessages((prev) => (prev.some((m) => m.id === inserted.id) ? prev : [...prev, inserted]));
+    }
   };
 
   const handleAdminDelete = async () => {

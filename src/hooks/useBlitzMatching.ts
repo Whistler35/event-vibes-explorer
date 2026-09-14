@@ -115,7 +115,15 @@ export async function acceptBlitzRequest(swipe: IncomingBlitzRequest) {
 
   let match = existing;
   if (!match) {
-    const chatExpiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+    // Chat stays open exactly as long as the Blitz itself (falls back to 1h
+    // if the Blitz somehow has no expiry).
+    const { data: blitzReq } = await supabase
+      .from("blitz_requests")
+      .select("expires_at")
+      .eq("id", swipe.blitz_request_id)
+      .maybeSingle();
+    const chatExpiresAt =
+      blitzReq?.expires_at ?? new Date(Date.now() + 60 * 60 * 1000).toISOString();
     const { data: inserted, error: mErr } = await supabase
       .from("blitz_matches")
       .insert({

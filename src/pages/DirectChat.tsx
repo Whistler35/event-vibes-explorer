@@ -92,7 +92,8 @@ const DirectChat = () => {
           filter: `conversation_id=eq.${conversationId}`,
         },
         (payload) => {
-          setMessages((prev) => [...prev, payload.new as Message]);
+          const incoming = payload.new as Message;
+          setMessages((prev) => (prev.some((m) => m.id === incoming.id) ? prev : [...prev, incoming]));
           markConversationRead(conversationId, user?.id);
         }
       )
@@ -113,12 +114,20 @@ const DirectChat = () => {
     setSending(true);
     const text = newMessage.trim();
     setNewMessage("");
-    const { error } = await supabase.from("direct_messages").insert({
-      conversation_id: conversationId,
-      sender_id: user.id,
-      message: text,
-    } as any);
+    const { data, error } = await supabase
+      .from("direct_messages")
+      .insert({
+        conversation_id: conversationId,
+        sender_id: user.id,
+        message: text,
+      } as any)
+      .select()
+      .single();
     if (!error) {
+      if (data) {
+        const inserted = data as Message;
+        setMessages((prev) => (prev.some((m) => m.id === inserted.id) ? prev : [...prev, inserted]));
+      }
       await supabase
         .from("direct_conversations")
         .update({ updated_at: new Date().toISOString() } as any)

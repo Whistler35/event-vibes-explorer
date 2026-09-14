@@ -579,7 +579,7 @@
     "activity": "Activity",
     "with": "With",
     "player2": "Player 2",
-    "emptyChat": "Message them directly — only 5 min to coordinate ⚡",
+    "emptyChat": "Message them directly — the chat stays open as long as your Blitz is active ⚡",
     "chatExpired": "Chat expired",
     "typeSomething": "Type something…"
   },
