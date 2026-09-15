@@ -26,6 +26,7 @@ import { useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { usePushNotifications } from "./hooks/usePushNotifications";
 import { getNotificationRoute } from "./lib/notificationRouting";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
@@ -120,35 +121,37 @@ function RootRoute() {
 }
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Suspense fallback={<div className="min-h-screen bg-[hsl(var(--blitz-forest))]" />}>
-            <PushSetup />
-            <Routes>
-              <Route path="/" element={<RootRoute />} />
-              <Route path="/onboarding" element={<Onboarding />} />
-              <Route path="/blitz" element={<Blitz />} />
-              <Route path="/blitz/match/:matchId" element={<BlitzMatch />} />
-              <Route path="/messenger" element={<Messenger />} />
-              <Route path="/dm/:conversationId" element={<DirectChat />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/profile/edit" element={<EditProfile />} />
-              <Route path="/admin" element={<AdminStats />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/auth/callback" element={<AuthCallback />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/user/:userId" element={<UserProfile />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Suspense fallback={<div className="min-h-screen bg-[hsl(var(--blitz-forest))]" />}>
+              <PushSetup />
+              <Routes>
+                <Route path="/" element={<RootRoute />} />
+                <Route path="/onboarding" element={<Onboarding />} />
+                <Route path="/blitz" element={<Blitz />} />
+                <Route path="/blitz/match/:matchId" element={<BlitzMatch />} />
+                <Route path="/messenger" element={<Messenger />} />
+                <Route path="/dm/:conversationId" element={<DirectChat />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/profile/edit" element={<EditProfile />} />
+                <Route path="/admin" element={<AdminStats />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/auth/callback" element={<AuthCallback />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/user/:userId" element={<UserProfile />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
