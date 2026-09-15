@@ -62,6 +62,15 @@ const FriendsCarousel = ({ userId, onAddFriend, isOwnProfile = true }: Props) =>
           <p className="text-white/60 text-sm py-4">Laden...</p>
         ) : (
           <>
+            <button
+              onClick={onAddFriend}
+              className="shrink-0 w-32 rounded-2xl border-2 border-dashed border-white/25 p-3 flex flex-col items-center justify-center gap-1 text-white/70 hover:border-[hsl(var(--blitz-pink))] hover:text-[hsl(var(--blitz-pink))] transition"
+            >
+              <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+                <UserPlus className="w-5 h-5" />
+              </div>
+              <span className="text-xs font-bold">Freund finden</span>
+            </button>
             {friends.map((f) => (
               <button
                 key={f.user_id}
@@ -77,15 +86,6 @@ const FriendsCarousel = ({ userId, onAddFriend, isOwnProfile = true }: Props) =>
                 </p>
               </button>
             ))}
-            <button
-              onClick={onAddFriend}
-              className="shrink-0 w-32 rounded-2xl border-2 border-dashed border-white/25 p-3 flex flex-col items-center justify-center gap-1 text-white/70 hover:border-[hsl(var(--blitz-pink))] hover:text-[hsl(var(--blitz-pink))] transition"
-            >
-              <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-                <UserPlus className="w-5 h-5" />
-              </div>
-              <span className="text-xs font-bold">Freund finden</span>
-            </button>
           </>
         )}
       </div>
