@@ -392,8 +392,8 @@ const Messenger = () => {
         {/* Header */}
         <div className="pt-2 flex items-start justify-between">
           <div>
-            <h1 className="text-4xl font-black tracking-tight text-foreground">Chats</h1>
-            <p className="text-sm text-muted-foreground mt-1">Your active Blitz huddles.</p>
+            <h1 className="text-4xl font-black tracking-tight text-foreground">{t('messenger.title')}</h1>
+            <p className="text-sm text-muted-foreground mt-1">{t('messenger.subtitle')}</p>
           </div>
           <NotificationBell />
         </div>

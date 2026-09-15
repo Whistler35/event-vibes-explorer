@@ -172,6 +172,8 @@
     "locationError": "Standort konnte nicht ermittelt werden"
   },
   "messenger": {
+    "title": "Chats",
+    "subtitle": "Deine aktiven Blitz-Huddles.",
     "notLoggedIn": "Nicht eingeloggt",
     "notLoggedInSub": "Melde dich an, um Nachrichten zu senden.",
     "signIn": "Anmelden",
@@ -190,7 +192,11 @@
   "directChat": {
     "noMessages": "Noch keine Nachrichten. Sag Hallo! 👋",
     "messagePlaceholder": "Nachricht...",
-    "chat": "Chat"
+    "chat": "Chat",
+    "directChatWith": "Direkter Chat mit",
+    "whosIn": "Wer ist dabei",
+    "you": "DU",
+    "inviteMore": "+ Weitere Freunde einladen"
   },
   "tickets": {
     "title": "Meine Tickets",
@@ -265,6 +271,8 @@
   },
   "editProfile": {
     "title": "Profil bearbeiten",
+    "language": "Sprache",
+    "languageSub": "App-Sprache manuell wählen.",
     "loading": "Lädt...",
     "uploadSuccess": "Bild hochgeladen!",
     "uploadFailed": "Upload fehlgeschlagen",
@@ -581,7 +589,9 @@
     "player2": "Player 2",
     "emptyChat": "Schreibt direkt los – der Chat läuft, solange euer Blitz aktiv ist ⚡",
     "chatExpired": "Chat abgelaufen",
-    "typeSomething": "Etwas schreiben …"
+    "typeSomething": "Etwas schreiben …",
+    "whosIn": "Wer ist dabei",
+    "inviteMore": "+ Weitere Freunde einladen"
   },
   "adminEvents": {
     "title": "Admin Bereich",

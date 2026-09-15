@@ -211,7 +211,7 @@ const DirectChat = () => {
             </AvatarFallback>
           </Avatar>
           <p className="text-sm text-muted-foreground">
-            Direct chat with{" "}
+            {t('directChat.directChatWith')}{" "}
             <span className="text-foreground font-black">{firstName}</span>
           </p>
         </div>
@@ -220,11 +220,11 @@ const DirectChat = () => {
       {/* Who's in */}
       <div className="px-5 pb-4 shrink-0">
         <p className="text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground mb-2">
-          Who's in
+          {t('directChat.whosIn')}
         </p>
         <div className="flex flex-wrap gap-2">
           {[
-            { p: myProfile, label: "YOU" },
+            { p: myProfile, label: t('directChat.you') },
             { p: otherProfile, label: "IN" },
           ].map(({ p, label }, i) => (
             <div
@@ -252,7 +252,7 @@ const DirectChat = () => {
           className="mt-3 w-full rounded-full py-3 text-[13px] font-semibold text-[hsl(var(--blitz-forest))] border border-[hsl(var(--blitz-forest))]/20 hover:bg-white/60 active:scale-[0.98] transition inline-flex items-center justify-center gap-2"
         >
           <Users className="w-4 h-4" />
-          + Invite more friends
+          {t('directChat.inviteMore')}
         </button>
       </div>
 
@@ -302,7 +302,7 @@ const DirectChat = () => {
           <input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Say something…"
+            placeholder={t('directChat.messagePlaceholder')}
             className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground text-sm"
           />
           <button

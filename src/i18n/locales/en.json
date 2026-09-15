@@ -172,6 +172,8 @@
     "locationError": "Location could not be determined"
   },
   "messenger": {
+    "title": "Chats",
+    "subtitle": "Your active Blitz huddles.",
     "notLoggedIn": "Not signed in",
     "notLoggedInSub": "Sign in to send messages.",
     "signIn": "Sign in",
@@ -190,7 +192,11 @@
   "directChat": {
     "noMessages": "No messages yet. Say hi! 👋",
     "messagePlaceholder": "Message...",
-    "chat": "Chat"
+    "chat": "Chat",
+    "directChatWith": "Direct chat with",
+    "whosIn": "Who's in",
+    "you": "YOU",
+    "inviteMore": "+ Invite more friends"
   },
   "tickets": {
     "title": "My Tickets",
@@ -265,6 +271,8 @@
   },
   "editProfile": {
     "title": "Edit profile",
+    "language": "Language",
+    "languageSub": "Manually choose the app language.",
     "loading": "Loading...",
     "uploadSuccess": "Image uploaded!",
     "uploadFailed": "Upload failed",
@@ -581,7 +589,9 @@
     "player2": "Player 2",
     "emptyChat": "Message them directly — the chat stays open as long as your Blitz is active ⚡",
     "chatExpired": "Chat expired",
-    "typeSomething": "Type something…"
+    "typeSomething": "Type something…",
+    "whosIn": "Who's in",
+    "inviteMore": "+ Invite more friends"
   },
   "adminEvents": {
     "title": "Admin Area",

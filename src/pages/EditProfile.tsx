@@ -24,6 +24,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { deleteOwnAccount } from "@/lib/moderation";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const EditProfile = () => {
   const { t } = useTranslation();
@@ -373,6 +374,15 @@ const EditProfile = () => {
           {saving ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
           {t('editProfile.save')}
         </Button>
+
+        {/* Language */}
+        <div className="border-t border-border pt-6 mt-2 flex items-center justify-between gap-4">
+          <div>
+            <h3 className="text-foreground font-bold text-lg">{t('editProfile.language')}</h3>
+            <p className="text-sm text-muted-foreground">{t('editProfile.languageSub')}</p>
+          </div>
+          <LanguageSwitcher />
+        </div>
 
         {/* Danger zone */}
         <div className="border-t border-border pt-6 mt-2">

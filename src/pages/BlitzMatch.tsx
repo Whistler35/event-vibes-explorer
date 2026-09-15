@@ -342,7 +342,7 @@ const BlitzMatch = () => {
       {/* Who's in */}
       <div className="px-5 pb-4 shrink-0">
         <p className="text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground mb-2">
-          Who's in
+          {t('blitzMatch.whosIn')}
         </p>
         <div className="flex flex-wrap gap-2">
           {participantIds.map((id) => {
@@ -394,7 +394,7 @@ const BlitzMatch = () => {
           }}
           className="mt-3 w-full rounded-full py-3 text-[13px] font-semibold text-[hsl(var(--blitz-forest))] border border-[hsl(var(--blitz-forest))]/20 hover:bg-white/60 active:scale-[0.98] transition"
         >
-          + Invite more friends
+          {t('blitzMatch.inviteMore')}
         </button>
       </div>
 
@@ -452,7 +452,7 @@ const BlitzMatch = () => {
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={expired ? t("blitzMatch.chatExpired") : "Say something…"}
+            placeholder={expired ? t("blitzMatch.chatExpired") : t("blitzMatch.typeSomething")}
             disabled={expired}
             className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground text-sm"
           />
