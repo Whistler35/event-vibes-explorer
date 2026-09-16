@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Tracks unread direct messages using database-persisted read timestamps.
+ * Hidden (deleted-from-list) conversations don't count unless a new message
+ * has arrived since they were hidden.
  */
 export function useUnreadDMCount() {
   const { user } = useAuth();
@@ -15,40 +17,38 @@ export function useUnreadDMCount() {
       return;
     }
 
-    // Get all conversations for this user
     const { data: convos } = await supabase
       .from("direct_conversations")
-      .select("id")
+      .select("id, updated_at")
       .or(`participant1_id.eq.${user.id},participant2_id.eq.${user.id}`);
 
     let unread = 0;
-
-    // Check EVENDLE welcome chat
-    const welcomeRead = localStorage.getItem("dm_last_read_evendle-welcome");
-    if (!welcomeRead) unread++;
 
     if (!convos || convos.length === 0) {
       setCount(unread);
       return;
     }
 
-    // Get all read timestamps for this user in one query
     const convoIds = convos.map((c) => c.id);
     const { data: reads } = await supabase
       .from("conversation_reads")
-      .select("conversation_id, last_read_at")
+      .select("conversation_id, last_read_at, hidden_at")
       .eq("user_id", user.id)
       .in("conversation_id", convoIds);
 
-    const readMap = new Map<string, string>();
+    const readMap = new Map<string, { last_read_at: string; hidden_at: string | null }>();
     if (reads) {
       for (const r of reads) {
-        readMap.set(r.conversation_id, r.last_read_at);
+        readMap.set(r.conversation_id, { last_read_at: r.last_read_at, hidden_at: (r as any).hidden_at ?? null });
       }
     }
 
     for (const convo of convos) {
-      const lastRead = readMap.get(convo.id) || "1970-01-01T00:00:00Z";
+      const read = readMap.get(convo.id);
+      const lastRead = read?.last_read_at || "1970-01-01T00:00:00Z";
+      const hiddenAt = read?.hidden_at;
+      // Hidden and nothing new since → doesn't count.
+      if (hiddenAt && new Date(convo.updated_at) <= new Date(hiddenAt)) continue;
 
       const { count: msgCount } = await supabase
         .from("direct_messages")
@@ -89,27 +89,11 @@ export function useUnreadDMCount() {
   return { unreadCount: count, refreshUnread: computeCount };
 }
 
-/**
- * Mark a conversation as read (call when user opens the chat).
- * Upserts a row in conversation_reads.
- */
-export async function markConversationRead(conversationId: string, userId?: string) {
-  // Special case for welcome chat
-  if (conversationId === "evendle-welcome") {
-    localStorage.setItem("dm_last_read_evendle-welcome", new Date().toISOString());
-    return;
-  }
-
-  if (!userId) {
-    const { data: { user } } = await supabase.auth.getUser();
-    userId = user?.id;
-  }
-
-  if (!userId) return;
-
-  const now = new Date().toISOString();
-
-  // Try update first, then insert if no rows updated
+async function upsertConversationRead(
+  conversationId: string,
+  userId: string,
+  fields: { last_read_at?: string; hidden_at?: string | null }
+) {
   const { data: existing } = await supabase
     .from("conversation_reads")
     .select("id")
@@ -118,17 +102,37 @@ export async function markConversationRead(conversationId: string, userId?: stri
     .maybeSingle();
 
   if (existing) {
-    await supabase
-      .from("conversation_reads")
-      .update({ last_read_at: now } as any)
-      .eq("id", existing.id);
+    await supabase.from("conversation_reads").update(fields as any).eq("id", existing.id);
   } else {
-    await supabase
-      .from("conversation_reads")
-      .insert({
-        user_id: userId,
-        conversation_id: conversationId,
-        last_read_at: now,
-      } as any);
+    await supabase.from("conversation_reads").insert({
+      user_id: userId,
+      conversation_id: conversationId,
+      last_read_at: fields.last_read_at ?? new Date().toISOString(),
+      hidden_at: fields.hidden_at ?? null,
+    } as any);
   }
+}
+
+/** Mark a conversation as read (call when user opens the chat). */
+export async function markConversationRead(conversationId: string, userId?: string) {
+  if (!userId) {
+    const { data: { user } } = await supabase.auth.getUser();
+    userId = user?.id;
+  }
+  if (!userId) return;
+  await upsertConversationRead(conversationId, userId, { last_read_at: new Date().toISOString() });
+}
+
+/** Mark a conversation as unread again (manual action from the chat list). */
+export async function markConversationUnread(conversationId: string, userId: string) {
+  await upsertConversationRead(conversationId, userId, { last_read_at: new Date(0).toISOString() });
+}
+
+/**
+ * "Delete" a conversation from the list — hides it for this user only (the
+ * other participant keeps their copy, same as WhatsApp/iMessage). It
+ * reappears automatically the moment a new message arrives.
+ */
+export async function hideConversation(conversationId: string, userId: string) {
+  await upsertConversationRead(conversationId, userId, { hidden_at: new Date().toISOString() });
 }

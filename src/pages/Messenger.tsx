@@ -6,10 +6,22 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import Layout from "@/components/Layout";
-import { MessageCircle, LogIn, Zap, Users } from "lucide-react";
+import { MessageCircle, LogIn, Zap, Users, MoreVertical, Check, MailQuestion, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { isHuddleActive } from "@/lib/blitzHuddle";
 import { getBlockedIds } from "@/lib/moderation";
+import { EVENDLE_SYSTEM_ID } from "@/lib/constants";
+import {
+  markConversationRead,
+  markConversationUnread,
+  hideConversation,
+} from "@/hooks/useUnreadDMCount";
 import NotificationBell from "@/components/NotificationBell";
 
 interface ConversationWithProfile {
@@ -21,6 +33,7 @@ interface ConversationWithProfile {
   last_message_at: string | null;
   isUnread: boolean;
   isBlitz?: boolean;
+  isSystem?: boolean;
   matchId?: string;
   blitzActivity?: string;
   expiresAt?: string;
@@ -30,13 +43,6 @@ interface ConversationWithProfile {
   isPendingBlitz?: boolean;
   blitzRequestId?: string;
 }
-
-const isConversationUnread = (convoId: string, lastMessageAt: string | null, userId: string, senderId?: string): boolean => {
-  const lastRead = localStorage.getItem(`dm_last_read_${convoId}`);
-  if (!lastRead) return true;
-  if (!lastMessageAt) return false;
-  return new Date(lastMessageAt) > new Date(lastRead);
-};
 
 const Messenger = () => {
   const { t, i18n } = useTranslation();
@@ -88,8 +94,6 @@ const Messenger = () => {
     };
   }, [user, queryClient]);
 
-  const isEvenldeUnread = !localStorage.getItem("dm_last_read_evendle-welcome");
-
   const { data: conversations = [], isLoading } = useQuery({
     queryKey: ["dm-conversations", user?.id],
     queryFn: async () => {
@@ -116,13 +120,21 @@ const Messenger = () => {
       const otherUserIds = convos.map((c: any) =>
         c.participant1_id === user.id ? c.participant2_id : c.participant1_id
       );
+      const convoIds = convos.map((c: any) => c.id);
 
-      const { data: profiles } = otherUserIds.length
-        ? await supabase
-            .from("profiles")
-            .select("user_id, name, avatar_url")
-            .in("user_id", otherUserIds)
-        : { data: [] as any[] };
+      const [{ data: profiles }, { data: reads }] = await Promise.all([
+        otherUserIds.length
+          ? supabase.from("profiles").select("user_id, name, avatar_url").in("user_id", otherUserIds)
+          : Promise.resolve({ data: [] as any[] }),
+        convoIds.length
+          ? supabase
+              .from("conversation_reads")
+              .select("conversation_id, last_read_at, hidden_at")
+              .eq("user_id", user.id)
+              .in("conversation_id", convoIds)
+          : Promise.resolve({ data: [] as any[] }),
+      ]);
+      const readMap = new Map((reads ?? []).map((r: any) => [r.conversation_id, r]));
 
       const results: ConversationWithProfile[] = [];
 
@@ -131,6 +143,7 @@ const Messenger = () => {
           (convo as any).participant1_id === user.id
             ? (convo as any).participant2_id
             : (convo as any).participant1_id;
+        const isSystem = otherId === EVENDLE_SYSTEM_ID;
 
         const profile = profiles?.find((p) => p.user_id === otherId);
 
@@ -143,27 +156,34 @@ const Messenger = () => {
           .maybeSingle();
 
         const lastMessageAt = lastMsg?.created_at || (convo as any).updated_at;
+        const read = readMap.get((convo as any).id);
+        const hiddenAt = read?.hidden_at;
+        // "Deleted" (hidden) — skip unless a new message has arrived since.
+        if (hiddenAt && new Date(lastMessageAt) <= new Date(hiddenAt)) continue;
+
+        const lastRead = read?.last_read_at ?? "1970-01-01T00:00:00Z";
         const unread =
-          lastMsg?.sender_id !== user.id &&
-          isConversationUnread((convo as any).id, lastMessageAt, user.id);
+          lastMsg?.sender_id !== user.id && new Date(lastMessageAt) > new Date(lastRead);
 
         results.push({
           id: (convo as any).id,
           other_user_id: otherId,
-          other_name: profile?.name || t('messenger.unknown'),
-          other_avatar: profile?.avatar_url || null,
+          other_name: isSystem ? "EVENDLE" : profile?.name || t('messenger.unknown'),
+          other_avatar: isSystem ? null : profile?.avatar_url || null,
           last_message: lastMsg?.message || null,
           last_message_at: lastMessageAt,
           isUnread: !!unread,
+          isSystem,
         });
       }
 
       // Load active Blitz group matches (where I'm a participant) and append as chats
       const { data: myParts } = await supabase
         .from("blitz_match_participants")
-        .select("match_id")
+        .select("match_id, last_read_at, hidden_at")
         .eq("user_id", user.id);
       const myMatchIds = Array.from(new Set((myParts ?? []).map((p: any) => p.match_id)));
+      const myReadMap = new Map((myParts ?? []).map((p: any) => [p.match_id, p]));
 
       const { data: matches } = myMatchIds.length
         ? await supabase
@@ -212,10 +232,15 @@ const Messenger = () => {
           const lastMsg = blitzMsgs?.find((msg: any) => msg.match_id === m.id);
           const activity = blitzReqs?.find((r: any) => r.id === m.blitz_request_id)?.activity;
           const lastAt = lastMsg?.created_at || m.updated_at;
+          const myRead = myReadMap.get(m.id);
+          const hiddenAt = myRead?.hidden_at;
+          // "Deleted" (hidden) — skip unless a new message has arrived since.
+          if (hiddenAt && new Date(lastAt) <= new Date(hiddenAt)) continue;
+          const lastReadAt = myRead?.last_read_at ?? "1970-01-01T00:00:00Z";
           const unread =
             !!lastMsg &&
             lastMsg.sender_id !== user.id &&
-            isConversationUnread(`blitz_${m.id}`, lastAt, user.id);
+            new Date(lastAt) > new Date(lastReadAt);
 
           // A huddle is always named after its Blitz. Only fall back to a
           // participant's name if the Blitz somehow has no activity text.
@@ -334,6 +359,51 @@ const Messenger = () => {
   const activeConversations = conversations.filter((c) => c.isBlitz);
   const otherConversations = conversations.filter((c) => !c.isBlitz);
 
+  const handleMarkRead = async (e: React.MouseEvent, c: ConversationWithProfile) => {
+    e.stopPropagation();
+    if (!user) return;
+    if (c.isBlitz && c.matchId) {
+      await supabase
+        .from("blitz_match_participants")
+        .update({ last_read_at: new Date().toISOString() } as any)
+        .eq("match_id", c.matchId)
+        .eq("user_id", user.id);
+    } else {
+      await markConversationRead(c.id, user.id);
+    }
+    queryClient.invalidateQueries({ queryKey: ["dm-conversations", user.id] });
+  };
+
+  const handleMarkUnread = async (e: React.MouseEvent, c: ConversationWithProfile) => {
+    e.stopPropagation();
+    if (!user) return;
+    if (c.isBlitz && c.matchId) {
+      await supabase
+        .from("blitz_match_participants")
+        .update({ last_read_at: new Date(0).toISOString() } as any)
+        .eq("match_id", c.matchId)
+        .eq("user_id", user.id);
+    } else {
+      await markConversationUnread(c.id, user.id);
+    }
+    queryClient.invalidateQueries({ queryKey: ["dm-conversations", user.id] });
+  };
+
+  const handleDeleteChat = async (e: React.MouseEvent, c: ConversationWithProfile) => {
+    e.stopPropagation();
+    if (!user) return;
+    if (c.isBlitz && c.matchId) {
+      await supabase
+        .from("blitz_match_participants")
+        .update({ hidden_at: new Date().toISOString() } as any)
+        .eq("match_id", c.matchId)
+        .eq("user_id", user.id);
+    } else {
+      await hideConversation(c.id, user.id);
+    }
+    queryClient.invalidateQueries({ queryKey: ["dm-conversations", user.id] });
+  };
+
   const renderConversation = (conversation: ConversationWithProfile) => (
     <div
       key={conversation.id}
@@ -348,8 +418,12 @@ const Messenger = () => {
       }
       className="flex items-center gap-4 p-4 rounded-3xl cursor-pointer transition bg-card hover:bg-card/90 shadow-[0_6px_18px_-8px_rgba(15,20,16,0.10)]"
     >
-      <div className={`relative w-12 h-12 ${conversation.isBlitz || conversation.isEventGroup ? "rounded-2xl" : "rounded-full"} overflow-hidden flex-shrink-0 bg-[hsl(var(--muted))] flex items-center justify-center`}>
-        {conversation.isBlitz ? (
+      <div className={`relative w-12 h-12 ${conversation.isBlitz || conversation.isEventGroup || conversation.isSystem ? "rounded-2xl" : "rounded-full"} overflow-hidden flex-shrink-0 bg-[hsl(var(--muted))] flex items-center justify-center`}>
+        {conversation.isSystem ? (
+          <div className="w-full h-full flex items-center justify-center bg-[hsl(var(--blitz-forest))]">
+            <span className="text-white font-black text-lg">E</span>
+          </div>
+        ) : conversation.isBlitz ? (
           <Zap className="w-6 h-6 text-[hsl(var(--blitz-forest))] fill-[hsl(var(--blitz-forest))]" />
         ) : conversation.isEventGroup && !conversation.other_avatar ? (
           <div className="w-full h-full flex items-center justify-center bg-primary">
@@ -382,6 +456,39 @@ const Messenger = () => {
       {conversation.isUnread && (
         <span className="w-2.5 h-2.5 rounded-full bg-[hsl(var(--bolt))] flex-shrink-0" />
       )}
+      {!conversation.isPendingBlitz && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              onClick={(e) => e.stopPropagation()}
+              aria-label={t('messenger.chatOptions')}
+              className="p-1.5 -mr-1.5 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition flex-shrink-0"
+            >
+              <MoreVertical className="w-4 h-4" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+            {conversation.isUnread ? (
+              <DropdownMenuItem onClick={(e) => handleMarkRead(e, conversation)}>
+                <Check className="w-4 h-4 mr-2" />
+                {t('messenger.markRead')}
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem onClick={(e) => handleMarkUnread(e, conversation)}>
+                <MailQuestion className="w-4 h-4 mr-2" />
+                {t('messenger.markUnread')}
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem
+              onClick={(e) => handleDeleteChat(e, conversation)}
+              className="text-destructive focus:text-destructive"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              {t('messenger.deleteChat')}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
     </div>
   );
 
@@ -397,27 +504,6 @@ const Messenger = () => {
           </div>
           <NotificationBell />
         </div>
-
-        {/* EVENDLE Welcome Chat */}
-        <div
-          onClick={() => navigate("/dm/evendle-welcome")}
-          className="flex items-center gap-4 p-4 rounded-3xl cursor-pointer transition bg-card hover:bg-card/90 shadow-[0_6px_18px_-8px_rgba(15,20,16,0.10)]"
-        >
-          <div className="relative w-12 h-12 rounded-2xl overflow-hidden flex-shrink-0 bg-[hsl(var(--blitz-forest))] flex items-center justify-center">
-            <span className="text-white font-black text-lg">E</span>
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between">
-              <h3 className={`truncate ${isEvenldeUnread ? "font-black" : "font-bold"} text-foreground`}>EVENDLE</h3>
-              <span className="text-xs text-muted-foreground font-semibold">{t('messenger.team')}</span>
-            </div>
-            <p className={`text-sm truncate mt-0.5 ${isEvenldeUnread ? "text-foreground" : "text-muted-foreground"}`}>
-              {t('messenger.welcome')}
-            </p>
-          </div>
-          {isEvenldeUnread && <span className="w-2.5 h-2.5 rounded-full bg-[hsl(var(--bolt))] flex-shrink-0" />}
-        </div>
-
 
         {isLoading ? (
           <div className="space-y-2">

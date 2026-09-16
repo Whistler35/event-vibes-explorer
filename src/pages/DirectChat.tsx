@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { markConversationRead } from "@/hooks/useUnreadDMCount";
 import UserActionsMenu from "@/components/moderation/UserActionsMenu";
+import { EVENDLE_SYSTEM_ID } from "@/lib/constants";
 
 interface Message {
   id: string;
@@ -42,6 +43,9 @@ const DirectChat = () => {
         (convo as any).participant1_id === user.id
           ? (convo as any).participant2_id
           : (convo as any).participant1_id;
+      if (otherId === EVENDLE_SYSTEM_ID) {
+        return { user_id: EVENDLE_SYSTEM_ID, name: "EVENDLE", avatar_url: null };
+      }
       const { data: profile } = await supabase
         .from("profiles")
         .select("user_id, name, avatar_url")
@@ -181,7 +185,7 @@ const DirectChat = () => {
             <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--blitz-forest))]" />
             2 IN
           </div>
-          {otherProfile?.user_id && (
+          {otherProfile?.user_id && otherProfile.user_id !== EVENDLE_SYSTEM_ID && (
             <UserActionsMenu
               targetUserId={otherProfile.user_id}
               targetUserName={otherProfile.name ?? undefined}
@@ -201,8 +205,12 @@ const DirectChat = () => {
           {displayName}
         </h1>
         <div
-          className="mt-3 flex items-center gap-2 cursor-pointer"
-          onClick={() => otherProfile && navigate(`/user/${otherProfile.user_id}`)}
+          className={`mt-3 flex items-center gap-2 ${otherProfile && otherProfile.user_id !== EVENDLE_SYSTEM_ID ? "cursor-pointer" : ""}`}
+          onClick={() =>
+            otherProfile &&
+            otherProfile.user_id !== EVENDLE_SYSTEM_ID &&
+            navigate(`/user/${otherProfile.user_id}`)
+          }
         >
           <Avatar className="w-8 h-8">
             <AvatarImage src={otherProfile?.avatar_url ?? undefined} />

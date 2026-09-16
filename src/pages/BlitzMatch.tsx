@@ -109,6 +109,17 @@ const BlitzMatch = () => {
     return () => clearTimeout(t);
   }, []);
 
+  // Mark this huddle as read (for the chat-list unread dot) whenever it's
+  // open — on entry, and again for every message that arrives while open.
+  useEffect(() => {
+    if (!matchId || !user) return;
+    supabase
+      .from("blitz_match_participants")
+      .update({ last_read_at: new Date().toISOString() } as any)
+      .eq("match_id", matchId)
+      .eq("user_id", user.id);
+  }, [matchId, user]);
+
   useEffect(() => {
     if (!matchId) return;
     const ch = supabase
@@ -119,6 +130,13 @@ const BlitzMatch = () => {
         (payload) => {
           const incoming = payload.new as ChatMessage;
           setMessages((prev) => (prev.some((m) => m.id === incoming.id) ? prev : [...prev, incoming]));
+          if (user) {
+            supabase
+              .from("blitz_match_participants")
+              .update({ last_read_at: new Date().toISOString() } as any)
+              .eq("match_id", matchId)
+              .eq("user_id", user.id);
+          }
         }
       )
       .on(
