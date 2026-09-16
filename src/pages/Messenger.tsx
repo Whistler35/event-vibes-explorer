@@ -136,6 +136,17 @@ const Messenger = () => {
       ]);
       const readMap = new Map((reads ?? []).map((r: any) => [r.conversation_id, r]));
 
+      // Latest message per conversation in a single round-trip (was previously
+      // one sequential query per conversation in the loop below — with N chats
+      // that's N blocking round-trips before the list could render at all).
+      const { data: allLastMsgs } = convoIds.length
+        ? await supabase
+            .from("direct_messages")
+            .select("conversation_id, message, created_at, sender_id")
+            .in("conversation_id", convoIds)
+            .order("created_at", { ascending: false })
+        : { data: [] as any[] };
+
       const results: ConversationWithProfile[] = [];
 
       for (const convo of convos) {
@@ -147,13 +158,9 @@ const Messenger = () => {
 
         const profile = profiles?.find((p) => p.user_id === otherId);
 
-        const { data: lastMsg } = await supabase
-          .from("direct_messages")
-          .select("message, created_at, sender_id")
-          .eq("conversation_id", (convo as any).id)
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .maybeSingle();
+        // allLastMsgs is sorted newest-first, so the first match per
+        // conversation is its latest message.
+        const lastMsg = allLastMsgs?.find((m: any) => m.conversation_id === (convo as any).id);
 
         const lastMessageAt = lastMsg?.created_at || (convo as any).updated_at;
         const read = readMap.get((convo as any).id);

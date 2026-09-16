@@ -74,45 +74,36 @@ const BlitzMatch = () => {
   useEffect(() => {
     if (!matchId || !user) return;
     (async () => {
-      const { data: m } = await supabase
-        .from("blitz_matches")
-        .select("*")
-        .eq("id", matchId)
-        .maybeSingle();
+      // Match, participants and messages only need matchId, so they can go
+      // out together instead of one-after-another (was 5 sequential
+      // round-trips before any chat content could render).
+      const [{ data: m }, { data: parts }, { data: msgs }] = await Promise.all([
+        supabase.from("blitz_matches").select("*").eq("id", matchId).maybeSingle(),
+        supabase.from("blitz_match_participants").select("user_id").eq("match_id", matchId),
+        supabase
+          .from("blitz_chat_messages")
+          .select("*")
+          .eq("match_id", matchId)
+          .order("created_at", { ascending: true }),
+      ]);
       if (!m) {
         toast.error(t("blitzMatch.matchNotFound"));
         navigate("/blitz");
         return;
       }
       setMatch(m as Match);
+      setMessages(msgs ?? []);
 
-      const { data: req } = await supabase
-        .from("blitz_requests")
-        .select("activity, city")
-        .eq("id", m.blitz_request_id)
-        .maybeSingle();
-      setActivity(req?.activity ?? "");
-      setCity((req as any)?.city ?? "");
-
-      const { data: parts } = await supabase
-        .from("blitz_match_participants")
-        .select("user_id")
-        .eq("match_id", matchId);
       const ids = Array.from(new Set([...(parts ?? []).map((p: any) => p.user_id), m.host_id]));
       setParticipantIds(ids);
 
-      const { data: profs } = await supabase
-        .from("profiles")
-        .select("user_id, name, avatar_url")
-        .in("user_id", ids);
+      const [{ data: req }, { data: profs }] = await Promise.all([
+        supabase.from("blitz_requests").select("activity, city").eq("id", m.blitz_request_id).maybeSingle(),
+        supabase.from("profiles").select("user_id, name, avatar_url").in("user_id", ids),
+      ]);
+      setActivity(req?.activity ?? "");
+      setCity((req as any)?.city ?? "");
       setProfilesMap(new Map((profs ?? []).map((p) => [p.user_id, p])));
-
-      const { data: msgs } = await supabase
-        .from("blitz_chat_messages")
-        .select("*")
-        .eq("match_id", matchId)
-        .order("created_at", { ascending: true });
-      setMessages(msgs ?? []);
     })();
   }, [matchId, user, navigate]);
 
