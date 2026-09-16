@@ -5,7 +5,8 @@
     "blitz": "BLITZ",
     "chat": "CHAT",
     "host": "HOST",
-    "profile": "PROFILE"
+    "profile": "PROFILE",
+    "feed": "FEED"
   },
   "common": {
     "loading": "Loading…",

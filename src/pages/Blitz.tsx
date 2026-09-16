@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Zap } from "lucide-react";
+import { Zap, Flame } from "lucide-react";
 import BottomNavigation from "@/components/BottomNavigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useActiveBlitzRequest } from "@/hooks/useBlitzRequest";
 import { useMyBlitzMatches, type BlitzMatch } from "@/hooks/useBlitzMatching";
+import { useBlitzStreak } from "@/hooks/useBlitzStreak";
 import CreateBlitzModal from "@/components/blitz/CreateBlitzModal";
 import ActiveBlitzScreen from "@/components/blitz/ActiveBlitzScreen";
 import DiscoveryDeck from "@/components/blitz/DiscoveryDeck";
@@ -31,6 +32,7 @@ const Blitz = () => {
   const [tab, setTab] = useState<Tab>(requestedTab ?? "discover");
   const [city, setCity] = useState<string | null>(null);
   const { matches } = useMyBlitzMatches();
+  const streak = useBlitzStreak(user?.id);
   const seenMatchIds = useRef<Set<string>>(new Set());
   const [matchMoment, setMatchMoment] = useState<BlitzMatch | null>(null);
 
@@ -124,7 +126,15 @@ const Blitz = () => {
     >
       <div className="max-w-md w-full mx-auto px-5 pt-5 flex-1 min-h-0 flex flex-col gap-4">
         <div className="flex items-center justify-between shrink-0">
-          <span className="text-[hsl(var(--blitz-forest))] text-lg font-black tracking-tight">EVENDLE</span>
+          <div className="flex items-center gap-2">
+            <span className="text-[hsl(var(--blitz-forest))] text-lg font-black tracking-tight">EVENDLE</span>
+            {streak > 0 && (
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[hsl(var(--bolt))]/20 text-[hsl(var(--blitz-forest))] text-xs font-black">
+                <Flame className="w-3.5 h-3.5 fill-[hsl(var(--bolt))] text-[hsl(var(--bolt))]" />
+                {streak}
+              </span>
+            )}
+          </div>
           <NotificationBell />
         </div>
 

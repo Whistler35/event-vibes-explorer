@@ -11,6 +11,7 @@ import Landing from "./pages/Landing";
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const Blitz = lazy(() => import("./pages/Blitz"));
 const BlitzMatch = lazy(() => import("./pages/BlitzMatch"));
+const BlitzFeed = lazy(() => import("./pages/BlitzFeed"));
 const Messenger = lazy(() => import("./pages/Messenger"));
 const DirectChat = lazy(() => import("./pages/DirectChat"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -135,6 +136,7 @@ const App = () => (
                 <Route path="/onboarding" element={<Onboarding />} />
                 <Route path="/blitz" element={<Blitz />} />
                 <Route path="/blitz/match/:matchId" element={<BlitzMatch />} />
+                <Route path="/feed" element={<BlitzFeed />} />
                 <Route path="/messenger" element={<Messenger />} />
                 <Route path="/dm/:conversationId" element={<DirectChat />} />
                 <Route path="/profile" element={<Profile />} />

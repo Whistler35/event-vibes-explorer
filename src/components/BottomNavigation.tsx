@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { User, MessageCircle, Zap } from "lucide-react";
+import { User, MessageCircle, Zap, Camera } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useUnreadDMCount } from "@/hooks/useUnreadDMCount";
 import { useIncomingBlitzCount } from "@/hooks/useIncomingBlitzCount";
@@ -22,16 +22,34 @@ const BottomNavigation = () => {
       style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 12px)" }}
     >
       <div className="mx-auto max-w-md px-5">
-        <div className="pointer-events-auto relative bg-white rounded-full shadow-[0_10px_30px_-8px_rgba(15,20,16,0.18)] flex items-center justify-between px-8 py-2.5">
-          {/* Chat left */}
+        <div className="pointer-events-auto relative bg-white rounded-full shadow-[0_10px_30px_-8px_rgba(15,20,16,0.18)] flex items-center justify-between px-5 py-2.5">
+          {/* Feed left-outer */}
+          <button
+            onClick={() => navigate("/feed")}
+            className="flex flex-col items-center gap-0.5 py-1.5 min-w-[52px]"
+            aria-label={t("nav.feed")}
+          >
+            <Camera
+              size={24}
+              strokeWidth={1.8}
+              className={
+                isActive("/feed") ? "text-[hsl(var(--blitz-forest))]" : "text-[hsl(var(--blitz-forest))]/80"
+              }
+            />
+            <span className="text-[11px] font-semibold text-[hsl(var(--blitz-forest))]">
+              {t("nav.feed")}
+            </span>
+          </button>
+
+          {/* Chat left-inner */}
           <button
             onClick={() => navigate("/messenger")}
-            className="flex flex-col items-center gap-0.5 py-1.5 min-w-[64px]"
+            className="flex flex-col items-center gap-0.5 py-1.5 min-w-[52px]"
             aria-label={t("nav.chat")}
           >
             <div className="relative">
               <MessageCircle
-                size={26}
+                size={24}
                 strokeWidth={1.8}
                 className={
                   isActive("/messenger")
@@ -83,14 +101,14 @@ const BottomNavigation = () => {
             </span>
           </button>
 
-          {/* Profile right */}
+          {/* Profile right-outer */}
           <button
             onClick={() => navigate("/profile")}
-            className="flex flex-col items-center gap-0.5 py-1.5 min-w-[64px]"
+            className="flex flex-col items-center gap-0.5 py-1.5 min-w-[52px]"
             aria-label={t("nav.profile")}
           >
             <User
-              size={26}
+              size={24}
               strokeWidth={1.8}
               className={
                 isActive("/profile")

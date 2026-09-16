@@ -38,7 +38,15 @@ export function getNotificationRoute(
       return { path: "/blitz", state: { tab: "request" } };
 
     case "new_blitz_nearby":
+    case "ritual_push":
       return { path: "/blitz", state: { tab: "discover" } };
+
+    case "blitz_recap_prompt":
+      return d.match_id ? { path: "/feed", state: { composeMatchId: d.match_id } } : { path: "/feed" };
+
+    case "feed_post_like":
+    case "feed_post_comment":
+      return { path: "/feed" };
 
     default:
       return null;

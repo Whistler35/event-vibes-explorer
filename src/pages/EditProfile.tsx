@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { deleteOwnAccount } from "@/lib/moderation";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { Switch } from "@/components/ui/switch";
 
 const EditProfile = () => {
   const { t } = useTranslation();
@@ -41,6 +42,7 @@ const EditProfile = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
+  const [ritualPushEnabled, setRitualPushEnabled] = useState(true);
 
   const handleChangePassword = async () => {
     if (newPassword.length < 6) {
@@ -100,7 +102,7 @@ const EditProfile = () => {
     const fetchProfile = async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("name, age, country, bio, fun_fact, avatar_url, instagram_username, instagram_followers, interests")
+        .select("name, age, country, bio, fun_fact, avatar_url, instagram_username, instagram_followers, interests, ritual_push_enabled")
         .eq("user_id", user.id)
         .maybeSingle() as any;
 
@@ -117,12 +119,26 @@ const EditProfile = () => {
           interests: data.interests || [],
         });
         setAvatarPreview(data.avatar_url);
+        setRitualPushEnabled(data.ritual_push_enabled ?? true);
       }
       setLoading(false);
     };
 
     fetchProfile();
   }, [user]);
+
+  const handleToggleRitualPush = async (checked: boolean) => {
+    if (!user) return;
+    setRitualPushEnabled(checked);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ ritual_push_enabled: checked } as any)
+      .eq("user_id", user.id);
+    if (error) {
+      setRitualPushEnabled(!checked);
+      toast.error(error.message);
+    }
+  };
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -406,6 +422,15 @@ const EditProfile = () => {
             <p className="text-sm text-muted-foreground">{t('editProfile.languageSub')}</p>
           </div>
           <LanguageSwitcher />
+        </div>
+
+        {/* Weekend ritual pushes */}
+        <div className="border-t border-border pt-6 mt-2 flex items-center justify-between gap-4">
+          <div>
+            <h3 className="text-foreground font-bold text-lg">Wochenend-Erinnerungen</h3>
+            <p className="text-sm text-muted-foreground">Fr/Sa/So ein kurzer Impuls, spontan was zu starten</p>
+          </div>
+          <Switch checked={ritualPushEnabled} onCheckedChange={handleToggleRitualPush} />
         </div>
 
         {/* Password */}
