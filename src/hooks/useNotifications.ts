@@ -85,3 +85,30 @@ export function useNotifications() {
 
   return { notifications, unreadCount, markAsRead, markAllAsRead, refetch: fetchNotifications };
 }
+
+/**
+ * Mark every notification tied to one chat thread as read, e.g. when the
+ * user opens a Huddle or DM and reads the latest message — older
+ * "new message" notifications for that same thread would otherwise sit in
+ * the bell as unread forever, even though the user has already seen them
+ * in context.
+ */
+export async function markHuddleNotificationsRead(userId: string, matchId: string) {
+  await supabase
+    .from("notifications")
+    .update({ is_read: true } as any)
+    .eq("user_id", userId)
+    .eq("type", "blitz_chat_message")
+    .eq("is_read", false)
+    .eq("data->>match_id", matchId);
+}
+
+export async function markDmNotificationsRead(userId: string, conversationId: string) {
+  await supabase
+    .from("notifications")
+    .update({ is_read: true } as any)
+    .eq("user_id", userId)
+    .eq("type", "new_dm")
+    .eq("is_read", false)
+    .eq("data->>conversation_id", conversationId);
+}

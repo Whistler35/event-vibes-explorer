@@ -38,6 +38,30 @@ const EditProfile = () => {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
+
+  const handleChangePassword = async () => {
+    if (newPassword.length < 6) {
+      toast.error(t('editProfile.passwordTooShort'));
+      return;
+    }
+    if (newPassword !== confirmNewPassword) {
+      toast.error(t('auth.errors.passwordMismatch'));
+      return;
+    }
+    setChangingPassword(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setChangingPassword(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(t('editProfile.passwordChanged'));
+    setNewPassword("");
+    setConfirmNewPassword("");
+  };
 
   const handleDeleteAccount = async () => {
     if (deleteConfirm.trim().toUpperCase() !== "LÖSCHEN") {
@@ -382,6 +406,43 @@ const EditProfile = () => {
             <p className="text-sm text-muted-foreground">{t('editProfile.languageSub')}</p>
           </div>
           <LanguageSwitcher />
+        </div>
+
+        {/* Password */}
+        <div className="border-t border-border pt-6 mt-2 space-y-3">
+          <div>
+            <h3 className="text-foreground font-bold text-lg">{t('editProfile.password')}</h3>
+            <p className="text-sm text-muted-foreground">{t('editProfile.passwordSub')}</p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="newPassword" className="text-foreground">{t('editProfile.newPassword')}</Label>
+            <Input
+              id="newPassword"
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="bg-muted border-border text-foreground"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="confirmNewPassword" className="text-foreground">{t('auth.confirmPassword')}</Label>
+            <Input
+              id="confirmNewPassword"
+              type="password"
+              value={confirmNewPassword}
+              onChange={(e) => setConfirmNewPassword(e.target.value)}
+              className="bg-muted border-border text-foreground"
+            />
+          </div>
+          <Button
+            onClick={handleChangePassword}
+            disabled={changingPassword || !newPassword || !confirmNewPassword}
+            variant="outline"
+            className="w-full h-11 rounded-xl font-bold"
+          >
+            {changingPassword ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+            {t('editProfile.changePassword')}
+          </Button>
         </div>
 
         {/* Danger zone */}

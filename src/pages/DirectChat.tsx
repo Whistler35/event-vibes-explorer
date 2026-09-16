@@ -8,6 +8,7 @@ import { ArrowLeft, Zap, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { markConversationRead } from "@/hooks/useUnreadDMCount";
+import { markDmNotificationsRead } from "@/hooks/useNotifications";
 import UserActionsMenu from "@/components/moderation/UserActionsMenu";
 import { EVENDLE_SYSTEM_ID } from "@/lib/constants";
 import { shareInvite } from "@/lib/share";
@@ -82,6 +83,7 @@ const DirectChat = () => {
       if (data) {
         setMessages(data as Message[]);
         markConversationRead(conversationId, user?.id);
+        if (user) markDmNotificationsRead(user.id, conversationId);
       }
     };
     fetchMessages();
@@ -100,6 +102,7 @@ const DirectChat = () => {
           const incoming = payload.new as Message;
           setMessages((prev) => (prev.some((m) => m.id === incoming.id) ? prev : [...prev, incoming]));
           markConversationRead(conversationId, user?.id);
+          if (user) markDmNotificationsRead(user.id, conversationId);
         }
       )
       .subscribe();

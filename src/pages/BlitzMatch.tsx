@@ -8,7 +8,8 @@ import { asBlitzQuestion } from "@/lib/utils";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import { shareInvite } from "@/lib/share";
+import { markHuddleNotificationsRead } from "@/hooks/useNotifications";
+import AddFriendToHuddleSheet from "@/components/blitz/AddFriendToHuddleSheet";
 
 interface Match {
   id: string;
@@ -47,6 +48,7 @@ const BlitzMatch = () => {
   const [input, setInput] = useState("");
   const [now, setNow] = useState(Date.now());
   const [showMatchSplash, setShowMatchSplash] = useState(true);
+  const [showAddFriend, setShowAddFriend] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   // Read inside the realtime effect without making it a dependency — that
   // effect must only ever (re)subscribe on matchId, never churn the socket
@@ -110,8 +112,9 @@ const BlitzMatch = () => {
     return () => clearTimeout(t);
   }, []);
 
-  // Mark this huddle as read (for the chat-list unread dot) whenever it's
-  // open — on entry, and again for every message that arrives while open.
+  // Mark this huddle as read (for the chat-list unread dot AND the
+  // notification bell) whenever it's open — on entry, and again for every
+  // message that arrives while open.
   useEffect(() => {
     if (!matchId || !user) return;
     supabase
@@ -119,6 +122,7 @@ const BlitzMatch = () => {
       .update({ last_read_at: new Date().toISOString() } as any)
       .eq("match_id", matchId)
       .eq("user_id", user.id);
+    markHuddleNotificationsRead(user.id, matchId);
   }, [matchId, user]);
 
   useEffect(() => {
@@ -137,6 +141,7 @@ const BlitzMatch = () => {
               .update({ last_read_at: new Date().toISOString() } as any)
               .eq("match_id", matchId)
               .eq("user_id", user.id);
+            markHuddleNotificationsRead(user.id, matchId);
           }
         }
       )
@@ -394,18 +399,19 @@ const BlitzMatch = () => {
         </div>
 
         <button
-          onClick={() =>
-            shareInvite({
-              title: activity || "Blitz",
-              text: `Join my Blitz${activity ? `: ${activity}` : ""}`,
-              url: `${window.location.origin}/blitz/${match.id}`,
-              copiedMessage: "Einladungslink kopiert",
-            })
-          }
+          onClick={() => setShowAddFriend(true)}
           className="mt-3 w-full rounded-full py-3 text-[13px] font-semibold text-[hsl(var(--blitz-forest))] border border-[hsl(var(--blitz-forest))]/20 hover:bg-white/60 active:scale-[0.98] transition"
         >
           {t('blitzMatch.inviteMore')}
         </button>
+
+        <AddFriendToHuddleSheet
+          open={showAddFriend}
+          onOpenChange={setShowAddFriend}
+          matchId={match.id}
+          activity={activity}
+          excludeIds={participantIds}
+        />
       </div>
 
       {/* Huddle chat */}
