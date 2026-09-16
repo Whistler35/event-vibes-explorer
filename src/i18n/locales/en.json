@@ -25,7 +25,8 @@
     "error": "Error",
     "success": "Success",
     "translating": "Translating…",
-    "or": "or"
+    "or": "or",
+    "and": "and"
   },
   "auth": {
     "loginTitle": "Sign in",
@@ -55,6 +56,10 @@
     "updatePassword": "Update password",
     "loginCta": "Sign in",
     "registerCta": "Sign up",
+    "termsPrefix": "I have read the",
+    "termsLinkAgb": "Terms of Use",
+    "termsLinkPrivacy": "Privacy Policy",
+    "termsSuffix": "and agree to them. I understand that objectionable content or abusive behavior is not tolerated.",
     "registerHostCta": "Sign up as Professional Host",
     "switchToRegister": "Don't have an account? Sign up",
     "switchToLogin": "Already registered? Sign in",
@@ -80,6 +85,7 @@
       "notImage": "Please select an image file.",
       "enterName": "Please enter your name",
       "fillRequired": "Please fill in all required fields",
+      "termsRequired": "Please accept the Terms and Privacy Policy",
       "passwordMismatch": "Passwords do not match",
       "passwordShort": "Password must be at least 6 characters",
       "enterEmail": "Please enter your email",

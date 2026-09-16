@@ -25,7 +25,8 @@
     "error": "Fehler",
     "success": "Erfolg",
     "translating": "Übersetze…",
-    "or": "oder"
+    "or": "oder",
+    "and": "und"
   },
   "auth": {
     "loginTitle": "Anmelden",
@@ -55,6 +56,10 @@
     "updatePassword": "Passwort aktualisieren",
     "loginCta": "Anmelden",
     "registerCta": "Registrieren",
+    "termsPrefix": "Ich habe die",
+    "termsLinkAgb": "AGB",
+    "termsLinkPrivacy": "Datenschutzerklärung",
+    "termsSuffix": "gelesen und stimme zu. Mir ist bewusst, dass anstößige Inhalte oder missbräuchliches Verhalten nicht toleriert werden.",
     "registerHostCta": "Als Professional Host registrieren",
     "switchToRegister": "Noch kein Konto? Registrieren",
     "switchToLogin": "Schon registriert? Anmelden",
@@ -80,6 +85,7 @@
       "notImage": "Bitte wähle eine Bilddatei.",
       "enterName": "Bitte gib deinen Namen ein",
       "fillRequired": "Bitte fülle alle Pflichtfelder aus",
+      "termsRequired": "Bitte akzeptiere die AGB und Datenschutzerklärung",
       "passwordMismatch": "Passwörter stimmen nicht überein",
       "passwordShort": "Passwort muss mindestens 6 Zeichen lang sein",
       "enterEmail": "Bitte E-Mail eingeben",

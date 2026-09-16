@@ -8,6 +8,7 @@ import { asBlitzQuestion } from "@/lib/utils";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
+import { shareInvite } from "@/lib/share";
 
 interface Match {
   id: string;
@@ -393,23 +394,14 @@ const BlitzMatch = () => {
         </div>
 
         <button
-          onClick={async () => {
-            const url = `${window.location.origin}/blitz/${match.id}`;
-            try {
-              if (navigator.share) {
-                await navigator.share({
-                  title: activity || "Blitz",
-                  text: `Join my Blitz${activity ? `: ${activity}` : ""}`,
-                  url,
-                });
-              } else {
-                await navigator.clipboard.writeText(url);
-                toast.success("Einladungslink kopiert");
-              }
-            } catch {
-              /* user cancelled */
-            }
-          }}
+          onClick={() =>
+            shareInvite({
+              title: activity || "Blitz",
+              text: `Join my Blitz${activity ? `: ${activity}` : ""}`,
+              url: `${window.location.origin}/blitz/${match.id}`,
+              copiedMessage: "Einladungslink kopiert",
+            })
+          }
           className="mt-3 w-full rounded-full py-3 text-[13px] font-semibold text-[hsl(var(--blitz-forest))] border border-[hsl(var(--blitz-forest))]/20 hover:bg-white/60 active:scale-[0.98] transition"
         >
           {t('blitzMatch.inviteMore')}

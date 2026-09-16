@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { markConversationRead } from "@/hooks/useUnreadDMCount";
 import UserActionsMenu from "@/components/moderation/UserActionsMenu";
 import { EVENDLE_SYSTEM_ID } from "@/lib/constants";
+import { shareInvite } from "@/lib/share";
 
 interface Message {
   id: string;
@@ -141,23 +142,13 @@ const DirectChat = () => {
     setSending(false);
   };
 
-  const handleInvite = async () => {
-    const url = `${window.location.origin}/`;
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: "EVENDLE",
-          text: "Join me on EVENDLE",
-          url,
-        });
-      } else {
-        await navigator.clipboard.writeText(url);
-        toast.success("Einladungslink kopiert");
-      }
-    } catch {
-      /* cancelled */
-    }
-  };
+  const handleInvite = () =>
+    shareInvite({
+      title: "EVENDLE",
+      text: "Join me on EVENDLE",
+      url: `${window.location.origin}/`,
+      copiedMessage: "Einladungslink kopiert",
+    });
 
   const displayName = otherProfile?.name || t("directChat.chat");
   const firstName = displayName.split(" ")[0];

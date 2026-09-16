@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { COUNTRIES } from '@/lib/countries';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Camera, Upload, ArrowLeft, Eye, EyeOff, Mail } from 'lucide-react';
@@ -135,6 +136,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState(false);
   const [signupSuccessEmail, setSignupSuccessEmail] = useState<string | null>(null);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { signIn, user } = useAuth();
@@ -189,6 +191,12 @@ const Auth = () => {
       } else {
         if (!name || !birthday || !country) {
           toast.error(t('auth.errors.fillRequired'));
+          setLoading(false);
+          return;
+        }
+
+        if (!termsAccepted) {
+          toast.error(t('auth.errors.termsRequired'));
           setLoading(false);
           return;
         }
@@ -437,11 +445,30 @@ const Auth = () => {
                   <Label htmlFor="funFact" className="text-foreground">{t('auth.funFact')}</Label>
                   <Textarea id="funFact" value={funFact} onChange={(e) => setFunFact(e.target.value)} placeholder={t('auth.funFactPlaceholder')} className="bg-card border-border text-foreground min-h-[80px]" />
                 </div>
+                <div className="flex items-start gap-2.5 pt-1">
+                  <Checkbox
+                    id="terms"
+                    checked={termsAccepted}
+                    onCheckedChange={(c) => setTermsAccepted(c === true)}
+                    className="mt-0.5"
+                  />
+                  <Label htmlFor="terms" className="text-sm font-normal text-muted-foreground leading-snug cursor-pointer">
+                    {t('auth.termsPrefix')}{' '}
+                    <a href="https://www.evendle.com/agb.html" target="_blank" rel="noopener" className="text-primary hover:underline" onClick={(e) => e.stopPropagation()}>
+                      {t('auth.termsLinkAgb')}
+                    </a>{' '}
+                    {t('common.and')}{' '}
+                    <a href="https://www.evendle.com/datenschutz.html" target="_blank" rel="noopener" className="text-primary hover:underline" onClick={(e) => e.stopPropagation()}>
+                      {t('auth.termsLinkPrivacy')}
+                    </a>{' '}
+                    {t('auth.termsSuffix')}
+                  </Label>
+                </div>
               </>
             )}
           </div>
 
-          <Button type="submit" disabled={loading} className="w-full">
+          <Button type="submit" disabled={loading || (!isLogin && !termsAccepted)} className="w-full">
             {loading ? t('common.loading') : isLogin ? t('auth.loginCta') : t('auth.registerCta')}
           </Button>
 
@@ -455,6 +482,10 @@ const Auth = () => {
           <div className="space-y-3">
             <Button type="button" variant="outline" disabled={socialLoading || loading} className="w-full"
               onClick={async () => {
+                if (!isLogin && !termsAccepted) {
+                  toast.error(t('auth.errors.termsRequired'));
+                  return;
+                }
                 setSocialLoading(true);
                 if (Capacitor.isNativePlatform()) {
                   const err = await nativeOAuth('google');
@@ -482,6 +513,10 @@ const Auth = () => {
 
             <Button type="button" variant="outline" disabled={socialLoading || loading} className="w-full"
               onClick={async () => {
+                if (!isLogin && !termsAccepted) {
+                  toast.error(t('auth.errors.termsRequired'));
+                  return;
+                }
                 setSocialLoading(true);
                 if (Capacitor.isNativePlatform()) {
                   const err = await nativeAppleSignIn();
