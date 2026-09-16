@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Zap, Trash2, Users, MapPin } from "lucide-react";
+import { ArrowLeft, Zap, Trash2, Users, MapPin, Heart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { asBlitzQuestion } from "@/lib/utils";
@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { markHuddleNotificationsRead } from "@/hooks/useNotifications";
 import AddFriendToHuddleSheet from "@/components/blitz/AddFriendToHuddleSheet";
+import { useMessageReactions } from "@/hooks/useMessageReactions";
 
 interface Match {
   id: string;
@@ -49,6 +50,19 @@ const BlitzMatch = () => {
   const [now, setNow] = useState(Date.now());
   const [showMatchSplash, setShowMatchSplash] = useState(true);
   const [showAddFriend, setShowAddFriend] = useState(false);
+  const [burstId, setBurstId] = useState<string | null>(null);
+  const { reactions, toggleHeart } = useMessageReactions(
+    "blitz_chat_message_reactions",
+    "match_id",
+    matchId,
+    user?.id
+  );
+
+  const handleDoubleTap = (messageId: string) => {
+    toggleHeart(messageId);
+    setBurstId(messageId);
+    setTimeout(() => setBurstId((cur) => (cur === messageId ? null : cur)), 700);
+  };
   const scrollRef = useRef<HTMLDivElement>(null);
   // Read inside the realtime effect without making it a dependency — that
   // effect must only ever (re)subscribe on matchId, never churn the socket
@@ -429,30 +443,48 @@ const BlitzMatch = () => {
         {messages.map((msg) => {
           const mine = msg.sender_id === user.id;
           const senderName = profilesMap.get(msg.sender_id)?.name?.split(" ")[0];
+          const msgReactions = reactions[msg.id] ?? [];
           return (
             <div
               key={msg.id}
               className={`w-full ${mine ? "flex justify-end" : ""}`}
             >
-              <div
-                className={`max-w-[85%] px-4 py-3 rounded-2xl shadow-sm ${
-                  mine
-                    ? "bg-[hsl(var(--blitz-forest))] text-white rounded-br-md"
-                    : "bg-white text-foreground rounded-bl-md"
-                }`}
-              >
-                {!mine && senderName && (
-                  <button
-                    type="button"
-                    onClick={() => navigate(`/user/${msg.sender_id}`)}
-                    className="text-[11px] font-black text-[hsl(var(--blitz-forest))] mb-0.5 hover:underline"
+              <div className="relative max-w-[85%]" onDoubleClick={() => handleDoubleTap(msg.id)}>
+                <div
+                  className={`px-4 py-3 rounded-2xl shadow-sm select-none ${
+                    mine
+                      ? "bg-[hsl(var(--blitz-forest))] text-white rounded-br-md"
+                      : "bg-white text-foreground rounded-bl-md"
+                  }`}
+                >
+                  {!mine && senderName && (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); navigate(`/user/${msg.sender_id}`); }}
+                      className="text-[11px] font-black text-[hsl(var(--blitz-forest))] mb-0.5 hover:underline"
+                    >
+                      {senderName}
+                    </button>
+                  )}
+                  <p className="text-sm break-words whitespace-pre-wrap leading-snug">
+                    {msg.message}
+                  </p>
+                </div>
+                {msgReactions.length > 0 && (
+                  <div
+                    className={`absolute -bottom-2.5 ${mine ? "left-1.5" : "right-1.5"} bg-white rounded-full shadow-sm px-1.5 py-0.5 flex items-center gap-0.5`}
                   >
-                    {senderName}
-                  </button>
+                    <span className="text-xs">❤️</span>
+                    {msgReactions.length > 1 && (
+                      <span className="text-[10px] font-bold text-muted-foreground">{msgReactions.length}</span>
+                    )}
+                  </div>
                 )}
-                <p className="text-sm break-words whitespace-pre-wrap leading-snug">
-                  {msg.message}
-                </p>
+                {burstId === msg.id && (
+                  <Heart
+                    className="absolute inset-0 m-auto w-14 h-14 text-[hsl(var(--blitz-pink))] fill-[hsl(var(--blitz-pink))] pointer-events-none animate-heart-burst"
+                  />
+                )}
               </div>
             </div>
           );

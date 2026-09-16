@@ -109,6 +109,17 @@ All colors MUST be HSL.
     animation: blitz-impact-flash 1.6s ease-out forwards;
   }
 
+  /* Instagram-style double-tap heart burst on a chat message */
+  @keyframes heart-burst {
+    0% { opacity: 0; transform: scale(0.3); }
+    30% { opacity: 1; transform: scale(1.15); }
+    50% { transform: scale(1); }
+    100% { opacity: 0; transform: scale(1); }
+  }
+  .animate-heart-burst {
+    animation: heart-burst 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
   /* Avatars slamming in from the sides */
   @keyframes blitz-slam-left {
     0% { transform: translateX(-120%) rotate(-12deg); opacity: 0; }

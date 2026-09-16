@@ -39,6 +39,10 @@ export default function Onboarding() {
   const [locationBusy, setLocationBusy] = useState(false);
   const [pushBusy, setPushBusy] = useState(false);
   const [finishing, setFinishing] = useState(false);
+  // Gate the very first render on the "already onboarded?" check — without
+  // this, the step-1 UI ("Wer bist du?") flashes for a moment on every app
+  // open before the redirect to /blitz kicks in.
+  const [checkingOnboarded, setCheckingOnboarded] = useState(true);
 
   useEffect(() => {
     if (!user) { navigate("/auth", { replace: true }); return; }
@@ -52,8 +56,13 @@ export default function Onboarding() {
         setAvatarUrl(data.avatar_url || null);
         setInterests(data.interests || []);
       }
+      setCheckingOnboarded(false);
     })();
   }, [user, navigate]);
+
+  if (checkingOnboarded) {
+    return <div className="min-h-screen bg-[hsl(var(--blitz-forest))]" />;
+  }
 
   const handleAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

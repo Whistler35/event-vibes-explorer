@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { ArrowLeft, Zap, Users } from "lucide-react";
+import { ArrowLeft, Zap, Users, Heart } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { markConversationRead } from "@/hooks/useUnreadDMCount";
@@ -12,6 +12,7 @@ import { markDmNotificationsRead } from "@/hooks/useNotifications";
 import UserActionsMenu from "@/components/moderation/UserActionsMenu";
 import { EVENDLE_SYSTEM_ID } from "@/lib/constants";
 import { shareInvite } from "@/lib/share";
+import { useMessageReactions } from "@/hooks/useMessageReactions";
 
 interface Message {
   id: string;
@@ -28,6 +29,19 @@ const DirectChat = () => {
   const [newMessage, setNewMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [sending, setSending] = useState(false);
+  const [burstId, setBurstId] = useState<string | null>(null);
+  const { reactions, toggleHeart } = useMessageReactions(
+    "direct_message_reactions",
+    "conversation_id",
+    conversationId,
+    user?.id
+  );
+
+  const handleDoubleTap = (messageId: string) => {
+    toggleHeart(messageId);
+    setBurstId(messageId);
+    setTimeout(() => setBurstId((cur) => (cur === messageId ? null : cur)), 700);
+  };
   const scrollRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
 
@@ -272,23 +286,41 @@ const DirectChat = () => {
         )}
         {messages.map((msg) => {
           const mine = msg.sender_id === user?.id;
+          const msgReactions = reactions[msg.id] ?? [];
           return (
             <div key={msg.id} className={`w-full ${mine ? "flex justify-end" : ""}`}>
-              <div
-                className={`max-w-[85%] px-4 py-3 rounded-2xl shadow-sm ${
-                  mine
-                    ? "bg-[hsl(var(--blitz-forest))] text-white rounded-br-md"
-                    : "bg-white text-foreground rounded-bl-md"
-                }`}
-              >
-                {!mine && (
-                  <p className="text-[11px] font-black text-[hsl(var(--blitz-forest))] mb-0.5">
-                    {firstName}
+              <div className="relative max-w-[85%]" onDoubleClick={() => handleDoubleTap(msg.id)}>
+                <div
+                  className={`px-4 py-3 rounded-2xl shadow-sm select-none ${
+                    mine
+                      ? "bg-[hsl(var(--blitz-forest))] text-white rounded-br-md"
+                      : "bg-white text-foreground rounded-bl-md"
+                  }`}
+                >
+                  {!mine && (
+                    <p className="text-[11px] font-black text-[hsl(var(--blitz-forest))] mb-0.5">
+                      {firstName}
+                    </p>
+                  )}
+                  <p className="text-sm break-words whitespace-pre-wrap leading-snug">
+                    {msg.message}
                   </p>
+                </div>
+                {msgReactions.length > 0 && (
+                  <div
+                    className={`absolute -bottom-2.5 ${mine ? "left-1.5" : "right-1.5"} bg-white rounded-full shadow-sm px-1.5 py-0.5 flex items-center gap-0.5`}
+                  >
+                    <span className="text-xs">❤️</span>
+                    {msgReactions.length > 1 && (
+                      <span className="text-[10px] font-bold text-muted-foreground">{msgReactions.length}</span>
+                    )}
+                  </div>
                 )}
-                <p className="text-sm break-words whitespace-pre-wrap leading-snug">
-                  {msg.message}
-                </p>
+                {burstId === msg.id && (
+                  <Heart
+                    className="absolute inset-0 m-auto w-14 h-14 text-[hsl(var(--blitz-pink))] fill-[hsl(var(--blitz-pink))] pointer-events-none animate-heart-burst"
+                  />
+                )}
               </div>
             </div>
           );
