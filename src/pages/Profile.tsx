@@ -16,7 +16,6 @@ import { Badge } from "@/components/ui/badge";
 import { getInstagramUrl } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import InterestChips from "@/components/profile/InterestChips";
-import PhotoStrip from "@/components/profile/PhotoStrip";
 import FriendsCarousel from "@/components/profile/FriendsCarousel";
 import MyFeedGrid from "@/components/profile/MyFeedGrid";
 import { useTranslation } from "react-i18next";
@@ -151,7 +150,6 @@ const Profile = () => {
   const avatarUrl = profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=ff2d78&color=fff&size=400`;
   const hostInstagramUrl = getInstagramUrl(hostProfile?.instagram_username);
   const profileInstagramUrl = getInstagramUrl(profile?.instagram_username);
-  const photos = profile?.photos || [];
   const interests = profile?.interests || [];
 
   return (
@@ -255,18 +253,10 @@ const Profile = () => {
                 <h1 className="text-foreground text-3xl font-black mt-5 tracking-tight">
                   {displayName}
                 </h1>
-                <p className="text-muted-foreground text-sm mt-1">
-                  {t("profile.blitzReady")}
-                </p>
               </div>
 
-              {/* Photo strip */}
-              <PhotoStrip
-                userId={user.id}
-                photos={photos}
-                editable
-                onChange={(next) => setProfile((p) => (p ? { ...p, photos: next } : p))}
-              />
+              {/* My Blitz Feed photos */}
+              <MyFeedGrid userId={user.id} />
 
               {/* Stats — 3 white cards */}
               <div className="grid grid-cols-3 gap-2.5">
@@ -322,9 +312,6 @@ const Profile = () => {
 
               {/* Friends carousel */}
               <FriendsCarousel userId={user.id} onAddFriend={() => setShowFriendsSheet(true)} />
-
-              {/* My Blitz Feed photos */}
-              <MyFeedGrid userId={user.id} />
 
               {/* Instagram link if present */}
               {profileInstagramUrl && (

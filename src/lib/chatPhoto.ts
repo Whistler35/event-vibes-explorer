@@ -1,12 +1,10 @@
 import { supabase } from "@/integrations/supabase/client";
-import { compressImage } from "@/lib/imageCompress";
 
 /** Uploads a chat photo to the shared public "avatars" bucket and returns its public URL. */
 export async function uploadChatPhoto(userId: string, file: File): Promise<string> {
-  const compressed = await compressImage(file);
-  const ext = compressed.name.split(".").pop() || "jpg";
+  const ext = file.name.split(".").pop() || "jpg";
   const path = `${userId}/chat/${Date.now()}.${ext}`;
-  const { error } = await supabase.storage.from("avatars").upload(path, compressed, { upsert: true });
+  const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
   if (error) throw error;
   const { data } = supabase.storage.from("avatars").getPublicUrl(path);
   return data.publicUrl;

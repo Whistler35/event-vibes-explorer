@@ -9,7 +9,6 @@ import { toast } from "sonner";
 import { Camera, Loader2, Zap, Globe2, Users } from "lucide-react";
 import { useEligibleRecaps } from "@/hooks/useEligibleRecaps";
 import { trackEvent } from "@/lib/analytics";
-import { compressImage } from "@/lib/imageCompress";
 
 interface Props {
   open: boolean;
@@ -58,10 +57,9 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
     if (!userId || !matchId || !file) return;
     setPosting(true);
     try {
-      const compressed = await compressImage(file);
-      const ext = compressed.name.split(".").pop() || "jpg";
+      const ext = file.name.split(".").pop() || "jpg";
       const path = `${userId}/feed/${matchId}-${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("avatars").upload(path, compressed, { upsert: true });
+      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
       if (upErr) throw upErr;
       const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
 
