@@ -19,7 +19,7 @@ interface Props {
   onToggleLike: (postId: string, currentlyLiked: boolean) => void;
   onOpenLikes: (postId: string) => void;
   onOpenComments: (postId: string) => void;
-  onDelete: (postId: string) => void;
+  onDelete: (postId: string, photoUrl: string) => void;
   onTagPeople: (postId: string) => void;
 }
 
@@ -67,7 +67,7 @@ const FeedPostCard = ({ post, isOwn, onToggleLike, onOpenLikes, onOpenComments, 
               <DropdownMenuItem onClick={() => onTagPeople(post.id)}>
                 <UserPlus className="w-4 h-4 mr-2" /> Personen markieren
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onDelete(post.id)} className="text-destructive">
+              <DropdownMenuItem onClick={() => onDelete(post.id, post.photo_url)} className="text-destructive">
                 <Trash2 className="w-4 h-4 mr-2" /> Löschen
               </DropdownMenuItem>
             </DropdownMenuContent>

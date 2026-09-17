@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/lib/analytics";
 import { getBlockedIds } from "@/lib/moderation";
+import { deleteStoragePhoto } from "@/lib/storagePhoto";
 
 export interface FeedPost {
   id: string;
@@ -148,9 +149,10 @@ export function useBlitzFeed(userId: string | undefined) {
   );
 
   const deletePost = useCallback(
-    async (postId: string) => {
+    async (postId: string, photoUrl?: string) => {
       await supabase.from("blitz_feed_posts" as any).delete().eq("id", postId);
       queryClient.invalidateQueries({ queryKey });
+      deleteStoragePhoto(photoUrl);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [userId]

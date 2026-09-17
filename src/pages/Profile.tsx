@@ -18,6 +18,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import InterestChips from "@/components/profile/InterestChips";
 import PhotoStrip from "@/components/profile/PhotoStrip";
 import FriendsCarousel from "@/components/profile/FriendsCarousel";
+import MyFeedGrid from "@/components/profile/MyFeedGrid";
 import { useTranslation } from "react-i18next";
 
 interface ProfileData {
@@ -321,6 +322,9 @@ const Profile = () => {
 
               {/* Friends carousel */}
               <FriendsCarousel userId={user.id} onAddFriend={() => setShowFriendsSheet(true)} />
+
+              {/* My Blitz Feed photos */}
+              <MyFeedGrid userId={user.id} />
 
               {/* Instagram link if present */}
               {profileInstagramUrl && (
