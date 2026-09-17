@@ -8,7 +8,8 @@ export function cn(...inputs: ClassValue[]) {
 /** Blitz activity headlines are shown as a question ("Kaffee?") — don't double
  *  up the "?" when the user already typed one themselves. */
 export function asBlitzQuestion(activity: string) {
-  return activity.trim().endsWith("?") ? activity.trim() : `${activity}?`;
+  const trimmed = activity.trim();
+  return trimmed.endsWith("?") ? trimmed : `${trimmed}?`;
 }
 
 export function getInstagramUrl(value?: string | null) {
