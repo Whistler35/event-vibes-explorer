@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Zap, Trash2, Users, MapPin, Heart } from "lucide-react";
+import { ArrowLeft, Zap, Trash2, Users, MapPin, Heart, Camera, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { asBlitzQuestion } from "@/lib/utils";
@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { markHuddleNotificationsRead } from "@/hooks/useNotifications";
 import AddFriendToHuddleSheet from "@/components/blitz/AddFriendToHuddleSheet";
 import { useMessageReactions } from "@/hooks/useMessageReactions";
+import { uploadChatPhoto, PHOTO_PLACEHOLDER } from "@/lib/chatPhoto";
 
 interface Match {
   id: string;
@@ -25,6 +26,7 @@ interface ChatMessage {
   match_id: string;
   sender_id: string;
   message: string;
+  photo_url?: string | null;
   created_at: string;
 }
 
@@ -51,6 +53,9 @@ const BlitzMatch = () => {
   const [showMatchSplash, setShowMatchSplash] = useState(true);
   const [showAddFriend, setShowAddFriend] = useState(false);
   const [burstId, setBurstId] = useState<string | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [previewPhoto, setPreviewPhoto] = useState<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
   const { reactions, toggleHeart } = useMessageReactions(
     "blitz_chat_message_reactions",
     "match_id",
@@ -229,6 +234,36 @@ const BlitzMatch = () => {
     if (data) {
       const inserted = data as ChatMessage;
       setMessages((prev) => (prev.some((m) => m.id === inserted.id) ? prev : [...prev, inserted]));
+    }
+  };
+
+  const handlePickPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) e.target.value = "";
+    if (!file || !match || expired) return;
+    setUploadingPhoto(true);
+    try {
+      const photoUrl = await uploadChatPhoto(user.id, file);
+      const { data, error } = await supabase
+        .from("blitz_chat_messages")
+        .insert({
+          match_id: match.id,
+          sender_id: user.id,
+          message: input.trim() || PHOTO_PLACEHOLDER,
+          photo_url: photoUrl,
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      setInput("");
+      if (data) {
+        const inserted = data as ChatMessage;
+        setMessages((prev) => (prev.some((m) => m.id === inserted.id) ? prev : [...prev, inserted]));
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Foto konnte nicht gesendet werden");
+    } finally {
+      setUploadingPhoto(false);
     }
   };
 
@@ -442,7 +477,7 @@ const BlitzMatch = () => {
             >
               <div className="relative max-w-[85%]" onDoubleClick={() => handleDoubleTap(msg.id)}>
                 <div
-                  className={`px-4 py-3 rounded-2xl shadow-sm select-none ${
+                  className={`${msg.photo_url ? "p-1.5" : "px-4 py-3"} rounded-2xl shadow-sm select-none ${
                     mine
                       ? "bg-[hsl(var(--blitz-forest))] text-white rounded-br-md"
                       : "bg-white text-foreground rounded-bl-md"
@@ -452,14 +487,26 @@ const BlitzMatch = () => {
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); navigate(`/user/${msg.sender_id}`); }}
-                      className="text-[11px] font-black text-[hsl(var(--blitz-forest))] mb-0.5 hover:underline"
+                      className={`text-[11px] font-black text-[hsl(var(--blitz-forest))] mb-0.5 hover:underline ${msg.photo_url ? "px-2 pt-1" : ""}`}
                     >
                       {senderName}
                     </button>
                   )}
-                  <p className="text-sm break-words whitespace-pre-wrap leading-snug">
-                    {msg.message}
-                  </p>
+                  {msg.photo_url && (
+                    <button type="button" onClick={(e) => { e.stopPropagation(); setPreviewPhoto(msg.photo_url!); }} className="block">
+                      <img
+                        src={msg.photo_url}
+                        alt=""
+                        loading="lazy"
+                        className="max-w-[220px] max-h-[280px] w-auto h-auto rounded-xl object-cover"
+                      />
+                    </button>
+                  )}
+                  {msg.message && msg.message !== PHOTO_PLACEHOLDER && (
+                    <p className={`text-sm break-words whitespace-pre-wrap leading-snug ${msg.photo_url ? "px-2 pt-1.5 pb-0.5" : ""}`}>
+                      {msg.message}
+                    </p>
+                  )}
                 </div>
                 {msgReactions.length > 0 && (
                   <div
@@ -487,6 +534,20 @@ const BlitzMatch = () => {
         className="shrink-0 border-t border-black/5 bg-background px-4 pt-3 flex items-center gap-2"
         style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}
       >
+        <button
+          type="button"
+          onClick={() => photoInputRef.current?.click()}
+          disabled={uploadingPhoto || expired}
+          className="w-11 h-11 shrink-0 rounded-full bg-white flex items-center justify-center shadow-[0_8px_20px_-6px_rgba(0,0,0,0.12)] disabled:opacity-50"
+          aria-label="Foto senden"
+        >
+          {uploadingPhoto ? (
+            <Loader2 className="w-5 h-5 animate-spin text-[hsl(var(--blitz-forest))]" />
+          ) : (
+            <Camera className="w-5 h-5 text-[hsl(var(--blitz-forest))]" />
+          )}
+        </button>
+        <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={handlePickPhoto} />
         <div className="flex-1 flex items-center gap-2 bg-white rounded-full pl-5 pr-2 py-2 shadow-[0_8px_20px_-6px_rgba(0,0,0,0.12)]">
           <input
             value={input}
@@ -505,6 +566,15 @@ const BlitzMatch = () => {
           </button>
         </div>
       </form>
+
+      {previewPhoto && (
+        <div
+          onClick={() => setPreviewPhoto(null)}
+          className="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center p-4"
+        >
+          <img src={previewPhoto} alt="" className="max-w-full max-h-full rounded-2xl" />
+        </div>
+      )}
     </div>
   );
 };

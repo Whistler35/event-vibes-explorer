@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getActivityFontClass } from "@/lib/blitzText";
 import { asBlitzQuestion } from "@/lib/utils";
 import { toast } from "sonner";
+import { shareInvite } from "@/lib/share";
 
 const SWIPE_THRESHOLD = 100;
 
@@ -324,7 +325,8 @@ const DiscoveryDeck = ({ city, onStartOwn }: DiscoveryDeckProps) => {
         <Zap className="w-16 h-16 text-[hsl(var(--blitz-pink))] fill-[hsl(var(--blitz-pink))] opacity-60" />
         <h2 className="text-3xl font-black uppercase">Keine Blitzes</h2>
         <p className="text-white/70 max-w-xs">
-          Aktuell ist hier in der Nähe nichts los. Sei der Erste und starte deinen eigenen Blitz.
+          Aktuell ist hier in der Nähe nichts los. Sei der Erste und starte deinen eigenen Blitz — oder hol dir
+          mehr Leute in deine Gegend.
         </p>
         <div className="flex flex-col gap-2 w-full max-w-xs mt-4">
           {onStartOwn && (
@@ -336,8 +338,27 @@ const DiscoveryDeck = ({ city, onStartOwn }: DiscoveryDeckProps) => {
             </button>
           )}
           <button
-            onClick={reload}
+            onClick={() =>
+              shareInvite({
+                title: "EVENDLE",
+                text: "Komm auf EVENDLE, dann ist hier mehr los!",
+                url: `${window.location.origin}/`,
+                copiedMessage: "Einladungslink kopiert",
+              })
+            }
+            className="px-6 py-3 rounded-full bg-white/10 border border-white/20 text-white font-bold uppercase text-sm tracking-wide flex items-center justify-center gap-2 hover:bg-white/20 transition"
+          >
+            <Users className="w-4 h-4" /> Freunde einladen
+          </button>
+          <button
+            onClick={() => navigate("/profile")}
             className="px-6 py-3 rounded-full bg-white/10 border border-white/20 text-white font-bold uppercase text-sm tracking-wide hover:bg-white/20 transition"
+          >
+            Freunde auf EVENDLE finden
+          </button>
+          <button
+            onClick={reload}
+            className="px-6 py-3 rounded-full text-white/60 font-bold uppercase text-xs tracking-wide hover:text-white transition"
           >
             Neu laden
           </button>

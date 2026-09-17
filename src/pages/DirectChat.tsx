@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { ArrowLeft, Zap, Users, Heart } from "lucide-react";
+import { ArrowLeft, Zap, Users, Heart, Camera, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { markConversationRead } from "@/hooks/useUnreadDMCount";
@@ -13,11 +13,13 @@ import UserActionsMenu from "@/components/moderation/UserActionsMenu";
 import { EVENDLE_SYSTEM_ID } from "@/lib/constants";
 import { shareInvite } from "@/lib/share";
 import { useMessageReactions } from "@/hooks/useMessageReactions";
+import { uploadChatPhoto, PHOTO_PLACEHOLDER } from "@/lib/chatPhoto";
 
 interface Message {
   id: string;
   sender_id: string;
   message: string;
+  photo_url?: string | null;
   created_at: string;
 }
 
@@ -29,7 +31,10 @@ const DirectChat = () => {
   const [newMessage, setNewMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [sending, setSending] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [previewPhoto, setPreviewPhoto] = useState<string | null>(null);
   const [burstId, setBurstId] = useState<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
   const { reactions, toggleHeart } = useMessageReactions(
     "direct_message_reactions",
     "conversation_id",
@@ -157,6 +162,41 @@ const DirectChat = () => {
       queryClient.invalidateQueries({ queryKey: ["dm-conversations"] });
     }
     setSending(false);
+  };
+
+  const handlePickPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) e.target.value = "";
+    if (!file || !user || !conversationId) return;
+    setUploadingPhoto(true);
+    try {
+      const photoUrl = await uploadChatPhoto(user.id, file);
+      const { data, error } = await supabase
+        .from("direct_messages")
+        .insert({
+          conversation_id: conversationId,
+          sender_id: user.id,
+          message: newMessage.trim() || PHOTO_PLACEHOLDER,
+          photo_url: photoUrl,
+        } as any)
+        .select()
+        .single();
+      if (error) throw error;
+      setNewMessage("");
+      if (data) {
+        const inserted = data as Message;
+        setMessages((prev) => (prev.some((m) => m.id === inserted.id) ? prev : [...prev, inserted]));
+      }
+      await supabase
+        .from("direct_conversations")
+        .update({ updated_at: new Date().toISOString() } as any)
+        .eq("id", conversationId);
+      queryClient.invalidateQueries({ queryKey: ["dm-conversations"] });
+    } catch (err: any) {
+      toast.error(err.message || "Foto konnte nicht gesendet werden");
+    } finally {
+      setUploadingPhoto(false);
+    }
   };
 
   const handleInvite = () =>
@@ -291,20 +331,32 @@ const DirectChat = () => {
             <div key={msg.id} className={`w-full ${mine ? "flex justify-end" : ""}`}>
               <div className="relative max-w-[85%]" onDoubleClick={() => handleDoubleTap(msg.id)}>
                 <div
-                  className={`px-4 py-3 rounded-2xl shadow-sm select-none ${
+                  className={`${msg.photo_url ? "p-1.5" : "px-4 py-3"} rounded-2xl shadow-sm select-none ${
                     mine
                       ? "bg-[hsl(var(--blitz-forest))] text-white rounded-br-md"
                       : "bg-white text-foreground rounded-bl-md"
                   }`}
                 >
                   {!mine && (
-                    <p className="text-[11px] font-black text-[hsl(var(--blitz-forest))] mb-0.5">
+                    <p className={`text-[11px] font-black text-[hsl(var(--blitz-forest))] mb-0.5 ${msg.photo_url ? "px-2 pt-1" : ""}`}>
                       {firstName}
                     </p>
                   )}
-                  <p className="text-sm break-words whitespace-pre-wrap leading-snug">
-                    {msg.message}
-                  </p>
+                  {msg.photo_url && (
+                    <button type="button" onClick={() => setPreviewPhoto(msg.photo_url!)} className="block">
+                      <img
+                        src={msg.photo_url}
+                        alt=""
+                        loading="lazy"
+                        className="max-w-[220px] max-h-[280px] w-auto h-auto rounded-xl object-cover"
+                      />
+                    </button>
+                  )}
+                  {msg.message && msg.message !== PHOTO_PLACEHOLDER && (
+                    <p className={`text-sm break-words whitespace-pre-wrap leading-snug ${msg.photo_url ? "px-2 pt-1.5 pb-0.5" : ""}`}>
+                      {msg.message}
+                    </p>
+                  )}
                 </div>
                 {msgReactions.length > 0 && (
                   <div
@@ -332,6 +384,20 @@ const DirectChat = () => {
         className="fixed left-0 right-0 bottom-0 px-4 pt-3 pb-4 flex items-center gap-2 z-20"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.75rem)" }}
       >
+        <button
+          type="button"
+          onClick={() => photoInputRef.current?.click()}
+          disabled={uploadingPhoto}
+          className="w-11 h-11 shrink-0 rounded-full bg-white flex items-center justify-center shadow-[0_8px_20px_-6px_rgba(0,0,0,0.12)] disabled:opacity-50"
+          aria-label="Foto senden"
+        >
+          {uploadingPhoto ? (
+            <Loader2 className="w-5 h-5 animate-spin text-[hsl(var(--blitz-forest))]" />
+          ) : (
+            <Camera className="w-5 h-5 text-[hsl(var(--blitz-forest))]" />
+          )}
+        </button>
+        <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={handlePickPhoto} />
         <div className="flex-1 flex items-center gap-2 bg-white rounded-full pl-5 pr-2 py-2 shadow-[0_8px_20px_-6px_rgba(0,0,0,0.12)]">
           <input
             value={newMessage}
@@ -349,6 +415,15 @@ const DirectChat = () => {
           </button>
         </div>
       </form>
+
+      {previewPhoto && (
+        <div
+          onClick={() => setPreviewPhoto(null)}
+          className="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center p-4"
+        >
+          <img src={previewPhoto} alt="" className="max-w-full max-h-full rounded-2xl" />
+        </div>
+      )}
     </div>
   );
 };
