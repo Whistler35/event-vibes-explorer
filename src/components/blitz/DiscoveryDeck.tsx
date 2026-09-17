@@ -9,6 +9,8 @@ import { getActivityFontClass } from "@/lib/blitzText";
 import { asBlitzQuestion } from "@/lib/utils";
 import { toast } from "sonner";
 import { shareInvite } from "@/lib/share";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import FriendSearch from "@/components/FriendSearch";
 
 const SWIPE_THRESHOLD = 100;
 
@@ -224,6 +226,7 @@ const DiscoveryDeck = ({ city, onStartOwn }: DiscoveryDeckProps) => {
   const { isAdmin } = useIsAdmin();
   const [index, setIndex] = useState(0);
   const [removedIds, setRemovedIds] = useState<Set<string>>(new Set());
+  const [showFriendSearch, setShowFriendSearch] = useState(false);
 
   useEffect(() => {
     setIndex(0);
@@ -351,7 +354,7 @@ const DiscoveryDeck = ({ city, onStartOwn }: DiscoveryDeckProps) => {
             <Users className="w-4 h-4" /> Freunde einladen
           </button>
           <button
-            onClick={() => navigate("/profile")}
+            onClick={() => setShowFriendSearch(true)}
             className="px-6 py-3 rounded-full bg-white/10 border border-white/20 text-white font-bold uppercase text-sm tracking-wide hover:bg-white/20 transition"
           >
             Freunde auf EVENDLE finden
@@ -363,6 +366,17 @@ const DiscoveryDeck = ({ city, onStartOwn }: DiscoveryDeckProps) => {
             Neu laden
           </button>
         </div>
+
+        <Sheet open={showFriendSearch} onOpenChange={setShowFriendSearch}>
+          <SheetContent side="bottom" className="rounded-t-3xl max-h-[85vh] overflow-y-auto">
+            <SheetHeader className="text-left">
+              <SheetTitle>Freunde finden</SheetTitle>
+            </SheetHeader>
+            <div className="py-4">
+              <FriendSearch />
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
     );
   }
