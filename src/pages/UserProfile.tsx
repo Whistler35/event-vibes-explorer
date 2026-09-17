@@ -26,10 +26,9 @@ import { toast } from "sonner";
 import ProfileStatsSheet from "@/components/ProfileStatsSheet";
 import HostRating from "@/components/HostRating";
 import { getInstagramUrl } from "@/lib/utils";
-import InterestChips from "@/components/profile/InterestChips";
 import UserActionsMenu from "@/components/moderation/UserActionsMenu";
-import PhotoStrip from "@/components/profile/PhotoStrip";
 import FriendsCarousel from "@/components/profile/FriendsCarousel";
+import BlitzMomentsGrid from "@/components/profile/BlitzMomentsGrid";
 import FriendSearch from "@/components/FriendSearch";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
@@ -238,8 +237,6 @@ const UserProfile = () => {
     `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=ff2d78&color=fff&size=400`;
   const hostInstagramUrl = getInstagramUrl(hostProfile?.instagram_username);
   const profileInstagramUrl = getInstagramUrl(profile.instagram_username);
-  const photos = profile.photos || [];
-  const interests = profile.interests || [];
   const score = stats.blitzSent + stats.blitzJoined;
   const level = t(activityLevelKey(score));
   const isOwnProfile = user?.id === userId;
@@ -415,18 +412,16 @@ const UserProfile = () => {
                 <h1 className="text-white text-3xl font-extrabold mt-5 tracking-tight">
                   {displayName}
                 </h1>
-                <p className="text-[hsl(var(--blitz-pink))] font-semibold text-sm mt-1">
-                  {t("userProfile.readyForBlitz")}
-                </p>
+                {profile.bio && (
+                  <p className="text-white/85 text-sm leading-relaxed mt-3 max-w-sm">{profile.bio}</p>
+                )}
               </div>
 
               {/* Friend / Message actions */}
               {friendActions}
 
-              {/* Photo strip (read-only for others) */}
-              {photos.length > 0 && (
-                <PhotoStrip userId={userId} photos={photos} editable={false} />
-              )}
+              {/* Blitz Feed photos */}
+              <BlitzMomentsGrid userId={userId} title={`${displayName.split(" ")[0]}s Blitz-Momente`} />
 
               {/* Stats */}
               <div className="grid grid-cols-3 gap-2.5">
@@ -456,17 +451,6 @@ const UserProfile = () => {
                   </p>
                 </div>
               </div>
-
-              {/* Interests + Bio */}
-              {(interests.length > 0 || profile.bio) && (
-                <div className="space-y-3">
-                  <h3 className="text-white font-bold text-lg">{t("userProfile.whatDoes", { name: displayName.split(" ")[0] })}</h3>
-                  {interests.length > 0 && <InterestChips interests={interests} />}
-                  {profile.bio && (
-                    <p className="text-white/75 text-sm leading-relaxed">{profile.bio}</p>
-                  )}
-                </div>
-              )}
 
               {/* Friends carousel */}
               <FriendsCarousel

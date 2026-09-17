@@ -15,14 +15,21 @@ interface GridPost {
 
 interface Props {
   userId: string;
+  title?: string;
 }
 
-/** BeReal-style grid of the user's own Blitz Feed photos, on their profile. */
-const MyFeedGrid = ({ userId }: Props) => {
+/**
+ * BeReal-style grid of a user's Blitz Feed photos, shown on their profile —
+ * used for both the signed-in user's own profile and anyone else's. RLS on
+ * blitz_feed_posts already scopes the query to what the *viewer* is allowed
+ * to see (their own, friends', or public posts), so no extra visibility
+ * filtering is needed here regardless of whose profile this is.
+ */
+const BlitzMomentsGrid = ({ userId, title = "Blitz-Momente" }: Props) => {
   const [preview, setPreview] = useState<GridPost | null>(null);
 
   const { data: posts = [] } = useQuery({
-    queryKey: ["my-feed-grid", userId],
+    queryKey: ["blitz-moments-grid", userId],
     queryFn: async () => {
       const { data: rows } = await supabase
         .from("blitz_feed_posts" as any)
@@ -62,7 +69,7 @@ const MyFeedGrid = ({ userId }: Props) => {
       <div className="flex items-center gap-2">
         <Camera className="w-4 h-4 text-muted-foreground" />
         <h3 className="text-muted-foreground font-black text-[11px] uppercase tracking-[0.25em]">
-          Meine Blitz-Momente
+          {title}
         </h3>
       </div>
       <div className="grid grid-cols-3 gap-1.5">
@@ -100,4 +107,4 @@ const MyFeedGrid = ({ userId }: Props) => {
   );
 };
 
-export default MyFeedGrid;
+export default BlitzMomentsGrid;

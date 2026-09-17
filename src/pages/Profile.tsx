@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { getInstagramUrl } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import FriendsCarousel from "@/components/profile/FriendsCarousel";
-import MyFeedGrid from "@/components/profile/MyFeedGrid";
+import BlitzMomentsGrid from "@/components/profile/BlitzMomentsGrid";
 import { useTranslation } from "react-i18next";
 
 interface ProfileData {
@@ -256,7 +256,7 @@ const Profile = () => {
               </div>
 
               {/* My Blitz Feed photos */}
-              <MyFeedGrid userId={user.id} />
+              <BlitzMomentsGrid userId={user.id} title="Meine Blitz-Momente" />
 
               {/* Stats — 3 white cards */}
               <div className="grid grid-cols-3 gap-2.5">
