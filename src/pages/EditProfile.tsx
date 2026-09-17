@@ -86,7 +86,6 @@ const EditProfile = () => {
     age: "",
     country: "",
     bio: "",
-    fun_fact: "",
     avatar_url: "",
     instagram_username: "",
     instagram_followers: "",
@@ -102,7 +101,7 @@ const EditProfile = () => {
     const fetchProfile = async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("name, age, country, bio, fun_fact, avatar_url, instagram_username, instagram_followers, interests, ritual_push_enabled")
+        .select("name, age, country, bio, avatar_url, instagram_username, instagram_followers, interests, ritual_push_enabled")
         .eq("user_id", user.id)
         .maybeSingle() as any;
 
@@ -112,7 +111,6 @@ const EditProfile = () => {
           age: data.age?.toString() || "",
           country: data.country || "",
           bio: data.bio || "",
-          fun_fact: data.fun_fact || "",
           avatar_url: data.avatar_url || "",
           instagram_username: data.instagram_username || "",
           instagram_followers: data.instagram_followers || "",
@@ -146,7 +144,6 @@ const EditProfile = () => {
     if (!form.age.trim() || isNaN(Number(form.age)) || Number(form.age) < 1) newErrors.age = t('editProfile.errors.age');
     if (!form.country.trim()) newErrors.country = t('editProfile.errors.country');
     if (!form.bio.trim()) newErrors.bio = t('editProfile.errors.bio');
-    if (!form.fun_fact.trim()) newErrors.fun_fact = t('editProfile.errors.fun_fact');
     // Profile photo is optional – a generated avatar is shown as fallback.
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -189,7 +186,6 @@ const EditProfile = () => {
         age: Number(form.age),
         country: form.country.trim(),
         bio: form.bio.trim(),
-        fun_fact: form.fun_fact.trim(),
         avatar_url: form.avatar_url,
         instagram_username: form.instagram_username.trim() || null,
         instagram_followers: form.instagram_followers.trim() || null,
@@ -317,17 +313,6 @@ const EditProfile = () => {
               className="mt-1 bg-muted border-border text-foreground resize-none"
             />
             {errors.bio && <p className="text-destructive text-xs mt-1">{errors.bio}</p>}
-          </div>
-
-          <div>
-            <Label className="text-foreground font-medium">{t('editProfile.funFact')} *</Label>
-            <Input
-              value={form.fun_fact}
-              onChange={(e) => setForm(prev => ({ ...prev, fun_fact: e.target.value }))}
-              placeholder={t('editProfile.funFactPh')}
-              className="mt-1 bg-muted border-border text-foreground"
-            />
-            {errors.fun_fact && <p className="text-destructive text-xs mt-1">{errors.fun_fact}</p>}
           </div>
 
           <div>

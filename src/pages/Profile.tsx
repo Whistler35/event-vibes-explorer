@@ -15,7 +15,6 @@ import HostRating from "@/components/HostRating";
 import { Badge } from "@/components/ui/badge";
 import { getInstagramUrl } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import InterestChips from "@/components/profile/InterestChips";
 import FriendsCarousel from "@/components/profile/FriendsCarousel";
 import MyFeedGrid from "@/components/profile/MyFeedGrid";
 import { useTranslation } from "react-i18next";
@@ -25,7 +24,6 @@ interface ProfileData {
   age: number | null;
   country: string | null;
   bio: string | null;
-  fun_fact: string | null;
   avatar_url: string | null;
   instagram_username: string | null;
   instagram_followers: string | null;
@@ -78,7 +76,7 @@ const Profile = () => {
     const fetchAll = async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("name, age, country, bio, fun_fact, avatar_url, instagram_username, instagram_followers, interests, photos")
+        .select("name, age, country, bio, avatar_url, instagram_username, instagram_followers, interests, photos")
         .eq("user_id", user.id)
         .maybeSingle() as any;
 
@@ -150,7 +148,6 @@ const Profile = () => {
   const avatarUrl = profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=ff2d78&color=fff&size=400`;
   const hostInstagramUrl = getInstagramUrl(hostProfile?.instagram_username);
   const profileInstagramUrl = getInstagramUrl(profile?.instagram_username);
-  const interests = profile?.interests || [];
 
   return (
     <Layout>
@@ -253,6 +250,9 @@ const Profile = () => {
                 <h1 className="text-foreground text-3xl font-black mt-5 tracking-tight">
                   {displayName}
                 </h1>
+                {profile?.bio && (
+                  <p className="text-white/85 text-sm leading-relaxed mt-3 max-w-sm">{profile.bio}</p>
+                )}
               </div>
 
               {/* My Blitz Feed photos */}
@@ -282,33 +282,6 @@ const Profile = () => {
                   <p className="text-muted-foreground text-[11px] font-semibold leading-tight mt-1">{t("profile.friends")}</p>
                 </button>
               </div>
-
-              {/* About / Interests */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-muted-foreground font-black text-[11px] uppercase tracking-[0.25em]">{t("profile.whatIDo")}</h3>
-                  <button onClick={() => navigate("/profile/edit")} className="text-[hsl(var(--bolt))] text-sm font-bold">{t("profile.edit")}</button>
-                </div>
-                <InterestChips interests={interests} onEdit={() => navigate("/profile/edit")} />
-                {profile?.bio && (
-                  <p className="text-white/85 text-sm leading-relaxed">{profile.bio}</p>
-                )}
-              </div>
-
-              {/* Fun-fact sticker */}
-              {profile?.fun_fact && (
-                <div className="flex justify-center pt-2">
-                  <div className="fun-fact-sticker rounded-2xl px-5 py-4 max-w-[88%]">
-                    <p className="text-[hsl(var(--blitz-forest))] font-extrabold text-sm uppercase tracking-wider">
-                      {t("profile.funFact")}
-                    </p>
-                    <p className="text-[#2a1a00] font-semibold mt-1 text-base leading-snug">
-                      {profile.fun_fact}
-                    </p>
-                    <p className="text-2xl mt-1">😄</p>
-                  </div>
-                </div>
-              )}
 
               {/* Friends carousel */}
               <FriendsCarousel userId={user.id} onAddFriend={() => setShowFriendsSheet(true)} />

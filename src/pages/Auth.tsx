@@ -130,7 +130,6 @@ const Auth = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [country, setCountry] = useState('');
   const [bio, setBio] = useState('');
-  const [funFact, setFunFact] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
@@ -223,7 +222,6 @@ const Auth = () => {
           age: calculatedAge,
           country,
           bio,
-          fun_fact: funFact,
         };
 
         const { error: signUpError, data } = await supabase.auth.signUp({
@@ -440,10 +438,6 @@ const Auth = () => {
                 <div className="space-y-2">
                   <Label htmlFor="bio" className="text-foreground">{t('auth.aboutMe')}</Label>
                   <Textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value)} placeholder={t('auth.aboutMePlaceholder')} className="bg-card border-border text-foreground min-h-[80px]" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="funFact" className="text-foreground">{t('auth.funFact')}</Label>
-                  <Textarea id="funFact" value={funFact} onChange={(e) => setFunFact(e.target.value)} placeholder={t('auth.funFactPlaceholder')} className="bg-card border-border text-foreground min-h-[80px]" />
                 </div>
                 <div className="flex items-start gap-2.5 pt-1">
                   <Checkbox

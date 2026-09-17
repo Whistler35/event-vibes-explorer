@@ -38,7 +38,6 @@ interface ProfileData {
   age: number | null;
   country: string | null;
   bio: string | null;
-  fun_fact: string | null;
   avatar_url: string | null;
   instagram_username: string | null;
   instagram_followers: string | null;
@@ -165,7 +164,7 @@ const UserProfile = () => {
       const { data } = await supabase
         .from("profiles")
         .select(
-          "name, age, country, bio, fun_fact, avatar_url, instagram_username, instagram_followers, interests, photos"
+          "name, age, country, bio, avatar_url, instagram_username, instagram_followers, interests, photos"
         )
         .eq("user_id", userId)
         .maybeSingle() as any;
@@ -466,21 +465,6 @@ const UserProfile = () => {
                   {profile.bio && (
                     <p className="text-white/75 text-sm leading-relaxed">{profile.bio}</p>
                   )}
-                </div>
-              )}
-
-              {/* Fun fact */}
-              {profile.fun_fact && (
-                <div className="flex justify-center pt-2">
-                  <div className="fun-fact-sticker rounded-2xl px-5 py-4 max-w-[88%]">
-                    <p className="text-[hsl(var(--blitz-pink))] font-extrabold text-sm uppercase tracking-wider">
-                      {t("userProfile.funFact")}
-                    </p>
-                    <p className="text-[#2a1a00] font-semibold mt-1 text-base leading-snug">
-                      {profile.fun_fact}
-                    </p>
-                    <p className="text-2xl mt-1">😄</p>
-                  </div>
                 </div>
               )}
 
