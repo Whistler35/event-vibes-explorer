@@ -9,7 +9,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ArrowLeft, RefreshCw, Zap, Users, Heart, MessageSquare, Flag,
-  ShieldCheck, UserPlus, Trash2, Search,
+  ShieldCheck, UserPlus, Trash2, Search, Camera, BellRing,
 } from "lucide-react";
 
 type Range = "today" | "7d" | "30d" | "all";
@@ -27,6 +27,11 @@ interface Stats {
   blitz_messages_new: number;
   dm_messages_new: number;
   reports_open: number;
+  feed_posts_new: number;
+  feed_likes_new: number;
+  feed_comments_new: number;
+  notifications_opened_new: number;
+  ritual_push_opened_new: number;
 }
 
 interface Person {
@@ -265,10 +270,36 @@ const AdminStats = () => {
         )}
 
         {stats && (
-          <p className="text-[11px] text-muted-foreground text-center">
-            Zeitraum: {range === "all" ? "seit Beginn" : `letzte ${RANGE_LABEL[range]}`} ·
-            {" "}Stand {new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
-          </p>
+          <>
+            <p className="text-[11px] text-muted-foreground text-center">
+              Zeitraum: {range === "all" ? "seit Beginn" : `letzte ${RANGE_LABEL[range]}`} ·
+              {" "}Stand {new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
+            </p>
+
+            {/* ── Feed & Notification engagement ─────────────── */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-2xl bg-card p-4 shadow-sm">
+                <div className="flex items-center gap-2 text-muted-foreground mb-2">
+                  <Camera className="w-4 h-4" />
+                  <span className="text-xs font-semibold">Feed-Posts</span>
+                </div>
+                <p className="text-2xl font-bold leading-none">{stats.feed_posts_new.toLocaleString("de-DE")}</p>
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  {stats.feed_likes_new} Likes · {stats.feed_comments_new} Kommentare
+                </p>
+              </div>
+              <div className="rounded-2xl bg-card p-4 shadow-sm">
+                <div className="flex items-center gap-2 text-muted-foreground mb-2">
+                  <BellRing className="w-4 h-4" />
+                  <span className="text-xs font-semibold">Pushes geöffnet</span>
+                </div>
+                <p className="text-2xl font-bold leading-none">{stats.notifications_opened_new.toLocaleString("de-DE")}</p>
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  davon {stats.ritual_push_opened_new} Wochenend-Erinnerung
+                </p>
+              </div>
+            </div>
+          </>
         )}
 
         {/* ── Admins verwalten ─────────────────────────────── */}

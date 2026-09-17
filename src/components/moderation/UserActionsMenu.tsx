@@ -18,12 +18,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import ReportDialog from "./ReportDialog";
-import { blockUser, unblockUser, hasBlocked } from "@/lib/moderation";
+import { blockUser, unblockUser, hasBlocked, type ReportContext } from "@/lib/moderation";
 
 interface UserActionsMenuProps {
   targetUserId: string;
   targetUserName?: string;
-  context?: "profile" | "direct_message" | "blitz";
+  context?: ReportContext;
+  /** The specific post/message/comment being reported, if any. */
+  reportedMessageId?: string;
   /** Optional: called after block/unblock so the parent can refresh. */
   onBlockChange?: (blocked: boolean) => void;
   /** Visual variant for the trigger button. */
@@ -34,6 +36,7 @@ export default function UserActionsMenu({
   targetUserId,
   targetUserName,
   context = "profile",
+  reportedMessageId,
   onBlockChange,
   className,
 }: UserActionsMenuProps) {
@@ -149,6 +152,7 @@ export default function UserActionsMenu({
         reportedUserId={targetUserId}
         reportedUserName={targetUserName}
         context={context}
+        reportedMessageId={reportedMessageId}
       />
     </>
   );

@@ -27,6 +27,7 @@ import { useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { usePushNotifications } from "./hooks/usePushNotifications";
 import { getNotificationRoute } from "./lib/notificationRouting";
+import { trackEvent } from "./lib/analytics";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
 const queryClient = new QueryClient();
@@ -57,6 +58,7 @@ function PushSetup() {
         const data = action.notification?.data as Record<string, any> | undefined;
         const type = data?.type;
         if (!type) return;
+        trackEvent(user?.id, "notification_opened", { type, source: "push" });
         const route = getNotificationRoute(type, data);
         if (route) navigate(route.path, route.state ? { state: route.state } : undefined);
       }).then((handle) => {

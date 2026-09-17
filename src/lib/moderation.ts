@@ -75,7 +75,7 @@ export async function getBlockedIds(): Promise<Set<string>> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type ReportReason = "spam" | "harassment" | "inappropriate" | "fake" | "other";
-export type ReportContext = "profile" | "direct_message" | "blitz";
+export type ReportContext = "profile" | "direct_message" | "blitz" | "feed_post" | "feed_comment";
 
 export const REPORT_REASONS: { value: ReportReason; label: string }[] = [
   { value: "harassment", label: "Belästigung oder Mobbing" },

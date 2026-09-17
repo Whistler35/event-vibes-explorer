@@ -14,8 +14,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Send, MoreVertical, Pencil, Trash2, Check, X } from "lucide-react";
+import { Send, MoreVertical, Pencil, Trash2, Check, X, Flag } from "lucide-react";
 import { useMatchParticipants } from "@/hooks/useMatchParticipants";
+import { trackEvent } from "@/lib/analytics";
+import ReportDialog from "@/components/moderation/ReportDialog";
 
 interface Comment {
   id: string;
@@ -71,6 +73,7 @@ const FeedCommentsSheet = ({ open, onOpenChange, postId, matchId, userId }: Prop
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
+  const [reportComment, setReportComment] = useState<Comment | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -149,6 +152,7 @@ const FeedCommentsSheet = ({ open, onOpenChange, postId, matchId, userId }: Prop
       toast.error(error.message);
       return;
     }
+    trackEvent(userId, "feed_post_commented", { post_id: postId });
     setText("");
     setMentionIds({});
     load();
@@ -233,18 +237,26 @@ const FeedCommentsSheet = ({ open, onOpenChange, postId, matchId, userId }: Prop
                     {c.edited_at ? " · bearbeitet" : ""}
                   </p>
                 </div>
-                {c.user_id === userId && editingId !== c.id && (
+                {editingId !== c.id && (
                   <DropdownMenu>
                     <DropdownMenuTrigger className="p-1 shrink-0" aria-label="Optionen">
                       <MoreVertical className="w-3.5 h-3.5 text-muted-foreground" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => startEdit(c)}>
-                        <Pencil className="w-4 h-4 mr-2" /> Bearbeiten
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleDelete(c.id)} className="text-destructive">
-                        <Trash2 className="w-4 h-4 mr-2" /> Löschen
-                      </DropdownMenuItem>
+                      {c.user_id === userId ? (
+                        <>
+                          <DropdownMenuItem onClick={() => startEdit(c)}>
+                            <Pencil className="w-4 h-4 mr-2" /> Bearbeiten
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDelete(c.id)} className="text-destructive">
+                            <Trash2 className="w-4 h-4 mr-2" /> Löschen
+                          </DropdownMenuItem>
+                        </>
+                      ) : (
+                        <DropdownMenuItem onClick={() => setReportComment(c)}>
+                          <Flag className="w-4 h-4 mr-2" /> Melden
+                        </DropdownMenuItem>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 )}
@@ -293,6 +305,16 @@ const FeedCommentsSheet = ({ open, onOpenChange, postId, matchId, userId }: Prop
           </div>
         </div>
       </SheetContent>
+      {reportComment && (
+        <ReportDialog
+          open={!!reportComment}
+          onOpenChange={(o) => !o && setReportComment(null)}
+          reportedUserId={reportComment.user_id}
+          reportedUserName={reportComment.name}
+          context="feed_comment"
+          reportedMessageId={reportComment.id}
+        />
+      )}
     </Sheet>
   );
 };

@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { acceptBlitzRequest, rejectBlitzRequest } from "@/hooks/useBlitzMatching";
 import { getNotificationRoute } from "@/lib/notificationRouting";
+import { trackEvent } from "@/lib/analytics";
 
 type FilterKey = "all" | "unread" | "messages" | "events" | "friends" | "blitz";
 
@@ -146,6 +147,7 @@ const NotificationBell = () => {
 
   const handleClick = (notif: AppNotification) => {
     if (!notif.is_read) markAsRead(notif.id);
+    trackEvent(user?.id, "notification_opened", { type: notif.type, source: "bell" });
 
     const route = getNotificationRoute(notif.type, notif.data);
     if (route) navigate(route.path, route.state ? { state: route.state } : undefined);

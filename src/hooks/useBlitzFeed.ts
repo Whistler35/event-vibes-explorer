@@ -1,6 +1,8 @@
 import { useCallback, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { trackEvent } from "@/lib/analytics";
+import { getBlockedIds } from "@/lib/moderation";
 
 export interface FeedPost {
   id: string;
@@ -29,12 +31,16 @@ export function useBlitzFeed(userId: string | undefined) {
     queryFn: async () => {
       // RLS already restricts this to posts I'm allowed to see (mine,
       // friends', or public) — no visibility filtering needed client-side.
-      const { data: posts } = await supabase
-        .from("blitz_feed_posts" as any)
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(60);
-      if (!posts || posts.length === 0) return [] as FeedPost[];
+      const [{ data: postsRaw }, blockedIds] = await Promise.all([
+        supabase
+          .from("blitz_feed_posts" as any)
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(60),
+        getBlockedIds(),
+      ]);
+      const posts = (postsRaw ?? []).filter((p: any) => !blockedIds.has(p.author_id));
+      if (posts.length === 0) return [] as FeedPost[];
 
       const postIds = posts.map((p: any) => p.id);
       const authorIds = Array.from(new Set(posts.map((p: any) => p.author_id)));
@@ -134,6 +140,7 @@ export function useBlitzFeed(userId: string | undefined) {
           .eq("user_id", userId);
       } else {
         await supabase.from("blitz_feed_post_likes" as any).insert({ post_id: postId, user_id: userId });
+        trackEvent(userId, "feed_post_liked", { post_id: postId });
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

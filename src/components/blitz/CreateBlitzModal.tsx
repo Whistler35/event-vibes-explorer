@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { trackEvent } from "@/lib/analytics";
 
 interface CreateBlitzModalProps {
   open: boolean;
@@ -130,6 +131,7 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
         audience,
         targetUserIds: audience === "selected" ? selectedFriendIds : undefined,
       });
+      trackEvent(user?.id, "blitz_created", { audience });
       toast.success(
         audience === "selected"
           ? `⚡ Geblitzt an ${selectedFriendIds.length} Freund${selectedFriendIds.length === 1 ? "" : "e"}`

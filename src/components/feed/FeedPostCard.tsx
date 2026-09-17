@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { FeedPost } from "@/hooks/useBlitzFeed";
+import UserActionsMenu from "@/components/moderation/UserActionsMenu";
 
 interface Props {
   post: FeedPost;
@@ -71,6 +72,15 @@ const FeedPostCard = ({ post, isOwn, onToggleLike, onOpenLikes, onOpenComments, 
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+        )}
+        {!isOwn && (
+          <UserActionsMenu
+            targetUserId={post.author_id}
+            targetUserName={post.authorName}
+            context="feed_post"
+            reportedMessageId={post.id}
+            className="p-1 shrink-0 text-muted-foreground"
+          />
         )}
       </div>
 

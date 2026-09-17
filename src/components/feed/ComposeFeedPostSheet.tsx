@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Camera, Loader2, Zap, Globe2, Users } from "lucide-react";
 import { useEligibleRecaps } from "@/hooks/useEligibleRecaps";
+import { trackEvent } from "@/lib/analytics";
 
 interface Props {
   open: boolean;
@@ -71,6 +72,7 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
       });
       if (error) throw error;
 
+      trackEvent(userId, "feed_post_created", { visibility: isPublic ? "public" : "friends" });
       toast.success("Im Feed geteilt! 🎉");
       queryClient.invalidateQueries({ queryKey: ["blitz-feed", userId] });
       queryClient.invalidateQueries({ queryKey: ["eligible-recaps", userId] });
