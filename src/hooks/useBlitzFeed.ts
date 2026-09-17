@@ -16,6 +16,7 @@ export interface FeedPost {
   likeCount: number;
   likedByMe: boolean;
   commentCount: number;
+  taggedPeople: { user_id: string; name: string; avatar_url: string | null }[];
 }
 
 export function useBlitzFeed(userId: string | undefined) {
@@ -39,12 +40,14 @@ export function useBlitzFeed(userId: string | undefined) {
       const authorIds = Array.from(new Set(posts.map((p: any) => p.author_id)));
       const matchIds = Array.from(new Set(posts.map((p: any) => p.match_id)));
 
-      const [{ data: authors }, { data: matches }, { data: likes }, { data: comments }] = await Promise.all([
-        supabase.from("profiles").select("user_id, name, avatar_url").in("user_id", authorIds),
-        supabase.from("blitz_matches").select("id, blitz_request_id").in("id", matchIds),
-        supabase.from("blitz_feed_post_likes" as any).select("post_id, user_id").in("post_id", postIds),
-        supabase.from("blitz_feed_post_comments" as any).select("post_id").in("post_id", postIds),
-      ]);
+      const [{ data: authors }, { data: matches }, { data: likes }, { data: comments }, { data: tags }] =
+        await Promise.all([
+          supabase.from("profiles").select("user_id, name, avatar_url").in("user_id", authorIds),
+          supabase.from("blitz_matches").select("id, blitz_request_id").in("id", matchIds),
+          supabase.from("blitz_feed_post_likes" as any).select("post_id, user_id").in("post_id", postIds),
+          supabase.from("blitz_feed_post_comments" as any).select("post_id").in("post_id", postIds),
+          supabase.from("blitz_feed_post_tags" as any).select("post_id, tagged_user_id").in("post_id", postIds),
+        ]);
 
       const requestIds = Array.from(new Set((matches ?? []).map((m: any) => m.blitz_request_id)));
       const { data: requests } = requestIds.length
@@ -58,9 +61,15 @@ export function useBlitzFeed(userId: string | undefined) {
         ])
       );
 
+      const taggedIds = Array.from(new Set(((tags ?? []) as any[]).map((t) => t.tagged_user_id)));
+      const { data: taggedProfiles } = taggedIds.length
+        ? await supabase.from("profiles").select("user_id, name, avatar_url").in("user_id", taggedIds)
+        : { data: [] as any[] };
+
       return posts.map((p: any) => {
         const author = authors?.find((a: any) => a.user_id === p.author_id);
         const postLikes = ((likes ?? []) as any[]).filter((l) => l.post_id === p.id);
+        const postTags = ((tags ?? []) as any[]).filter((t) => t.post_id === p.id);
         return {
           id: p.id,
           match_id: p.match_id,
@@ -75,6 +84,10 @@ export function useBlitzFeed(userId: string | undefined) {
           likeCount: postLikes.length,
           likedByMe: postLikes.some((l) => l.user_id === userId),
           commentCount: ((comments ?? []) as any[]).filter((c) => c.post_id === p.id).length,
+          taggedPeople: postTags.map((t) => {
+            const prof = taggedProfiles?.find((tp: any) => tp.user_id === t.tagged_user_id);
+            return { user_id: t.tagged_user_id, name: prof?.name || "Jemand", avatar_url: prof?.avatar_url || null };
+          }),
         } as FeedPost;
       });
     },
@@ -91,6 +104,9 @@ export function useBlitzFeed(userId: string | undefined) {
         queryClient.invalidateQueries({ queryKey })
       )
       .on("postgres_changes", { event: "*", schema: "public", table: "blitz_feed_post_comments" }, () =>
+        queryClient.invalidateQueries({ queryKey })
+      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "blitz_feed_post_tags" }, () =>
         queryClient.invalidateQueries({ queryKey })
       )
       .subscribe();
@@ -133,5 +149,41 @@ export function useBlitzFeed(userId: string | undefined) {
     [userId]
   );
 
-  return { posts: query.data ?? [], isLoading: query.isLoading, toggleLike, deletePost, refetch: query.refetch };
+  const setPostTags = useCallback(
+    async (postId: string, taggedUserIds: string[]) => {
+      if (!userId) return;
+      const { data: existing } = await supabase
+        .from("blitz_feed_post_tags" as any)
+        .select("tagged_user_id")
+        .eq("post_id", postId);
+      const existingIds = new Set(((existing ?? []) as any[]).map((t) => t.tagged_user_id));
+      const toAdd = taggedUserIds.filter((id) => !existingIds.has(id));
+      const toRemove = Array.from(existingIds).filter((id) => !taggedUserIds.includes(id as string));
+
+      if (toAdd.length) {
+        await supabase
+          .from("blitz_feed_post_tags" as any)
+          .insert(toAdd.map((tagged_user_id) => ({ post_id: postId, tagged_user_id, tagged_by: userId })));
+      }
+      if (toRemove.length) {
+        await supabase
+          .from("blitz_feed_post_tags" as any)
+          .delete()
+          .eq("post_id", postId)
+          .in("tagged_user_id", toRemove as string[]);
+      }
+      queryClient.invalidateQueries({ queryKey });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [userId]
+  );
+
+  return {
+    posts: query.data ?? [],
+    isLoading: query.isLoading,
+    toggleLike,
+    deletePost,
+    setPostTags,
+    refetch: query.refetch,
+  };
 }

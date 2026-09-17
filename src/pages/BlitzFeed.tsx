@@ -8,18 +8,23 @@ import FeedPostCard from "@/components/feed/FeedPostCard";
 import FeedLikesSheet from "@/components/feed/FeedLikesSheet";
 import FeedCommentsSheet from "@/components/feed/FeedCommentsSheet";
 import ComposeFeedPostSheet from "@/components/feed/ComposeFeedPostSheet";
+import TagPeopleSheet from "@/components/feed/TagPeopleSheet";
 import { useBlitzFeed } from "@/hooks/useBlitzFeed";
 
 const BlitzFeed = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { posts, isLoading, toggleLike, deletePost } = useBlitzFeed(user?.id);
+  const { posts, isLoading, toggleLike, deletePost, setPostTags } = useBlitzFeed(user?.id);
 
   const [composeOpen, setComposeOpen] = useState(false);
   const [composeMatchId, setComposeMatchId] = useState<string | null>(null);
   const [likesPostId, setLikesPostId] = useState<string | null>(null);
   const [commentsPostId, setCommentsPostId] = useState<string | null>(null);
+  const [tagPeoplePostId, setTagPeoplePostId] = useState<string | null>(null);
+
+  const commentsPost = posts.find((p) => p.id === commentsPostId);
+  const tagPeoplePost = posts.find((p) => p.id === tagPeoplePostId);
 
   useEffect(() => {
     const preselect = (location.state as { composeMatchId?: string } | null)?.composeMatchId;
@@ -88,6 +93,7 @@ const BlitzFeed = () => {
                 onOpenLikes={setLikesPostId}
                 onOpenComments={setCommentsPostId}
                 onDelete={deletePost}
+                onTagPeople={setTagPeoplePostId}
               />
             ))}
           </div>
@@ -105,7 +111,19 @@ const BlitzFeed = () => {
         open={!!commentsPostId}
         onOpenChange={(o) => !o && setCommentsPostId(null)}
         postId={commentsPostId}
+        matchId={commentsPost?.match_id ?? null}
         userId={user?.id}
+      />
+      <TagPeopleSheet
+        open={!!tagPeoplePostId}
+        onOpenChange={(o) => !o && setTagPeoplePostId(null)}
+        matchId={tagPeoplePost?.match_id}
+        currentUserId={user?.id}
+        initialSelected={tagPeoplePost?.taggedPeople.map((t) => t.user_id) ?? []}
+        onSave={(ids) => {
+          if (tagPeoplePostId) setPostTags(tagPeoplePostId, ids);
+          setTagPeoplePostId(null);
+        }}
       />
 
       <BottomNavigation />

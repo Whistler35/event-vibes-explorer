@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { de } from "date-fns/locale";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, MessageCircle, Globe2, MoreVertical, Trash2, Zap } from "lucide-react";
+import { Heart, MessageCircle, Globe2, MoreVertical, Trash2, Zap, UserPlus } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,9 +19,10 @@ interface Props {
   onOpenLikes: (postId: string) => void;
   onOpenComments: (postId: string) => void;
   onDelete: (postId: string) => void;
+  onTagPeople: (postId: string) => void;
 }
 
-const FeedPostCard = ({ post, isOwn, onToggleLike, onOpenLikes, onOpenComments, onDelete }: Props) => {
+const FeedPostCard = ({ post, isOwn, onToggleLike, onOpenLikes, onOpenComments, onDelete, onTagPeople }: Props) => {
   const navigate = useNavigate();
   const [burst, setBurst] = useState(false);
 
@@ -62,6 +63,9 @@ const FeedPostCard = ({ post, isOwn, onToggleLike, onOpenLikes, onOpenComments, 
               <MoreVertical className="w-4 h-4 text-muted-foreground" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onTagPeople(post.id)}>
+                <UserPlus className="w-4 h-4 mr-2" /> Personen markieren
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => onDelete(post.id)} className="text-destructive">
                 <Trash2 className="w-4 h-4 mr-2" /> Löschen
               </DropdownMenuItem>
@@ -108,6 +112,22 @@ const FeedPostCard = ({ post, isOwn, onToggleLike, onOpenLikes, onOpenComments, 
         {post.caption && (
           <p className="text-sm text-foreground">
             <span className="font-semibold">{post.authorName}</span> {post.caption}
+          </p>
+        )}
+        {post.taggedPeople.length > 0 && (
+          <p className="text-xs text-muted-foreground">
+            mit{" "}
+            {post.taggedPeople.map((t, i) => (
+              <span key={t.user_id}>
+                <button
+                  onClick={() => navigate(`/user/${t.user_id}`)}
+                  className="font-semibold text-[hsl(var(--blitz-forest))]"
+                >
+                  {t.name}
+                </button>
+                {i < post.taggedPeople.length - 1 ? ", " : ""}
+              </span>
+            ))}
           </p>
         )}
         {post.commentCount > 0 && (

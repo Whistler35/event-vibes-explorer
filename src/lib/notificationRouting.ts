@@ -46,6 +46,8 @@ export function getNotificationRoute(
 
     case "feed_post_like":
     case "feed_post_comment":
+    case "feed_comment_mention":
+    case "feed_post_tag":
       return { path: "/feed" };
 
     default:
