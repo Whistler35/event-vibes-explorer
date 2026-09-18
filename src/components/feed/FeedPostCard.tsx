@@ -56,9 +56,28 @@ const FeedPostCard = ({
           </Avatar>
         </button>
         <div className="flex-1 min-w-0">
-          <button onClick={() => navigate(`/user/${post.author_id}`)} className="font-bold text-sm text-foreground truncate block">
-            {post.authorName}
-          </button>
+          <p className="text-sm truncate">
+            <button onClick={() => navigate(`/user/${post.author_id}`)} className="font-bold text-foreground">
+              {post.authorName}
+            </button>
+            {post.taggedPeople.length > 0 && (
+              <span className="text-muted-foreground">
+                {" "}
+                mit{" "}
+                {post.taggedPeople.map((t, i) => (
+                  <span key={t.user_id}>
+                    <button
+                      onClick={() => navigate(`/user/${t.user_id}`)}
+                      className="font-bold text-foreground"
+                    >
+                      {t.name}
+                    </button>
+                    {i < post.taggedPeople.length - 1 ? ", " : ""}
+                  </span>
+                ))}
+              </span>
+            )}
+          </p>
           {post.activity && (
             <span className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-full bg-[hsl(var(--bolt))]/20 text-[hsl(var(--blitz-forest))] text-[10px] font-black uppercase tracking-wide">
               <Zap className="w-2.5 h-2.5 fill-current" /> {post.activity}
@@ -141,22 +160,6 @@ const FeedPostCard = ({
         {post.caption && (
           <p className="text-sm text-foreground">
             <span className="font-semibold">{post.authorName}</span> {post.caption}
-          </p>
-        )}
-        {post.taggedPeople.length > 0 && (
-          <p className="text-xs text-muted-foreground">
-            mit{" "}
-            {post.taggedPeople.map((t, i) => (
-              <span key={t.user_id}>
-                <button
-                  onClick={() => navigate(`/user/${t.user_id}`)}
-                  className="font-semibold text-[hsl(var(--blitz-forest))]"
-                >
-                  {t.name}
-                </button>
-                {i < post.taggedPeople.length - 1 ? ", " : ""}
-              </span>
-            ))}
           </p>
         )}
         {post.commentCount > 0 && (
