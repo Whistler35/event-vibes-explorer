@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { FeedPost } from "@/hooks/useBlitzFeed";
 import UserActionsMenu from "@/components/moderation/UserActionsMenu";
+import TaggedPeopleSheet from "@/components/feed/TaggedPeopleSheet";
 
 interface Props {
   post: FeedPost;
@@ -36,6 +37,7 @@ const FeedPostCard = ({
 }: Props) => {
   const navigate = useNavigate();
   const [burst, setBurst] = useState(false);
+  const [showTagged, setShowTagged] = useState(false);
 
   const handleDoubleTap = () => {
     if (!post.likedByMe) onToggleLike(post.id, post.likedByMe);
@@ -56,28 +58,33 @@ const FeedPostCard = ({
           </Avatar>
         </button>
         <div className="flex-1 min-w-0">
-          <p className="text-sm truncate">
-            <button onClick={() => navigate(`/user/${post.author_id}`)} className="font-bold text-foreground">
-              {post.authorName}
-            </button>
-            {post.taggedPeople.length > 0 && (
-              <span className="text-muted-foreground">
-                {" "}
-                mit{" "}
-                {post.taggedPeople.map((t, i) => (
-                  <span key={t.user_id}>
-                    <button
-                      onClick={() => navigate(`/user/${t.user_id}`)}
-                      className="font-bold text-foreground"
-                    >
-                      {t.name}
-                    </button>
-                    {i < post.taggedPeople.length - 1 ? ", " : ""}
-                  </span>
-                ))}
-              </span>
+          <div className="flex items-baseline gap-1">
+            <p className="text-sm truncate min-w-0">
+              <button onClick={() => navigate(`/user/${post.author_id}`)} className="font-bold text-foreground">
+                {post.authorName}
+              </button>
+              {post.taggedPeople.length > 0 && (
+                <span className="text-muted-foreground">
+                  {" "}
+                  mit{" "}
+                  <button
+                    onClick={() => navigate(`/user/${post.taggedPeople[0].user_id}`)}
+                    className="font-bold text-foreground"
+                  >
+                    {post.taggedPeople[0].name}
+                  </button>
+                </span>
+              )}
+            </p>
+            {post.taggedPeople.length > 1 && (
+              <button
+                onClick={() => setShowTagged(true)}
+                className="text-xs font-bold text-muted-foreground shrink-0 underline underline-offset-2"
+              >
+                +{post.taggedPeople.length - 1}
+              </button>
             )}
-          </p>
+          </div>
           {post.activity && (
             <span className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-full bg-[hsl(var(--bolt))]/20 text-[hsl(var(--blitz-forest))] text-[10px] font-black uppercase tracking-wide">
               <Zap className="w-2.5 h-2.5 fill-current" /> {post.activity}
@@ -171,6 +178,8 @@ const FeedPostCard = ({
           {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: de })}
         </p>
       </div>
+
+      <TaggedPeopleSheet open={showTagged} onOpenChange={setShowTagged} people={post.taggedPeople} />
     </div>
   );
 };
