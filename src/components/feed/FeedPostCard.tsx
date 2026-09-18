@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { de } from "date-fns/locale";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, MessageCircle, Globe2, MoreVertical, Trash2, Zap, UserPlus } from "lucide-react";
+import { Heart, MessageCircle, Globe2, MoreVertical, Trash2, Zap, UserPlus, Users } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,9 +21,19 @@ interface Props {
   onOpenComments: (postId: string) => void;
   onDelete: (postId: string, photoUrl: string) => void;
   onTagPeople: (postId: string) => void;
+  onSetVisibility: (postId: string, visibility: "friends" | "public") => void;
 }
 
-const FeedPostCard = ({ post, isOwn, onToggleLike, onOpenLikes, onOpenComments, onDelete, onTagPeople }: Props) => {
+const FeedPostCard = ({
+  post,
+  isOwn,
+  onToggleLike,
+  onOpenLikes,
+  onOpenComments,
+  onDelete,
+  onTagPeople,
+  onSetVisibility,
+}: Props) => {
   const navigate = useNavigate();
   const [burst, setBurst] = useState(false);
 
@@ -67,6 +77,15 @@ const FeedPostCard = ({ post, isOwn, onToggleLike, onOpenLikes, onOpenComments, 
               <DropdownMenuItem onClick={() => onTagPeople(post.id)}>
                 <UserPlus className="w-4 h-4 mr-2" /> Personen markieren
               </DropdownMenuItem>
+              {post.visibility === "public" ? (
+                <DropdownMenuItem onClick={() => onSetVisibility(post.id, "friends")}>
+                  <Users className="w-4 h-4 mr-2" /> Nur für Freunde sichtbar machen
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem onClick={() => onSetVisibility(post.id, "public")}>
+                  <Globe2 className="w-4 h-4 mr-2" /> Öffentlich machen
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={() => onDelete(post.id, post.photo_url)} className="text-destructive">
                 <Trash2 className="w-4 h-4 mr-2" /> Löschen
               </DropdownMenuItem>

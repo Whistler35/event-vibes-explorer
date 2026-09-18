@@ -69,6 +69,15 @@ const UserProfile = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  // Landing on your own id here (e.g. tapping yourself in someone else's
+  // friends list) used to render this whole page with its own, different
+  // look — confusing, and the reason "my profile changed" reports kept
+  // coming up. Your own profile should always be the canonical /profile.
+  useEffect(() => {
+    if (user && userId && user.id === userId) navigate("/profile", { replace: true });
+  }, [user, userId, navigate]);
+
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [hostProfile, setHostProfile] = useState<HostProfileData | null>(null);
   const [isHost, setIsHost] = useState(false);
@@ -208,7 +217,7 @@ const UserProfile = () => {
     fetchFriendship();
   }, [userId, fetchFriendship]);
 
-  if (loading) {
+  if (loading || (user && userId && user.id === userId)) {
     return (
       <Layout>
         <div className="flex items-center justify-center h-[70vh]">
@@ -400,16 +409,13 @@ const UserProfile = () => {
             </div>
           ) : (
             <>
-              {/* Immersive header */}
+              {/* Header — same look as your own profile */}
               <div className="flex flex-col items-center text-center pt-2">
-                <div className="relative">
-                  <div className="absolute inset-0 -m-6 profile-avatar-halo rounded-full" />
-                  <div className="relative w-40 h-40 rounded-full overflow-hidden ring-4 ring-[hsl(var(--blitz-pink))] shadow-[0_20px_40px_-10px_rgba(255,45,120,0.45)]">
-                    <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
-                  </div>
+                <div className="relative w-36 h-36 rounded-full overflow-hidden ring-4 ring-[hsl(var(--blitz-forest))] shadow-[0_20px_40px_-16px_rgba(30,51,35,0.35)]">
+                  <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
                 </div>
 
-                <h1 className="text-white text-3xl font-extrabold mt-5 tracking-tight">
+                <h1 className="text-foreground text-3xl font-black mt-5 tracking-tight">
                   {displayName}
                 </h1>
                 {profile.bio && (
@@ -423,30 +429,24 @@ const UserProfile = () => {
               {/* Blitz Feed photos */}
               <BlitzMomentsGrid userId={userId} title={`${displayName.split(" ")[0]}s Blitz-Momente`} />
 
-              {/* Stats */}
+              {/* Stats — 3 dark cards, same style as your own profile */}
               <div className="grid grid-cols-3 gap-2.5">
-                <div className="blitz-stat-card rounded-2xl p-3 flex flex-col items-center gap-1.5 text-center">
-                  <div className="w-11 h-11 rounded-full bg-[hsl(var(--blitz-pink))] text-white flex items-center justify-center font-extrabold text-lg shadow-lg">
-                    {stats.blitzSent}
-                  </div>
-                  <p className="text-white/85 text-[11px] font-semibold leading-tight">{t("userProfile.blitzSent")}</p>
+                <div className="rounded-2xl bg-white/10 border border-white/10 p-4 flex flex-col items-center gap-1 text-center">
+                  <p className="text-3xl font-black tabular-nums text-foreground leading-none">{stats.blitzSent}</p>
+                  <p className="text-muted-foreground text-[11px] font-semibold leading-tight mt-1">{t("userProfile.blitzSent")}</p>
                 </div>
                 <button
                   onClick={() => setStatsSheet({ open: true, tab: "joined" })}
-                  className="blitz-stat-card rounded-2xl p-3 flex flex-col items-center gap-1.5 text-center"
+                  className="rounded-2xl bg-white/10 border border-white/10 p-4 flex flex-col items-center gap-1 text-center"
                 >
-                  <div className="w-11 h-11 rounded-full bg-[hsl(var(--blitz-pink))] text-white flex items-center justify-center font-extrabold text-lg shadow-lg">
-                    {stats.blitzJoined}
-                  </div>
-                  <p className="text-white/85 text-[11px] font-semibold leading-tight">
+                  <p className="text-3xl font-black tabular-nums text-foreground leading-none">{stats.blitzJoined}</p>
+                  <p className="text-muted-foreground text-[11px] font-semibold leading-tight mt-1">
                     Mitgemacht <ThumbsUp className="inline w-3 h-3 -mt-0.5" />
                   </p>
                 </button>
-                <div className="blitz-stat-card rounded-2xl p-3 flex flex-col items-center gap-1.5 text-center">
-                  <div className="w-11 h-11 rounded-full bg-[hsl(var(--blitz-pink))] text-white flex items-center justify-center shadow-lg">
-                    <Zap className="w-5 h-5 fill-white" />
-                  </div>
-                  <p className="text-white/85 text-[11px] font-semibold leading-tight">
+                <div className="rounded-2xl bg-white/10 border border-white/10 p-4 flex flex-col items-center gap-1 text-center">
+                  <Zap className="w-6 h-6 text-foreground fill-[hsl(var(--bolt))]" />
+                  <p className="text-muted-foreground text-[11px] font-semibold leading-tight mt-1">
                     {t("userProfile.activity")}: {level} <Flame className="inline w-3 h-3 -mt-0.5 text-orange-400" />
                   </p>
                 </div>

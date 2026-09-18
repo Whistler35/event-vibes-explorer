@@ -20,10 +20,12 @@ interface Props {
 
 /**
  * BeReal-style grid of a user's Blitz Feed photos, shown on their profile —
- * used for both the signed-in user's own profile and anyone else's. RLS on
- * blitz_feed_posts already scopes the query to what the *viewer* is allowed
- * to see (their own, friends', or public posts), so no extra visibility
- * filtering is needed here regardless of whose profile this is.
+ * used for both the signed-in user's own profile and anyone else's. Shows
+ * posts this profile's owner authored AND ones where they were tagged by
+ * someone else (they were there too). RLS on blitz_feed_posts/tags already
+ * scopes both queries to what the *current viewer* is allowed to see (own,
+ * friends', public, or tagged posts), so no extra visibility filtering is
+ * needed here regardless of whose profile this is.
  */
 const BlitzMomentsGrid = ({ userId, title = "Blitz-Momente" }: Props) => {
   const [preview, setPreview] = useState<GridPost | null>(null);
@@ -31,12 +33,28 @@ const BlitzMomentsGrid = ({ userId, title = "Blitz-Momente" }: Props) => {
   const { data: posts = [] } = useQuery({
     queryKey: ["blitz-moments-grid", userId],
     queryFn: async () => {
-      const { data: rows } = await supabase
-        .from("blitz_feed_posts" as any)
-        .select("id, photo_url, caption, created_at, match_id")
-        .eq("author_id", userId)
-        .order("created_at", { ascending: false });
-      const list = (rows ?? []) as any[];
+      const [{ data: authored }, { data: tagRows }] = await Promise.all([
+        supabase
+          .from("blitz_feed_posts" as any)
+          .select("id, photo_url, caption, created_at, match_id")
+          .eq("author_id", userId),
+        supabase.from("blitz_feed_post_tags" as any).select("post_id").eq("tagged_user_id", userId),
+      ]);
+
+      const tagPostIds = ((tagRows ?? []) as any[]).map((t) => t.post_id);
+      const { data: tagged } = tagPostIds.length
+        ? await supabase
+            .from("blitz_feed_posts" as any)
+            .select("id, photo_url, caption, created_at, match_id")
+            .in("id", tagPostIds)
+        : { data: [] as any[] };
+
+      const byId = new Map(
+        [...(authored ?? []), ...(tagged ?? [])].map((p: any) => [p.id, p])
+      );
+      const list = Array.from(byId.values()).sort(
+        (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
       if (list.length === 0) return [] as GridPost[];
 
       const matchIds = Array.from(new Set(list.map((p) => p.match_id)));

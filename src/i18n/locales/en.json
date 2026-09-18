@@ -92,7 +92,8 @@
       "enterEmail": "Please enter your email",
       "generic": "An error occurred",
       "googleFailed": "Google sign-in failed",
-      "appleFailed": "Apple sign-in failed"
+      "appleFailed": "Apple sign-in failed",
+      "emailAlreadyRegistered": "There is already an account with this email address. Please log in or reset your password."
     },
     "success": {
       "signedIn": "Signed in successfully!",

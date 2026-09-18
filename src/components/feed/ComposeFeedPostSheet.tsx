@@ -6,9 +6,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Camera, Loader2, Zap, Globe2, Users } from "lucide-react";
+import { Camera, Loader2, Zap, Globe2, Users, Check } from "lucide-react";
 import { useEligibleRecaps } from "@/hooks/useEligibleRecaps";
+import { useMatchParticipants } from "@/hooks/useMatchParticipants";
 import { trackEvent } from "@/lib/analytics";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface Props {
   open: boolean;
@@ -25,9 +27,12 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [caption, setCaption] = useState("");
-  const [isPublic, setIsPublic] = useState(false);
+  const [isPublic, setIsPublic] = useState(true);
+  const [taggedIds, setTaggedIds] = useState<string[]>([]);
   const [posting, setPosting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const { data: participants = [] } = useMatchParticipants(matchId ?? undefined);
+  const taggable = participants.filter((p) => p.user_id !== userId);
 
   useEffect(() => {
     if (!open) return;
@@ -42,7 +47,8 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
     setFile(null);
     setPreview(null);
     setCaption("");
-    setIsPublic(false);
+    setIsPublic(true);
+    setTaggedIds([]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, preselectedMatchId]);
 
@@ -63,14 +69,28 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
       if (upErr) throw upErr;
       const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
 
-      const { error } = await supabase.from("blitz_feed_posts" as any).insert({
-        match_id: matchId,
-        author_id: userId,
-        photo_url: pub.publicUrl,
-        caption: caption.trim() || null,
-        visibility: isPublic ? "public" : "friends",
-      });
+      const { data: post, error } = await supabase
+        .from("blitz_feed_posts" as any)
+        .insert({
+          match_id: matchId,
+          author_id: userId,
+          photo_url: pub.publicUrl,
+          caption: caption.trim() || null,
+          visibility: isPublic ? "public" : "friends",
+        })
+        .select("id")
+        .single();
       if (error) throw error;
+
+      if (taggedIds.length > 0) {
+        await supabase.from("blitz_feed_post_tags" as any).insert(
+          taggedIds.map((tagged_user_id) => ({
+            post_id: (post as any).id,
+            tagged_user_id,
+            tagged_by: userId,
+          }))
+        );
+      }
 
       trackEvent(userId, "feed_post_created", { visibility: isPublic ? "public" : "friends" });
       toast.success("Im Feed geteilt! 🎉");
@@ -163,6 +183,44 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
               </div>
               <Switch checked={isPublic} onCheckedChange={setIsPublic} />
             </div>
+
+            {taggable.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs font-black uppercase tracking-wide text-muted-foreground">
+                  Personen markieren
+                </p>
+                <div className="space-y-1">
+                  {taggable.map((p) => {
+                    const selected = taggedIds.includes(p.user_id);
+                    return (
+                      <button
+                        key={p.user_id}
+                        type="button"
+                        onClick={() =>
+                          setTaggedIds((prev) =>
+                            selected ? prev.filter((id) => id !== p.user_id) : [...prev, p.user_id]
+                          )
+                        }
+                        className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-muted transition text-left"
+                      >
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage src={p.avatar_url ?? undefined} />
+                          <AvatarFallback className="bg-[hsl(var(--blitz-forest))] text-white text-[10px] font-black">
+                            {p.name?.[0] ?? "?"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="flex-1 text-sm font-semibold">{p.name}</span>
+                        {selected && (
+                          <span className="w-5 h-5 rounded-full bg-[hsl(var(--blitz-forest))] flex items-center justify-center shrink-0">
+                            <Check className="w-3 h-3 text-[hsl(var(--bolt))]" />
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             <Button className="w-full" size="lg" onClick={handlePost} disabled={!file || posting}>
               {posting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}

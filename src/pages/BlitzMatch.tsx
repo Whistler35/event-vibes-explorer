@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Zap, Trash2, Users, MapPin, Heart, Camera, Loader2 } from "lucide-react";
+import { ArrowLeft, Zap, Trash2, Users, MapPin, Heart, Camera, Loader2, Clock } from "lucide-react";
+import { Capacitor } from "@capacitor/core";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { asBlitzQuestion } from "@/lib/utils";
@@ -10,6 +11,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { markHuddleNotificationsRead } from "@/hooks/useNotifications";
 import AddFriendToHuddleSheet from "@/components/blitz/AddFriendToHuddleSheet";
+import ParticipantChip from "@/components/blitz/ParticipantChip";
+import ParticipantOptionsSheet from "@/components/blitz/ParticipantOptionsSheet";
+import ExtendHuddleSheet from "@/components/blitz/ExtendHuddleSheet";
 import { useMessageReactions } from "@/hooks/useMessageReactions";
 import { uploadChatPhoto, PHOTO_PLACEHOLDER } from "@/lib/chatPhoto";
 
@@ -46,6 +50,9 @@ const BlitzMatch = () => {
   const [activity, setActivity] = useState<string>("");
   const [city, setCity] = useState<string>("");
   const [participantIds, setParticipantIds] = useState<string[]>([]);
+  const [roleLabels, setRoleLabels] = useState<Map<string, string | null>>(new Map());
+  const [optionsForId, setOptionsForId] = useState<string | null>(null);
+  const [showExtendSheet, setShowExtendSheet] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [profilesMap, setProfilesMap] = useState<Map<string, Profile>>(new Map());
   const [input, setInput] = useState("");
@@ -84,7 +91,7 @@ const BlitzMatch = () => {
       // round-trips before any chat content could render).
       const [{ data: m }, { data: parts }, { data: msgs }] = await Promise.all([
         supabase.from("blitz_matches").select("*").eq("id", matchId).maybeSingle(),
-        supabase.from("blitz_match_participants").select("user_id").eq("match_id", matchId),
+        supabase.from("blitz_match_participants").select("user_id, role_label").eq("match_id", matchId),
         supabase
           .from("blitz_chat_messages")
           .select("*")
@@ -101,6 +108,7 @@ const BlitzMatch = () => {
 
       const ids = Array.from(new Set([...(parts ?? []).map((p: any) => p.user_id), m.host_id]));
       setParticipantIds(ids);
+      setRoleLabels(new Map((parts ?? []).map((p: any) => [p.user_id, p.role_label ?? null])));
 
       const [{ data: req }, { data: profs }] = await Promise.all([
         supabase.from("blitz_requests").select("activity, city").eq("id", m.blitz_request_id).maybeSingle(),
@@ -161,10 +169,11 @@ const BlitzMatch = () => {
         async () => {
           const { data: parts } = await supabase
             .from("blitz_match_participants")
-            .select("user_id")
+            .select("user_id, role_label")
             .eq("match_id", matchId);
           const ids = Array.from(new Set((parts ?? []).map((p: any) => p.user_id)));
           setParticipantIds(ids);
+          setRoleLabels(new Map((parts ?? []).map((p: any) => [p.user_id, p.role_label ?? null])));
           const missing = ids.filter((id) => !profilesMapRef.current.has(id));
           if (missing.length) {
             const { data: profs } = await supabase
@@ -182,6 +191,51 @@ const BlitzMatch = () => {
       .subscribe();
     return () => {
       supabase.removeChannel(ch);
+    };
+  }, [matchId]);
+
+  // Realtime alone left the huddle chat stale until you left and re-entered
+  // — likely iOS suspending the WebView's WebSocket in the background, which
+  // doesn't always self-heal. Poll as a safety net and catch up immediately
+  // whenever the app comes back to the foreground.
+  useEffect(() => {
+    if (!matchId) return;
+    const refetchMessages = async () => {
+      const { data } = await supabase
+        .from("blitz_chat_messages")
+        .select("*")
+        .eq("match_id", matchId)
+        .order("created_at", { ascending: true });
+      if (!data) return;
+      setMessages((prev) => {
+        const byId = new Map(prev.map((m) => [m.id, m]));
+        (data as ChatMessage[]).forEach((m) => byId.set(m.id, m));
+        return Array.from(byId.values()).sort(
+          (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
+      });
+    };
+
+    const pollId = setInterval(refetchMessages, 4000);
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") refetchMessages();
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    let removeCapListener: (() => void) | undefined;
+    if (Capacitor.isNativePlatform()) {
+      import("@capacitor/app").then(({ App: CapApp }) => {
+        CapApp.addListener("appStateChange", ({ isActive }) => {
+          if (isActive) refetchMessages();
+        }).then((handle) => {
+          removeCapListener = () => handle.remove();
+        });
+      });
+    }
+
+    return () => {
+      clearInterval(pollId);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      removeCapListener?.();
     };
   }, [matchId]);
 
@@ -413,27 +467,17 @@ const BlitzMatch = () => {
             const p = profilesMap.get(id);
             const isHost = id === match.host_id;
             const isMe = id === user.id;
+            const iAmHost = match.host_id === user.id;
+            const canLongPress = iAmHost && !isHost;
             return (
-              <button
+              <ParticipantChip
                 key={id}
-                type="button"
-                onClick={() => { if (!isMe) navigate(`/user/${id}`); }}
-                disabled={isMe}
-                className="inline-flex items-center gap-2 pl-1 pr-3 py-1 rounded-full bg-white shadow-sm enabled:active:scale-[0.97] enabled:hover:bg-white/80 transition disabled:cursor-default"
-              >
-                <Avatar className="w-7 h-7">
-                  <AvatarImage src={p?.avatar_url ?? undefined} loading="lazy" />
-                  <AvatarFallback className="bg-[hsl(var(--blitz-forest))] text-white text-[10px] font-black">
-                    {p?.name?.[0] ?? "?"}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="leading-tight text-left">
-                  <p className="text-xs font-black">{isMe ? "Du" : p?.name?.split(" ")[0] ?? "?"}</p>
-                  <p className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">
-                    {isHost ? "HOST" : "IN"}
-                  </p>
-                </div>
-              </button>
+                name={isMe ? "Du" : p?.name?.split(" ")[0] ?? "?"}
+                avatarUrl={p?.avatar_url ?? null}
+                label={isHost ? "HOST" : roleLabels.get(id) || "IN"}
+                onTap={() => { if (!isMe) navigate(`/user/${id}`); }}
+                onLongPress={canLongPress ? () => setOptionsForId(id) : undefined}
+              />
             );
           })}
         </div>
@@ -445,12 +489,48 @@ const BlitzMatch = () => {
           {t('blitzMatch.inviteMore')}
         </button>
 
+        {match.host_id === user.id && (
+          <button
+            onClick={() => setShowExtendSheet(true)}
+            className="mt-2 w-full rounded-full py-3 text-[13px] font-semibold text-muted-foreground border border-border hover:bg-white/60 active:scale-[0.98] transition flex items-center justify-center gap-1.5"
+          >
+            <Clock className="w-3.5 h-3.5" /> Huddle verlängern
+          </button>
+        )}
+
         <AddFriendToHuddleSheet
           open={showAddFriend}
           onOpenChange={setShowAddFriend}
           matchId={match.id}
           activity={activity}
           excludeIds={participantIds}
+        />
+
+        <ParticipantOptionsSheet
+          matchId={match.id}
+          userId={optionsForId}
+          userName={profilesMap.get(optionsForId ?? "")?.name?.split(" ")[0] ?? "Person"}
+          currentRoleLabel={roleLabels.get(optionsForId ?? "") ?? null}
+          onOpenChange={(o) => !o && setOptionsForId(null)}
+          onRemoved={(removedId) => {
+            setParticipantIds((prev) => prev.filter((id) => id !== removedId));
+            setRoleLabels((prev) => {
+              const next = new Map(prev);
+              next.delete(removedId);
+              return next;
+            });
+          }}
+          onRoleSet={(uid, label) => {
+            setRoleLabels((prev) => new Map(prev).set(uid, label));
+          }}
+        />
+
+        <ExtendHuddleSheet
+          open={showExtendSheet}
+          onOpenChange={setShowExtendSheet}
+          matchId={match.id}
+          currentExpiresAt={match.chat_expires_at}
+          onExtended={(newExpiresAt) => setMatch((prev) => (prev ? { ...prev, chat_expires_at: newExpiresAt } : prev))}
         />
       </div>
 

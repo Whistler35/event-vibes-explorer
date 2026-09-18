@@ -187,11 +187,21 @@ export function useBlitzFeed(userId: string | undefined) {
     [userId]
   );
 
+  const setPostVisibility = useCallback(
+    async (postId: string, visibility: "friends" | "public") => {
+      await supabase.from("blitz_feed_posts" as any).update({ visibility }).eq("id", postId);
+      queryClient.invalidateQueries({ queryKey });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [userId]
+  );
+
   return {
     posts: query.data ?? [],
     isLoading: query.isLoading,
     toggleLike,
     deletePost,
+    setPostVisibility,
     setPostTags,
     refetch: query.refetch,
   };

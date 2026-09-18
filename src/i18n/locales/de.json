@@ -92,7 +92,8 @@
       "enterEmail": "Bitte E-Mail eingeben",
       "generic": "Ein Fehler ist aufgetreten",
       "googleFailed": "Google-Anmeldung fehlgeschlagen",
-      "appleFailed": "Apple-Anmeldung fehlgeschlagen"
+      "appleFailed": "Apple-Anmeldung fehlgeschlagen",
+      "emailAlreadyRegistered": "Es gibt bereits ein Konto mit dieser E-Mail-Adresse. Bitte melde dich an oder setze dein Passwort zurück."
     },
     "success": {
       "signedIn": "Erfolgreich angemeldet!",

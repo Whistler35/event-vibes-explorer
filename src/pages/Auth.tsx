@@ -236,6 +236,19 @@ const Auth = () => {
           return;
         }
 
+        // Supabase never returns an error for signUp with an email that's
+        // already registered (avoids leaking which emails exist) — instead
+        // it returns a "successful" response whose user has no identities.
+        // Without this check, re-registering with an existing email showed
+        // the same "check your inbox" success screen as a real signup, even
+        // though no account was created and no email was sent.
+        if (data.user && data.user.identities && data.user.identities.length === 0) {
+          toast.error(t('auth.errors.emailAlreadyRegistered'));
+          setIsLogin(true);
+          setLoading(false);
+          return;
+        }
+
         let finalAvatarUrl = avatarUrl;
         if (avatarFile && data.user) {
           try {

@@ -15,7 +15,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Send, MoreVertical, Pencil, Trash2, Check, X, Flag } from "lucide-react";
-import { useMatchParticipants } from "@/hooks/useMatchParticipants";
+import { useFriends } from "@/hooks/useFriends";
 import { trackEvent } from "@/lib/analytics";
 import ReportDialog from "@/components/moderation/ReportDialog";
 
@@ -34,7 +34,6 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   postId: string | null;
-  matchId: string | null;
   userId: string | undefined;
 }
 
@@ -62,9 +61,9 @@ function renderCommentText(comment: Comment, namesById: Map<string, string>) {
   );
 }
 
-const FeedCommentsSheet = ({ open, onOpenChange, postId, matchId, userId }: Props) => {
+const FeedCommentsSheet = ({ open, onOpenChange, postId, userId }: Props) => {
   const navigate = useNavigate();
-  const { data: participants = [] } = useMatchParticipants(matchId ?? undefined);
+  const { data: friends = [] } = useFriends(userId);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [text, setText] = useState("");
@@ -77,7 +76,7 @@ const FeedCommentsSheet = ({ open, onOpenChange, postId, matchId, userId }: Prop
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const namesById = useMemo(() => new Map(participants.map((p) => [p.user_id, p.name])), [participants]);
+  const namesById = useMemo(() => new Map(friends.map((p) => [p.user_id, p.name])), [friends]);
 
   const load = async () => {
     if (!postId) return;
@@ -110,8 +109,8 @@ const FeedCommentsSheet = ({ open, onOpenChange, postId, matchId, userId }: Prop
   const mentionCandidates = useMemo(() => {
     if (mentionQuery === null) return [];
     const q = mentionQuery.toLowerCase();
-    return participants.filter((p) => p.user_id !== userId && p.name?.toLowerCase().includes(q)).slice(0, 5);
-  }, [mentionQuery, participants, userId]);
+    return friends.filter((p) => p.user_id !== userId && p.name?.toLowerCase().includes(q)).slice(0, 5);
+  }, [mentionQuery, friends, userId]);
 
   const handleTextChange = (value: string) => {
     setText(value);

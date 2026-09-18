@@ -15,7 +15,7 @@ const BlitzFeed = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { posts, isLoading, toggleLike, deletePost, setPostTags } = useBlitzFeed(user?.id);
+  const { posts, isLoading, toggleLike, deletePost, setPostTags, setPostVisibility } = useBlitzFeed(user?.id);
 
   const [composeOpen, setComposeOpen] = useState(false);
   const [composeMatchId, setComposeMatchId] = useState<string | null>(null);
@@ -23,7 +23,6 @@ const BlitzFeed = () => {
   const [commentsPostId, setCommentsPostId] = useState<string | null>(null);
   const [tagPeoplePostId, setTagPeoplePostId] = useState<string | null>(null);
 
-  const commentsPost = posts.find((p) => p.id === commentsPostId);
   const tagPeoplePost = posts.find((p) => p.id === tagPeoplePostId);
 
   useEffect(() => {
@@ -94,6 +93,7 @@ const BlitzFeed = () => {
                 onOpenComments={setCommentsPostId}
                 onDelete={deletePost}
                 onTagPeople={setTagPeoplePostId}
+                onSetVisibility={setPostVisibility}
               />
             ))}
           </div>
@@ -111,7 +111,6 @@ const BlitzFeed = () => {
         open={!!commentsPostId}
         onOpenChange={(o) => !o && setCommentsPostId(null)}
         postId={commentsPostId}
-        matchId={commentsPost?.match_id ?? null}
         userId={user?.id}
       />
       <TagPeopleSheet

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Capacitor } from "@capacitor/core";
 import { useTranslation } from "react-i18next";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -93,6 +94,13 @@ const DirectChat = () => {
 
   useEffect(() => {
     if (!conversationId) return;
+
+    // Merges in any messages we don't already have — used for the initial
+    // load, and as a fallback catch-up whenever realtime might have missed
+    // something (app resumed from background, socket hiccup, etc.). Realtime
+    // alone was leaving the chat stale until you left and re-entered the
+    // screen, presumably because iOS suspends the WebView's WebSocket while
+    // backgrounded and it doesn't always recover on its own.
     const fetchMessages = async () => {
       const { data } = await supabase
         .from("direct_messages")
@@ -100,7 +108,13 @@ const DirectChat = () => {
         .eq("conversation_id", conversationId)
         .order("created_at", { ascending: true });
       if (data) {
-        setMessages(data as Message[]);
+        setMessages((prev) => {
+          const byId = new Map(prev.map((m) => [m.id, m]));
+          (data as Message[]).forEach((m) => byId.set(m.id, m));
+          return Array.from(byId.values()).sort(
+            (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          );
+        });
         markConversationRead(conversationId, user?.id);
         if (user) markDmNotificationsRead(user.id, conversationId);
       }
@@ -126,8 +140,29 @@ const DirectChat = () => {
       )
       .subscribe();
 
+    // Poll as a safety net (realtime should usually beat this) and refetch
+    // immediately whenever the app comes back to the foreground.
+    const pollId = setInterval(fetchMessages, 4000);
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") fetchMessages();
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    let removeCapListener: (() => void) | undefined;
+    if (Capacitor.isNativePlatform()) {
+      import("@capacitor/app").then(({ App: CapApp }) => {
+        CapApp.addListener("appStateChange", ({ isActive }) => {
+          if (isActive) fetchMessages();
+        }).then((handle) => {
+          removeCapListener = () => handle.remove();
+        });
+      });
+    }
+
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(pollId);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      removeCapListener?.();
     };
   }, [conversationId, user?.id]);
 
