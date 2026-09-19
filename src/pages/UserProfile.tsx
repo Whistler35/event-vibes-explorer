@@ -17,8 +17,6 @@ import {
   Clock,
   X,
   ThumbsUp,
-  Zap,
-  Flame,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -57,12 +55,6 @@ interface Friendship {
   addressee_id: string;
   status: string;
 }
-
-const activityLevelKey = (score: number) => {
-  if (score >= 20) return "userProfile.activityHigh";
-  if (score >= 5) return "userProfile.activityMid";
-  return "userProfile.activityLow";
-};
 
 const UserProfile = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -246,8 +238,6 @@ const UserProfile = () => {
     `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=ff2d78&color=fff&size=400`;
   const hostInstagramUrl = getInstagramUrl(hostProfile?.instagram_username);
   const profileInstagramUrl = getInstagramUrl(profile.instagram_username);
-  const score = stats.blitzSent + stats.blitzJoined;
-  const level = t(activityLevelKey(score));
   const isOwnProfile = user?.id === userId;
 
   const friendActions = user && !isOwnProfile && (
@@ -444,12 +434,13 @@ const UserProfile = () => {
                     Mitgemacht <ThumbsUp className="inline w-3 h-3 -mt-0.5" />
                   </p>
                 </button>
-                <div className="rounded-2xl bg-white/10 border border-white/10 p-4 flex flex-col items-center gap-1 text-center">
-                  <Zap className="w-6 h-6 text-foreground fill-[hsl(var(--bolt))]" />
-                  <p className="text-muted-foreground text-[11px] font-semibold leading-tight mt-1">
-                    {t("userProfile.activity")}: {level} <Flame className="inline w-3 h-3 -mt-0.5 text-orange-400" />
-                  </p>
-                </div>
+                <button
+                  onClick={() => setStatsSheet({ open: true, tab: "friends" })}
+                  className="rounded-2xl bg-white/10 border border-white/10 p-4 flex flex-col items-center gap-1 text-center"
+                >
+                  <p className="text-3xl font-black tabular-nums text-foreground leading-none">{stats.friendsCount}</p>
+                  <p className="text-muted-foreground text-[11px] font-semibold leading-tight mt-1">{t("userProfile.friends")}</p>
+                </button>
               </div>
 
               {/* Friends carousel */}
