@@ -69,23 +69,21 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
       if (upErr) throw upErr;
       const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
 
-      const { data: post, error } = await supabase
-        .from("blitz_feed_posts" as any)
-        .insert({
-          match_id: matchId,
-          author_id: userId,
-          photo_url: pub.publicUrl,
-          caption: caption.trim() || null,
-          visibility: isPublic ? "public" : "friends",
-        })
-        .select("id")
-        .single();
+      const postId = crypto.randomUUID();
+      const { error } = await supabase.from("blitz_feed_posts" as any).insert({
+        id: postId,
+        match_id: matchId,
+        author_id: userId,
+        photo_url: pub.publicUrl,
+        caption: caption.trim() || null,
+        visibility: isPublic ? "public" : "friends",
+      });
       if (error) throw error;
 
       if (taggedIds.length > 0) {
         await supabase.from("blitz_feed_post_tags" as any).insert(
           taggedIds.map((tagged_user_id) => ({
-            post_id: (post as any).id,
+            post_id: postId,
             tagged_user_id,
             tagged_by: userId,
           }))
