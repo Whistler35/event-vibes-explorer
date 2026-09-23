@@ -25,3 +25,6 @@ dist-ssr
 
 # Supabase CLI cache
 supabase/.temp
+
+# Built Android release bundles — local build output, not source
+play-store/release/
