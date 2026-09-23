@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "781035292835",
+    "project_id": "evendle-aea57",
+    "storage_bucket": "evendle-aea57.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:781035292835:android:3ff4d7cd9b1e4dad0ad716",
+        "android_client_info": {
+          "package_name": "com.evendle.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDj8kV6Ghq6Vipit-RpZ95daJRCPUpHEyg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
