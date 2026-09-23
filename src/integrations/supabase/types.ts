@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_events: {
+        Row: {
+          created_at: string
+          data: Json
+          event_type: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json
+          event_type: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          event_type?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       app_secrets: {
         Row: {
           key: string
@@ -32,12 +56,55 @@ export type Database = {
         }
         Relationships: []
       }
+      blitz_chat_message_reactions: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: string
+          match_id: string
+          message_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          match_id: string
+          message_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          match_id?: string
+          message_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blitz_chat_message_reactions_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "blitz_matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blitz_chat_message_reactions_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "blitz_chat_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blitz_chat_messages: {
         Row: {
           created_at: string
           id: string
           match_id: string
           message: string
+          photo_url: string | null
           sender_id: string
         }
         Insert: {
@@ -45,6 +112,7 @@ export type Database = {
           id?: string
           match_id: string
           message: string
+          photo_url?: string | null
           sender_id: string
         }
         Update: {
@@ -52,6 +120,7 @@ export type Database = {
           id?: string
           match_id?: string
           message?: string
+          photo_url?: string | null
           sender_id?: string
         }
         Relationships: [
@@ -64,23 +133,169 @@ export type Database = {
           },
         ]
       }
-      blitz_match_participants: {
+      blitz_feed_post_comments: {
         Row: {
+          comment: string
+          created_at: string
+          edited_at: string | null
           id: string
-          joined_at: string
-          match_id: string
+          mentioned_user_ids: string[]
+          post_id: string
           user_id: string
         }
         Insert: {
+          comment: string
+          created_at?: string
+          edited_at?: string | null
           id?: string
-          joined_at?: string
-          match_id: string
+          mentioned_user_ids?: string[]
+          post_id: string
           user_id: string
         }
         Update: {
+          comment?: string
+          created_at?: string
+          edited_at?: string | null
+          id?: string
+          mentioned_user_ids?: string[]
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blitz_feed_post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "blitz_feed_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blitz_feed_post_likes: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blitz_feed_post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "blitz_feed_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blitz_feed_post_tags: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          tagged_by: string
+          tagged_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          tagged_by: string
+          tagged_user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          tagged_by?: string
+          tagged_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blitz_feed_post_tags_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "blitz_feed_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blitz_feed_posts: {
+        Row: {
+          author_id: string
+          caption: string | null
+          created_at: string
+          id: string
+          match_id: string
+          photo_url: string
+          visibility: string
+        }
+        Insert: {
+          author_id: string
+          caption?: string | null
+          created_at?: string
+          id?: string
+          match_id: string
+          photo_url: string
+          visibility?: string
+        }
+        Update: {
+          author_id?: string
+          caption?: string | null
+          created_at?: string
+          id?: string
+          match_id?: string
+          photo_url?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blitz_feed_posts_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "blitz_matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blitz_match_participants: {
+        Row: {
+          hidden_at: string | null
+          id: string
+          joined_at: string
+          last_read_at: string
+          match_id: string
+          role_label: string | null
+          user_id: string
+        }
+        Insert: {
+          hidden_at?: string | null
           id?: string
           joined_at?: string
+          last_read_at?: string
+          match_id: string
+          role_label?: string | null
+          user_id: string
+        }
+        Update: {
+          hidden_at?: string | null
+          id?: string
+          joined_at?: string
+          last_read_at?: string
           match_id?: string
+          role_label?: string | null
           user_id?: string
         }
         Relationships: [
@@ -100,6 +315,7 @@ export type Database = {
           created_at: string
           host_id: string
           id: string
+          recap_prompted_at: string | null
           status: Database["public"]["Enums"]["blitz_match_status"]
           updated_at: string
         }
@@ -109,6 +325,7 @@ export type Database = {
           created_at?: string
           host_id: string
           id?: string
+          recap_prompted_at?: string | null
           status?: Database["public"]["Enums"]["blitz_match_status"]
           updated_at?: string
         }
@@ -118,6 +335,7 @@ export type Database = {
           created_at?: string
           host_id?: string
           id?: string
+          recap_prompted_at?: string | null
           status?: Database["public"]["Enums"]["blitz_match_status"]
           updated_at?: string
         }
@@ -276,18 +494,21 @@ export type Database = {
       conversation_reads: {
         Row: {
           conversation_id: string
+          hidden_at: string | null
           id: string
           last_read_at: string
           user_id: string
         }
         Insert: {
           conversation_id: string
+          hidden_at?: string | null
           id?: string
           last_read_at?: string
           user_id: string
         }
         Update: {
           conversation_id?: string
+          hidden_at?: string | null
           id?: string
           last_read_at?: string
           user_id?: string
@@ -326,12 +547,55 @@ export type Database = {
         }
         Relationships: []
       }
+      direct_message_reactions: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          emoji: string
+          id: string
+          message_id: string
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          emoji?: string
+          id?: string
+          message_id: string
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          emoji?: string
+          id?: string
+          message_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "direct_message_reactions_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "direct_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "direct_message_reactions_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "direct_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       direct_messages: {
         Row: {
           conversation_id: string
           created_at: string
           id: string
           message: string
+          photo_url: string | null
           sender_id: string
         }
         Insert: {
@@ -339,6 +603,7 @@ export type Database = {
           created_at?: string
           id?: string
           message: string
+          photo_url?: string | null
           sender_id: string
         }
         Update: {
@@ -346,6 +611,7 @@ export type Database = {
           created_at?: string
           id?: string
           message?: string
+          photo_url?: string | null
           sender_id?: string
         }
         Relationships: [
@@ -1027,6 +1293,7 @@ export type Database = {
           phone: string | null
           phone_hash: string | null
           photos: string[]
+          ritual_push_enabled: boolean
           updated_at: string
           user_id: string
         }
@@ -1046,6 +1313,7 @@ export type Database = {
           phone?: string | null
           phone_hash?: string | null
           photos?: string[]
+          ritual_push_enabled?: boolean
           updated_at?: string
           user_id: string
         }
@@ -1065,6 +1333,7 @@ export type Database = {
           phone?: string | null
           phone_hash?: string | null
           photos?: string[]
+          ritual_push_enabled?: boolean
           updated_at?: string
           user_id?: string
         }
@@ -1424,6 +1693,10 @@ export type Database = {
         Returns: unknown
       }
       _st_within: { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
+      add_friend_to_huddle: {
+        Args: { p_friend_id: string; p_match_id: string }
+        Returns: undefined
+      }
       addauth: { Args: { "": string }; Returns: boolean }
       addgeometrycolumn:
         | {
@@ -1479,6 +1752,14 @@ export type Database = {
           p_type: string
           p_user_id: string
         }
+        Returns: undefined
+      }
+      can_view_feed_post: {
+        Args: { p_post_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      create_evendle_welcome_chat: {
+        Args: { p_user_id: string }
         Returns: undefined
       }
       create_notification: {
@@ -1632,6 +1913,7 @@ export type Database = {
         Returns: boolean
       }
       geomfromewkt: { Args: { "": string }; Returns: unknown }
+      get_blitz_streak_weeks: { Args: { p_user_id: string }; Returns: number }
       get_or_create_dm: {
         Args: { p_user1: string; p_user2: string }
         Returns: string
@@ -1782,6 +2064,11 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      send_blitz_recap_prompts: { Args: never; Returns: undefined }
+      send_weekend_ritual_push: {
+        Args: { p_body: string; p_title: string }
+        Returns: undefined
       }
       st_3dclosestpoint: {
         Args: { geom1: unknown; geom2: unknown }
