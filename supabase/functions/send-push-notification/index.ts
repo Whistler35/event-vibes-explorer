@@ -148,6 +148,114 @@ async function sendApns(
   return { ok: false, stale, status: res.status, reason }
 }
 
+// ─── FCM v1 (native Android) ────────────────────────────────────────────────
+// Needs a Firebase service-account key (Firebase Console → Project Settings →
+// Service accounts → "Generate new private key", downloads a JSON file).
+// From that JSON:
+//   FCM_PROJECT_ID    – the "project_id" field (plain Edge Function secret)
+//   FCM_CLIENT_EMAIL  – the "client_email" field (plain Edge Function secret)
+// FCM_PRIVATE_KEY (the "private_key" PEM) is NOT a plain Secret — same
+// Lovable multi-line-value corruption bug as APNS_PRIVATE_KEY above. Store it
+// in public.app_secrets (key='FCM_PRIVATE_KEY') the same way: base64-encode
+// the PEM once more before pasting it into the SQL editor.
+
+const FCM_PROJECT_ID = Deno.env.get('FCM_PROJECT_ID')
+const FCM_CLIENT_EMAIL = Deno.env.get('FCM_CLIENT_EMAIL')
+
+let cachedFcmPrivateKey: string | null = null
+async function getFcmPrivateKey(supabase: ReturnType<typeof createClient>): Promise<string | null> {
+  if (cachedFcmPrivateKey) return cachedFcmPrivateKey
+  const { data, error } = await supabase
+    .from('app_secrets')
+    .select('value')
+    .eq('key', 'FCM_PRIVATE_KEY')
+    .maybeSingle()
+  if (error || !data?.value) return null
+  cachedFcmPrivateKey = atob(data.value.trim())
+  return cachedFcmPrivateKey
+}
+
+let cachedFcmAccessToken: { token: string; exp: number } | null = null
+
+async function getFcmAccessToken(privateKey: string): Promise<string> {
+  const now = Math.floor(Date.now() / 1000)
+  if (cachedFcmAccessToken && now < cachedFcmAccessToken.exp - 60) return cachedFcmAccessToken.token
+
+  const header = b64url(new TextEncoder().encode(JSON.stringify({ alg: 'RS256', typ: 'JWT' })))
+  const claims = b64url(
+    new TextEncoder().encode(
+      JSON.stringify({
+        iss: FCM_CLIENT_EMAIL,
+        scope: 'https://www.googleapis.com/auth/firebase.messaging',
+        aud: 'https://oauth2.googleapis.com/token',
+        iat: now,
+        exp: now + 3600,
+      }),
+    ),
+  )
+  const signingInput = `${header}.${claims}`
+
+  const key = await crypto.subtle.importKey(
+    'pkcs8',
+    pemToPkcs8(privateKey) as unknown as ArrayBufferView,
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  )
+  const sig = new Uint8Array(
+    await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, new TextEncoder().encode(signingInput)),
+  )
+  const assertion = `${signingInput}.${b64url(sig)}`
+
+  const res = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      assertion,
+    }),
+  })
+  const json = await res.json()
+  if (!res.ok || !json.access_token) {
+    throw new Error(`FCM OAuth token exchange failed: ${JSON.stringify(json)}`)
+  }
+  cachedFcmAccessToken = { token: json.access_token, exp: now + (json.expires_in ?? 3600) }
+  return json.access_token
+}
+
+async function sendFcm(
+  deviceToken: string,
+  n: PushPayload,
+  accessToken: string,
+): Promise<{ ok: boolean; stale: boolean; status: number; reason?: string }> {
+  const res = await fetch(`https://fcm.googleapis.com/v1/projects/${FCM_PROJECT_ID}/messages:send`, {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${accessToken}`,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      message: {
+        token: deviceToken,
+        notification: { title: n.title, body: n.body ?? '' },
+        // FCM data payloads must be flat string maps.
+        data: Object.fromEntries(
+          Object.entries({ url: n.url ?? '', ...(n.data ?? {}) }).map(([k, v]) => [k, String(v)]),
+        ),
+        android: { priority: 'high' },
+      },
+    }),
+  })
+  if (res.status === 200) return { ok: true, stale: false, status: 200 }
+  let reason = ''
+  try {
+    reason = (await res.json())?.error?.status ?? ''
+  } catch { /* ignore */ }
+  // UNREGISTERED (token no longer valid) / NOT_FOUND → the token is dead
+  const stale = reason === 'UNREGISTERED' || reason === 'NOT_FOUND'
+  return { ok: false, stale, status: res.status, reason }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -177,9 +285,12 @@ Deno.serve(async (req) => {
     const apnsPrivateKey = await getApnsPrivateKey(supabase)
     const apnsConfigured = !!(APNS_KEY_ID && APNS_TEAM_ID && apnsPrivateKey)
 
-    if (!webPushConfigured && !apnsConfigured) {
+    const fcmPrivateKey = await getFcmPrivateKey(supabase)
+    const fcmConfigured = !!(FCM_PROJECT_ID && FCM_CLIENT_EMAIL && fcmPrivateKey)
+
+    if (!webPushConfigured && !apnsConfigured && !fcmConfigured) {
       return new Response(
-        JSON.stringify({ error: 'Neither Web Push (VAPID) nor APNs is configured' }),
+        JSON.stringify({ error: 'Neither Web Push (VAPID), APNs, nor FCM is configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
       )
     }
@@ -234,6 +345,19 @@ Deno.serve(async (req) => {
     await Promise.all(
       subs.map(async (s: any) => {
         try {
+          // Native Android row (has an FCM device token)
+          if (s.device_token && s.platform === 'android') {
+            if (!fcmConfigured || !fcmPrivateKey) { failed++; return }
+            const accessToken = await getFcmAccessToken(fcmPrivateKey)
+            const r = await sendFcm(s.device_token, n, accessToken)
+            if (r.ok) sent++
+            else {
+              failed++
+              if (r.stale) staleIds.push(s.id)
+              console.error('FCM send failed', { status: r.status, reason: r.reason })
+            }
+            return
+          }
           // Native iOS row (has an APNs device token)
           if (s.device_token) {
             if (!apnsConfigured || !apnsPrivateKey) { failed++; return }
