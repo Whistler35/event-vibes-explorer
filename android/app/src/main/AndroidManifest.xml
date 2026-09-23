@@ -40,4 +40,14 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- "Blitz" location matching (navigator.geolocation in the WebView) — the
+         permission dialog itself is already handled by Capacitor's built-in
+         BridgeWebChromeClient.onGeolocationPermissionsShowPrompt(), this just
+         has to be declared here for that runtime request to be allowed. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <!-- Required on Android 13+ (API 33) for push notifications to show at all -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 </manifest>
