@@ -66,40 +66,62 @@ const TimeProgressBar = ({
 
 const SwipeCard = ({ item, onSwipe, onAdminDelete, isTop, isAdmin }: CardProps) => {
   const navigate = useNavigate();
+  // `drag` only drives the release animation (snap-back / fly-out) — a single
+  // React update per gesture, not per pixel. While a finger is actually
+  // moving, position is written straight to the DOM via refs below, bypassing
+  // React re-renders entirely so the card tracks the touch with no lag.
   const [drag, setDrag] = useState({ x: 0, y: 0 });
   const [animating, setAnimating] = useState(false);
   const startRef = useRef({ x: 0, y: 0 });
   const isDownRef = useRef(false);
+  const dragPosRef = useRef({ x: 0, y: 0 });
+  const cardRef = useRef<HTMLDivElement>(null);
+  const likeRef = useRef<HTMLDivElement>(null);
+  const nopeRef = useRef<HTMLDivElement>(null);
 
   const isOnNoDrag = (target: EventTarget | null) =>
     target instanceof HTMLElement && !!target.closest("[data-no-drag]");
+
+  const applyTransform = (x: number, y: number) => {
+    if (cardRef.current) {
+      cardRef.current.style.transform = `translate(${x}px, ${y}px) rotate(${x / 20}deg)`;
+    }
+    if (likeRef.current) likeRef.current.style.opacity = String(Math.max(0, Math.min(1, x / SWIPE_THRESHOLD)));
+    if (nopeRef.current) nopeRef.current.style.opacity = String(Math.max(0, Math.min(1, -x / SWIPE_THRESHOLD)));
+  };
 
   const handleStart = (clientX: number, clientY: number, target: EventTarget | null) => {
     if (!isTop || animating) return;
     if (isOnNoDrag(target)) return;
     isDownRef.current = true;
     startRef.current = { x: clientX, y: clientY };
+    if (cardRef.current) cardRef.current.style.transition = "none";
   };
   const handleMove = (clientX: number, clientY: number) => {
     if (!isDownRef.current) return;
-    setDrag({ x: clientX - startRef.current.x, y: clientY - startRef.current.y });
+    const x = clientX - startRef.current.x;
+    const y = clientY - startRef.current.y;
+    dragPosRef.current = { x, y };
+    applyTransform(x, y);
   };
   const handleEnd = () => {
     if (!isDownRef.current) return;
     isDownRef.current = false;
-    if (Math.abs(drag.x) > SWIPE_THRESHOLD) {
-      const dir = drag.x > 0 ? "right" : "left";
+    const { x, y } = dragPosRef.current;
+    if (cardRef.current) cardRef.current.style.transition = "transform 0.25s ease-out";
+    if (Math.abs(x) > SWIPE_THRESHOLD) {
+      const dir = x > 0 ? "right" : "left";
+      const flyX = x > 0 ? 1000 : -1000;
       setAnimating(true);
-      setDrag({ x: drag.x > 0 ? 1000 : -1000, y: drag.y });
+      setDrag({ x: flyX, y });
+      applyTransform(flyX, y);
       setTimeout(() => onSwipe(dir), 250);
     } else {
       setDrag({ x: 0, y: 0 });
+      applyTransform(0, 0);
     }
   };
 
-  const rotate = drag.x / 20;
-  const likeOpacity = Math.max(0, Math.min(1, drag.x / SWIPE_THRESHOLD));
-  const nopeOpacity = Math.max(0, Math.min(1, -drag.x / SWIPE_THRESHOLD));
   const fontClass = getActivityFontClass(item.activity);
 
   const handleProfile = () => {
@@ -125,9 +147,10 @@ const SwipeCard = ({ item, onSwipe, onAdminDelete, isTop, isAdmin }: CardProps) 
 
   return (
     <div
+      ref={cardRef}
       className="absolute inset-0 select-none touch-none"
       style={{
-        transform: `translate(${drag.x}px, ${drag.y}px) rotate(${rotate}deg)`,
+        transform: `translate(${drag.x}px, ${drag.y}px) rotate(${drag.x / 20}deg)`,
         transition: animating || !isDownRef.current ? "transform 0.25s ease-out" : "none",
         zIndex: isTop ? 10 : 1,
         cursor: isTop ? "grab" : "default",
@@ -164,14 +187,16 @@ const SwipeCard = ({ item, onSwipe, onAdminDelete, isTop, isAdmin }: CardProps) 
 
         {/* Swipe overlays */}
         <div
+          ref={likeRef}
           className="absolute top-24 left-6 z-20 px-4 py-2 rounded-2xl border-4 border-[hsl(var(--bolt))] text-[hsl(var(--bolt))] font-black text-3xl uppercase rotate-[-15deg]"
-          style={{ opacity: likeOpacity }}
+          style={{ opacity: Math.max(0, Math.min(1, drag.x / SWIPE_THRESHOLD)) }}
         >
           Match!
         </div>
         <div
+          ref={nopeRef}
           className="absolute top-24 right-6 z-20 px-4 py-2 rounded-2xl border-4 border-white/70 text-white/70 font-black text-3xl uppercase rotate-[15deg]"
-          style={{ opacity: nopeOpacity }}
+          style={{ opacity: Math.max(0, Math.min(1, -drag.x / SWIPE_THRESHOLD)) }}
         >
           Nope
         </div>

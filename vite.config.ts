@@ -19,4 +19,11 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // NOTE: don't add build.rollupOptions.output.manualChunks for vendor
+  // splitting — tried it (2026-09-24), it causes a white-screen crash on
+  // load ("Cannot read properties of undefined (reading 'forwardRef')"),
+  // a chunk-execution-order issue between the Radix/React vendor chunks.
+  // Route-level lazy() already splits per-page code, which is the change
+  // that actually matters for this Capacitor app (locally bundled, so the
+  // network-caching benefit of vendor splitting barely applies anyway).
 }));
