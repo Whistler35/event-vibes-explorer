@@ -31,7 +31,20 @@ import { getNotificationRoute } from "./lib/notificationRouting";
 import { trackEvent } from "./lib/analytics";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
-const queryClient = new QueryClient();
+// staleTime keeps the last-known data on screen instantly when a screen
+// remounts (no more blank/loading flash switching tabs) — refetchOnMount
+// 'always' makes sure that's purely cosmetic: every mount still triggers a
+// fresh fetch in the background regardless of staleTime, so nothing (e.g. a
+// new match/chat) can go stale-and-missed the way relying on staleTime alone
+// would risk.
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 15_000,
+      refetchOnMount: "always",
+    },
+  },
+});
 
 function PushSetup() {
   const { user } = useAuth();
