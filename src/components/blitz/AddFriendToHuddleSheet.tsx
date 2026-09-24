@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { UserPlus, Share2, Check } from "lucide-react";
 import { shareInvite } from "@/lib/share";
+import { PUBLIC_WEB_ORIGIN } from "@/lib/publicUrl";
 
 interface Friend {
   user_id: string;
@@ -119,7 +120,7 @@ const AddFriendToHuddleSheet = ({ open, onOpenChange, matchId, activity, exclude
               shareInvite({
                 title: activity || "Blitz",
                 text: `Join my Blitz${activity ? `: ${activity}` : ""}`,
-                url: `${window.location.origin}/blitz/${matchId}`,
+                url: `${PUBLIC_WEB_ORIGIN}/blitz/match/${matchId}`,
                 copiedMessage: "Einladungslink kopiert",
               })
             }

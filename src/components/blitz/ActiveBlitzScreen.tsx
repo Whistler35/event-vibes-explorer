@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { X } from "lucide-react";
+import { X, Share2 } from "lucide-react";
 import { BlitzRequest, cancelBlitzRequest } from "@/hooks/useBlitzRequest";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -8,6 +8,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Zap } from "lucide-react";
+import { shareInvite } from "@/lib/share";
+import { PUBLIC_WEB_ORIGIN } from "@/lib/publicUrl";
 
 interface ActiveBlitzScreenProps {
   request: BlitzRequest;
@@ -76,6 +78,16 @@ const ActiveBlitzScreen = ({ request, onEnded }: ActiveBlitzScreenProps) => {
     else toast("Noch niemand dabei – warte auf Anfragen 👀");
   };
 
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    shareInvite({
+      title: request.activity,
+      text: `Ich blitze gerade: ${request.activity} – schau vorbei!`,
+      url: `${PUBLIC_WEB_ORIGIN}/s/${request.id}`,
+      copiedMessage: "Link kopiert",
+    });
+  };
+
   const handleCancel = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!confirm("Diesen Blitz beenden?")) return;
@@ -97,6 +109,14 @@ const ActiveBlitzScreen = ({ request, onEnded }: ActiveBlitzScreenProps) => {
         onClick={openHuddle}
         className="w-full text-left relative overflow-hidden rounded-[28px] bg-[hsl(var(--blitz-forest))] text-white p-8 min-h-[62vh] flex flex-col items-center justify-between active:scale-[0.99] transition"
       >
+        <button
+          onClick={handleShare}
+          aria-label="Blitz teilen"
+          className="absolute top-4 left-4 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center backdrop-blur-sm"
+        >
+          <Share2 className="w-4 h-4 text-white/80" />
+        </button>
+
         <button
           onClick={handleCancel}
           aria-label="Blitz beenden"

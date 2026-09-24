@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Zap, X, Check, MapPin, Loader2, Trash2, Users } from "lucide-react";
+import { Zap, X, Check, MapPin, Loader2, Trash2, Users, Share2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useBlitzDiscovery, swipeBlitz, undoSwipe, DiscoveryBlitz } from "@/hooks/useBlitzDiscovery";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -9,6 +9,7 @@ import { getActivityFontClass } from "@/lib/blitzText";
 import { asBlitzQuestion } from "@/lib/utils";
 import { toast } from "sonner";
 import { shareInvite } from "@/lib/share";
+import { PUBLIC_WEB_ORIGIN } from "@/lib/publicUrl";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import FriendSearch from "@/components/FriendSearch";
 
@@ -112,6 +113,16 @@ const SwipeCard = ({ item, onSwipe, onAdminDelete, isTop, isAdmin }: CardProps) 
     onAdminDelete(item.id);
   };
 
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    shareInvite({
+      title: item.activity,
+      text: `${item.host_name?.split(" ")[0] ?? "Jemand"} blitzt gerade: ${item.activity} – schau vorbei!`,
+      url: `${PUBLIC_WEB_ORIGIN}/s/${item.id}`,
+      copiedMessage: "Link kopiert",
+    });
+  };
+
   return (
     <div
       className="absolute inset-0 select-none touch-none"
@@ -173,6 +184,17 @@ const SwipeCard = ({ item, onSwipe, onAdminDelete, isTop, isAdmin }: CardProps) 
             className="absolute bottom-5 right-5 z-30 w-9 h-9 rounded-full bg-red-500/90 hover:bg-red-500 flex items-center justify-center shadow-lg backdrop-blur-sm border border-white/20 transition"
           >
             <Trash2 className="w-4 h-4 text-white" />
+          </button>
+        )}
+
+        {isTop && (
+          <button
+            data-no-drag
+            onClick={handleShare}
+            aria-label="Blitz teilen"
+            className="absolute bottom-5 left-5 z-30 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center shadow-lg backdrop-blur-sm border border-white/20 transition"
+          >
+            <Share2 className="w-4 h-4 text-white/85" />
           </button>
         )}
 
@@ -345,7 +367,7 @@ const DiscoveryDeck = ({ city, onStartOwn }: DiscoveryDeckProps) => {
               shareInvite({
                 title: "EVENDLE",
                 text: "Komm auf EVENDLE, dann ist hier mehr los!",
-                url: `${window.location.origin}/`,
+                url: `${PUBLIC_WEB_ORIGIN}/`,
                 copiedMessage: "Einladungslink kopiert",
               })
             }

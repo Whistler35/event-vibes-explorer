@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -118,7 +118,10 @@ const nativeOAuth = async (provider: 'google' | 'apple') => {
 
 const Auth = () => {
   const { t } = useTranslation();
-  const [isLogin, setIsLogin] = useState(true);
+  const location = useLocation();
+  // A "Registrieren" CTA elsewhere (e.g. a public Blitz share preview) can
+  // land here pre-set to the signup form via navigate('/auth', { state: { mode: 'signup' } }).
+  const [isLogin, setIsLogin] = useState((location.state as { mode?: string } | null)?.mode !== 'signup');
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
   const [email, setEmail] = useState('');

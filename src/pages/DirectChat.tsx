@@ -13,6 +13,7 @@ import { markDmNotificationsRead } from "@/hooks/useNotifications";
 import UserActionsMenu from "@/components/moderation/UserActionsMenu";
 import { EVENDLE_SYSTEM_ID } from "@/lib/constants";
 import { shareInvite } from "@/lib/share";
+import { PUBLIC_WEB_ORIGIN } from "@/lib/publicUrl";
 import { useMessageReactions } from "@/hooks/useMessageReactions";
 import { uploadChatPhoto, PHOTO_PLACEHOLDER } from "@/lib/chatPhoto";
 
@@ -238,7 +239,7 @@ const DirectChat = () => {
     shareInvite({
       title: "EVENDLE",
       text: "Join me on EVENDLE",
-      url: `${window.location.origin}/`,
+      url: `${PUBLIC_WEB_ORIGIN}/`,
       copiedMessage: "Einladungslink kopiert",
     });
 

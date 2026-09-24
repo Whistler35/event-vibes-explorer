@@ -21,6 +21,7 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const UserProfile = lazy(() => import("./pages/UserProfile"));
 const EditProfile = lazy(() => import("./pages/EditProfile"));
 const AdminStats = lazy(() => import("./pages/AdminStats"));
+const SharedBlitz = lazy(() => import("./pages/SharedBlitz"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 import { Capacitor } from "@capacitor/core";
 import { useNavigate } from "react-router-dom";
@@ -148,6 +149,7 @@ const App = () => (
                 <Route path="/auth/callback" element={<AuthCallback />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/user/:userId" element={<UserProfile />} />
+                <Route path="/s/:blitzId" element={<SharedBlitz />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
