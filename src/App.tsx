@@ -2,7 +2,9 @@ import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 // Landing is the first thing logged-out users see, so it stays eagerly
 // bundled (no extra loading flash on cold start). Everything else loads on
@@ -36,14 +38,26 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 // 'always' makes sure that's purely cosmetic: every mount still triggers a
 // fresh fetch in the background regardless of staleTime, so nothing (e.g. a
 // new match/chat) can go stale-and-missed the way relying on staleTime alone
-// would risk.
+// would risk. gcTime is bumped so entries survive long enough to be useful
+// after the persister restores them on a cold app start (see below).
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 15_000,
+      gcTime: ONE_DAY_MS,
       refetchOnMount: "always",
     },
   },
+});
+
+// Persists the query cache to localStorage so a cold app start (not just an
+// in-session tab switch) can also show the last-known data immediately
+// instead of a blank/loading screen, while refetchOnMount 'always' still
+// refreshes everything in the background right away.
+const localStoragePersister = createSyncStoragePersister({
+  storage: window.localStorage,
+  key: "evendle-query-cache",
 });
 
 function PushSetup() {
@@ -139,7 +153,10 @@ function RootRoute() {
 
 const App = () => (
   <ErrorBoundary>
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{ persister: localStoragePersister, maxAge: ONE_DAY_MS }}
+    >
       <AuthProvider>
         <TooltipProvider>
           <Toaster />
@@ -169,7 +186,7 @@ const App = () => (
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   </ErrorBoundary>
 );
 

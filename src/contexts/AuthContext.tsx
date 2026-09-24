@@ -161,6 +161,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    // Clears the persisted React Query cache so a shared/handed-off device
+    // can't briefly show the previous user's cached chats/feed on next login.
+    localStorage.removeItem("evendle-query-cache");
   };
 
   const value = {
