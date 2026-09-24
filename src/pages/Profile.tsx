@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import evendleLogo from "@/assets/evendle-logo.jpeg";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -60,54 +61,52 @@ const Profile = () => {
   const { isAdmin } = useIsAdmin();
   const { isHost } = useIsHost();
   const navigate = useNavigate();
-  const [profile, setProfile] = useState<ProfileData | null>(null);
-  const [hostProfile, setHostProfile] = useState<HostProfileData | null>(null);
-  const [loading, setLoading] = useState(true);
   const [showFriendsSheet, setShowFriendsSheet] = useState(false);
   const [statsSheet, setStatsSheet] = useState<{ open: boolean; tab: "sent" | "joined" | "friends" }>({ open: false, tab: "sent" });
-  const [stats, setStats] = useState<Stats>({ friendsCount: 0, blitzSent: 0, blitzJoined: 0 });
 
-  useEffect(() => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-
-    const fetchAll = async () => {
-      const { data } = await supabase
+  // Combined into one query (was 3 sequential setState calls behind a single
+  // `loading` flag) so this page gets the same "instant cached data, refresh
+  // quietly" behavior as the rest of the app instead of blanking on every
+  // visit.
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ["profile-full", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data: profileData } = await supabase
         .from("profiles")
         .select("name, age, country, bio, avatar_url, instagram_username, instagram_followers, interests, photos")
-        .eq("user_id", user.id)
+        .eq("user_id", user!.id)
         .maybeSingle() as any;
-
-      if (data) setProfile(data);
 
       const { data: hostData } = await supabase
         .from("host_profiles")
         .select("company_name, website_url, instagram_username, is_verified")
-        .eq("user_id", user.id)
+        .eq("user_id", user!.id)
         .maybeSingle() as any;
-      if (hostData) setHostProfile(hostData);
 
       const [friendsRes, blitzRes, joinedRes] = await Promise.all([
         supabase.from("friendships").select("id", { count: "exact", head: true })
           .eq("status", "accepted")
-          .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`),
-        supabase.from("blitz_requests").select("id", { count: "exact", head: true }).eq("host_id", user.id),
-        supabase.from("blitz_match_participants").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+          .or(`requester_id.eq.${user!.id},addressee_id.eq.${user!.id}`),
+        supabase.from("blitz_requests").select("id", { count: "exact", head: true }).eq("host_id", user!.id),
+        supabase.from("blitz_match_participants").select("id", { count: "exact", head: true }).eq("user_id", user!.id),
       ]);
 
-      setStats({
-        friendsCount: friendsRes.count || 0,
-        blitzSent: blitzRes.count || 0,
-        blitzJoined: joinedRes.count || 0,
-      });
+      return {
+        profile: (profileData ?? null) as ProfileData | null,
+        hostProfile: (hostData ?? null) as HostProfileData | null,
+        stats: {
+          friendsCount: friendsRes.count || 0,
+          blitzSent: blitzRes.count || 0,
+          blitzJoined: joinedRes.count || 0,
+        } as Stats,
+      };
+    },
+  });
 
-      setLoading(false);
-    };
-
-    fetchAll();
-  }, [user]);
+  const profile = data?.profile ?? null;
+  const hostProfile = data?.hostProfile ?? null;
+  const stats = data?.stats ?? { friendsCount: 0, blitzSent: 0, blitzJoined: 0 };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();

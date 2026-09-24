@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Layout from "@/components/Layout";
@@ -70,22 +71,88 @@ const UserProfile = () => {
     if (user && userId && user.id === userId) navigate("/profile", { replace: true });
   }, [user, userId, navigate]);
 
-  const [profile, setProfile] = useState<ProfileData | null>(null);
-  const [hostProfile, setHostProfile] = useState<HostProfileData | null>(null);
-  const [isHost, setIsHost] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    friendsCount: 0,
-    blitzSent: 0,
-    blitzJoined: 0,
-  });
+  const queryClient = useQueryClient();
   const [statsSheet, setStatsSheet] = useState<{
     open: boolean;
     tab: "sent" | "joined" | "friends";
   }>({ open: false, tab: "sent" });
-  const [friendship, setFriendship] = useState<Friendship | null>(null);
   const [friendActionLoading, setFriendActionLoading] = useState(false);
   const [showFriendsSheet, setShowFriendsSheet] = useState(false);
+
+  const friendshipQueryKey = ["friendship", user?.id, userId] as const;
+  const { data: friendship } = useQuery({
+    queryKey: friendshipQueryKey,
+    enabled: !!user && !!userId && userId !== user.id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("friendships")
+        .select("id, requester_id, addressee_id, status")
+        .or(
+          `and(requester_id.eq.${user!.id},addressee_id.eq.${userId}),and(requester_id.eq.${userId},addressee_id.eq.${user!.id})`
+        )
+        .maybeSingle();
+      return (data ?? null) as Friendship | null;
+    },
+  });
+
+  // Combined into one query (was several sequential setState calls behind a
+  // single `loading` flag) so re-visiting a profile shows the last-known
+  // data instantly instead of blanking every time.
+  const { data: profileData, isLoading: loading } = useQuery({
+    queryKey: ["user-profile-full", userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select(
+          "name, age, country, bio, avatar_url, instagram_username, instagram_followers, interests, photos"
+        )
+        .eq("user_id", userId!)
+        .maybeSingle() as any;
+
+      const { data: roleData } = await supabase.rpc("has_role", {
+        _user_id: userId!,
+        _role: "professional_host",
+      });
+      const userIsHost = roleData === true;
+
+      let hostProfileData: HostProfileData | null = null;
+      if (userIsHost) {
+        const { data: hostData } = (await supabase
+          .from("host_profiles")
+          .select("company_name, website_url, instagram_username, is_verified")
+          .eq("user_id", userId!)
+          .maybeSingle()) as any;
+        hostProfileData = hostData ?? null;
+      }
+
+      const [friendsRes, blitzRes, joinedRes] = await Promise.all([
+        supabase
+          .from("friendships")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "accepted")
+          .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`),
+        supabase.from("blitz_requests").select("id", { count: "exact", head: true }).eq("host_id", userId!),
+        supabase.from("blitz_match_participants").select("id", { count: "exact", head: true }).eq("user_id", userId!),
+      ]);
+
+      return {
+        profile: (data ?? null) as ProfileData | null,
+        isHost: userIsHost,
+        hostProfile: hostProfileData,
+        stats: {
+          friendsCount: friendsRes.count || 0,
+          blitzSent: blitzRes.count || 0,
+          blitzJoined: joinedRes.count || 0,
+        },
+      };
+    },
+  });
+
+  const profile = profileData?.profile ?? null;
+  const hostProfile = profileData?.hostProfile ?? null;
+  const isHost = profileData?.isHost ?? false;
+  const stats = profileData?.stats ?? { friendsCount: 0, blitzSent: 0, blitzJoined: 0 };
 
   const handleStartDM = async () => {
     if (!user || !userId) {
@@ -103,18 +170,6 @@ const UserProfile = () => {
     navigate(`/dm/${data}`);
   };
 
-  const fetchFriendship = useCallback(async () => {
-    if (!user || !userId || userId === user.id) return;
-    const { data } = await supabase
-      .from("friendships")
-      .select("id, requester_id, addressee_id, status")
-      .or(
-        `and(requester_id.eq.${user.id},addressee_id.eq.${userId}),and(requester_id.eq.${userId},addressee_id.eq.${user.id})`
-      )
-      .maybeSingle();
-    setFriendship(data as Friendship | null);
-  }, [user, userId]);
-
   const sendFriendRequest = async () => {
     if (!user || !userId) return;
     setFriendActionLoading(true);
@@ -123,7 +178,7 @@ const UserProfile = () => {
       .insert({ requester_id: user.id, addressee_id: userId } as any);
     if (error) toast.error(t("userProfile.friendRequestError"));
     else toast.success(t("userProfile.friendRequestSent"));
-    await fetchFriendship();
+    await queryClient.invalidateQueries({ queryKey: friendshipQueryKey });
     setFriendActionLoading(false);
   };
 
@@ -143,7 +198,7 @@ const UserProfile = () => {
       if (error) toast.error(t("userProfile.updateError"));
       else toast.success(t("userProfile.friendAdded"));
     }
-    await fetchFriendship();
+    await queryClient.invalidateQueries({ queryKey: friendshipQueryKey });
     setFriendActionLoading(false);
   };
 
@@ -153,61 +208,9 @@ const UserProfile = () => {
     const { error } = await supabase.from("friendships").delete().eq("id", friendship.id);
     if (error) toast.error(t("userProfile.removeError"));
     else toast.success(t("userProfile.friendRemoved"));
-    setFriendship(null);
+    queryClient.setQueryData(friendshipQueryKey, null);
     setFriendActionLoading(false);
   };
-
-  useEffect(() => {
-    if (!userId) return;
-
-    const fetchProfile = async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select(
-          "name, age, country, bio, avatar_url, instagram_username, instagram_followers, interests, photos"
-        )
-        .eq("user_id", userId)
-        .maybeSingle() as any;
-
-      if (data) setProfile(data);
-
-      const { data: roleData } = await supabase.rpc("has_role", {
-        _user_id: userId,
-        _role: "professional_host",
-      });
-      const userIsHost = roleData === true;
-      setIsHost(userIsHost);
-
-      if (userIsHost) {
-        const { data: hostData } = (await supabase
-          .from("host_profiles")
-          .select("company_name, website_url, instagram_username, is_verified")
-          .eq("user_id", userId)
-          .maybeSingle()) as any;
-        if (hostData) setHostProfile(hostData);
-      }
-
-      const [friendsRes, blitzRes, joinedRes] = await Promise.all([
-        supabase
-          .from("friendships")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "accepted")
-          .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`),
-        supabase.from("blitz_requests").select("id", { count: "exact", head: true }).eq("host_id", userId),
-        supabase.from("blitz_match_participants").select("id", { count: "exact", head: true }).eq("user_id", userId),
-      ]);
-      setStats({
-        friendsCount: friendsRes.count || 0,
-        blitzSent: blitzRes.count || 0,
-        blitzJoined: joinedRes.count || 0,
-      });
-
-      setLoading(false);
-    };
-
-    fetchProfile();
-    fetchFriendship();
-  }, [userId, fetchFriendship]);
 
   if (loading || (user && userId && user.id === userId)) {
     return (
