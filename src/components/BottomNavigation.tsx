@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { User, MessageCircle, Zap, Camera } from "lucide-react";
+import { User, MessageCircle, Zap, Camera, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useUnreadDMCount } from "@/hooks/useUnreadDMCount";
 import { useIncomingBlitzCount } from "@/hooks/useIncomingBlitzCount";
@@ -23,7 +23,7 @@ const BottomNavigation = () => {
     >
       <div className="mx-auto max-w-md px-5">
         <div className="pointer-events-auto relative bg-white rounded-full shadow-[0_10px_30px_-8px_rgba(15,20,16,0.18)] flex items-center justify-between px-5 py-2.5">
-          {/* Feed left-outer */}
+          {/* Feed */}
           <button
             onClick={() => navigate("/feed")}
             className="flex flex-col items-center gap-0.5 py-1.5 min-w-[52px]"
@@ -41,7 +41,7 @@ const BottomNavigation = () => {
             </span>
           </button>
 
-          {/* Chat left-inner */}
+          {/* Chat */}
           <button
             onClick={() => navigate("/messenger")}
             className="flex flex-col items-center gap-0.5 py-1.5 min-w-[52px]"
@@ -68,10 +68,52 @@ const BottomNavigation = () => {
             </span>
           </button>
 
-          {/* Blitz center — lime disc lifted above the pill */}
+          {/* Spacer reserving room for the floating Blitz button below */}
+          <div className="w-12" aria-hidden="true" />
+
+          {/* Friends */}
+          <button
+            onClick={() => navigate("/friends")}
+            className="flex flex-col items-center gap-0.5 py-1.5 min-w-[52px]"
+            aria-label={t("nav.friends")}
+          >
+            <Users
+              size={24}
+              strokeWidth={1.8}
+              className={
+                isActive("/friends") ? "text-[hsl(var(--blitz-forest))]" : "text-[hsl(var(--blitz-forest))]/80"
+              }
+            />
+            <span className="text-[11px] font-semibold text-[hsl(var(--blitz-forest))]">
+              {t("nav.friends")}
+            </span>
+          </button>
+
+          {/* Profile */}
+          <button
+            onClick={() => navigate("/profile")}
+            className="flex flex-col items-center gap-0.5 py-1.5 min-w-[52px]"
+            aria-label={t("nav.profile")}
+          >
+            <User
+              size={24}
+              strokeWidth={1.8}
+              className={
+                isActive("/profile")
+                  ? "text-[hsl(var(--blitz-forest))]"
+                  : "text-[hsl(var(--blitz-forest))]/80"
+              }
+            />
+            <span className="text-[11px] font-semibold text-[hsl(var(--blitz-forest))]">
+              {t("nav.profile")}
+            </span>
+          </button>
+
+          {/* Blitz — floats above the pill, absolutely centered regardless
+              of how many tabs sit on either side. */}
           <button
             onClick={() => navigate("/blitz")}
-            className="flex flex-col items-center gap-1 -mt-8"
+            className="absolute left-1/2 -translate-x-1/2 -top-8 flex flex-col items-center gap-1"
             aria-label="BLITZ"
           >
             <div
@@ -98,26 +140,6 @@ const BottomNavigation = () => {
             </div>
             <span className="text-[10px] font-black tracking-[0.25em] text-[hsl(var(--blitz-forest))] pt-0.5">
               {t("nav.blitz")}
-            </span>
-          </button>
-
-          {/* Profile right-outer */}
-          <button
-            onClick={() => navigate("/profile")}
-            className="flex flex-col items-center gap-0.5 py-1.5 min-w-[52px]"
-            aria-label={t("nav.profile")}
-          >
-            <User
-              size={24}
-              strokeWidth={1.8}
-              className={
-                isActive("/profile")
-                  ? "text-[hsl(var(--blitz-forest))]"
-                  : "text-[hsl(var(--blitz-forest))]/80"
-              }
-            />
-            <span className="text-[11px] font-semibold text-[hsl(var(--blitz-forest))]">
-              {t("nav.profile")}
             </span>
           </button>
         </div>

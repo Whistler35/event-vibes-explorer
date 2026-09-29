@@ -15,6 +15,7 @@ const BlitzFeed = lazy(() => import("./pages/BlitzFeed"));
 const Messenger = lazy(() => import("./pages/Messenger"));
 const DirectChat = lazy(() => import("./pages/DirectChat"));
 const Profile = lazy(() => import("./pages/Profile"));
+const Friends = lazy(() => import("./pages/Friends"));
 const Auth = lazy(() => import("./pages/Auth"));
 const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
@@ -172,6 +173,7 @@ const App = () => (
                 <Route path="/messenger" element={<Messenger />} />
                 <Route path="/dm/:conversationId" element={<DirectChat />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/friends" element={<Friends />} />
                 <Route path="/profile/edit" element={<EditProfile />} />
                 <Route path="/admin" element={<AdminStats />} />
                 <Route path="/auth" element={<Auth />} />

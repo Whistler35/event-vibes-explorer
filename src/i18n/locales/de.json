@@ -6,7 +6,8 @@
     "chat": "CHAT",
     "host": "HOST",
     "profile": "PROFIL",
-    "feed": "FEED"
+    "feed": "FEED",
+    "friends": "FRIENDS"
   },
   "common": {
     "loading": "Lädt…",

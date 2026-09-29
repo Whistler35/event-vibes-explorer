@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Zap, MapPin, Loader2, Globe2, Users, UserCheck, Check } from "lucide-react";
 import { createBlitzRequest, BlitzAudience } from "@/hooks/useBlitzRequest";
+import { useFriendGroups } from "@/hooks/useFriendGroups";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
@@ -36,6 +37,7 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
   const [locating, setLocating] = useState(false);
   const [locError, setLocError] = useState<string | null>(null);
   const { user } = useAuth();
+  const { groups } = useFriendGroups(user?.id);
 
   const { data: friends = [] } = useQuery({
     queryKey: ["blitz-friend-picker", user?.id],
@@ -265,6 +267,34 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
                 );
               })}
             </div>
+
+            {audience === "selected" && groups.length > 0 && (
+              <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1">
+                {groups.map((g) => {
+                  const allIn = g.memberIds.length > 0 && g.memberIds.every((id) => selectedFriendIds.includes(id));
+                  return (
+                    <button
+                      key={g.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedFriendIds((prev) =>
+                          allIn
+                            ? prev.filter((id) => !g.memberIds.includes(id))
+                            : Array.from(new Set([...prev, ...g.memberIds]))
+                        );
+                      }}
+                      className={`shrink-0 px-3 py-2 rounded-full text-xs font-bold border-2 transition ${
+                        allIn
+                          ? "bg-[hsl(var(--bolt))]/10 border-[hsl(var(--bolt))] text-[hsl(var(--bolt))]"
+                          : "bg-white/5 border-white/10 text-white/80"
+                      }`}
+                    >
+                      {g.name} · {g.memberIds.length}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
 
             {audience === "selected" && (
               <div className="mt-2 rounded-2xl bg-white/5 border border-white/10 p-2 max-h-56 overflow-y-auto space-y-1">
