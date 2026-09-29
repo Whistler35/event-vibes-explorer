@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import evendleLogo from "@/assets/evendle-logo.jpeg";
+import evendleLogo from "@/assets/evendle-logo.png";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
