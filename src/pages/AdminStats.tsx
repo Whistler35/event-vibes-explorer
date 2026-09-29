@@ -9,7 +9,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ArrowLeft, RefreshCw, Zap, Users, Heart, MessageSquare, Flag,
-  ShieldCheck, UserPlus, Trash2, Search, Camera, BellRing,
+  ShieldCheck, UserPlus, Trash2, Search, Camera, BellRing, Check, UserX,
 } from "lucide-react";
 
 type Range = "today" | "7d" | "30d" | "all";
@@ -48,7 +48,22 @@ interface ListRow {
   subtitle: string;
   meta: string;
   created_at: string;
+  // Only present for kind "reports" — used to power the admin actions below.
+  reported_user_id?: string;
+  reported_user_name?: string;
+  reported_message_id?: string | null;
+  context?: string;
+  status?: string;
+  details?: string | null;
 }
+
+const DELETABLE_CONTEXTS = new Set(["feed_post", "feed_comment", "blitz", "direct_message"]);
+const CONTENT_LABEL: Record<string, string> = {
+  feed_post: "Beitrag",
+  feed_comment: "Kommentar",
+  blitz: "Blitz",
+  direct_message: "Nachricht",
+};
 
 const RANGE_LABEL: Record<Range, string> = {
   today: "Heute",
@@ -87,6 +102,7 @@ const AdminStats = () => {
   });
   const [detailRows, setDetailRows] = useState<ListRow[]>([]);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [reportActionBusy, setReportActionBusy] = useState<string | null>(null);
 
   const openDetail = async (kind: ListKind, title: string) => {
     setDetail({ open: true, kind, title });
@@ -105,6 +121,43 @@ const AdminStats = () => {
   useEffect(() => {
     if (!adminLoading && !isAdmin) navigate("/", { replace: true });
   }, [adminLoading, isAdmin, navigate]);
+
+  const resolveReport = async (row: ListRow) => {
+    setReportActionBusy(row.id);
+    const { error } = await supabase.rpc("admin_resolve_report" as any, { p_report_id: row.id });
+    setReportActionBusy(null);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Als erledigt markiert");
+    setDetailRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, status: "resolved" } : r)));
+  };
+
+  const deleteReportedContent = async (row: ListRow) => {
+    const label = CONTENT_LABEL[row.context ?? ""] ?? "Inhalt";
+    if (!confirm(`${label} wirklich löschen? Das kann nicht rückgängig gemacht werden.`)) return;
+    setReportActionBusy(row.id);
+    const { error } = await supabase.rpc("admin_delete_reported_content" as any, { p_report_id: row.id });
+    setReportActionBusy(null);
+    if (error) { toast.error(error.message); return; }
+    toast.success(`${label} gelöscht`);
+    setDetailRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, status: "resolved" } : r)));
+  };
+
+  const deleteReportedUser = async (row: ListRow) => {
+    if (!row.reported_user_id) return;
+    if (
+      !confirm(
+        `Konto von ${row.reported_user_name ?? "diesem Nutzer"} wirklich vollständig löschen? Das kann nicht rückgängig gemacht werden.`
+      )
+    )
+      return;
+    setReportActionBusy(row.id);
+    const { error } = await supabase.rpc("admin_delete_user" as any, { p_user_id: row.reported_user_id });
+    setReportActionBusy(null);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Nutzer gelöscht");
+    // That account's other reports are gone too (cascade) — just reload the list.
+    openDetail("reports", detail.title);
+  };
 
   const load = async (r: Range) => {
     setLoading(true);
@@ -387,19 +440,53 @@ const AdminStats = () => {
             ) : (
               <div className="divide-y divide-border">
                 {detailRows.map((r) => (
-                  <div key={r.id} className="py-2.5 flex items-start gap-3">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold truncate">{r.title || "—"}</p>
-                      {r.subtitle && (
-                        <p className="text-xs text-muted-foreground truncate">{r.subtitle}</p>
-                      )}
+                  <div key={r.id} className="py-2.5 space-y-2">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold truncate">{r.title || "—"}</p>
+                        {r.subtitle && (
+                          <p className="text-xs text-muted-foreground truncate">{r.subtitle}</p>
+                        )}
+                        {detail.kind === "reports" && r.details && (
+                          <p className="text-xs text-muted-foreground mt-0.5">„{r.details}"</p>
+                        )}
+                      </div>
+                      <div className="text-right shrink-0">
+                        {r.meta && <p className="text-[11px] font-medium">{r.meta}</p>}
+                        <p className="text-[11px] text-muted-foreground">
+                          {new Date(r.created_at).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "2-digit" })}
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-right shrink-0">
-                      {r.meta && <p className="text-[11px] font-medium">{r.meta}</p>}
-                      <p className="text-[11px] text-muted-foreground">
-                        {new Date(r.created_at).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "2-digit" })}
-                      </p>
-                    </div>
+                    {detail.kind === "reports" && r.status !== "resolved" && (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {r.reported_message_id && DELETABLE_CONTEXTS.has(r.context ?? "") && (
+                          <button
+                            onClick={() => deleteReportedContent(r)}
+                            disabled={reportActionBusy === r.id}
+                            className="flex items-center gap-1 text-[11px] font-semibold text-destructive bg-destructive/10 hover:bg-destructive/15 rounded-full px-2.5 py-1 disabled:opacity-40"
+                          >
+                            <Trash2 className="w-3 h-3" /> {CONTENT_LABEL[r.context ?? ""] ?? "Inhalt"} löschen
+                          </button>
+                        )}
+                        {r.reported_user_id && (
+                          <button
+                            onClick={() => deleteReportedUser(r)}
+                            disabled={reportActionBusy === r.id}
+                            className="flex items-center gap-1 text-[11px] font-semibold text-destructive bg-destructive/10 hover:bg-destructive/15 rounded-full px-2.5 py-1 disabled:opacity-40"
+                          >
+                            <UserX className="w-3 h-3" /> Nutzer löschen
+                          </button>
+                        )}
+                        <button
+                          onClick={() => resolveReport(r)}
+                          disabled={reportActionBusy === r.id}
+                          className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground bg-muted hover:bg-muted/70 rounded-full px-2.5 py-1 disabled:opacity-40"
+                        >
+                          <Check className="w-3 h-3" /> Erledigt
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

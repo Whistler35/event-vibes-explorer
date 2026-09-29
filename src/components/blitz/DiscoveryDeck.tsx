@@ -225,19 +225,25 @@ const SwipeCard = ({ item, onSwipe, onAdminDelete, isTop, isAdmin }: CardProps) 
 
         <div className="relative z-10 flex flex-col h-full pt-20 pb-8 px-8 items-center text-center">
           {/* Big activity tile */}
-          <div className="w-32 h-32 rounded-3xl bg-[hsl(var(--blitz-forest-deep))]/60 flex items-center justify-center mb-8">
+          <div className="shrink-0 w-32 h-32 rounded-3xl bg-[hsl(var(--blitz-forest-deep))]/60 flex items-center justify-center mb-8">
             <Zap className="w-16 h-16 text-[hsl(var(--bolt))]" strokeWidth={2} />
           </div>
 
-          <h2 className={`${fontClass} text-5xl font-black leading-[0.95] tracking-tight break-words max-w-full`}>
-            {asBlitzQuestion(item.activity)}
-          </h2>
+          {/* Flexible + scrollable so however long the text is, the host row
+              below never gets pushed off-screen or clipped. fontClass already
+              scales the size down for longer text (see getActivityFontClass);
+              this is the safety net for the extreme cases. */}
+          <div className="flex-1 min-h-0 w-full flex items-center justify-center overflow-y-auto">
+            <h2 className={`${fontClass} font-black leading-[0.95] tracking-tight break-words max-w-full`}>
+              {asBlitzQuestion(item.activity)}
+            </h2>
+          </div>
 
           <button
             type="button"
             data-no-drag
             onClick={handleProfile}
-            className="mt-8 flex items-center gap-2 text-white/85"
+            className="shrink-0 mt-8 flex items-center gap-2 text-white/85"
             aria-label={`Profil von ${item.host_name ?? "Host"} öffnen`}
           >
             <Avatar className="w-8 h-8 border border-white/20">
@@ -253,7 +259,7 @@ const SwipeCard = ({ item, onSwipe, onAdminDelete, isTop, isAdmin }: CardProps) 
           </button>
 
           {item.city && (
-            <p className="mt-2 text-white/60 text-sm">{item.city}</p>
+            <p className="shrink-0 mt-2 text-white/60 text-sm">{item.city}</p>
           )}
         </div>
       </div>
