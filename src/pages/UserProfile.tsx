@@ -18,7 +18,9 @@ import {
   Clock,
   X,
   ThumbsUp,
+  Flame,
 } from "lucide-react";
+import { useBlitzStreak } from "@/hooks/useBlitzStreak";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -78,6 +80,7 @@ const UserProfile = () => {
   }>({ open: false, tab: "sent" });
   const [friendActionLoading, setFriendActionLoading] = useState(false);
   const [showFriendsSheet, setShowFriendsSheet] = useState(false);
+  const streak = useBlitzStreak(userId);
 
   const friendshipQueryKey = ["friendship", user?.id, userId] as const;
   const { data: friendship } = useQuery({
@@ -436,13 +439,13 @@ const UserProfile = () => {
                     Mitgemacht <ThumbsUp className="inline w-3 h-3 -mt-0.5" />
                   </p>
                 </button>
-                <button
-                  onClick={() => setStatsSheet({ open: true, tab: "friends" })}
-                  className="rounded-2xl bg-white/10 border border-white/10 p-4 flex flex-col items-center gap-1 text-center"
-                >
-                  <p className="text-3xl font-black tabular-nums text-foreground leading-none">{stats.friendsCount}</p>
-                  <p className="text-muted-foreground text-[11px] font-semibold leading-tight mt-1">{t("userProfile.friends")}</p>
-                </button>
+                <div className="rounded-2xl bg-white/10 border border-white/10 p-4 flex flex-col items-center gap-1 text-center">
+                  <p className="text-3xl font-black tabular-nums text-foreground leading-none flex items-center gap-1">
+                    <Flame className="w-6 h-6 fill-[hsl(var(--bolt))] text-[hsl(var(--bolt))]" />
+                    {streak}
+                  </p>
+                  <p className="text-muted-foreground text-[11px] font-semibold leading-tight mt-1">Streak</p>
+                </div>
               </div>
 
               {/* Friends carousel */}

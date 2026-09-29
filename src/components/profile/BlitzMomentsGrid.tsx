@@ -58,10 +58,14 @@ const BlitzMomentsGrid = ({ userId, title = "Blitz-Momente" }: Props) => {
       if (list.length === 0) return [] as GridPost[];
 
       const matchIds = Array.from(new Set(list.map((p) => p.match_id)));
-      const { data: matches } = await supabase
-        .from("blitz_matches")
-        .select("id, blitz_request_id")
-        .in("id", matchIds);
+      // A direct `blitz_matches` select is RLS-restricted to that match's
+      // host/participants — a viewer on someone else's profile usually
+      // isn't one, so this RPC bridges match -> blitz_request id only,
+      // regardless of that relationship (same reasoning as the activity
+      // RPC right below).
+      const { data: matches } = matchIds.length
+        ? await supabase.rpc("get_blitz_request_ids_for_matches" as any, { p_match_ids: matchIds })
+        : { data: [] as any[] };
       // Same RPC as the feed (see useBlitzFeed.ts) — a viewer on someone
       // else's profile isn't necessarily a participant of the underlying
       // Blitz, so a direct blitz_requests read can be silently RLS-blocked.
@@ -70,7 +74,7 @@ const BlitzMomentsGrid = ({ userId, title = "Blitz-Momente" }: Props) => {
         ? await supabase.rpc("get_blitz_activity_names" as any, { p_ids: requestIds })
         : { data: [] as any[] };
       const activityByMatch = new Map(
-        (matches ?? []).map((m: any) => [m.id, requests?.find((r: any) => r.id === m.blitz_request_id)?.activity ?? null])
+        (matches ?? []).map((m: any) => [m.match_id, requests?.find((r: any) => r.id === m.blitz_request_id)?.activity ?? null])
       );
 
       return list.map((p) => ({

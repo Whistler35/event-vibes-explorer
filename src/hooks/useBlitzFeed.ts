@@ -50,7 +50,14 @@ export function useBlitzFeed(userId: string | undefined) {
       const [{ data: authors }, { data: matches }, { data: likes }, { data: comments }, { data: tags }] =
         await Promise.all([
           supabase.from("profiles").select("user_id, name, avatar_url").in("user_id", authorIds),
-          supabase.from("blitz_matches").select("id, blitz_request_id").in("id", matchIds),
+          // A direct `blitz_matches` select is RLS-restricted to that
+          // match's host/participants — a feed post viewer usually isn't
+          // one, so this RPC bridges match -> blitz_request id only,
+          // regardless of that relationship (see get_blitz_activity_names
+          // right below, same reasoning).
+          matchIds.length
+            ? supabase.rpc("get_blitz_request_ids_for_matches" as any, { p_match_ids: matchIds })
+            : Promise.resolve({ data: [] as any[] }),
           supabase.from("blitz_feed_post_likes" as any).select("post_id, user_id").in("post_id", postIds),
           supabase.from("blitz_feed_post_comments" as any).select("post_id").in("post_id", postIds),
           supabase.from("blitz_feed_post_tags" as any).select("post_id, tagged_user_id").in("post_id", postIds),
@@ -67,7 +74,7 @@ export function useBlitzFeed(userId: string | undefined) {
 
       const activityByMatch = new Map(
         (matches ?? []).map((m: any) => [
-          m.id,
+          m.match_id,
           requests?.find((r: any) => r.id === m.blitz_request_id)?.activity ?? null,
         ])
       );

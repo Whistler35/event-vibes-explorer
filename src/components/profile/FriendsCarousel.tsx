@@ -53,7 +53,7 @@ const FriendsCarousel = ({ userId, onAddFriend, isOwnProfile = true }: Props) =>
       <div className="flex items-center justify-between px-4">
         <h3 className="text-white font-bold text-lg flex items-center gap-2">
           <Users className="w-5 h-5 text-[hsl(var(--blitz-pink))]" />
-          {isOwnProfile ? "Deine Blitz-Community" : "Blitz-Community"}
+          {isOwnProfile ? "Deine Freunde" : "Freunde"}
           <span className="text-white/60 font-medium">({friends.length})</span>
         </h3>
       </div>

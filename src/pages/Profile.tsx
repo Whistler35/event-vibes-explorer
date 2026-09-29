@@ -4,10 +4,11 @@ import evendleLogo from "@/assets/evendle-logo.png";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, ShieldCheck, LogIn, Building2, Globe, ExternalLink } from "lucide-react";
+import { LogOut, Settings, ShieldCheck, LogIn, Building2, Globe, ExternalLink, Flame } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { useIsHost } from "@/hooks/useIsHost";
+import { useBlitzStreak } from "@/hooks/useBlitzStreak";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import FriendSearch from "@/components/FriendSearch";
@@ -63,6 +64,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const [showFriendsSheet, setShowFriendsSheet] = useState(false);
   const [statsSheet, setStatsSheet] = useState<{ open: boolean; tab: "sent" | "joined" | "friends" }>({ open: false, tab: "sent" });
+  const streak = useBlitzStreak(user?.id);
 
   // Combined into one query (was 3 sequential setState calls behind a single
   // `loading` flag) so this page gets the same "instant cached data, refresh
@@ -272,13 +274,13 @@ const Profile = () => {
                   <p className="text-3xl font-black tabular-nums text-foreground leading-none">{stats.blitzJoined}</p>
                   <p className="text-muted-foreground text-[11px] font-semibold leading-tight mt-1">Mitgemacht</p>
                 </button>
-                <button
-                  onClick={() => setStatsSheet({ open: true, tab: "friends" })}
-                  className="rounded-2xl bg-white/10 border border-white/10 p-4 flex flex-col items-center gap-1 text-center"
-                >
-                  <p className="text-3xl font-black tabular-nums text-foreground leading-none">{stats.friendsCount}</p>
-                  <p className="text-muted-foreground text-[11px] font-semibold leading-tight mt-1">{t("profile.friends")}</p>
-                </button>
+                <div className="rounded-2xl bg-white/10 border border-white/10 p-4 flex flex-col items-center gap-1 text-center">
+                  <p className="text-3xl font-black tabular-nums text-foreground leading-none flex items-center gap-1">
+                    <Flame className="w-6 h-6 fill-[hsl(var(--bolt))] text-[hsl(var(--bolt))]" />
+                    {streak}
+                  </p>
+                  <p className="text-muted-foreground text-[11px] font-semibold leading-tight mt-1">Streak</p>
+                </div>
               </div>
 
               {/* Friends carousel */}

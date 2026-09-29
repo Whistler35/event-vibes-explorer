@@ -62,6 +62,7 @@ const BlitzMatch = () => {
   const [burstId, setBurstId] = useState<string | null>(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [previewPhoto, setPreviewPhoto] = useState<string | null>(null);
+  const [chatFocused, setChatFocused] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const { reactions, toggleHeart } = useMessageReactions(
     "blitz_chat_message_reactions",
@@ -253,6 +254,8 @@ const BlitzMatch = () => {
 
   const others = participantIds.filter((id) => id !== user.id);
   const otherProfiles = others.map((id) => profilesMap.get(id)).filter(Boolean) as Profile[];
+  const iAmHost = match.host_id === user.id;
+  const hostProfile = profilesMap.get(match.host_id);
   const headerTitle =
     activity ||
     (otherProfiles.length === 1
@@ -388,16 +391,21 @@ const BlitzMatch = () => {
   return (
     <div className="h-[100dvh] bg-background text-foreground flex flex-col overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 pt-3 pb-2 shrink-0">
+      <div className="flex items-center justify-between px-4 pt-3 pb-2 shrink-0 gap-3">
         <button
           onClick={() => navigate("/blitz")}
-          className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-[0_4px_12px_-4px_rgba(0,0,0,0.1)]"
+          className="w-10 h-10 shrink-0 rounded-full bg-white flex items-center justify-center shadow-[0_4px_12px_-4px_rgba(0,0,0,0.1)]"
           aria-label="Back"
         >
           <ArrowLeft className="w-5 h-5 text-[hsl(var(--blitz-forest))]" />
         </button>
+        {chatFocused && (
+          <p className="flex-1 min-w-0 truncate text-center font-display text-lg font-bold text-foreground">
+            {asBlitzQuestion(headerTitle)}
+          </p>
+        )}
         <div
-          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-black ${
+          className={`shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-black ${
             expired
               ? "bg-white text-muted-foreground"
               : "bg-[hsl(var(--bolt))] text-[hsl(var(--blitz-forest))]"
@@ -408,131 +416,136 @@ const BlitzMatch = () => {
         </div>
       </div>
 
-      {/* Title + host */}
-      <div className="px-5 pt-2 pb-4 shrink-0">
-        <h1 className="font-display text-4xl font-bold tracking-tight text-foreground leading-tight">
-          {asBlitzQuestion(headerTitle)}
-        </h1>
-        <div className="mt-3 flex items-center gap-2">
-          <Avatar className="w-8 h-8">
-            <AvatarImage src={otherProfiles[0]?.avatar_url ?? undefined} />
-            <AvatarFallback className="bg-[hsl(var(--blitz-forest))] text-white text-[10px] font-black">
-              {otherProfiles[0]?.name?.[0] ?? "?"}
-            </AvatarFallback>
-          </Avatar>
-          <p className="text-sm text-muted-foreground">
-            <span className="text-foreground font-black">
-              {otherProfiles[0]?.name?.split(" ")[0] ?? "Host"}
-            </span>{" "}
-            is hosting
-          </p>
+      {/* Title + host + who's in — collapse while typing to give the chat more room, WhatsApp-style */}
+      <div
+        className={`shrink-0 overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${
+          chatFocused ? "max-h-0 opacity-0" : "max-h-[900px] opacity-100"
+        }`}
+      >
+        <div className="px-5 pt-2 pb-4">
+          <h1 className="font-display text-4xl font-bold tracking-tight text-foreground leading-tight">
+            {asBlitzQuestion(headerTitle)}
+          </h1>
+          <div className="mt-3 flex items-center gap-2">
+            <Avatar className="w-8 h-8">
+              <AvatarImage src={hostProfile?.avatar_url ?? undefined} />
+              <AvatarFallback className="bg-[hsl(var(--blitz-forest))] text-white text-[10px] font-black">
+                {hostProfile?.name?.[0] ?? "?"}
+              </AvatarFallback>
+            </Avatar>
+            <p className="text-sm text-muted-foreground">
+              <span className="text-foreground font-black">
+                {iAmHost ? "Du" : hostProfile?.name?.split(" ")[0] ?? "Host"}
+              </span>{" "}
+              is hosting
+            </p>
+          </div>
+
+          <div className="mt-4 flex items-center gap-2 flex-wrap">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-sm text-sm">
+              <Zap className="w-3.5 h-3.5 fill-[hsl(var(--blitz-forest))] text-[hsl(var(--blitz-forest))]" />
+              <span className="font-black tabular-nums">
+                {String(mm).padStart(2, "0")}:{String(ss).padStart(2, "0")}
+              </span>
+            </div>
+            {city && (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-sm text-sm">
+                <MapPin className="w-3.5 h-3.5 text-[hsl(var(--blitz-forest))]" />
+                <span className="font-semibold">{city}</span>
+              </div>
+            )}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-sm text-sm">
+              <Users className="w-3.5 h-3.5" />
+              <span className="font-semibold">{participantIds.length}</span>
+            </div>
+            {isAdmin && (
+              <button
+                onClick={handleAdminDelete}
+                aria-label={t("blitzMatch.adminDeleteAria")}
+                className="ml-auto w-9 h-9 rounded-full bg-red-500/90 hover:bg-red-500 flex items-center justify-center transition"
+              >
+                <Trash2 className="w-4 h-4 text-white" />
+              </button>
+            )}
+          </div>
         </div>
 
-        <div className="mt-4 flex items-center gap-2 flex-wrap">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-sm text-sm">
-            <Zap className="w-3.5 h-3.5 fill-[hsl(var(--blitz-forest))] text-[hsl(var(--blitz-forest))]" />
-            <span className="font-black tabular-nums">
-              {String(mm).padStart(2, "0")}:{String(ss).padStart(2, "0")}
-            </span>
+        {/* Who's in */}
+        <div className="px-5 pb-4">
+          <p className="text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground mb-2">
+            {t('blitzMatch.whosIn')}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {participantIds.map((id) => {
+              const p = profilesMap.get(id);
+              const isHost = id === match.host_id;
+              const isMe = id === user.id;
+              const canLongPress = iAmHost && !isHost;
+              return (
+                <ParticipantChip
+                  key={id}
+                  name={isMe ? "Du" : p?.name?.split(" ")[0] ?? "?"}
+                  avatarUrl={p?.avatar_url ?? null}
+                  label={isHost ? "HOST" : roleLabels.get(id) || "IN"}
+                  onTap={() => { if (!isMe) navigate(`/user/${id}`); }}
+                  onLongPress={canLongPress ? () => setOptionsForId(id) : undefined}
+                />
+              );
+            })}
           </div>
-          {city && (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-sm text-sm">
-              <MapPin className="w-3.5 h-3.5 text-[hsl(var(--blitz-forest))]" />
-              <span className="font-semibold">{city}</span>
-            </div>
-          )}
-          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-sm text-sm">
-            <Users className="w-3.5 h-3.5" />
-            <span className="font-semibold">{participantIds.length}</span>
-          </div>
-          {isAdmin && (
+
+          <button
+            onClick={() => setShowAddFriend(true)}
+            className="mt-3 w-full rounded-full py-3 text-[13px] font-semibold text-[hsl(var(--blitz-forest))] border border-[hsl(var(--blitz-forest))]/20 hover:bg-white/60 active:scale-[0.98] transition"
+          >
+            {t('blitzMatch.inviteMore')}
+          </button>
+
+          {iAmHost && (
             <button
-              onClick={handleAdminDelete}
-              aria-label={t("blitzMatch.adminDeleteAria")}
-              className="ml-auto w-9 h-9 rounded-full bg-red-500/90 hover:bg-red-500 flex items-center justify-center transition"
+              onClick={() => setShowExtendSheet(true)}
+              className="mt-2 w-full rounded-full py-3 text-[13px] font-semibold text-muted-foreground border border-border hover:bg-white/60 active:scale-[0.98] transition flex items-center justify-center gap-1.5"
             >
-              <Trash2 className="w-4 h-4 text-white" />
+              <Clock className="w-3.5 h-3.5" /> Huddle verlängern
             </button>
           )}
         </div>
       </div>
 
-      {/* Who's in */}
-      <div className="px-5 pb-4 shrink-0">
-        <p className="text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground mb-2">
-          {t('blitzMatch.whosIn')}
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {participantIds.map((id) => {
-            const p = profilesMap.get(id);
-            const isHost = id === match.host_id;
-            const isMe = id === user.id;
-            const iAmHost = match.host_id === user.id;
-            const canLongPress = iAmHost && !isHost;
-            return (
-              <ParticipantChip
-                key={id}
-                name={isMe ? "Du" : p?.name?.split(" ")[0] ?? "?"}
-                avatarUrl={p?.avatar_url ?? null}
-                label={isHost ? "HOST" : roleLabels.get(id) || "IN"}
-                onTap={() => { if (!isMe) navigate(`/user/${id}`); }}
-                onLongPress={canLongPress ? () => setOptionsForId(id) : undefined}
-              />
-            );
-          })}
-        </div>
+      <AddFriendToHuddleSheet
+        open={showAddFriend}
+        onOpenChange={setShowAddFriend}
+        matchId={match.id}
+        activity={activity}
+        excludeIds={participantIds}
+      />
 
-        <button
-          onClick={() => setShowAddFriend(true)}
-          className="mt-3 w-full rounded-full py-3 text-[13px] font-semibold text-[hsl(var(--blitz-forest))] border border-[hsl(var(--blitz-forest))]/20 hover:bg-white/60 active:scale-[0.98] transition"
-        >
-          {t('blitzMatch.inviteMore')}
-        </button>
+      <ParticipantOptionsSheet
+        matchId={match.id}
+        userId={optionsForId}
+        userName={profilesMap.get(optionsForId ?? "")?.name?.split(" ")[0] ?? "Person"}
+        currentRoleLabel={roleLabels.get(optionsForId ?? "") ?? null}
+        onOpenChange={(o) => !o && setOptionsForId(null)}
+        onRemoved={(removedId) => {
+          setParticipantIds((prev) => prev.filter((id) => id !== removedId));
+          setRoleLabels((prev) => {
+            const next = new Map(prev);
+            next.delete(removedId);
+            return next;
+          });
+        }}
+        onRoleSet={(uid, label) => {
+          setRoleLabels((prev) => new Map(prev).set(uid, label));
+        }}
+      />
 
-        {match.host_id === user.id && (
-          <button
-            onClick={() => setShowExtendSheet(true)}
-            className="mt-2 w-full rounded-full py-3 text-[13px] font-semibold text-muted-foreground border border-border hover:bg-white/60 active:scale-[0.98] transition flex items-center justify-center gap-1.5"
-          >
-            <Clock className="w-3.5 h-3.5" /> Huddle verlängern
-          </button>
-        )}
-
-        <AddFriendToHuddleSheet
-          open={showAddFriend}
-          onOpenChange={setShowAddFriend}
-          matchId={match.id}
-          activity={activity}
-          excludeIds={participantIds}
-        />
-
-        <ParticipantOptionsSheet
-          matchId={match.id}
-          userId={optionsForId}
-          userName={profilesMap.get(optionsForId ?? "")?.name?.split(" ")[0] ?? "Person"}
-          currentRoleLabel={roleLabels.get(optionsForId ?? "") ?? null}
-          onOpenChange={(o) => !o && setOptionsForId(null)}
-          onRemoved={(removedId) => {
-            setParticipantIds((prev) => prev.filter((id) => id !== removedId));
-            setRoleLabels((prev) => {
-              const next = new Map(prev);
-              next.delete(removedId);
-              return next;
-            });
-          }}
-          onRoleSet={(uid, label) => {
-            setRoleLabels((prev) => new Map(prev).set(uid, label));
-          }}
-        />
-
-        <ExtendHuddleSheet
-          open={showExtendSheet}
-          onOpenChange={setShowExtendSheet}
-          matchId={match.id}
-          currentExpiresAt={match.chat_expires_at}
-          onExtended={(newExpiresAt) => setMatch((prev) => (prev ? { ...prev, chat_expires_at: newExpiresAt } : prev))}
-        />
-      </div>
+      <ExtendHuddleSheet
+        open={showExtendSheet}
+        onOpenChange={setShowExtendSheet}
+        matchId={match.id}
+        currentExpiresAt={match.chat_expires_at}
+        onExtended={(newExpiresAt) => setMatch((prev) => (prev ? { ...prev, chat_expires_at: newExpiresAt } : prev))}
+      />
 
       {/* Huddle chat */}
       <div className="px-5 pb-2 shrink-0">
@@ -632,6 +645,8 @@ const BlitzMatch = () => {
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onFocus={() => setChatFocused(true)}
+            onBlur={() => setChatFocused(false)}
             placeholder={expired ? t("blitzMatch.chatExpired") : t("blitzMatch.typeSomething")}
             disabled={expired}
             className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground text-sm"
