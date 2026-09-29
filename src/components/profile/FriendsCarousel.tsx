@@ -23,17 +23,19 @@ const FriendsCarousel = ({ userId, onAddFriend, isOwnProfile = true }: Props) =>
 
   useEffect(() => {
     const load = async () => {
-      const { data: fs } = await supabase
-        .from("friendships")
-        .select("requester_id, addressee_id")
-        .eq("status", "accepted")
-        .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`);
-      if (!fs || fs.length === 0) {
+      // A direct `friendships` select is RLS-restricted to rows the
+      // CURRENT viewer is personally party to — on someone else's profile
+      // that only ever surfaces the one friendship (if any) between viewer
+      // and that person, not their other friends. This RPC (already used
+      // by ProfileStatsSheet's friends tab) bypasses that, exposing only
+      // the safe fields the carousel needs regardless of viewer relationship.
+      const { data: fs } = await supabase.rpc("get_profile_friends_list" as any, { p_user_id: userId });
+      const ids = ((fs ?? []) as any[]).map((f) => f.user_id);
+      if (ids.length === 0) {
         setFriends([]);
         setLoading(false);
         return;
       }
-      const ids = fs.map((f) => (f.requester_id === userId ? f.addressee_id : f.requester_id));
       const { data: profs } = await supabase
         .from("profiles")
         .select("user_id, name, avatar_url, bio")
