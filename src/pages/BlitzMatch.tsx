@@ -62,10 +62,8 @@ const BlitzMatch = () => {
   const [burstId, setBurstId] = useState<string | null>(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [previewPhoto, setPreviewPhoto] = useState<string | null>(null);
-  const [chatFocused, setChatFocused] = useState(false);
-  const [keyboardVisible, setKeyboardVisible] = useState(false);
-  const [viewportHeight, setViewportHeight] = useState<number | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
   const { reactions, toggleHeart } = useMessageReactions(
     "blitz_chat_message_reactions",
     "match_id",
@@ -78,7 +76,6 @@ const BlitzMatch = () => {
     setBurstId(messageId);
     setTimeout(() => setBurstId((cur) => (cur === messageId ? null : cur)), 700);
   };
-  const scrollRef = useRef<HTMLDivElement>(null);
   // Read inside the realtime effect without making it a dependency — that
   // effect must only ever (re)subscribe on matchId, never churn the socket
   // every time profilesMap changes (which happens right after mount and was
@@ -243,54 +240,8 @@ const BlitzMatch = () => {
   }, [matchId]);
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages.length]);
-
-  // `100dvh` did not reliably track the WebView actually shrinking for the
-  // keyboard on-device (the header stayed expanded AND the keyboard simply
-  // overlaid the chat — i.e. nothing below was getting less room at all).
-  // Measuring visualViewport directly and applying it as an explicit pixel
-  // height sidesteps that: it's the one thing guaranteed to reflect the
-  // WebView's real visible area regardless of how the keyboard got there.
-  // A height drop of >120px is treated as "keyboard is up" — also the most
-  // reliable of the composing signals, independent of focus-event quirks.
-  useEffect(() => {
-    const vv = window.visualViewport;
-    if (!vv) return;
-    const baseline = vv.height;
-    const update = () => {
-      setViewportHeight(vv.height);
-      setKeyboardVisible(baseline - vv.height > 120);
-    };
-    update();
-    vv.addEventListener("resize", update);
-    return () => vv.removeEventListener("resize", update);
-  }, []);
-
-  // Capacitor's own Keyboard events as a second, independent signal — kept
-  // alongside visualViewport rather than instead of it.
-  useEffect(() => {
-    if (!Capacitor.isNativePlatform()) return;
-    let removeShow: (() => void) | undefined;
-    let removeHide: (() => void) | undefined;
-    import("@capacitor/keyboard").then(({ Keyboard }) => {
-      Keyboard.addListener("keyboardWillShow", () => setKeyboardVisible(true)).then((h) => {
-        removeShow = () => h.remove();
-      });
-      Keyboard.addListener("keyboardWillHide", () => setKeyboardVisible(false)).then((h) => {
-        removeHide = () => h.remove();
-      });
-    });
-    return () => {
-      removeShow?.();
-      removeHide?.();
-    };
-  }, []);
-
-  // Third, simplest signal: the instant there's text in the box, collapse —
-  // matches "sobald ich zu schreiben anfange" literally, and can't fail to
-  // fire since it rides the same state the input is already bound to.
-  const isComposing = chatFocused || keyboardVisible || input.trim().length > 0;
 
   if (!match || !user) {
     return (
@@ -438,11 +389,8 @@ const BlitzMatch = () => {
 
   return (
     <div
-      className="bg-background text-foreground flex flex-col overflow-hidden"
-      style={{
-        height: viewportHeight != null ? `${viewportHeight}px` : "100dvh",
-        paddingTop: 'env(safe-area-inset-top)',
-      }}
+      className="min-h-screen bg-background text-foreground flex flex-col"
+      style={{ paddingTop: 'env(safe-area-inset-top)' }}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 pt-3 pb-2 shrink-0 gap-3">
@@ -453,13 +401,8 @@ const BlitzMatch = () => {
         >
           <ArrowLeft className="w-5 h-5 text-[hsl(var(--blitz-forest))]" />
         </button>
-        {isComposing && (
-          <p className="flex-1 min-w-0 truncate text-center font-display text-lg font-bold text-foreground">
-            {asBlitzQuestion(headerTitle)}
-          </p>
-        )}
         <div
-          className={`shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-black ${
+          className={`ml-auto shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-black ${
             expired
               ? "bg-white text-muted-foreground"
               : "bg-[hsl(var(--bolt))] text-[hsl(var(--blitz-forest))]"
@@ -470,12 +413,8 @@ const BlitzMatch = () => {
         </div>
       </div>
 
-      {/* Title + host + who's in — collapse while typing to give the chat more room, WhatsApp-style */}
-      <div
-        className={`shrink-0 overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${
-          isComposing ? "max-h-0 opacity-0" : "max-h-[900px] opacity-100"
-        }`}
-      >
+      {/* Title + host + who's in */}
+      <div className="shrink-0">
         <div className="px-5 pt-2 pb-4">
           <h1 className="font-display text-4xl font-bold tracking-tight text-foreground leading-tight">
             {asBlitzQuestion(headerTitle)}
@@ -607,7 +546,7 @@ const BlitzMatch = () => {
           The Huddle
         </p>
       </div>
-      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-5 pb-4 space-y-2">
+      <div className="flex-1 px-5 pb-4 space-y-2">
         {messages.length === 0 && (
           <div className="text-center text-muted-foreground text-sm py-12">
             {t("blitzMatch.emptyChat")}
@@ -674,6 +613,7 @@ const BlitzMatch = () => {
             </div>
           );
         })}
+        <div ref={bottomRef} />
       </div>
 
       <form
@@ -699,8 +639,6 @@ const BlitzMatch = () => {
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onFocus={() => setChatFocused(true)}
-            onBlur={() => setChatFocused(false)}
             placeholder={expired ? t("blitzMatch.chatExpired") : t("blitzMatch.typeSomething")}
             disabled={expired}
             className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground text-sm"
