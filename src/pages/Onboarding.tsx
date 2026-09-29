@@ -8,6 +8,7 @@ import { Camera, Check, Loader2, MapPin, Bell, Users, Zap, ChevronRight, Message
 import { toast } from "sonner";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import FriendSearch from "@/components/FriendSearch";
+import { Geolocation } from "@capacitor/geolocation";
 
 type Step = 0 | 1 | 2 | 3 | 4;
 
@@ -190,13 +191,16 @@ export default function Onboarding() {
   };
 
   const requestLocation = async () => {
-    if (!("geolocation" in navigator)) { toast.error("Standort nicht verfügbar"); return; }
     setLocationBusy(true);
-    navigator.geolocation.getCurrentPosition(
-      () => { setLocationGranted(true); setLocationBusy(false); toast.success("Standort aktiviert"); },
-      () => { setLocationBusy(false); toast.error("Standort abgelehnt – du kannst das später ändern"); },
-      { timeout: 10_000 }
-    );
+    try {
+      await Geolocation.getCurrentPosition({ timeout: 10_000 });
+      setLocationGranted(true);
+      toast.success("Standort aktiviert");
+    } catch {
+      toast.error("Standort abgelehnt – du kannst das später ändern");
+    } finally {
+      setLocationBusy(false);
+    }
   };
 
   const requestPush = async () => {

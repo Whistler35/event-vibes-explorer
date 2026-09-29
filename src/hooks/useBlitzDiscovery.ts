@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { getBlockedIds } from "@/lib/moderation";
+import { Geolocation } from "@capacitor/geolocation";
 
 export interface DiscoveryBlitz {
   id: string;
@@ -40,20 +41,15 @@ export function useBlitzDiscovery(_city?: string | null) {
 
   // Get viewer location once
   useEffect(() => {
-    if (!("geolocation" in navigator)) {
-      setLocError("Location is not supported by your browser.");
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => setViewerCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      (err) =>
+    Geolocation.getCurrentPosition({ enableHighAccuracy: false, timeout: 10000, maximumAge: 5 * 60_000 })
+      .then((pos) => setViewerCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }))
+      .catch((err) =>
         setLocError(
-          err.code === err.PERMISSION_DENIED
-            ? "Location access required to see Blitzes near you."
-            : "Could not determine your location."
-        ),
-      { enableHighAccuracy: false, timeout: 10000, maximumAge: 5 * 60_000 }
-    );
+          err?.message?.toLowerCase().includes("denied")
+            ? "Standortzugriff wird benötigt, um Blitze in deiner Nähe zu sehen."
+            : "Standort konnte nicht ermittelt werden."
+        )
+      );
   }, []);
 
   const load = useCallback(async () => {

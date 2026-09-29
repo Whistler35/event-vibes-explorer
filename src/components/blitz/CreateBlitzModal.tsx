@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { trackEvent } from "@/lib/analytics";
+import { Geolocation } from "@capacitor/geolocation";
 
 interface CreateBlitzModalProps {
   open: boolean;
@@ -61,28 +62,21 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
     },
   });
 
-  const requestLocation = () => {
-    if (!("geolocation" in navigator)) {
-      setLocError("Standort wird von deinem Browser nicht unterstützt.");
-      return;
-    }
+  const requestLocation = async () => {
     setLocating(true);
     setLocError(null);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        setLocating(false);
-      },
-      (err) => {
-        setLocError(
-          err.code === err.PERMISSION_DENIED
-            ? "Standortzugriff wird für einen Blitz benötigt."
-            : "Standort konnte nicht ermittelt werden."
-        );
-        setLocating(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
-    );
+    try {
+      const pos = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
+      setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+    } catch (err: any) {
+      setLocError(
+        err?.message?.toLowerCase().includes("denied")
+          ? "Standortzugriff wird für einen Blitz benötigt."
+          : "Standort konnte nicht ermittelt werden."
+      );
+    } finally {
+      setLocating(false);
+    }
   };
 
   useEffect(() => {

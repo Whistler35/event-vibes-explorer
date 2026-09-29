@@ -1,5 +1,6 @@
 import { useEffect, useCallback, useRef } from 'react'
 import { Capacitor } from '@capacitor/core'
+import { Geolocation } from '@capacitor/geolocation'
 import { supabase } from '@/integrations/supabase/client'
 import { toast } from 'sonner'
 
@@ -27,15 +28,13 @@ async function getUserId(): Promise<string | null> {
 }
 
 // Returns current position silently (no error thrown, returns null on failure)
-function getCurrentPosition(): Promise<GeolocationCoordinates | null> {
-  if (!('geolocation' in navigator)) return Promise.resolve(null)
-  return new Promise((resolve) => {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => resolve(pos.coords),
-      () => resolve(null),
-      { maximumAge: 300_000, timeout: 10_000 }
-    )
-  })
+async function getCurrentPosition(): Promise<GeolocationCoordinates | null> {
+  try {
+    const pos = await Geolocation.getCurrentPosition({ maximumAge: 300_000, timeout: 10_000 })
+    return pos.coords
+  } catch {
+    return null
+  }
 }
 
 // ─── Native path (APNs / FCM via @capacitor/push-notifications) ─────────────
