@@ -43,62 +43,27 @@ const ProfileStatsSheet = ({ open, onOpenChange, userId, activeTab }: Props) => 
     if (!open || !userId) return;
     setLoading(true);
 
+    // Direct RLS-scoped queries here only ever returned rows the CURRENT
+    // viewer is personally party to — always right on your own profile, but
+    // silently empty on anyone else's (the same class of bug as the stat
+    // counts above it, see get_profile_stats). These RPCs return just the
+    // fields already shown here, safe regardless of viewer relationship.
     const fetchData = async () => {
-      // Blitze, die ich gesendet habe
-      const { data: sentData } = await supabase
-        .from("blitz_requests")
-        .select("id, activity, city, created_at")
-        .eq("host_id", userId)
-        .order("created_at", { ascending: false })
-        .limit(50);
+      const { data: sentData } = await supabase.rpc("get_profile_blitz_list" as any, {
+        p_user_id: userId,
+        p_kind: "sent",
+      });
       setSent((sentData as BlitzItem[]) || []);
 
-      // Blitze, bei denen ich mitgemacht habe
-      const { data: parts } = await supabase
-        .from("blitz_match_participants")
-        .select("match_id")
-        .eq("user_id", userId);
-      const matchIds = (parts || []).map((p: any) => p.match_id);
-      if (matchIds.length) {
-        const { data: matches } = await supabase
-          .from("blitz_matches")
-          .select("blitz_request_id, created_at")
-          .in("id", matchIds);
-        const reqIds = Array.from(
-          new Set((matches || []).map((m: any) => m.blitz_request_id).filter(Boolean))
-        );
-        if (reqIds.length) {
-          const { data: reqs } = await supabase
-            .from("blitz_requests")
-            .select("id, activity, city, created_at")
-            .in("id", reqIds)
-            .order("created_at", { ascending: false });
-          setJoined((reqs as BlitzItem[]) || []);
-        } else {
-          setJoined([]);
-        }
-      } else {
-        setJoined([]);
-      }
+      const { data: joinedData } = await supabase.rpc("get_profile_blitz_joined_list" as any, {
+        p_user_id: userId,
+      });
+      setJoined((joinedData as BlitzItem[]) || []);
 
-      // Freunde
-      const { data: friendships } = await supabase
-        .from("friendships")
-        .select("requester_id, addressee_id")
-        .eq("status", "accepted")
-        .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`);
-      if (friendships && friendships.length > 0) {
-        const friendIds = friendships.map((f: any) =>
-          f.requester_id === userId ? f.addressee_id : f.requester_id
-        );
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("user_id, name, avatar_url")
-          .in("user_id", friendIds);
-        setFriends((profiles as FriendItem[]) || []);
-      } else {
-        setFriends([]);
-      }
+      const { data: friendsData } = await supabase.rpc("get_profile_friends_list" as any, {
+        p_user_id: userId,
+      });
+      setFriends((friendsData as FriendItem[]) || []);
 
       setLoading(false);
     };

@@ -56,9 +56,13 @@ export function useBlitzFeed(userId: string | undefined) {
           supabase.from("blitz_feed_post_tags" as any).select("post_id, tagged_user_id").in("post_id", postIds),
         ]);
 
+      // A feed post can be visible far more broadly ('public') than the
+      // blitz_requests RLS policy allows reading directly (host / accepted
+      // friend of host / selected target only) — this RPC exposes just the
+      // activity text, safe to read regardless of that relationship.
       const requestIds = Array.from(new Set((matches ?? []).map((m: any) => m.blitz_request_id)));
       const { data: requests } = requestIds.length
-        ? await supabase.from("blitz_requests").select("id, activity").in("id", requestIds)
+        ? await supabase.rpc("get_blitz_activity_names" as any, { p_ids: requestIds })
         : { data: [] as any[] };
 
       const activityByMatch = new Map(

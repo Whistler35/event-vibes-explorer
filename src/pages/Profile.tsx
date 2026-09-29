@@ -84,21 +84,20 @@ const Profile = () => {
         .eq("user_id", user!.id)
         .maybeSingle() as any;
 
-      const [friendsRes, blitzRes, joinedRes] = await Promise.all([
-        supabase.from("friendships").select("id", { count: "exact", head: true })
-          .eq("status", "accepted")
-          .or(`requester_id.eq.${user!.id},addressee_id.eq.${user!.id}`),
-        supabase.from("blitz_requests").select("id", { count: "exact", head: true }).eq("host_id", user!.id),
-        supabase.from("blitz_match_participants").select("id", { count: "exact", head: true }).eq("user_id", user!.id),
-      ]);
+      // RLS on friendships/blitz_requests/blitz_match_participants only
+      // lets you see rows you're personally party to — fine for your own
+      // profile (you always qualify) but this RPC keeps the same code path
+      // as UserProfile.tsx, which genuinely needs it to bypass that.
+      const { data: statsRow } = await supabase.rpc("get_profile_stats" as any, { p_user_id: user!.id });
+      const s = (statsRow as any[] | null)?.[0];
 
       return {
         profile: (profileData ?? null) as ProfileData | null,
         hostProfile: (hostData ?? null) as HostProfileData | null,
         stats: {
-          friendsCount: friendsRes.count || 0,
-          blitzSent: blitzRes.count || 0,
-          blitzJoined: joinedRes.count || 0,
+          friendsCount: Number(s?.friends_count ?? 0),
+          blitzSent: Number(s?.blitz_sent ?? 0),
+          blitzJoined: Number(s?.blitz_joined ?? 0),
         } as Stats,
       };
     },

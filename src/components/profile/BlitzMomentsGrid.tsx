@@ -62,9 +62,12 @@ const BlitzMomentsGrid = ({ userId, title = "Blitz-Momente" }: Props) => {
         .from("blitz_matches")
         .select("id, blitz_request_id")
         .in("id", matchIds);
+      // Same RPC as the feed (see useBlitzFeed.ts) — a viewer on someone
+      // else's profile isn't necessarily a participant of the underlying
+      // Blitz, so a direct blitz_requests read can be silently RLS-blocked.
       const requestIds = Array.from(new Set((matches ?? []).map((m: any) => m.blitz_request_id)));
       const { data: requests } = requestIds.length
-        ? await supabase.from("blitz_requests").select("id, activity").in("id", requestIds)
+        ? await supabase.rpc("get_blitz_activity_names" as any, { p_ids: requestIds })
         : { data: [] as any[] };
       const activityByMatch = new Map(
         (matches ?? []).map((m: any) => [m.id, requests?.find((r: any) => r.id === m.blitz_request_id)?.activity ?? null])
@@ -90,12 +93,12 @@ const BlitzMomentsGrid = ({ userId, title = "Blitz-Momente" }: Props) => {
           {title}
         </h3>
       </div>
-      <div className="grid grid-cols-3 gap-1.5">
+      <div className="flex gap-2.5 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-1 -mx-4 px-4">
         {posts.map((p) => (
           <button
             key={p.id}
             onClick={() => setPreview(p)}
-            className="aspect-square rounded-xl overflow-hidden bg-muted"
+            className="shrink-0 w-28 aspect-square rounded-xl overflow-hidden bg-muted snap-start"
           >
             <img src={p.photo_url} alt="" loading="lazy" className="w-full h-full object-cover" />
           </button>

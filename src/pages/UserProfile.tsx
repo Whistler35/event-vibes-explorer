@@ -126,24 +126,23 @@ const UserProfile = () => {
         hostProfileData = hostData ?? null;
       }
 
-      const [friendsRes, blitzRes, joinedRes] = await Promise.all([
-        supabase
-          .from("friendships")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "accepted")
-          .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`),
-        supabase.from("blitz_requests").select("id", { count: "exact", head: true }).eq("host_id", userId!),
-        supabase.from("blitz_match_participants").select("id", { count: "exact", head: true }).eq("user_id", userId!),
-      ]);
+      // Direct row counts against friendships / blitz_requests /
+      // blitz_match_participants were silently undercounting (often 0) for
+      // any viewer who isn't personally party to those rows — RLS on all
+      // three only exposes rows the CURRENT user is involved in, not rows
+      // belonging to the profile being *viewed*. This RPC returns just the
+      // three numbers, safe regardless of the viewer's relationship to them.
+      const { data: statsRow } = await supabase.rpc("get_profile_stats" as any, { p_user_id: userId! });
+      const s = (statsRow as any[] | null)?.[0];
 
       return {
         profile: (data ?? null) as ProfileData | null,
         isHost: userIsHost,
         hostProfile: hostProfileData,
         stats: {
-          friendsCount: friendsRes.count || 0,
-          blitzSent: blitzRes.count || 0,
-          blitzJoined: joinedRes.count || 0,
+          friendsCount: Number(s?.friends_count ?? 0),
+          blitzSent: Number(s?.blitz_sent ?? 0),
+          blitzJoined: Number(s?.blitz_joined ?? 0),
         },
       };
     },
