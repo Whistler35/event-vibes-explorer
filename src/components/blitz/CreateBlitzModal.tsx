@@ -61,7 +61,7 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
 
   const requestLocation = () => {
     if (!("geolocation" in navigator)) {
-      setLocError("Location is not supported by your browser.");
+      setLocError("Standort wird von deinem Browser nicht unterstützt.");
       return;
     }
     setLocating(true);
@@ -74,8 +74,8 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
       (err) => {
         setLocError(
           err.code === err.PERMISSION_DENIED
-            ? "Location access required to Blitz."
-            : "Could not determine your location."
+            ? "Standortzugriff wird für einen Blitz benötigt."
+            : "Standort konnte nicht ermittelt werden."
         );
         setLocating(false);
       },
@@ -160,8 +160,8 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
         className="w-screen sm:w-[calc(100vw-1rem)] max-w-md p-0 border-0 bg-[hsl(var(--blitz-forest))] text-white h-[100dvh] sm:h-auto sm:max-h-[92dvh] overflow-hidden rounded-none sm:rounded-[28px] top-auto bottom-0 left-1/2 -translate-x-1/2 translate-y-0 sm:top-1/2 sm:bottom-auto sm:-translate-y-1/2 flex flex-col [&>button]:text-white [&>button]:opacity-90 [&>button]:hover:opacity-100 [&>button]:z-20"
       >
         <VisuallyHidden>
-          <DialogTitle>Spontaneous Blitz Request</DialogTitle>
-          <DialogDescription>Create a spontaneous Blitz request</DialogDescription>
+          <DialogTitle>Spontane Blitz-Anfrage</DialogTitle>
+          <DialogDescription>Erstelle eine spontane Blitz-Anfrage</DialogDescription>
         </VisuallyHidden>
         <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
         <div className="px-5 pt-8 pb-6 space-y-5 min-w-0">
@@ -172,20 +172,20 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
             <div className="min-w-0 flex-1">
               <p className="text-[10px] uppercase tracking-[0.3em] text-white/55 font-black">Blitz</p>
               <h2 className="font-display text-xl sm:text-2xl font-bold leading-tight truncate">
-                Spontaneous Request
+                Spontane Anfrage
               </h2>
             </div>
           </div>
 
           <div className="space-y-2">
             <label className="text-[11px] font-black uppercase tracking-[0.25em] text-white/55">
-              What are you up for?
+              Worauf hast du Lust?
             </label>
             <input
               autoFocus
               value={activity}
               onChange={(e) => setActivity(e.target.value)}
-              placeholder="e.g. Tennis, Coffee…"
+              placeholder="z.B. Tennis, Kaffee…"
               maxLength={80}
               className="block w-full min-w-0 max-w-full bg-transparent border-b border-white/25 focus:border-[hsl(var(--bolt))] outline-none text-base sm:text-lg font-black placeholder:text-white/25 py-3 transition truncate"
             />
@@ -193,7 +193,7 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
 
           <div className="space-y-3">
             <label className="text-[11px] font-black uppercase tracking-[0.25em] text-white/55">
-              How long?
+              Wie lange sichtbar?
             </label>
             <div className="grid grid-cols-3 gap-2">
               {DURATIONS.map((d) => {
@@ -317,26 +317,26 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
             {locating ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin text-white/70" />
-                <span className="text-sm text-white/70">Detecting location…</span>
+                <span className="text-sm text-white/70">Standort wird ermittelt…</span>
               </>
             ) : coords ? (
               <>
                 <MapPin className="w-5 h-5 text-[hsl(var(--bolt))]" />
                 <span className="text-sm text-white/80">
-                  Location active · visible within {radius} km
+                  Standort aktiv · sichtbar im Umkreis von {radius} km
                 </span>
               </>
             ) : (
               <>
                 <MapPin className="w-5 h-5 text-white/50" />
                 <div className="flex-1 text-sm text-white/70">
-                  {locError ?? "Location required."}
+                  {locError ?? "Standort erforderlich."}
                 </div>
                 <button
                   onClick={requestLocation}
                   className="px-3 py-1.5 rounded-full bg-[hsl(var(--bolt))] text-[hsl(var(--blitz-forest))] text-[11px] font-black uppercase tracking-wider"
                 >
-                  Allow
+                  Erlauben
                 </button>
               </>
             )}
@@ -354,7 +354,7 @@ const CreateBlitzModal = ({ open, onOpenChange, onCreated }: CreateBlitzModalPro
             className="w-full py-5 rounded-full bg-[hsl(var(--bolt))] text-[hsl(var(--blitz-forest))] font-black text-lg tracking-[0.15em] uppercase shadow-[0_12px_32px_-8px_hsl(var(--bolt)/0.6)] active:scale-[0.98] transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             <Zap className="w-5 h-5 fill-[hsl(var(--blitz-forest))]" />
-            {submitting ? "Blitzing…" : "Blitz now"}
+            {submitting ? "Wird geblitzt…" : "Jetzt blitzen"}
           </button>
           <button
             type="button"
