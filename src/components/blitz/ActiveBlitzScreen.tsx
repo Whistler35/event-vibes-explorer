@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Zap } from "lucide-react";
 import { shareInvite } from "@/lib/share";
 import { PUBLIC_WEB_ORIGIN } from "@/lib/publicUrl";
+import { getActivityFontClass } from "@/lib/blitzText";
 
 interface ActiveBlitzScreenProps {
   request: BlitzRequest;
@@ -125,11 +126,18 @@ const ActiveBlitzScreen = ({ request, onEnded }: ActiveBlitzScreenProps) => {
           <X className="w-4 h-4 text-white/80" />
         </button>
 
-        <div className="text-center pt-4 space-y-3">
+        <div className="w-full min-w-0 text-center pt-4 space-y-3">
           <p className="text-[11px] uppercase tracking-[0.35em] text-white/55 font-bold">
             EVENDLE BLITZ
           </p>
-          <h1 className="text-6xl font-black leading-none tracking-tight break-words">
+          {/* Same fix as the Discover card (SwipeCard): a definite width
+              (w-full, not just a cap) so the text actually wraps against it
+              instead of sizing to its longest unbroken run first, plus
+              break-all as a hard backstop and length-based sizing instead of
+              a fixed text-6xl. */}
+          <h1
+            className={`${getActivityFontClass(request.activity)} font-black leading-none tracking-tight break-words [overflow-wrap:anywhere] break-all w-full`}
+          >
             {request.activity}
           </h1>
           <p className="text-white/65 text-[15px]">

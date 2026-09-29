@@ -64,6 +64,7 @@ const BlitzMatch = () => {
   const [previewPhoto, setPreviewPhoto] = useState<string | null>(null);
   const [chatFocused, setChatFocused] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [viewportHeight, setViewportHeight] = useState<number | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const { reactions, toggleHeart } = useMessageReactions(
     "blitz_chat_message_reactions",
@@ -245,11 +246,29 @@ const BlitzMatch = () => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages.length]);
 
-  // Native keyboard show/hide is the authoritative signal for "is the user
-  // typing" — driving the header collapse off just input focus turned out to
-  // be unreliable on-device (reports of the header staying expanded and the
-  // keyboard simply covering the chat). This is on top of, not instead of,
-  // the focus handlers below.
+  // `100dvh` did not reliably track the WebView actually shrinking for the
+  // keyboard on-device (the header stayed expanded AND the keyboard simply
+  // overlaid the chat — i.e. nothing below was getting less room at all).
+  // Measuring visualViewport directly and applying it as an explicit pixel
+  // height sidesteps that: it's the one thing guaranteed to reflect the
+  // WebView's real visible area regardless of how the keyboard got there.
+  // A height drop of >120px is treated as "keyboard is up" — also the most
+  // reliable of the composing signals, independent of focus-event quirks.
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const baseline = vv.height;
+    const update = () => {
+      setViewportHeight(vv.height);
+      setKeyboardVisible(baseline - vv.height > 120);
+    };
+    update();
+    vv.addEventListener("resize", update);
+    return () => vv.removeEventListener("resize", update);
+  }, []);
+
+  // Capacitor's own Keyboard events as a second, independent signal — kept
+  // alongside visualViewport rather than instead of it.
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
     let removeShow: (() => void) | undefined;
@@ -418,7 +437,13 @@ const BlitzMatch = () => {
   }
 
   return (
-    <div className="h-[100dvh] bg-background text-foreground flex flex-col overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+    <div
+      className="bg-background text-foreground flex flex-col overflow-hidden"
+      style={{
+        height: viewportHeight != null ? `${viewportHeight}px` : "100dvh",
+        paddingTop: 'env(safe-area-inset-top)',
+      }}
+    >
       {/* Header */}
       <div className="flex items-center justify-between px-4 pt-3 pb-2 shrink-0 gap-3">
         <button
