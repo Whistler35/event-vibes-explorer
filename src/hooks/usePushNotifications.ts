@@ -61,9 +61,10 @@ async function subscribeNative(): Promise<boolean> {
       if (!userId) { pushDebug('kein eingeloggter userId — abgebrochen'); resolve(false); return }
 
       // A user may have several devices; the unique key is (user_id, device_token).
+      const platform = Capacitor.getPlatform()
       const { error } = await supabase.from('push_subscriptions').upsert({
         user_id:      userId,
-        platform:     Capacitor.getPlatform(),
+        platform,
         device_token: token,
         latitude:     coords?.latitude  ?? null,
         longitude:    coords?.longitude ?? null,
@@ -74,6 +75,18 @@ async function subscribeNative(): Promise<boolean> {
         pushDebug(`DB-Upsert FEHLGESCHLAGEN: ${error.message}`)
       } else {
         pushDebug('Token erfolgreich in push_subscriptions gespeichert ✅')
+        // A reinstall or a new build issues a fresh APNs/FCM token without
+        // invalidating the old row — send-push-notification pushes to every
+        // row for a user with no dedup, so a stale token still reachable
+        // (e.g. an older TestFlight build still on the same device) meant
+        // duplicate notifications. Only the just-registered token for this
+        // platform should remain.
+        await supabase
+          .from('push_subscriptions')
+          .delete()
+          .eq('user_id', userId)
+          .eq('platform', platform)
+          .neq('device_token', token)
       }
       resolve(!error)
     })
@@ -138,7 +151,17 @@ async function subscribeWeb(): Promise<boolean> {
       longitude:  coords?.longitude ?? null,
       user_agent: navigator.userAgent,
     }, { onConflict: 'endpoint' })
-    if (error) console.error('push_subscriptions upsert (web):', error)
+    if (error) {
+      console.error('push_subscriptions upsert (web):', error)
+    } else {
+      // Same stale-row cleanup as the native path (see subscribeNative).
+      await supabase
+        .from('push_subscriptions')
+        .delete()
+        .eq('user_id', userId)
+        .eq('platform', 'web')
+        .neq('endpoint', json.endpoint)
+    }
     return !error
   } catch (err) {
     console.error('subscribeWeb error:', err)
