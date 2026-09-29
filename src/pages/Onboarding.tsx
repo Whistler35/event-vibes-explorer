@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Camera, Check, Loader2, MapPin, Bell, Users, Zap, ChevronRight } from "lucide-react";
+import { Camera, Check, Loader2, MapPin, Bell, Users, Zap, ChevronRight, MessageCircle, PartyPopper } from "lucide-react";
 import { toast } from "sonner";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import FriendSearch from "@/components/FriendSearch";
@@ -13,6 +13,36 @@ type Step = 0 | 1 | 2 | 3 | 4;
 
 const TOTAL_STEPS = 5;
 type Screen = "flow" | "ready";
+
+// Instagram-Story-style explainer, shown once before the functional setup
+// steps below — tap right/left to advance/go back, quick and skippable.
+// Purely explains the concept; collects nothing.
+const STORY_SLIDES = [
+  {
+    icon: Zap,
+    eyebrow: "EVENDLE",
+    title: "Spontan statt geplant.",
+    body: "Kein Gruppenchat, keine 87 ungelesenen Nachrichten. Du sagst, worauf du Lust hast — der Rest ergibt sich.",
+  },
+  {
+    icon: MapPin,
+    eyebrow: "SCHRITT 1",
+    title: "Zünde einen Blitz.",
+    body: "Aktivität eintippen, Dauer wählen, fertig. Läuft für die Zeit, die du festlegst — dann verschwindet er wieder.",
+  },
+  {
+    icon: MessageCircle,
+    eyebrow: "SCHRITT 2",
+    title: "Jemand ist dabei? Match!",
+    body: "Ihr landet direkt im Huddle-Chat. Kein Warten, kein Ghosting — ihr klärt einfach, wann und wo.",
+  },
+  {
+    icon: PartyPopper,
+    eyebrow: "SCHRITT 3",
+    title: "Danach: für die Ewigkeit.",
+    body: "Teilt ein Foto vom Blitz im Feed — eure eigene kleine Sammlung an spontanen Momenten.",
+  },
+];
 
 const INTERESTS = [
   "Tennis", "Fußball", "Padel", "Basketball", "Volleyball",
@@ -31,6 +61,7 @@ export default function Onboarding() {
 
   const [step, setStep] = useState<Step>(0);
   const [screen, setScreen] = useState<Screen>("flow");
+  const [storyStep, setStoryStep] = useState<number | null>(0);
   const [name, setName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -62,6 +93,78 @@ export default function Onboarding() {
 
   if (checkingOnboarded) {
     return <div className="min-h-screen bg-[hsl(var(--blitz-forest))]" />;
+  }
+
+  const storyTap = (side: "left" | "right") => {
+    if (storyStep === null) return;
+    if (side === "right") {
+      if (storyStep >= STORY_SLIDES.length - 1) setStoryStep(null);
+      else setStoryStep(storyStep + 1);
+    } else {
+      setStoryStep(Math.max(0, storyStep - 1));
+    }
+  };
+
+  if (storyStep !== null) {
+    const slide = STORY_SLIDES[storyStep];
+    const Icon = slide.icon;
+    return (
+      <div className="fixed inset-0 bg-[hsl(var(--blitz-forest))] text-white flex flex-col select-none">
+        <div
+          className="px-5 flex items-center gap-1.5"
+          style={{ paddingTop: "calc(env(safe-area-inset-top) + 14px)" }}
+        >
+          {STORY_SLIDES.map((_, i) => (
+            <div key={i} className="h-1 flex-1 rounded-full bg-white/25 overflow-hidden">
+              <div
+                className="h-full bg-white rounded-full transition-all"
+                style={{ width: i < storyStep ? "100%" : i === storyStep ? "100%" : "0%" }}
+              />
+            </div>
+          ))}
+        </div>
+
+        <button
+          onClick={() => setStoryStep(null)}
+          className="absolute right-5 text-white/50 text-sm font-semibold"
+          style={{ top: "calc(env(safe-area-inset-top) + 12px)" }}
+        >
+          Überspringen
+        </button>
+
+        {/* Tap zones */}
+        <button
+          aria-label="Zurück"
+          onClick={() => storyTap("left")}
+          className="absolute left-0 top-0 bottom-0 w-[35%] z-10"
+        />
+        <button
+          aria-label="Weiter"
+          onClick={() => storyTap("right")}
+          className="absolute right-0 top-0 bottom-0 w-[65%] z-10"
+        />
+
+        <div className="flex-1 flex flex-col items-center justify-center px-8 gap-7 pointer-events-none">
+          <div className="w-20 h-20 rounded-3xl bg-[hsl(var(--bolt))] flex items-center justify-center animate-blitz-pulse">
+            <Icon className="w-10 h-10 text-[hsl(var(--blitz-forest))]" strokeWidth={2.2} />
+          </div>
+          <div className="text-center space-y-3 max-w-xs">
+            <p className="text-[11px] font-black tracking-[0.35em] text-[hsl(var(--bolt))]">{slide.eyebrow}</p>
+            <h1 className="font-display text-[32px] font-extrabold leading-[1.08] tracking-tight">
+              {slide.title}
+            </h1>
+            <p className="text-white/70 text-base leading-relaxed">{slide.body}</p>
+          </div>
+        </div>
+
+        <div
+          className="px-8 text-center text-white/40 text-xs font-semibold"
+          style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 20px)" }}
+        >
+          Zum Weiterklicken tippen ⚡
+        </div>
+      </div>
+    );
   }
 
   const handleAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
