@@ -233,8 +233,13 @@ const SwipeCard = ({ item, onSwipe, onAdminDelete, isTop, isAdmin }: CardProps) 
               below never gets pushed off-screen or clipped. fontClass already
               scales the size down for longer text (see getActivityFontClass);
               this is the safety net for the extreme cases. */}
-          <div className="flex-1 min-h-0 w-full flex items-center justify-center overflow-y-auto">
-            <h2 className={`${fontClass} font-black leading-[0.95] tracking-tight break-words max-w-full`}>
+          <div className="flex-1 min-h-0 min-w-0 w-full flex items-center justify-center overflow-x-hidden overflow-y-auto">
+            {/* w-full (not just max-w-full) gives this a definite width to
+                wrap against — a shrink-to-fit box sizes to its longest
+                unbreakable run BEFORE break-words can kick in, which is how
+                a single very long "word" (no spaces) still overflowed the
+                card sideways. break-all is the hard backstop for that case. */}
+            <h2 className={`${fontClass} font-black leading-[0.95] tracking-tight break-words [overflow-wrap:anywhere] break-all w-full`}>
               {asBlitzQuestion(item.activity)}
             </h2>
           </div>

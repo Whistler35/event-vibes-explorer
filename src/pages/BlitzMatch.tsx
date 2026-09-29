@@ -63,6 +63,7 @@ const BlitzMatch = () => {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [previewPhoto, setPreviewPhoto] = useState<string | null>(null);
   const [chatFocused, setChatFocused] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const { reactions, toggleHeart } = useMessageReactions(
     "blitz_chat_message_reactions",
@@ -244,6 +245,34 @@ const BlitzMatch = () => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages.length]);
 
+  // Native keyboard show/hide is the authoritative signal for "is the user
+  // typing" — driving the header collapse off just input focus turned out to
+  // be unreliable on-device (reports of the header staying expanded and the
+  // keyboard simply covering the chat). This is on top of, not instead of,
+  // the focus handlers below.
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    let removeShow: (() => void) | undefined;
+    let removeHide: (() => void) | undefined;
+    import("@capacitor/keyboard").then(({ Keyboard }) => {
+      Keyboard.addListener("keyboardWillShow", () => setKeyboardVisible(true)).then((h) => {
+        removeShow = () => h.remove();
+      });
+      Keyboard.addListener("keyboardWillHide", () => setKeyboardVisible(false)).then((h) => {
+        removeHide = () => h.remove();
+      });
+    });
+    return () => {
+      removeShow?.();
+      removeHide?.();
+    };
+  }, []);
+
+  // Third, simplest signal: the instant there's text in the box, collapse —
+  // matches "sobald ich zu schreiben anfange" literally, and can't fail to
+  // fire since it rides the same state the input is already bound to.
+  const isComposing = chatFocused || keyboardVisible || input.trim().length > 0;
+
   if (!match || !user) {
     return (
       <div className="min-h-screen bg-[hsl(var(--blitz-forest))] flex items-center justify-center text-white">
@@ -399,7 +428,7 @@ const BlitzMatch = () => {
         >
           <ArrowLeft className="w-5 h-5 text-[hsl(var(--blitz-forest))]" />
         </button>
-        {chatFocused && (
+        {isComposing && (
           <p className="flex-1 min-w-0 truncate text-center font-display text-lg font-bold text-foreground">
             {asBlitzQuestion(headerTitle)}
           </p>
@@ -419,7 +448,7 @@ const BlitzMatch = () => {
       {/* Title + host + who's in — collapse while typing to give the chat more room, WhatsApp-style */}
       <div
         className={`shrink-0 overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${
-          chatFocused ? "max-h-0 opacity-0" : "max-h-[900px] opacity-100"
+          isComposing ? "max-h-0 opacity-0" : "max-h-[900px] opacity-100"
         }`}
       >
         <div className="px-5 pt-2 pb-4">
