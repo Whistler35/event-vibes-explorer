@@ -9,8 +9,10 @@ import { toast } from "sonner";
 import { Camera, Loader2, Zap, Globe2, Users, Check } from "lucide-react";
 import { useEligibleRecaps } from "@/hooks/useEligibleRecaps";
 import { useMatchParticipants } from "@/hooks/useMatchParticipants";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { trackEvent } from "@/lib/analytics";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
 
 interface Props {
   open: boolean;
@@ -22,6 +24,7 @@ interface Props {
 const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }: Props) => {
   const queryClient = useQueryClient();
   const { data: eligible = [], isLoading: loadingEligible } = useEligibleRecaps(userId);
+  const { isAdmin } = useIsAdmin();
   const [matchId, setMatchId] = useState<string | null>(null);
   const [activity, setActivity] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -30,6 +33,9 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
   const [isPublic, setIsPublic] = useState(true);
   const [taggedIds, setTaggedIds] = useState<string[]>([]);
   const [posting, setPosting] = useState(false);
+  const [namingCustomBlitz, setNamingCustomBlitz] = useState(false);
+  const [customActivity, setCustomActivity] = useState("");
+  const [creatingBlitz, setCreatingBlitz] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const { data: participants = [] } = useMatchParticipants(matchId ?? undefined);
   const taggable = participants.filter((p) => p.user_id !== userId);
@@ -49,8 +55,73 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
     setCaption("");
     setIsPublic(true);
     setTaggedIds([]);
+    setNamingCustomBlitz(false);
+    setCustomActivity("");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, preselectedMatchId]);
+
+  // Admin-only: post to the Feed without a real Huddle behind it (e.g.
+  // backfilling older activity). The feed data model always joins through a
+  // real blitz_matches -> blitz_requests row, so this creates a minimal one
+  // — already expired (expires_at = now) so it never shows up anywhere as
+  // an active/joinable Blitz, and specifically doesn't fire the "Blitz
+  // nearby" push (that trigger now skips already-expired rows).
+  const createStandaloneBlitzForPost = async (activityName: string) => {
+    if (!userId) return null;
+    const coords = await new Promise<{ lat: number; lng: number }>((resolve) => {
+      if (!("geolocation" in navigator)) return resolve({ lat: 0, lng: 0 });
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => resolve({ lat: 0, lng: 0 }),
+        { timeout: 8000 }
+      );
+    });
+    const now = new Date().toISOString();
+
+    const { data: req, error: reqErr } = await supabase
+      .from("blitz_requests")
+      .insert({
+        host_id: userId,
+        activity: activityName.trim(),
+        duration_minutes: 0,
+        city: null,
+        latitude: coords.lat,
+        longitude: coords.lng,
+        radius_km: 1,
+        expires_at: now,
+        status: "cancelled",
+        audience: "public",
+      })
+      .select()
+      .single();
+    if (reqErr) throw reqErr;
+
+    const { data: match, error: matchErr } = await supabase
+      .from("blitz_matches")
+      .insert({ blitz_request_id: req.id, host_id: userId, chat_expires_at: now })
+      .select()
+      .single();
+    if (matchErr) throw matchErr;
+
+    await supabase.from("blitz_match_participants").insert({ match_id: match.id, user_id: userId });
+    return match.id as string;
+  };
+
+  const handleConfirmCustomActivity = async () => {
+    if (!customActivity.trim()) return;
+    setCreatingBlitz(true);
+    try {
+      const newMatchId = await createStandaloneBlitzForPost(customActivity);
+      if (newMatchId) {
+        setMatchId(newMatchId);
+        setActivity(customActivity.trim());
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Konnte Blitz nicht anlegen");
+    } finally {
+      setCreatingBlitz(false);
+    }
+  };
 
   const handlePickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -102,16 +173,38 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
     }
   };
 
-  const showPicker = !preselectedMatchId && !matchId;
+  const showPicker = !preselectedMatchId && !matchId && !namingCustomBlitz;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="rounded-t-3xl max-h-[88vh] overflow-y-auto">
         <SheetHeader className="text-left">
-          <SheetTitle>{showPicker ? "Welcher Blitz?" : "Foto teilen"}</SheetTitle>
+          <SheetTitle>{namingCustomBlitz ? "Blitz benennen" : showPicker ? "Welcher Blitz?" : "Foto teilen"}</SheetTitle>
         </SheetHeader>
 
-        {showPicker ? (
+        {namingCustomBlitz ? (
+          <div className="py-4 space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Als Admin kannst du einen Feed-Post ohne echten Huddle dazu posten — gib einfach an, worum es ging.
+            </p>
+            <Input
+              autoFocus
+              value={customActivity}
+              onChange={(e) => setCustomActivity(e.target.value)}
+              placeholder="z.B. Sommerfest 2026"
+              maxLength={80}
+            />
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={() => setNamingCustomBlitz(false)} disabled={creatingBlitz}>
+                Zurück
+              </Button>
+              <Button className="flex-1" onClick={handleConfirmCustomActivity} disabled={!customActivity.trim() || creatingBlitz}>
+                {creatingBlitz ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                Weiter
+              </Button>
+            </div>
+          </div>
+        ) : showPicker ? (
           <div className="py-4 space-y-2">
             {loadingEligible ? (
               <p className="text-muted-foreground text-sm text-center py-6">Lädt…</p>
@@ -136,6 +229,17 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
                   <span className="font-semibold text-sm flex-1">{e.activity || "Blitz"}</span>
                 </button>
               ))
+            )}
+            {isAdmin && (
+              <button
+                onClick={() => setNamingCustomBlitz(true)}
+                className="w-full flex items-center gap-3 p-3 rounded-2xl border-2 border-dashed border-[hsl(var(--blitz-forest))]/30 hover:border-[hsl(var(--blitz-forest))]/60 transition text-left"
+              >
+                <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center shrink-0">
+                  <Zap className="w-4 h-4 text-[hsl(var(--blitz-forest))]" />
+                </div>
+                <span className="font-semibold text-sm flex-1">Blitz ohne Huddle benennen (Admin)</span>
+              </button>
             )}
           </div>
         ) : (
