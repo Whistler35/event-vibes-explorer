@@ -46,7 +46,7 @@ const FriendsCarousel = ({ userId, onAddFriend, isOwnProfile = true }: Props) =>
 
   const avatar = (f: Friend) =>
     f.avatar_url ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(f.name)}&background=ff2d78&color=fff&size=128`;
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(f.name)}&background=C8F14F&color=1E3323&size=128`;
 
   return (
     <div className="space-y-3">

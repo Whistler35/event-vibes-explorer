@@ -361,7 +361,7 @@ const Messenger = () => {
 
   const getAvatarUrl = (name: string, avatar: string | null) =>
     avatar ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=ff5722&color=fff&size=100`;
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=C8F14F&color=1E3323&size=100`;
 
   const activeConversations = conversations.filter((c) => c.isBlitz);
   const otherConversations = conversations.filter((c) => !c.isBlitz);

@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -33,7 +34,6 @@ const EditProfile = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -96,34 +96,42 @@ const EditProfile = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    if (!user) { navigate("/auth"); return; }
+    if (!user) navigate("/auth");
+  }, [user, navigate]);
 
-    const fetchProfile = async () => {
-      const { data } = await supabase
+  const { data: profileRow, isLoading: loading } = useQuery({
+    queryKey: ["edit-profile", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
         .from("profiles")
         .select("name, age, country, bio, avatar_url, instagram_username, instagram_followers, interests, ritual_push_enabled")
-        .eq("user_id", user.id)
+        .eq("user_id", user!.id)
         .maybeSingle() as any;
+      if (error) throw error;
+      return data;
+    },
+  });
 
-      if (data) {
-        setForm({
-          name: data.name || "",
-          age: data.age?.toString() || "",
-          country: data.country || "",
-          bio: data.bio || "",
-          avatar_url: data.avatar_url || "",
-          instagram_username: data.instagram_username || "",
-          instagram_followers: data.instagram_followers || "",
-          interests: data.interests || [],
-        });
-        setAvatarPreview(data.avatar_url);
-        setRitualPushEnabled(data.ritual_push_enabled ?? true);
-      }
-      setLoading(false);
-    };
-
-    fetchProfile();
-  }, [user]);
+  // Populate the editable form once the fetch resolves (or re-resolves —
+  // e.g. after a background refresh) without clobbering in-progress edits
+  // on every refetch, only on an actual identity change.
+  useEffect(() => {
+    if (!profileRow) return;
+    setForm({
+      name: profileRow.name || "",
+      age: profileRow.age?.toString() || "",
+      country: profileRow.country || "",
+      bio: profileRow.bio || "",
+      avatar_url: profileRow.avatar_url || "",
+      instagram_username: profileRow.instagram_username || "",
+      instagram_followers: profileRow.instagram_followers || "",
+      interests: profileRow.interests || [],
+    });
+    setAvatarPreview(profileRow.avatar_url || null);
+    setRitualPushEnabled(profileRow.ritual_push_enabled ?? true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profileRow?.name, profileRow?.age, profileRow?.country, profileRow?.bio, profileRow?.avatar_url, profileRow?.instagram_username, profileRow?.instagram_followers, profileRow?.ritual_push_enabled]);
 
   const handleToggleRitualPush = async (checked: boolean) => {
     if (!user) return;
@@ -217,80 +225,82 @@ const EditProfile = () => {
     }
   };
 
-  const currentAvatar = avatarPreview || `https://ui-avatars.com/api/?name=${encodeURIComponent(form.name || "U")}&background=ff5722&color=fff&size=400`;
+  const currentAvatar = avatarPreview || `https://ui-avatars.com/api/?name=${encodeURIComponent(form.name || "U")}&background=C8F14F&color=1E3323&size=400`;
 
   if (loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center h-[70vh]">
-          <p className="text-muted-foreground">{t('editProfile.loading')}</p>
+        <div className="min-h-screen bg-[hsl(var(--blitz-forest))] flex items-center justify-center h-[70vh]">
+          <p className="text-white/60">{t('editProfile.loading')}</p>
         </div>
       </Layout>
     );
   }
 
+  const inputClass = "mt-1 bg-white/10 border-white/20 text-white placeholder:text-white/40";
+
   return (
     <Layout>
-      <div className="p-4 space-y-6 pb-24">
+      <div className="min-h-screen bg-[hsl(var(--blitz-forest))] text-white p-4 space-y-6 pb-24">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/profile")} className="text-muted-foreground hover:text-foreground">
+          <Button variant="ghost" size="icon" onClick={() => navigate("/profile")} className="text-white/70 hover:text-white hover:bg-white/10">
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h1 className="text-foreground text-xl font-bold">{t('editProfile.title')}</h1>
+          <h1 className="text-white text-xl font-bold">{t('editProfile.title')}</h1>
         </div>
 
         {/* Avatar */}
         <div className="flex flex-col items-center gap-3">
           <div className="relative">
-            <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-primary">
+            <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-[hsl(var(--bolt))]">
               <img src={currentAvatar} alt="Avatar" className="w-full h-full object-cover" />
             </div>
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
-              className="absolute bottom-0 right-0 w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg"
+              className="absolute bottom-0 right-0 w-10 h-10 rounded-full bg-[hsl(var(--bolt))] text-[hsl(var(--blitz-forest))] flex items-center justify-center shadow-lg"
             >
               {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Camera className="w-5 h-5" />}
             </button>
             <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
           </div>
-          {errors.avatar && <p className="text-destructive text-xs">{errors.avatar}</p>}
+          {errors.avatar && <p className="text-red-400 text-xs">{errors.avatar}</p>}
         </div>
 
         {/* Form Fields */}
         <div className="space-y-4">
           <div>
-            <Label className="text-foreground font-medium">{t('editProfile.name')} *</Label>
+            <Label className="text-white/80 font-medium">{t('editProfile.name')} *</Label>
             <Input
               value={form.name}
               onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))}
               placeholder={t('editProfile.namePh')}
-              className="mt-1 bg-muted border-border text-foreground"
+              className={inputClass}
             />
-            {errors.name && <p className="text-destructive text-xs mt-1">{errors.name}</p>}
+            {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-foreground font-medium">{t('editProfile.age')} *</Label>
+              <Label className="text-white/80 font-medium">{t('editProfile.age')} *</Label>
               <Input
                 type="number"
                 value={form.age}
                 onChange={(e) => setForm(prev => ({ ...prev, age: e.target.value }))}
                 placeholder="25"
                 min={1}
-                className="mt-1 bg-muted border-border text-foreground"
+                className={inputClass}
               />
-              {errors.age && <p className="text-destructive text-xs mt-1">{errors.age}</p>}
+              {errors.age && <p className="text-red-400 text-xs mt-1">{errors.age}</p>}
             </div>
             <div>
-              <Label className="text-foreground font-medium">{t('editProfile.country')} *</Label>
+              <Label className="text-white/80 font-medium">{t('editProfile.country')} *</Label>
               <Select
                 value={form.country || undefined}
                 onValueChange={(v) => setForm(prev => ({ ...prev, country: v }))}
               >
-                <SelectTrigger className="mt-1 bg-muted border-border text-foreground">
+                <SelectTrigger className={inputClass}>
                   <SelectValue placeholder={t('editProfile.country')} />
                 </SelectTrigger>
                 <SelectContent className="max-h-72">
@@ -299,25 +309,25 @@ const EditProfile = () => {
                   ))}
                 </SelectContent>
               </Select>
-              {errors.country && <p className="text-destructive text-xs mt-1">{errors.country}</p>}
+              {errors.country && <p className="text-red-400 text-xs mt-1">{errors.country}</p>}
             </div>
           </div>
 
           <div>
-            <Label className="text-foreground font-medium">{t('editProfile.aboutMe')} *</Label>
+            <Label className="text-white/80 font-medium">{t('editProfile.aboutMe')} *</Label>
             <Textarea
               value={form.bio}
               onChange={(e) => setForm(prev => ({ ...prev, bio: e.target.value }))}
               placeholder={t('editProfile.aboutMePh')}
               rows={3}
-              className="mt-1 bg-muted border-border text-foreground resize-none"
+              className={`${inputClass} resize-none`}
             />
-            {errors.bio && <p className="text-destructive text-xs mt-1">{errors.bio}</p>}
+            {errors.bio && <p className="text-red-400 text-xs mt-1">{errors.bio}</p>}
           </div>
 
           <div>
-            <Label className="text-foreground font-medium">{t('editProfile.interestsLabel')}</Label>
-            <p className="text-muted-foreground text-xs mt-0.5">{t('editProfile.interestsHint')}</p>
+            <Label className="text-white/80 font-medium">{t('editProfile.interestsLabel')}</Label>
+            <p className="text-white/50 text-xs mt-0.5">{t('editProfile.interestsHint')}</p>
             <div className="flex gap-2 mt-2">
               <Input
                 value={interestInput}
@@ -333,11 +343,10 @@ const EditProfile = () => {
                   }
                 }}
                 placeholder={t('editProfile.interestsPh')}
-                className="bg-muted border-border text-foreground"
+                className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
               />
               <Button
                 type="button"
-                variant="secondary"
                 onClick={() => {
                   const v = interestInput.trim();
                   if (v && !form.interests.includes(v) && form.interests.length < 12) {
@@ -345,6 +354,7 @@ const EditProfile = () => {
                     setInterestInput("");
                   }
                 }}
+                className="bg-white/15 hover:bg-white/25 text-white"
               >
                 {t('editProfile.add')}
               </Button>
@@ -356,7 +366,7 @@ const EditProfile = () => {
                     key={tag}
                     type="button"
                     onClick={() => setForm((p) => ({ ...p, interests: p.interests.filter((t) => t !== tag) }))}
-                    className="px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-semibold flex items-center gap-1.5"
+                    className="px-3 py-1.5 rounded-full bg-[hsl(var(--bolt))] text-[hsl(var(--blitz-forest))] text-xs font-semibold flex items-center gap-1.5"
                   >
                     {tag} <span className="opacity-70">×</span>
                   </button>
@@ -365,25 +375,16 @@ const EditProfile = () => {
             )}
           </div>
 
-          <div className="border-t border-border pt-4">
-            <h3 className="text-foreground font-bold text-lg mb-3">{t('editProfile.instagramTitle')}</h3>
+          <div className="border-t border-white/15 pt-4">
+            <h3 className="text-white font-bold text-lg mb-3">{t('editProfile.instagramTitle')}</h3>
             <div className="space-y-3">
               <div>
-                <Label className="text-muted-foreground font-medium">{t('editProfile.username')}</Label>
+                <Label className="text-white/60 font-medium">{t('editProfile.username')}</Label>
                 <Input
                   value={form.instagram_username}
                   onChange={(e) => setForm(prev => ({ ...prev, instagram_username: e.target.value }))}
                   placeholder={t('editProfile.usernamePh')}
-                  className="mt-1 bg-muted border-border text-foreground"
-                />
-              </div>
-              <div>
-                <Label className="text-muted-foreground font-medium">{t('editProfile.followers')}</Label>
-                <Input
-                  value={form.instagram_followers}
-                  onChange={(e) => setForm(prev => ({ ...prev, instagram_followers: e.target.value }))}
-                  placeholder={t('editProfile.followersPh')}
-                  className="mt-1 bg-muted border-border text-foreground"
+                  className={inputClass}
                 />
               </div>
             </div>
@@ -394,61 +395,61 @@ const EditProfile = () => {
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg"
+          className="w-full h-12 rounded-xl bg-[hsl(var(--bolt))] hover:bg-[hsl(var(--bolt))]/90 text-[hsl(var(--blitz-forest))] font-bold text-lg"
         >
           {saving ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
           {t('editProfile.save')}
         </Button>
 
         {/* Language */}
-        <div className="border-t border-border pt-6 mt-2 flex items-center justify-between gap-4">
+        <div className="border-t border-white/15 pt-6 mt-2 flex items-center justify-between gap-4">
           <div>
-            <h3 className="text-foreground font-bold text-lg">{t('editProfile.language')}</h3>
-            <p className="text-sm text-muted-foreground">{t('editProfile.languageSub')}</p>
+            <h3 className="text-white font-bold text-lg">{t('editProfile.language')}</h3>
+            <p className="text-sm text-white/60">{t('editProfile.languageSub')}</p>
           </div>
           <LanguageSwitcher />
         </div>
 
         {/* Weekend ritual pushes */}
-        <div className="border-t border-border pt-6 mt-2 flex items-center justify-between gap-4">
+        <div className="border-t border-white/15 pt-6 mt-2 flex items-center justify-between gap-4">
           <div>
-            <h3 className="text-foreground font-bold text-lg">Wochenend-Erinnerungen</h3>
-            <p className="text-sm text-muted-foreground">Fr/Sa/So ein kurzer Impuls, spontan was zu starten</p>
+            <h3 className="text-white font-bold text-lg">Wochenend-Erinnerungen</h3>
+            <p className="text-sm text-white/60">Fr/Sa/So ein kurzer Impuls, spontan was zu starten</p>
           </div>
           <Switch checked={ritualPushEnabled} onCheckedChange={handleToggleRitualPush} />
         </div>
 
         {/* Password */}
-        <div className="border-t border-border pt-6 mt-2 space-y-3">
+        <div className="border-t border-white/15 pt-6 mt-2 space-y-3">
           <div>
-            <h3 className="text-foreground font-bold text-lg">{t('editProfile.password')}</h3>
-            <p className="text-sm text-muted-foreground">{t('editProfile.passwordSub')}</p>
+            <h3 className="text-white font-bold text-lg">{t('editProfile.password')}</h3>
+            <p className="text-sm text-white/60">{t('editProfile.passwordSub')}</p>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="newPassword" className="text-foreground">{t('editProfile.newPassword')}</Label>
+            <Label htmlFor="newPassword" className="text-white/80">{t('editProfile.newPassword')}</Label>
             <Input
               id="newPassword"
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="bg-muted border-border text-foreground"
+              className="bg-white/10 border-white/20 text-white"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirmNewPassword" className="text-foreground">{t('auth.confirmPassword')}</Label>
+            <Label htmlFor="confirmNewPassword" className="text-white/80">{t('auth.confirmPassword')}</Label>
             <Input
               id="confirmNewPassword"
               type="password"
               value={confirmNewPassword}
               onChange={(e) => setConfirmNewPassword(e.target.value)}
-              className="bg-muted border-border text-foreground"
+              className="bg-white/10 border-white/20 text-white"
             />
           </div>
           <Button
             onClick={handleChangePassword}
             disabled={changingPassword || !newPassword || !confirmNewPassword}
             variant="outline"
-            className="w-full h-11 rounded-xl font-bold"
+            className="w-full h-11 rounded-xl font-bold border-white/25 text-white hover:bg-white/10 hover:text-white"
           >
             {changingPassword ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
             {t('editProfile.changePassword')}
@@ -456,9 +457,9 @@ const EditProfile = () => {
         </div>
 
         {/* Danger zone */}
-        <div className="border-t border-border pt-6 mt-2">
-          <h3 className="text-foreground font-bold text-lg mb-1">Konto</h3>
-          <p className="text-sm text-muted-foreground mb-3">
+        <div className="border-t border-white/15 pt-6 mt-2">
+          <h3 className="text-white font-bold text-lg mb-1">Konto</h3>
+          <p className="text-sm text-white/60 mb-3">
             Wenn du dein Konto löschst, werden dein Profil, deine Nachrichten und
             deine Aktivitäten dauerhaft entfernt. Das kann nicht rückgängig
             gemacht werden.
@@ -471,7 +472,7 @@ const EditProfile = () => {
             <AlertDialogTrigger asChild>
               <Button
                 variant="outline"
-                className="w-full h-12 rounded-xl border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive font-bold"
+                className="w-full h-12 rounded-xl border-red-500/40 text-red-400 hover:bg-red-500/10 hover:text-red-400 font-bold"
               >
                 <Trash2 className="w-4 h-4 mr-2" />
                 Konto löschen
@@ -490,7 +491,6 @@ const EditProfile = () => {
                 value={deleteConfirm}
                 onChange={(e) => setDeleteConfirm(e.target.value)}
                 placeholder="LÖSCHEN"
-                className="bg-muted border-border text-foreground"
                 autoFocus
               />
               <AlertDialogFooter>
@@ -510,7 +510,7 @@ const EditProfile = () => {
           </AlertDialog>
         </div>
 
-        <p className="text-center text-xs text-muted-foreground pt-2">
+        <p className="text-center text-xs text-white/50 pt-2">
           <a href="https://www.evendle.com/datenschutz.html" target="_blank" rel="noopener" className="hover:underline">Datenschutz</a>
           <span className="mx-1.5">·</span>
           <a href="https://www.evendle.com/agb.html" target="_blank" rel="noopener" className="hover:underline">AGB</a>

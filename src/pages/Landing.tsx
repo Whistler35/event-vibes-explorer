@@ -96,21 +96,19 @@ const Landing = () => {
 
       <div className="flex-1" />
 
-      {/* CTAs */}
-      <div className="px-6 pb-8 pt-8 space-y-3">
+      {/* CTA — a single button into Auth (pre-set to signup); Auth itself
+          already has a "Schon einen Account? Anmelden" toggle, so a second
+          landing-page button led to the exact same place as this one (and,
+          on top of that, both used to land on the login form regardless —
+          Auth read location.state, this page passed the mode via a ?mode=
+          query param, so the state was always empty). */}
+      <div className="px-6 pb-8 pt-8">
         <button
-          onClick={() => navigate("/auth?mode=signup")}
+          onClick={() => navigate("/auth", { state: { mode: "signup" } })}
           className="w-full rounded-full py-4 font-semibold text-[15px] bg-[hsl(var(--bolt))] text-[hsl(var(--ink))] active:scale-[0.98] transition"
           style={{ boxShadow: "0 10px 30px hsl(var(--bolt) / 0.25)" }}
         >
           Get started
-        </button>
-        <button
-          onClick={() => navigate("/auth?mode=login")}
-          className="w-full rounded-full py-4 font-semibold text-white text-[15px] active:scale-[0.98] transition"
-          style={{ border: "1px solid rgba(255,255,255,0.2)" }}
-        >
-          I already have an account
         </button>
       </div>
     </div>

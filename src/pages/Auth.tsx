@@ -10,12 +10,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { COUNTRIES } from '@/lib/countries';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Camera, Upload, ArrowLeft, Eye, EyeOff, Mail } from 'lucide-react';
+import { Camera, Upload, ArrowLeft, Eye, EyeOff, Mail, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import evendleLogo from '@/assets/evendle-logo.jpeg';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { Capacitor } from '@capacitor/core';
+import { PUBLIC_WEB_ORIGIN } from '@/lib/publicUrl';
+
+// window.location.origin resolves to the local Capacitor bundle's own
+// origin on native (e.g. https://localhost) — useless in an email link
+// opened outside the app. On web it's the real, correct origin (including
+// localhost during dev), so only native needs the override.
+const emailLinkOrigin = () => (Capacitor.isNativePlatform() ? PUBLIC_WEB_ORIGIN : window.location.origin);
 
 const NATIVE_REDIRECT = 'com.evendle.app://login-callback';
 const SUPABASE_URL = 'https://yhetszgeflsldahfuwen.supabase.co';
@@ -230,7 +236,7 @@ const Auth = () => {
         const { error: signUpError, data } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/`, data: metadata },
+          options: { emailRedirectTo: `${emailLinkOrigin()}/`, data: metadata },
         });
 
         if (signUpError) {
@@ -272,13 +278,13 @@ const Auth = () => {
 
   if (signupSuccessEmail) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4 relative" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}>
+      <div className="min-h-screen bg-[hsl(var(--blitz-forest))] text-white flex items-center justify-center p-4 relative" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}>
         <Button
           type="button"
           variant="ghost"
           size="sm"
           onClick={() => navigate('/')}
-          className="absolute left-4 text-muted-foreground hover:text-foreground"
+          className="absolute left-4 text-white/70 hover:text-white hover:bg-white/10"
           style={{ top: 'calc(1rem + env(safe-area-inset-top))' }}
         >
           <ArrowLeft className="w-4 h-4 mr-1" />
@@ -287,23 +293,25 @@ const Auth = () => {
         <div className="absolute right-4" style={{ top: 'calc(1rem + env(safe-area-inset-top))' }}><LanguageSwitcher /></div>
         <div className="w-full max-w-md space-y-6 text-center">
           <div className="flex items-center justify-center space-x-2">
-            <img src={evendleLogo} alt="Evendle" className="w-9 h-9 object-contain" />
-            <span className="text-foreground text-2xl font-bold">EVENDLE</span>
+            <div className="w-8 h-8 rounded-full bg-[hsl(var(--bolt))] flex items-center justify-center">
+              <Zap className="w-4 h-4 text-[hsl(var(--blitz-forest))] fill-current" />
+            </div>
+            <span className="text-white text-2xl font-bold">EVENDLE</span>
           </div>
-          <div className="mx-auto w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
-            <Mail className="w-10 h-10 text-primary" />
+          <div className="mx-auto w-20 h-20 rounded-full bg-white/10 flex items-center justify-center">
+            <Mail className="w-10 h-10 text-[hsl(var(--bolt))]" />
           </div>
           <div className="space-y-3">
-            <h1 className="text-2xl font-bold text-foreground">{t('auth.thanksTitle')}</h1>
-            <p className="text-muted-foreground">{t('auth.thanksBody1', { email: signupSuccessEmail })}</p>
-            <p className="text-muted-foreground">{t('auth.thanksBody2')}</p>
-            <p className="text-sm text-muted-foreground">{t('auth.thanksHint')}</p>
+            <h1 className="text-2xl font-bold text-white">{t('auth.thanksTitle')}</h1>
+            <p className="text-white/70">{t('auth.thanksBody1', { email: signupSuccessEmail })}</p>
+            <p className="text-white/70">{t('auth.thanksBody2')}</p>
+            <p className="text-sm text-white/50">{t('auth.thanksHint')}</p>
           </div>
           <div className="space-y-3 pt-2">
-            <Button type="button" className="w-full" onClick={() => { setSignupSuccessEmail(null); setIsLogin(true); }}>
+            <Button type="button" className="w-full bg-[hsl(var(--bolt))] hover:bg-[hsl(var(--bolt))]/90 text-[hsl(var(--blitz-forest))] font-bold" onClick={() => { setSignupSuccessEmail(null); setIsLogin(true); }}>
               {t('auth.backToLogin')}
             </Button>
-            <Button type="button" variant="outline" className="w-full" onClick={() => navigate('/')}>
+            <Button type="button" variant="outline" className="w-full border-white/25 text-white hover:bg-white/10 hover:text-white" onClick={() => navigate('/')}>
               {t('auth.backToHome')}
             </Button>
           </div>
@@ -318,7 +326,7 @@ const Auth = () => {
       if (!email) { toast.error(t('auth.errors.enterEmail')); return; }
       setResetLoading(true);
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${emailLinkOrigin()}/reset-password`,
       });
       setResetLoading(false);
       if (error) toast.error(error.message);
@@ -326,26 +334,28 @@ const Auth = () => {
     };
 
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4 relative" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}>
-        <Button type="button" variant="ghost" size="sm" onClick={() => setIsForgotPassword(false)} className="absolute left-4 text-muted-foreground hover:text-foreground" style={{ top: 'calc(1rem + env(safe-area-inset-top))' }}>
+      <div className="min-h-screen bg-[hsl(var(--blitz-forest))] text-white flex items-center justify-center p-4 relative" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}>
+        <Button type="button" variant="ghost" size="sm" onClick={() => setIsForgotPassword(false)} className="absolute left-4 text-white/70 hover:text-white hover:bg-white/10" style={{ top: 'calc(1rem + env(safe-area-inset-top))' }}>
           <ArrowLeft className="w-4 h-4 mr-1" />{t('common.back')}
         </Button>
         <div className="absolute right-4" style={{ top: 'calc(1rem + env(safe-area-inset-top))' }}><LanguageSwitcher /></div>
         <div className="w-full max-w-md space-y-6">
           <div className="text-center space-y-2">
             <div className="flex items-center justify-center space-x-2">
-              <img src={evendleLogo} alt="Evendle" className="w-9 h-9 object-contain" />
-              <span className="text-foreground text-2xl font-bold">EVENDLE</span>
+              <div className="w-8 h-8 rounded-full bg-[hsl(var(--bolt))] flex items-center justify-center">
+                <Zap className="w-4 h-4 text-[hsl(var(--blitz-forest))] fill-current" />
+              </div>
+              <span className="text-white text-2xl font-bold">EVENDLE</span>
             </div>
-            <h1 className="text-xl font-bold text-foreground pt-2">{t('auth.forgotTitle')}</h1>
-            <p className="text-muted-foreground text-sm">{t('auth.forgotSub')}</p>
+            <h1 className="text-xl font-bold text-white pt-2">{t('auth.forgotTitle')}</h1>
+            <p className="text-white/60 text-sm">{t('auth.forgotSub')}</p>
           </div>
           <form onSubmit={handleResetSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="reset-email" className="text-foreground">{t('auth.email')} *</Label>
-              <Input id="reset-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="bg-card border-border text-foreground" />
+              <Label htmlFor="reset-email" className="text-white/80">{t('auth.email')} *</Label>
+              <Input id="reset-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="bg-white/10 border-white/20 text-white" />
             </div>
-            <Button type="submit" disabled={resetLoading} className="w-full">
+            <Button type="submit" disabled={resetLoading} className="w-full bg-[hsl(var(--bolt))] hover:bg-[hsl(var(--bolt))]/90 text-[hsl(var(--blitz-forest))] font-bold">
               {resetLoading ? t('auth.sending') : t('auth.sendResetLink')}
             </Button>
           </form>
@@ -355,18 +365,20 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}>
-      <Button type="button" variant="ghost" size="sm" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))} className="absolute left-4 text-muted-foreground hover:text-foreground" style={{ top: 'calc(1rem + env(safe-area-inset-top))' }}>
+    <div className="min-h-screen bg-[hsl(var(--blitz-forest))] text-white flex items-center justify-center p-4 relative" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}>
+      <Button type="button" variant="ghost" size="sm" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))} className="absolute left-4 text-white/70 hover:text-white hover:bg-white/10" style={{ top: 'calc(1rem + env(safe-area-inset-top))' }}>
         <ArrowLeft className="w-4 h-4 mr-1" />{t('common.back')}
       </Button>
       <div className="absolute right-4" style={{ top: 'calc(1rem + env(safe-area-inset-top))' }}><LanguageSwitcher /></div>
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2">
           <div className="flex items-center justify-center space-x-2">
-            <img src={evendleLogo} alt="Evendle" className="w-9 h-9 object-contain" />
-            <span className="text-foreground text-2xl font-bold">EVENDLE</span>
+            <div className="w-8 h-8 rounded-full bg-[hsl(var(--bolt))] flex items-center justify-center">
+              <Zap className="w-4 h-4 text-[hsl(var(--blitz-forest))] fill-current" />
+            </div>
+            <span className="text-white text-2xl font-bold">EVENDLE</span>
           </div>
-          <p className="text-muted-foreground">{isLogin ? t('auth.loginTitle') : t('auth.registerTitle')}</p>
+          <p className="text-white/60">{isLogin ? t('auth.loginTitle') : t('auth.registerTitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -375,18 +387,18 @@ const Auth = () => {
               <div className="relative">
                 <Avatar className="w-24 h-24 cursor-pointer" onClick={() => fileInputRef.current?.click()}>
                   <AvatarImage src={avatarUrl} />
-                  <AvatarFallback className="bg-muted text-muted-foreground">
+                  <AvatarFallback className="bg-white/10 text-white/70">
                     {name ? name[0].toUpperCase() : <Camera className="w-8 h-8" />}
                   </AvatarFallback>
                 </Avatar>
-                <div className="absolute bottom-0 right-0 bg-primary rounded-full p-1">
-                  <Upload className="w-4 h-4 text-primary-foreground" />
+                <div className="absolute bottom-0 right-0 bg-[hsl(var(--bolt))] rounded-full p-1">
+                  <Upload className="w-4 h-4 text-[hsl(var(--blitz-forest))]" />
                 </div>
               </div>
               <div className="w-full space-y-2">
-                <Label htmlFor="avatar-file" className="text-foreground">{t('auth.uploadPhoto')}</Label>
+                <Label htmlFor="avatar-file" className="text-white/80">{t('auth.uploadPhoto')}</Label>
                 <input ref={fileInputRef} id="avatar-file" type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
-                <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} className="w-full">
+                <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} className="w-full border-white/25 text-white hover:bg-white/10 hover:text-white">
                   {avatarFile ? avatarFile.name : t('auth.choosePhoto')}
                 </Button>
               </div>
@@ -395,21 +407,21 @@ const Auth = () => {
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-foreground">{t('auth.email')} *</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="bg-card border-border text-foreground" />
+              <Label htmlFor="email" className="text-white/80">{t('auth.email')} *</Label>
+              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="bg-white/10 border-white/20 text-white" />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-foreground">{t('auth.password')} *</Label>
+              <Label htmlFor="password" className="text-white/80">{t('auth.password')} *</Label>
               <div className="relative">
-                <Input id="password" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} required className="bg-card border-border text-foreground pr-10" />
-                <button type="button" onClick={() => setShowPassword((s) => !s)} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1">
+                <Input id="password" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} required className="bg-white/10 border-white/20 text-white pr-10" />
+                <button type="button" onClick={() => setShowPassword((s) => !s)} className="absolute right-2 top-1/2 -translate-y-1/2 text-white/60 hover:text-white p-1">
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
               {isLogin && (
                 <div className="text-right">
-                  <button type="button" onClick={() => setIsForgotPassword(true)} className="text-sm text-primary hover:underline">
+                  <button type="button" onClick={() => setIsForgotPassword(true)} className="text-sm text-[hsl(var(--bolt))] hover:underline">
                     {t('auth.forgotPassword')}
                   </button>
                 </div>
@@ -419,28 +431,28 @@ const Auth = () => {
             {!isLogin && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-foreground">{t('auth.confirmPassword')} *</Label>
+                  <Label htmlFor="confirmPassword" className="text-white/80">{t('auth.confirmPassword')} *</Label>
                   <div className="relative">
-                    <Input id="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="bg-card border-border text-foreground pr-10" />
-                    <button type="button" onClick={() => setShowConfirmPassword((s) => !s)} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1">
+                    <Input id="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="bg-white/10 border-white/20 text-white pr-10" />
+                    <button type="button" onClick={() => setShowConfirmPassword((s) => !s)} className="absolute right-2 top-1/2 -translate-y-1/2 text-white/60 hover:text-white p-1">
                       {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-foreground">{t('auth.name')} *</Label>
-                  <Input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} required className="bg-card border-border text-foreground" />
+                  <Label htmlFor="name" className="text-white/80">{t('auth.name')} *</Label>
+                  <Input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} required className="bg-white/10 border-white/20 text-white" />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="birthday" className="text-foreground">{t('auth.birthday')} *</Label>
-                    <Input id="birthday" type="date" value={birthday} onChange={(e) => setBirthday(e.target.value)} required max={new Date(new Date().setFullYear(new Date().getFullYear() - 12)).toISOString().split('T')[0]} min="1900-01-01" className="bg-card border-border text-foreground" />
+                    <Label htmlFor="birthday" className="text-white/80">{t('auth.birthday')} *</Label>
+                    <Input id="birthday" type="date" value={birthday} onChange={(e) => setBirthday(e.target.value)} required max={new Date(new Date().setFullYear(new Date().getFullYear() - 12)).toISOString().split('T')[0]} min="1900-01-01" className="bg-white/10 border-white/20 text-white [color-scheme:dark]" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="country" className="text-foreground">{t('auth.country')} *</Label>
+                    <Label htmlFor="country" className="text-white/80">{t('auth.country')} *</Label>
                     <Select value={country} onValueChange={setCountry}>
-                      <SelectTrigger id="country" className="bg-card border-border text-foreground">
+                      <SelectTrigger id="country" className="bg-white/10 border-white/20 text-white">
                         <SelectValue placeholder={t('auth.country')} />
                       </SelectTrigger>
                       <SelectContent className="max-h-72">
@@ -452,23 +464,23 @@ const Auth = () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="bio" className="text-foreground">{t('auth.aboutMe')}</Label>
-                  <Textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value)} placeholder={t('auth.aboutMePlaceholder')} className="bg-card border-border text-foreground min-h-[80px]" />
+                  <Label htmlFor="bio" className="text-white/80">{t('auth.aboutMe')}</Label>
+                  <Textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value)} placeholder={t('auth.aboutMePlaceholder')} className="bg-white/10 border-white/20 text-white placeholder:text-white/40 min-h-[80px]" />
                 </div>
                 <div className="flex items-start gap-2.5 pt-1">
                   <Checkbox
                     id="terms"
                     checked={termsAccepted}
                     onCheckedChange={(c) => setTermsAccepted(c === true)}
-                    className="mt-0.5"
+                    className="mt-0.5 border-white/40 data-[state=checked]:bg-[hsl(var(--bolt))] data-[state=checked]:text-[hsl(var(--blitz-forest))] data-[state=checked]:border-[hsl(var(--bolt))]"
                   />
-                  <Label htmlFor="terms" className="text-sm font-normal text-muted-foreground leading-snug cursor-pointer">
+                  <Label htmlFor="terms" className="text-sm font-normal text-white/60 leading-snug cursor-pointer">
                     {t('auth.termsPrefix')}{' '}
-                    <a href="https://www.evendle.com/agb.html" target="_blank" rel="noopener" className="text-primary hover:underline" onClick={(e) => e.stopPropagation()}>
+                    <a href="https://www.evendle.com/agb.html" target="_blank" rel="noopener" className="text-[hsl(var(--bolt))] hover:underline" onClick={(e) => e.stopPropagation()}>
                       {t('auth.termsLinkAgb')}
                     </a>{' '}
                     {t('common.and')}{' '}
-                    <a href="https://www.evendle.com/datenschutz.html" target="_blank" rel="noopener" className="text-primary hover:underline" onClick={(e) => e.stopPropagation()}>
+                    <a href="https://www.evendle.com/datenschutz.html" target="_blank" rel="noopener" className="text-[hsl(var(--bolt))] hover:underline" onClick={(e) => e.stopPropagation()}>
                       {t('auth.termsLinkPrivacy')}
                     </a>{' '}
                     {t('auth.termsSuffix')}
@@ -478,19 +490,19 @@ const Auth = () => {
             )}
           </div>
 
-          <Button type="submit" disabled={loading || (!isLogin && !termsAccepted)} className="w-full">
+          <Button type="submit" disabled={loading || (!isLogin && !termsAccepted)} className="w-full bg-[hsl(var(--bolt))] hover:bg-[hsl(var(--bolt))]/90 text-[hsl(var(--blitz-forest))] font-bold">
             {loading ? t('common.loading') : isLogin ? t('auth.loginCta') : t('auth.registerCta')}
           </Button>
 
           <div className="relative">
-            <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border" /></div>
+            <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-white/15" /></div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">{t('common.or')}</span>
+              <span className="bg-[hsl(var(--blitz-forest))] px-2 text-white/50">{t('common.or')}</span>
             </div>
           </div>
 
           <div className="space-y-3">
-            <Button type="button" variant="outline" disabled={socialLoading || loading} className="w-full"
+            <Button type="button" variant="outline" disabled={socialLoading || loading} className="w-full bg-white text-[hsl(var(--ink))] border-white hover:bg-white/90"
               onClick={async () => {
                 if (!isLogin && !termsAccepted) {
                   toast.error(t('auth.errors.termsRequired'));
@@ -522,7 +534,7 @@ const Auth = () => {
             </Button>
 
             {Capacitor.getPlatform() !== 'android' && (
-              <Button type="button" variant="outline" disabled={socialLoading || loading} className="w-full"
+              <Button type="button" variant="outline" disabled={socialLoading || loading} className="w-full bg-black text-white border-black hover:bg-black/90"
                 onClick={async () => {
                   if (!isLogin && !termsAccepted) {
                     toast.error(t('auth.errors.termsRequired'));
@@ -552,12 +564,12 @@ const Auth = () => {
           </div>
 
           <div className="text-center">
-            <button type="button" onClick={() => setIsLogin(!isLogin)} className="text-primary hover:underline">
+            <button type="button" onClick={() => setIsLogin(!isLogin)} className="text-[hsl(var(--bolt))] hover:underline">
               {isLogin ? t('auth.switchToRegister') : t('auth.switchToLogin')}
             </button>
           </div>
 
-          <p className="text-center text-xs text-muted-foreground pt-2">
+          <p className="text-center text-xs text-white/40 pt-2">
             <a href="https://www.evendle.com/datenschutz.html" target="_blank" rel="noopener" className="hover:underline">Datenschutz</a>
             <span className="mx-1.5">·</span>
             <a href="https://www.evendle.com/agb.html" target="_blank" rel="noopener" className="hover:underline">AGB</a>

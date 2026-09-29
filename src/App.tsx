@@ -1,6 +1,4 @@
 import { Suspense, lazy, useEffect, useRef, useState } from "react";
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
@@ -159,8 +157,9 @@ const App = () => (
     >
       <AuthProvider>
         <TooltipProvider>
-          <Toaster />
-          <Sonner />
+          {/* Toast popups turned off app-wide per feedback (2026-09) — all
+              toast.success/error call sites are left in place so they can
+              be switched back on by re-adding <Sonner /> here. */}
           <BrowserRouter>
             <Suspense fallback={<div className="min-h-screen bg-[hsl(var(--blitz-forest))]" />}>
               <PushSetup />

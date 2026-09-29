@@ -43,6 +43,9 @@ const NotificationBell = () => {
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<FilterKey>("all");
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
+  // Notifications acted on this session — hides Annehmen/Ablehnen right
+  // away instead of leaving them clickable after a decision was made.
+  const [respondedIds, setRespondedIds] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
 
   const respondFriendRequest = async (notif: AppNotification, accept: boolean) => {
@@ -71,6 +74,7 @@ const NotificationBell = () => {
         if (error) throw error;
         toast("Anfrage abgelehnt");
       }
+      setRespondedIds((s) => new Set(s).add(notif.id));
       if (!notif.is_read) markAsRead(notif.id);
       refetch?.();
     } catch (e: any) {
@@ -108,6 +112,7 @@ const NotificationBell = () => {
         await rejectBlitzRequest(swipeId);
         toast("Anfrage abgelehnt");
       }
+      setRespondedIds((s) => new Set(s).add(notif.id));
       if (!notif.is_read) markAsRead(notif.id);
       refetch?.();
     } catch (e: any) {
@@ -243,7 +248,7 @@ const NotificationBell = () => {
                     <p className={`text-xs mt-0.5 line-clamp-2 ${!notif.is_read ? "text-foreground/80" : "text-muted-foreground"}`}>
                       {notif.body}
                     </p>
-                    {(notif.type === "friend_request" || notif.type === "blitz_request") && (
+                    {(notif.type === "friend_request" || notif.type === "blitz_request") && !respondedIds.has(notif.id) && (
                       <div className="flex gap-2 mt-2" onClick={(e) => e.stopPropagation()}>
                         <Button
                           size="sm"

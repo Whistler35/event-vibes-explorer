@@ -238,7 +238,7 @@ const UserProfile = () => {
   const displayName = profile.name || "Unknown";
   const avatarUrl =
     profile.avatar_url ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=ff2d78&color=fff&size=400`;
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=C8F14F&color=1E3323&size=400`;
   const hostInstagramUrl = getInstagramUrl(hostProfile?.instagram_username);
   const profileInstagramUrl = getInstagramUrl(profile.instagram_username);
   const isOwnProfile = user?.id === userId;
