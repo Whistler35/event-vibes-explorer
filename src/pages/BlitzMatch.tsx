@@ -618,7 +618,7 @@ const BlitzMatch = () => {
 
       <form
         onSubmit={handleSend}
-        className="shrink-0 border-t border-black/5 bg-background px-4 pt-3 flex items-center gap-2"
+        className="sticky bottom-0 z-10 shrink-0 border-t border-black/5 bg-background px-4 pt-3 flex items-center gap-2"
         style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}
       >
         <button
