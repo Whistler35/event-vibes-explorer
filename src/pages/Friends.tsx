@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -24,17 +24,24 @@ const Friends = () => {
   const [showNewGroup, setShowNewGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [managingGroupId, setManagingGroupId] = useState<string | null>(null);
+  const newGroupInputRef = useRef<HTMLInputElement>(null);
 
   const managingGroup = groups.find((g) => g.id === managingGroupId);
+  const [creatingGroup, setCreatingGroup] = useState(false);
 
   const handleCreateGroup = async () => {
     if (!newGroupName.trim()) return;
+    setCreatingGroup(true);
     try {
-      await createGroup(newGroupName);
-      setNewGroupName("");
+      const newId = await createGroup(newGroupName);
       setShowNewGroup(false);
+      // Go straight into picking members for the group just named, instead
+      // of making the person reopen it from the list as a separate step.
+      if (newId) setManagingGroupId(newId);
     } catch (e: any) {
       toast.error(e.message || "Gruppe konnte nicht erstellt werden");
+    } finally {
+      setCreatingGroup(false);
     }
   };
 
@@ -150,19 +157,32 @@ const Friends = () => {
 
       {/* New group sheet */}
       <Sheet open={showNewGroup} onOpenChange={setShowNewGroup}>
-        <SheetContent side="bottom" className="rounded-t-3xl">
+        <SheetContent
+          side="bottom"
+          className="rounded-t-3xl"
+          onOpenAutoFocus={(e) => {
+            // Focusing (and thus opening the keyboard) in the same frame the
+            // sheet starts its slide-in animation races Capacitor's keyboard
+            // resize against the sheet's own open transition — the field
+            // visibly jumps once both settle. Waiting for the sheet's own
+            // animation to finish first (see duration-500 in sheet.tsx)
+            // avoids that.
+            e.preventDefault();
+            setTimeout(() => newGroupInputRef.current?.focus(), 350);
+          }}
+        >
           <SheetHeader>
             <SheetTitle>Neue Gruppe</SheetTitle>
           </SheetHeader>
           <div className="mt-4 space-y-3 pb-4">
             <Input
-              autoFocus
+              ref={newGroupInputRef}
               value={newGroupName}
               onChange={(e) => setNewGroupName(e.target.value)}
               placeholder="z.B. Beachvolleyball-Crew"
               maxLength={40}
             />
-            <Button className="w-full" onClick={handleCreateGroup} disabled={!newGroupName.trim()}>
+            <Button className="w-full" onClick={handleCreateGroup} disabled={!newGroupName.trim() || creatingGroup}>
               Erstellen
             </Button>
           </div>
@@ -170,10 +190,18 @@ const Friends = () => {
       </Sheet>
 
       {/* Manage group sheet */}
-      <Sheet open={!!managingGroupId} onOpenChange={(o) => !o && setManagingGroupId(null)}>
+      <Sheet
+        open={!!managingGroupId}
+        onOpenChange={(o) => {
+          if (!o) {
+            setManagingGroupId(null);
+            setNewGroupName("");
+          }
+        }}
+      >
         <SheetContent side="bottom" className="h-[80vh] rounded-t-3xl overflow-y-auto">
           <SheetHeader>
-            <SheetTitle>{managingGroup?.name}</SheetTitle>
+            <SheetTitle>{managingGroup?.name ?? newGroupName}</SheetTitle>
           </SheetHeader>
           <div className="mt-4 space-y-4 pb-4">
             <p className="text-muted-foreground text-xs">Wer soll in dieser Gruppe sein?</p>

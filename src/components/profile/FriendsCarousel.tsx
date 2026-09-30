@@ -52,14 +52,14 @@ const FriendsCarousel = ({ userId, onAddFriend, isOwnProfile = true }: Props) =>
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between px-4">
+      <div className="flex items-center justify-between">
         <h3 className="text-white font-bold text-lg flex items-center gap-2">
           <Users className="w-5 h-5 text-[hsl(var(--blitz-pink))]" />
           {isOwnProfile ? "Deine Freunde" : "Freunde"}
           <span className="text-white/60 font-medium">({friends.length})</span>
         </h3>
       </div>
-      <div className="flex gap-3 overflow-x-auto no-scrollbar px-4 pb-2">
+      <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4 pb-2">
         {loading ? (
           <p className="text-white/60 text-sm py-4">Laden...</p>
         ) : (

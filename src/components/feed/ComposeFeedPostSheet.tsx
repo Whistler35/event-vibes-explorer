@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Camera, Loader2, Zap, Globe2, Users, Check, Search, X } from "lucide-react";
+import { Camera, Loader2, Zap, Globe2, Users, Check, Search, X, Trash2 } from "lucide-react";
 import { useEligibleRecaps } from "@/hooks/useEligibleRecaps";
 import { useMatchParticipants } from "@/hooks/useMatchParticipants";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -23,7 +23,7 @@ interface Props {
 
 const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }: Props) => {
   const queryClient = useQueryClient();
-  const { data: eligible = [], isLoading: loadingEligible } = useEligibleRecaps(userId);
+  const { data: eligible = [], isLoading: loadingEligible, dismiss: dismissRecap } = useEligibleRecaps(userId);
   const { isAdmin } = useIsAdmin();
   const [matchId, setMatchId] = useState<string | null>(null);
   const [activity, setActivity] = useState<string | null>(null);
@@ -40,6 +40,17 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
   const [tagSearch, setTagSearch] = useState("");
   const [taggedProfiles, setTaggedProfiles] = useState<Map<string, { name: string; avatar_url: string | null }>>(new Map());
   const fileRef = useRef<HTMLInputElement>(null);
+  const customActivityRef = useRef<HTMLInputElement>(null);
+
+  // Focusing (and thus opening the keyboard) the instant this step's input
+  // mounts can visibly fight with the sheet's own reflow for a frame or two
+  // — a short delay lets everything settle first.
+  useEffect(() => {
+    if (!namingCustomBlitz) return;
+    const t = setTimeout(() => customActivityRef.current?.focus(), 150);
+    return () => clearTimeout(t);
+  }, [namingCustomBlitz]);
+
   const { data: participants = [] } = useMatchParticipants(matchId ?? undefined);
   const taggable = participants.filter((p) => p.user_id !== userId);
 
@@ -223,7 +234,7 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
               Als Admin kannst du einen Feed-Post ohne echten Huddle dazu posten — gib einfach an, worum es ging.
             </p>
             <Input
-              autoFocus
+              ref={customActivityRef}
               value={customActivity}
               onChange={(e) => setCustomActivity(e.target.value)}
               placeholder="z.B. Sommerfest 2026"
@@ -250,19 +261,38 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
               </p>
             ) : (
               eligible.map((e) => (
-                <button
+                <div
                   key={e.matchId}
-                  onClick={() => {
-                    setMatchId(e.matchId);
-                    setActivity(e.activity);
-                  }}
-                  className="w-full flex items-center gap-3 p-3 rounded-2xl bg-muted hover:bg-muted/70 transition text-left"
+                  className="w-full flex items-center gap-3 p-3 rounded-2xl bg-muted hover:bg-muted/70 transition"
                 >
-                  <div className="w-9 h-9 rounded-full bg-[hsl(var(--blitz-forest))] flex items-center justify-center shrink-0">
-                    <Zap className="w-4 h-4 text-[hsl(var(--bolt))] fill-[hsl(var(--bolt))]" />
-                  </div>
-                  <span className="font-semibold text-sm flex-1">{e.activity || "Blitz"}</span>
-                </button>
+                  <button
+                    onClick={() => {
+                      setMatchId(e.matchId);
+                      setActivity(e.activity);
+                    }}
+                    className="flex items-center gap-3 flex-1 text-left min-w-0"
+                  >
+                    <div className="w-9 h-9 rounded-full bg-[hsl(var(--blitz-forest))] flex items-center justify-center shrink-0">
+                      <Zap className="w-4 h-4 text-[hsl(var(--bolt))] fill-[hsl(var(--bolt))]" />
+                    </div>
+                    <span className="font-semibold text-sm flex-1 truncate">{e.activity || "Blitz"}</span>
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Blitz aus der Liste entfernen"
+                    onClick={async () => {
+                      if (!confirm(`"${e.activity || "Blitz"}" aus dieser Liste entfernen? Du kannst später nicht mehr direkt dazu posten.`)) return;
+                      try {
+                        await dismissRecap(e.matchId);
+                      } catch (err: any) {
+                        toast.error(err.message || "Konnte nicht entfernt werden");
+                      }
+                    }}
+                    className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               ))
             )}
             {isAdmin && (

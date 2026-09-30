@@ -40,12 +40,15 @@ export function useFriendGroups(userId: string | undefined) {
   });
 
   const createGroup = async (name: string) => {
-    if (!userId || !name.trim()) return;
-    const { error } = await supabase
+    if (!userId || !name.trim()) return null;
+    const { data, error } = await supabase
       .from("friend_groups" as any)
-      .insert({ owner_id: userId, name: name.trim() });
+      .insert({ owner_id: userId, name: name.trim() })
+      .select("id")
+      .single();
     if (error) throw error;
     queryClient.invalidateQueries({ queryKey });
+    return (data as any).id as string;
   };
 
   const renameGroup = async (groupId: string, name: string) => {

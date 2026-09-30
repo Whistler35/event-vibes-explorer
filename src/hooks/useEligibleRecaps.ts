@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface EligibleRecap {
@@ -9,21 +9,29 @@ export interface EligibleRecap {
 
 /** Matches the user was part of that have ended and don't have a post from them yet. */
 export function useEligibleRecaps(userId: string | undefined) {
-  return useQuery({
-    queryKey: ["eligible-recaps", userId],
+  const queryClient = useQueryClient();
+  const queryKey = ["eligible-recaps", userId];
+
+  const query = useQuery({
+    queryKey,
     enabled: !!userId,
     queryFn: async () => {
       if (!userId) return [] as EligibleRecap[];
       const nowIso = new Date().toISOString();
 
-      const [{ data: hosted }, { data: myParts }] = await Promise.all([
+      const [{ data: hosted }, { data: myParts }, { data: dismissed }] = await Promise.all([
         supabase
           .from("blitz_matches")
           .select("id, blitz_request_id, chat_expires_at")
           .eq("host_id", userId)
           .lte("chat_expires_at", nowIso),
         supabase.from("blitz_match_participants").select("match_id").eq("user_id", userId),
+        supabase
+          .from("blitz_feed_recap_dismissals" as any)
+          .select("match_id")
+          .eq("user_id", userId),
       ]);
+      const dismissedIds = new Set(((dismissed ?? []) as any[]).map((d) => d.match_id));
 
       const joinedIds = (myParts ?? []).map((p: any) => p.match_id);
       const { data: joined } = joinedIds.length
@@ -47,7 +55,7 @@ export function useEligibleRecaps(userId: string | undefined) {
         .in("match_id", matchIds);
       const postedIds = new Set(((myPosts ?? []) as any[]).map((p) => p.match_id));
 
-      const remaining = uniqueMatches.filter((m: any) => !postedIds.has(m.id));
+      const remaining = uniqueMatches.filter((m: any) => !postedIds.has(m.id) && !dismissedIds.has(m.id));
       const requestIds = Array.from(new Set(remaining.map((m: any) => m.blitz_request_id)));
       const { data: requests } = requestIds.length
         ? await supabase.from("blitz_requests").select("id, activity").in("id", requestIds)
@@ -62,4 +70,17 @@ export function useEligibleRecaps(userId: string | undefined) {
         .sort((a, b) => new Date(b.endedAt).getTime() - new Date(a.endedAt).getTime());
     },
   });
+
+  const dismiss = useMutation({
+    mutationFn: async (matchId: string) => {
+      if (!userId) return;
+      const { error } = await supabase
+        .from("blitz_feed_recap_dismissals" as any)
+        .insert({ user_id: userId, match_id: matchId });
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+  });
+
+  return { ...query, dismiss: dismiss.mutateAsync };
 }
