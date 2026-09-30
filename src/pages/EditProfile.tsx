@@ -84,7 +84,7 @@ const EditProfile = () => {
 
   const [form, setForm] = useState({
     name: "",
-    age: "",
+    birthday: "",
     country: "",
     bio: "",
     avatar_url: "",
@@ -106,7 +106,7 @@ const EditProfile = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("name, age, country, bio, avatar_url, instagram_username, instagram_followers, interests, ritual_push_enabled")
+        .select("name, birthday, country, bio, avatar_url, instagram_username, instagram_followers, interests, ritual_push_enabled")
         .eq("user_id", user!.id)
         .maybeSingle() as any;
       if (error) throw error;
@@ -121,7 +121,7 @@ const EditProfile = () => {
     if (!profileRow) return;
     setForm({
       name: profileRow.name || "",
-      age: profileRow.age?.toString() || "",
+      birthday: profileRow.birthday || "",
       country: profileRow.country || "",
       bio: profileRow.bio || "",
       avatar_url: profileRow.avatar_url || "",
@@ -132,7 +132,7 @@ const EditProfile = () => {
     setAvatarPreview(profileRow.avatar_url || null);
     setRitualPushEnabled(profileRow.ritual_push_enabled ?? true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profileRow?.name, profileRow?.age, profileRow?.country, profileRow?.bio, profileRow?.avatar_url, profileRow?.instagram_username, profileRow?.instagram_followers, profileRow?.ritual_push_enabled]);
+  }, [profileRow?.name, profileRow?.birthday, profileRow?.country, profileRow?.bio, profileRow?.avatar_url, profileRow?.instagram_username, profileRow?.instagram_followers, profileRow?.ritual_push_enabled]);
 
   const handleToggleRitualPush = async (checked: boolean) => {
     if (!user) return;
@@ -150,7 +150,7 @@ const EditProfile = () => {
   const validate = () => {
     const newErrors: Record<string, string> = {};
     if (!form.name.trim()) newErrors.name = t('editProfile.errors.name');
-    if (!form.age.trim() || isNaN(Number(form.age)) || Number(form.age) < 1) newErrors.age = t('editProfile.errors.age');
+    if (!form.birthday) newErrors.birthday = t('editProfile.errors.age');
     if (!form.country.trim()) newErrors.country = t('editProfile.errors.country');
     if (!form.bio.trim()) newErrors.bio = t('editProfile.errors.bio');
     // Profile photo is optional – a generated avatar is shown as fallback.
@@ -189,10 +189,20 @@ const EditProfile = () => {
 
     setSaving(true);
     try {
+      // Same calculation as the signup form (Auth.tsx) so age stays in sync
+      // with the birthday the person actually picked, instead of a raw
+      // number that goes stale every year.
+      const birthDate = new Date(form.birthday);
+      const today = new Date();
+      let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) calculatedAge--;
+
       const profileData = {
         user_id: user.id,
         name: form.name.trim(),
-        age: Number(form.age),
+        birthday: form.birthday,
+        age: calculatedAge,
         country: form.country.trim(),
         bio: form.bio.trim(),
         avatar_url: form.avatar_url,
@@ -284,16 +294,16 @@ const EditProfile = () => {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-white/80 font-medium">{t('editProfile.age')} *</Label>
+              <Label className="text-white/80 font-medium">{t('auth.birthday')} *</Label>
               <Input
-                type="number"
-                value={form.age}
-                onChange={(e) => setForm(prev => ({ ...prev, age: e.target.value }))}
-                placeholder="25"
-                min={1}
-                className={inputClass}
+                type="date"
+                value={form.birthday}
+                onChange={(e) => setForm(prev => ({ ...prev, birthday: e.target.value }))}
+                max={new Date(new Date().setFullYear(new Date().getFullYear() - 12)).toISOString().split('T')[0]}
+                min="1900-01-01"
+                className={`${inputClass} [color-scheme:dark]`}
               />
-              {errors.age && <p className="text-red-400 text-xs mt-1">{errors.age}</p>}
+              {errors.birthday && <p className="text-red-400 text-xs mt-1">{errors.birthday}</p>}
             </div>
             <div>
               <Label className="text-white/80 font-medium">{t('editProfile.country')} *</Label>
