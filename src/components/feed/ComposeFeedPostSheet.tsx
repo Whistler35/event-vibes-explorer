@@ -429,7 +429,6 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
                 </div>
               )
             )}
-            )}
 
             <Button className="w-full" size="lg" onClick={handlePost} disabled={!file || posting}>
               {posting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}

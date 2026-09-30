@@ -19,8 +19,8 @@ const LanguageSwitcher = () => {
           className="flex items-center gap-1 px-2 h-9 rounded-full hover:bg-muted/60 transition-colors"
           aria-label="Sprache wählen"
         >
-          <Languages className="w-5 h-5 text-foreground/80" />
-          <span className="text-xs font-bold uppercase text-foreground/80">{current}</span>
+          <Languages className="w-5 h-5 text-[hsl(var(--bolt))]" />
+          <span className="text-xs font-bold uppercase text-[hsl(var(--bolt))]">{current}</span>
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[140px]">

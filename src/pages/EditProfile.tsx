@@ -292,7 +292,7 @@ const EditProfile = () => {
             {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-4">
             <div>
               <Label className="text-white/80 font-medium">{t('auth.birthday')} *</Label>
               <Input
@@ -301,7 +301,7 @@ const EditProfile = () => {
                 onChange={(e) => setForm(prev => ({ ...prev, birthday: e.target.value }))}
                 max={new Date(new Date().setFullYear(new Date().getFullYear() - 12)).toISOString().split('T')[0]}
                 min="1900-01-01"
-                className={`${inputClass} [color-scheme:dark]`}
+                className={`${inputClass} [color-scheme:dark] w-full`}
               />
               {errors.birthday && <p className="text-red-400 text-xs mt-1">{errors.birthday}</p>}
             </div>
@@ -427,7 +427,11 @@ const EditProfile = () => {
             <h3 className="text-white font-bold text-lg">Wochenend-Erinnerungen</h3>
             <p className="text-sm text-white/60">Fr/Sa/So ein kurzer Impuls, spontan was zu starten</p>
           </div>
-          <Switch checked={ritualPushEnabled} onCheckedChange={handleToggleRitualPush} />
+          <Switch
+            checked={ritualPushEnabled}
+            onCheckedChange={handleToggleRitualPush}
+            className="data-[state=checked]:bg-[hsl(var(--bolt))] data-[state=unchecked]:bg-white/25"
+          />
         </div>
 
         {/* Password */}
