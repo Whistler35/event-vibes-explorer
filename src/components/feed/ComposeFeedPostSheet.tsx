@@ -13,6 +13,7 @@ import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { trackEvent } from "@/lib/analytics";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
+import KeyboardDebugHUD from "@/components/debug/KeyboardDebugHUD";
 
 interface Props {
   open: boolean;
@@ -230,6 +231,7 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
 
         {namingCustomBlitz ? (
           <div className="py-4 space-y-4">
+            <KeyboardDebugHUD />
             <p className="text-sm text-muted-foreground">
               Als Admin kannst du einen Feed-Post ohne echten Huddle dazu posten — gib einfach an, worum es ging.
             </p>
