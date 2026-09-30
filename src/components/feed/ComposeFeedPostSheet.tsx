@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Camera, Loader2, Zap, Globe2, Users, Check } from "lucide-react";
+import { Camera, Loader2, Zap, Globe2, Users, Check, Search, X } from "lucide-react";
 import { useEligibleRecaps } from "@/hooks/useEligibleRecaps";
 import { useMatchParticipants } from "@/hooks/useMatchParticipants";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -36,9 +36,40 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
   const [namingCustomBlitz, setNamingCustomBlitz] = useState(false);
   const [customActivity, setCustomActivity] = useState("");
   const [creatingBlitz, setCreatingBlitz] = useState(false);
+  const [standaloneAdminPost, setStandaloneAdminPost] = useState(false);
+  const [tagSearch, setTagSearch] = useState("");
+  const [taggedProfiles, setTaggedProfiles] = useState<Map<string, { name: string; avatar_url: string | null }>>(new Map());
   const fileRef = useRef<HTMLInputElement>(null);
   const { data: participants = [] } = useMatchParticipants(matchId ?? undefined);
   const taggable = participants.filter((p) => p.user_id !== userId);
+
+  // Only for admin standalone posts (no real Huddle → no real participants to
+  // pick from): search all profiles instead, since anyone can be tagged.
+  const { data: tagSearchResults = [] } = useQuery({
+    queryKey: ["feed-post-tag-search", tagSearch],
+    enabled: standaloneAdminPost && tagSearch.trim().length >= 2,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("user_id, name, avatar_url")
+        .neq("user_id", userId ?? "")
+        .ilike("name", `%${tagSearch.trim()}%`)
+        .limit(15);
+      return (data ?? []) as { user_id: string; name: string; avatar_url: string | null }[];
+    },
+  });
+
+  const toggleStandaloneTag = (p: { user_id: string; name: string; avatar_url: string | null }) => {
+    setTaggedIds((prev) =>
+      prev.includes(p.user_id) ? prev.filter((id) => id !== p.user_id) : [...prev, p.user_id]
+    );
+    setTaggedProfiles((prev) => {
+      const next = new Map(prev);
+      if (next.has(p.user_id)) next.delete(p.user_id);
+      else next.set(p.user_id, { name: p.name, avatar_url: p.avatar_url });
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -57,6 +88,9 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
     setTaggedIds([]);
     setNamingCustomBlitz(false);
     setCustomActivity("");
+    setStandaloneAdminPost(false);
+    setTagSearch("");
+    setTaggedProfiles(new Map());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, preselectedMatchId]);
 
@@ -83,7 +117,7 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
       .insert({
         host_id: userId,
         activity: activityName.trim(),
-        duration_minutes: 0,
+        duration_minutes: 15,
         city: null,
         latitude: coords.lat,
         longitude: coords.lng,
@@ -115,6 +149,7 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
       if (newMatchId) {
         setMatchId(newMatchId);
         setActivity(customActivity.trim());
+        setStandaloneAdminPost(true);
       }
     } catch (err: any) {
       toast.error(err.message || "Konnte Blitz nicht anlegen");
@@ -286,42 +321,114 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
               <Switch checked={isPublic} onCheckedChange={setIsPublic} />
             </div>
 
-            {taggable.length > 0 && (
+            {standaloneAdminPost ? (
               <div className="space-y-2">
                 <p className="text-xs font-black uppercase tracking-wide text-muted-foreground">
-                  Personen markieren
+                  Personen markieren (Admin — jede:r wählbar, unabhängig vom Blitz)
                 </p>
-                <div className="space-y-1">
-                  {taggable.map((p) => {
-                    const selected = taggedIds.includes(p.user_id);
-                    return (
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    value={tagSearch}
+                    onChange={(e) => setTagSearch(e.target.value)}
+                    placeholder="Nach Namen suchen…"
+                    className="pl-9"
+                  />
+                </div>
+
+                {taggedProfiles.size > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {Array.from(taggedProfiles.entries()).map(([id, p]) => (
                       <button
-                        key={p.user_id}
+                        key={id}
                         type="button"
-                        onClick={() =>
-                          setTaggedIds((prev) =>
-                            selected ? prev.filter((id) => id !== p.user_id) : [...prev, p.user_id]
-                          )
-                        }
-                        className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-muted transition text-left"
+                        onClick={() => toggleStandaloneTag({ user_id: id, name: p.name, avatar_url: p.avatar_url })}
+                        className="flex items-center gap-1 pl-1 pr-2 py-1 rounded-full bg-[hsl(var(--blitz-forest))]/10 text-[hsl(var(--blitz-forest))] text-xs font-semibold"
                       >
-                        <Avatar className="w-8 h-8">
+                        <Avatar className="w-5 h-5">
                           <AvatarImage src={p.avatar_url ?? undefined} />
-                          <AvatarFallback className="bg-[hsl(var(--blitz-forest))] text-white text-[10px] font-black">
+                          <AvatarFallback className="bg-[hsl(var(--blitz-forest))] text-white text-[9px] font-black">
                             {p.name?.[0] ?? "?"}
                           </AvatarFallback>
                         </Avatar>
-                        <span className="flex-1 text-sm font-semibold">{p.name}</span>
-                        {selected && (
-                          <span className="w-5 h-5 rounded-full bg-[hsl(var(--blitz-forest))] flex items-center justify-center shrink-0">
-                            <Check className="w-3 h-3 text-[hsl(var(--bolt))]" />
-                          </span>
-                        )}
+                        {p.name} <X className="w-3 h-3" />
                       </button>
-                    );
-                  })}
-                </div>
+                    ))}
+                  </div>
+                )}
+
+                {tagSearch.trim().length >= 2 && (
+                  <div className="space-y-1">
+                    {tagSearchResults.length === 0 ? (
+                      <p className="text-muted-foreground text-xs px-2 py-1">Keine Personen gefunden.</p>
+                    ) : (
+                      tagSearchResults.map((p) => {
+                        const selected = taggedIds.includes(p.user_id);
+                        return (
+                          <button
+                            key={p.user_id}
+                            type="button"
+                            onClick={() => toggleStandaloneTag(p)}
+                            className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-muted transition text-left"
+                          >
+                            <Avatar className="w-8 h-8">
+                              <AvatarImage src={p.avatar_url ?? undefined} />
+                              <AvatarFallback className="bg-[hsl(var(--blitz-forest))] text-white text-[10px] font-black">
+                                {p.name?.[0] ?? "?"}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="flex-1 text-sm font-semibold">{p.name}</span>
+                            {selected && (
+                              <span className="w-5 h-5 rounded-full bg-[hsl(var(--blitz-forest))] flex items-center justify-center shrink-0">
+                                <Check className="w-3 h-3 text-[hsl(var(--bolt))]" />
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+                )}
               </div>
+            ) : (
+              taggable.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-black uppercase tracking-wide text-muted-foreground">
+                    Personen markieren
+                  </p>
+                  <div className="space-y-1">
+                    {taggable.map((p) => {
+                      const selected = taggedIds.includes(p.user_id);
+                      return (
+                        <button
+                          key={p.user_id}
+                          type="button"
+                          onClick={() =>
+                            setTaggedIds((prev) =>
+                              selected ? prev.filter((id) => id !== p.user_id) : [...prev, p.user_id]
+                            )
+                          }
+                          className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-muted transition text-left"
+                        >
+                          <Avatar className="w-8 h-8">
+                            <AvatarImage src={p.avatar_url ?? undefined} />
+                            <AvatarFallback className="bg-[hsl(var(--blitz-forest))] text-white text-[10px] font-black">
+                              {p.name?.[0] ?? "?"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="flex-1 text-sm font-semibold">{p.name}</span>
+                          {selected && (
+                            <span className="w-5 h-5 rounded-full bg-[hsl(var(--blitz-forest))] flex items-center justify-center shrink-0">
+                              <Check className="w-3 h-3 text-[hsl(var(--bolt))]" />
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )
+            )}
             )}
 
             <Button className="w-full" size="lg" onClick={handlePost} disabled={!file || posting}>
