@@ -164,6 +164,10 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
         setMatchId(newMatchId);
         setActivity(customActivity.trim());
         setStandaloneAdminPost(true);
+        // Without this, showPicker/namingCustomBlitz's ternary keeps
+        // rendering the naming step forever — matchId gets set correctly,
+        // but the sheet never visibly moves on to "Foto teilen".
+        setNamingCustomBlitz(false);
       }
     } catch (err: any) {
       toast.error(err.message || "Konnte Blitz nicht anlegen");

@@ -16,6 +16,8 @@ import { shareInvite } from "@/lib/share";
 import { PUBLIC_WEB_ORIGIN } from "@/lib/publicUrl";
 import { useMessageReactions } from "@/hooks/useMessageReactions";
 import { uploadChatPhoto, PHOTO_PLACEHOLDER } from "@/lib/chatPhoto";
+import { useCollapsibleHeader } from "@/hooks/useCollapsibleHeader";
+import { ChevronDown } from "lucide-react";
 
 interface Message {
   id: string;
@@ -49,7 +51,7 @@ const DirectChat = () => {
     setBurstId(messageId);
     setTimeout(() => setBurstId((cur) => (cur === messageId ? null : cur)), 700);
   };
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const { expanded: headerExpanded, scrollRef, onScroll, expand: expandHeader } = useCollapsibleHeader();
   const queryClient = useQueryClient();
 
   const { data: otherProfile } = useQuery({
@@ -249,11 +251,8 @@ const DirectChat = () => {
 
   return (
     <div
-      className="h-[100dvh] bg-background text-foreground flex flex-col"
-      style={{
-        paddingTop: "env(safe-area-inset-top)",
-        paddingBottom: "env(safe-area-inset-bottom)",
-      }}
+      className="h-full bg-background text-foreground flex flex-col overflow-hidden"
+      style={{ paddingTop: "env(safe-area-inset-top)" }}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 pt-3 pb-2 shrink-0">
@@ -283,7 +282,26 @@ const DirectChat = () => {
         </div>
       </div>
 
-      {/* Title + host */}
+      {/* Compact stand-in for the title/who's-in block once it's been
+          scrolled past — tapping it (or scrolling back to top) brings the
+          full header back. */}
+      {!headerExpanded && (
+        <button
+          onClick={expandHeader}
+          className="shrink-0 w-full flex items-center gap-2 px-5 py-2.5 border-b border-black/5 bg-background text-left"
+        >
+          <span className="font-display text-base font-bold tracking-tight text-foreground truncate flex-1">
+            {displayName}
+          </span>
+          <ChevronDown className="w-4 h-4 shrink-0 text-muted-foreground" />
+        </button>
+      )}
+
+      {/* Title + who's in + messages, all as one scrollable region — same
+          keyboard/collapsible-header pattern as the Huddle chat (see
+          BlitzMatch.tsx): only the input form (outside this div, shrink-0)
+          stays fixed in place. */}
+      <div ref={scrollRef} onScroll={onScroll} className="flex-1 min-h-0 overflow-y-auto">
       <div className="px-5 pt-2 pb-4 shrink-0">
         <h1 className="font-display text-4xl font-bold tracking-tight text-foreground leading-tight">
           {displayName}
@@ -349,12 +367,12 @@ const DirectChat = () => {
       </div>
 
       {/* Chat */}
-      <div className="px-5 pb-2 shrink-0">
+      <div className="px-5 pb-2">
         <p className="text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground">
           The Huddle
         </p>
       </div>
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 pb-40 space-y-2">
+      <div className="px-5 pb-4 space-y-2">
         {messages.length === 0 && (
           <div className="text-center text-muted-foreground text-sm py-12">
             {t("directChat.noMessages")}
@@ -414,10 +432,11 @@ const DirectChat = () => {
           );
         })}
       </div>
+      </div>
 
       <form
         onSubmit={handleSend}
-        className="fixed left-0 right-0 bottom-0 px-4 pt-3 pb-4 flex items-center gap-2 z-20"
+        className="shrink-0 border-t border-black/5 bg-background px-4 pt-3 flex items-center gap-2"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.75rem)" }}
       >
         <button
