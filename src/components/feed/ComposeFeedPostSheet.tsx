@@ -212,7 +212,7 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="rounded-t-3xl max-h-[88vh] overflow-y-auto">
+      <SheetContent side="bottom" className="rounded-t-3xl max-h-[88%] overflow-y-auto">
         <SheetHeader className="text-left">
           <SheetTitle>{namingCustomBlitz ? "Blitz benennen" : showPicker ? "Welcher Blitz?" : "Foto teilen"}</SheetTitle>
         </SheetHeader>

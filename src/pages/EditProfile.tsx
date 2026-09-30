@@ -293,7 +293,7 @@ const EditProfile = () => {
           </div>
 
           <div className="space-y-4">
-            <div>
+            <div className="w-full overflow-hidden rounded-md">
               <Label className="text-white/80 font-medium">{t('auth.birthday')} *</Label>
               <Input
                 type="date"
@@ -301,7 +301,7 @@ const EditProfile = () => {
                 onChange={(e) => setForm(prev => ({ ...prev, birthday: e.target.value }))}
                 max={new Date(new Date().setFullYear(new Date().getFullYear() - 12)).toISOString().split('T')[0]}
                 min="1900-01-01"
-                className={`${inputClass} [color-scheme:dark] w-full`}
+                className={`${inputClass} [color-scheme:dark] w-full max-w-full box-border`}
               />
               {errors.birthday && <p className="text-red-400 text-xs mt-1">{errors.birthday}</p>}
             </div>

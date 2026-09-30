@@ -389,7 +389,7 @@ const BlitzMatch = () => {
 
   return (
     <div
-      className="min-h-screen bg-background text-foreground flex flex-col"
+      className="h-full bg-background text-foreground flex flex-col overflow-hidden"
       style={{ paddingTop: 'env(safe-area-inset-top)' }}
     >
       {/* Header */}
@@ -546,7 +546,7 @@ const BlitzMatch = () => {
           The Huddle
         </p>
       </div>
-      <div className="flex-1 px-5 pb-4 space-y-2">
+      <div className="flex-1 min-h-0 overflow-y-auto px-5 pb-4 space-y-2">
         {messages.length === 0 && (
           <div className="text-center text-muted-foreground text-sm py-12">
             {t("blitzMatch.emptyChat")}
@@ -618,7 +618,7 @@ const BlitzMatch = () => {
 
       <form
         onSubmit={handleSend}
-        className="sticky bottom-0 z-10 shrink-0 border-t border-black/5 bg-background px-4 pt-3 flex items-center gap-2"
+        className="shrink-0 border-t border-black/5 bg-background px-4 pt-3 flex items-center gap-2"
         style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}
       >
         <button

@@ -193,15 +193,31 @@ All colors MUST be HSL.
 
   html {
     -webkit-text-size-adjust: 100%;
+    height: 100%;
   }
 
   body {
     @apply bg-background text-foreground;
+    /* Containing block for any `position: absolute` descendant (see sheet.tsx)
+       so it tracks this element's real, Capacitor-shrunk box instead of the
+       untouched viewport that `position: fixed` would resolve against. */
+    position: relative;
     overscroll-behavior-y: none;
     -webkit-overflow-scrolling: touch;
     font-family: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
     font-feature-settings: "ss01", "cv11";
     -webkit-font-smoothing: antialiased;
+    /* Capacitor's Keyboard plugin (resize: 'body') shrinks this element's
+       own box (an inline `height` in px) when the keyboard opens — it does
+       NOT touch the WKWebView frame, so `vh` units stay at the full,
+       un-shrunk screen size throughout. #root inheriting height:100% here
+       is what lets a page opt into tracking the real, keyboard-aware
+       height via `h-full` instead of `min-h-screen` (100vh). */
+    height: 100%;
+  }
+
+  #root {
+    height: 100%;
   }
 }
 

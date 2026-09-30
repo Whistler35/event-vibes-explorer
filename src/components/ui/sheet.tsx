@@ -29,7 +29,12 @@ const SheetOverlay = React.forwardRef<
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName
 
 const sheetVariants = cva(
-  "fixed z-50 gap-4 bg-background p-6 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500",
+  // `absolute` (not `fixed`) so this resolves against `body`'s own box (see
+  // `position: relative` on body in index.css) — Capacitor's Keyboard plugin
+  // (resize: 'body') shrinks that box's real height when the keyboard opens,
+  // which `position: fixed` (anchored to the untouched viewport) ignores,
+  // leaving the sheet's input pinned behind the keyboard.
+  "absolute z-50 gap-4 bg-background p-6 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500",
   {
     variants: {
       side: {
