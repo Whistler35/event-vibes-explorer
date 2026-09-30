@@ -45,10 +45,12 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
 
   // Focusing (and thus opening the keyboard) the instant this step's input
   // mounts can visibly fight with the sheet's own reflow for a frame or two
-  // — a short delay lets everything settle first.
+  // — a short delay lets everything settle first. preventScroll stops the
+  // browser's own "scroll the focused element into view" from overshooting
+  // and hiding content above it that already fit on screen just fine.
   useEffect(() => {
     if (!namingCustomBlitz) return;
-    const t = setTimeout(() => customActivityRef.current?.focus(), 150);
+    const t = setTimeout(() => customActivityRef.current?.focus({ preventScroll: true }), 150);
     return () => clearTimeout(t);
   }, [namingCustomBlitz]);
 

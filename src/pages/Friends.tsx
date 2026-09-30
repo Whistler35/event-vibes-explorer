@@ -166,9 +166,10 @@ const Friends = () => {
             // resize against the sheet's own open transition — the field
             // visibly jumps once both settle. Waiting for the sheet's own
             // animation to finish first (see duration-500 in sheet.tsx)
-            // avoids that.
+            // avoids that. preventScroll stops the browser's own "scroll
+            // focused element into view" from separately overshooting.
             e.preventDefault();
-            setTimeout(() => newGroupInputRef.current?.focus(), 350);
+            setTimeout(() => newGroupInputRef.current?.focus({ preventScroll: true }), 350);
           }}
         >
           <SheetHeader>
