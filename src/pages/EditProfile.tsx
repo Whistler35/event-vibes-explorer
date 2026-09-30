@@ -25,6 +25,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { deleteOwnAccount } from "@/lib/moderation";
+import BlockedUsersList from "@/components/profile/BlockedUsersList";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { Switch } from "@/components/ui/switch";
 
@@ -455,6 +456,8 @@ const EditProfile = () => {
             {t('editProfile.changePassword')}
           </Button>
         </div>
+
+        <BlockedUsersList />
 
         {/* Danger zone */}
         <div className="border-t border-white/15 pt-6 mt-2">
