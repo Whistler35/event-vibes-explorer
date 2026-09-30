@@ -317,6 +317,7 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
           </div>
         ) : (
           <div className="py-4 space-y-4">
+            <KeyboardDebugHUD />
             {activity && (
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[hsl(var(--bolt))]/20 text-[hsl(var(--blitz-forest))] text-xs font-black uppercase tracking-wide">
                 <Zap className="w-3 h-3 fill-current" /> {activity}

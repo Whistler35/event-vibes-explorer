@@ -1,18 +1,25 @@
 import { useCallback, useRef, useState } from "react";
+import { useKeyboardOpen } from "./useKeyboardOpen";
 
 /**
  * Drives a chat-style "collapse the huddle/organization header once you've
- * scrolled into the messages, show a compact bar you can tap (or scroll back
- * to top) to get it back" pattern — shared by BlitzMatch and DirectChat so
- * both behave the same way.
+ * scrolled into the messages (or the keyboard opens), show a compact bar you
+ * can tap (or scroll back to top) to get it back" pattern — shared by
+ * BlitzMatch and DirectChat so both behave the same way.
+ *
+ * The keyboard opening collapses the header unconditionally (not just past a
+ * scroll threshold): with the keyboard up there usually isn't room for the
+ * full header AND the messages AND the input all at once, and — like every
+ * reference chat app — the input should win that space, not the org info.
  */
 export function useCollapsibleHeader(threshold = 24) {
-  const [expanded, setExpanded] = useState(true);
+  const [scrolledToTop, setScrolledToTop] = useState(true);
+  const keyboardOpen = useKeyboardOpen();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const onScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement>) => {
-      setExpanded(e.currentTarget.scrollTop <= threshold);
+      setScrolledToTop(e.currentTarget.scrollTop <= threshold);
     },
     [threshold]
   );
@@ -21,5 +28,5 @@ export function useCollapsibleHeader(threshold = 24) {
     scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  return { expanded, scrollRef, onScroll, expand };
+  return { expanded: scrolledToTop && !keyboardOpen, scrollRef, onScroll, expand };
 }
