@@ -415,8 +415,11 @@ const BlitzMatch = () => {
         </div>
       </div>
 
-      {/* Title + host + who's in */}
-      <div className="shrink-0">
+      {/* Title + host + who's in + messages, all as one scrollable region —
+          when the keyboard shrinks the available height, this is what gives
+          up space first so the input form (outside this div, shrink-0)
+          always stays visible right above the keyboard. */}
+      <div className="flex-1 min-h-0 overflow-y-auto">
         <div className="px-5 pt-2 pb-4">
           <h1 className="font-display text-4xl font-bold tracking-tight text-foreground leading-tight">
             {asBlitzQuestion(headerTitle)}
@@ -505,50 +508,14 @@ const BlitzMatch = () => {
             </button>
           )}
         </div>
-      </div>
 
-      <AddFriendToHuddleSheet
-        open={showAddFriend}
-        onOpenChange={setShowAddFriend}
-        matchId={match.id}
-        activity={activity}
-        excludeIds={participantIds}
-      />
-
-      <ParticipantOptionsSheet
-        matchId={match.id}
-        userId={optionsForId}
-        userName={profilesMap.get(optionsForId ?? "")?.name?.split(" ")[0] ?? "Person"}
-        currentRoleLabel={roleLabels.get(optionsForId ?? "") ?? null}
-        onOpenChange={(o) => !o && setOptionsForId(null)}
-        onRemoved={(removedId) => {
-          setParticipantIds((prev) => prev.filter((id) => id !== removedId));
-          setRoleLabels((prev) => {
-            const next = new Map(prev);
-            next.delete(removedId);
-            return next;
-          });
-        }}
-        onRoleSet={(uid, label) => {
-          setRoleLabels((prev) => new Map(prev).set(uid, label));
-        }}
-      />
-
-      <ExtendHuddleSheet
-        open={showExtendSheet}
-        onOpenChange={setShowExtendSheet}
-        matchId={match.id}
-        currentExpiresAt={match.chat_expires_at}
-        onExtended={(newExpiresAt) => setMatch((prev) => (prev ? { ...prev, chat_expires_at: newExpiresAt } : prev))}
-      />
-
-      {/* Huddle chat */}
-      <div className="px-5 pb-2 shrink-0">
-        <p className="text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground">
-          The Huddle
-        </p>
-      </div>
-      <div className="flex-1 min-h-0 overflow-y-auto px-5 pb-4 space-y-2">
+        {/* Huddle chat */}
+        <div className="px-5 pb-2">
+          <p className="text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground">
+            The Huddle
+          </p>
+        </div>
+        <div className="px-5 pb-4 space-y-2">
         {messages.length === 0 && (
           <div className="text-center text-muted-foreground text-sm py-12">
             {t("blitzMatch.emptyChat")}
@@ -616,7 +583,43 @@ const BlitzMatch = () => {
           );
         })}
         <div ref={bottomRef} />
+        </div>
       </div>
+
+      <AddFriendToHuddleSheet
+        open={showAddFriend}
+        onOpenChange={setShowAddFriend}
+        matchId={match.id}
+        activity={activity}
+        excludeIds={participantIds}
+      />
+
+      <ParticipantOptionsSheet
+        matchId={match.id}
+        userId={optionsForId}
+        userName={profilesMap.get(optionsForId ?? "")?.name?.split(" ")[0] ?? "Person"}
+        currentRoleLabel={roleLabels.get(optionsForId ?? "") ?? null}
+        onOpenChange={(o) => !o && setOptionsForId(null)}
+        onRemoved={(removedId) => {
+          setParticipantIds((prev) => prev.filter((id) => id !== removedId));
+          setRoleLabels((prev) => {
+            const next = new Map(prev);
+            next.delete(removedId);
+            return next;
+          });
+        }}
+        onRoleSet={(uid, label) => {
+          setRoleLabels((prev) => new Map(prev).set(uid, label));
+        }}
+      />
+
+      <ExtendHuddleSheet
+        open={showExtendSheet}
+        onOpenChange={setShowExtendSheet}
+        matchId={match.id}
+        currentExpiresAt={match.chat_expires_at}
+        onExtended={(newExpiresAt) => setMatch((prev) => (prev ? { ...prev, chat_expires_at: newExpiresAt } : prev))}
+      />
 
       <form
         onSubmit={handleSend}
