@@ -1,6 +1,8 @@
-# EVENDLE → App Store: Jetzt wirklich einreichen (Stand 29.09.2026, Build 1.3 (24))
+# EVENDLE → App Store: Jetzt wirklich einreichen (Stand 01.10.2026, Build 1.3 (39))
 
-Das meiste ist aus der Vorbereitung vom 09./10.09. schon fertig (Texte, Datenschutz-Antworten, Screenshots liegen bereit). Das hier ist die aktualisierte, komplette Reihenfolge für **Build 1.3 (24)**. Alles zum Copy-Pasten ist als Codeblock markiert.
+Das meiste ist aus der Vorbereitung vom 09./10.09. schon fertig (Texte, Datenschutz-Antworten). Das hier ist die aktualisierte, komplette Reihenfolge für **Build 1.3 (39)**. Alles zum Copy-Pasten ist als Codeblock markiert.
+
+**Screenshots sind fertig** — die 6 Marketing-Screenshots liegen in `app-store/screenshots-marketing/` in korrekter Auflösung (1290×2796px), siehe B6.
 
 Zwei Browser-Tabs offen halten:
 - **App Store Connect:** https://appstoreconnect.apple.com → „Meine Apps" → **EVENDLE**
@@ -121,16 +123,21 @@ blitz,spontan,treffen,leute,aktivität,ausgehen,freunde,kennenlernen,nähe,gemei
 ```
 
 ### B6. Screenshots
-**Schon fertig und in der richtigen Größe** — liegen im Repo unter `app-store/screenshots/` (1320 × 2868 px, genau Apples 6.9″-Pflichtformat):
-- `01-mein-blitz.png`
-- `02-profil.png`
-- `03-entdecken.png`
-- `04-huddle-chat.png`
 
-Einfach im Abschnitt „App-Vorschau und Screenshots" hochladen. Sie sind vom 12.09. — zeigen also noch nicht die neuesten Sachen von heute (Streak-Anzeige, "Freunde" statt "Blitz-Community" etc.), das ist aber kein Einreichungs-Blocker. Wenn du willst, können wir die später mal auffrischen; für die Einreichung reichen sie so.
+**Fertig, in korrekter Auflösung (1290×2796px)** — liegen unter `app-store/screenshots-marketing/`, in dieser Reihenfolge hochladen:
+1. `01-feel-like-something.png`
+2. `02-send-a-blitz.png`
+3. `03-swipe-right.png`
+4. `04-plan-huddle.png`
+5. `05-phones-away.png`
+6. `06-your-crew.png`
+
+Im Abschnitt „App-Vorschau und Screenshots" hochladen (6.7"/6.9"-Pflichtformat — Apple leitet die anderen Gerätegrößen automatisch ab).
+
+(Die alten, einfachen UI-Screenshots liegen weiterhin als Fallback unter `app-store/screenshots/`, falls mal gebraucht.)
 
 ### B7. Build auswählen
-Abschnitt **„Build"** → **+** → **Build 1.3 (24)** wählen (falls „Processing": 15–30 Min warten, Seite neu laden).
+Abschnitt **„Build"** → **+** → **Build 1.3 (39)** wählen (falls „Processing": 15–30 Min warten, Seite neu laden).
 
 ### B8. „Neuigkeiten in dieser Version"
 Da das die erste tatsächliche Einreichung ist, optional — falls Pflicht:
@@ -239,7 +246,7 @@ Status wechselt auf **„Warten auf Prüfung"**. Prüfung dauert i. d. R. **24�
 
 ## Fehlerbehebung
 
-**Build 1.3 (24) taucht nicht auf / „Processing"**
+**Build 1.3 (39) taucht nicht auf / „Processing"**
 → 15–45 Min nach Upload normal. Seite neu laden. Nach >2 h noch weg: E-Mail von Apple checken.
 
 **„Missing Compliance" beim Einreichen**

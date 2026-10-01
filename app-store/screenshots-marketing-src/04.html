@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; }
+  html,body { width:1290px; height:2796px; overflow:hidden; }
+  body { background:#F4F3ED; position:relative; }
+  .pill { position:absolute; top:168px; left:50%; transform:translateX(-50%); padding:20px 34px; border-radius:999px; background:#E7E4DA; font-weight:800; font-size:23px; letter-spacing:3.5px; color:#4A4A40; text-transform:uppercase; }
+  .headline { position:absolute; top:272px; left:0; right:0; text-align:center; font-weight:800; font-size:96px; line-height:1.04; letter-spacing:-2px; color:#131711; }
+  .headline .accent { background:#C8F14F; padding:0 6px; }
+  .sub { position:absolute; top:520px; left:50%; transform:translateX(-50%); width:940px; text-align:center; font-weight:500; font-size:40px; line-height:1.45; color:#79826F; }
+  .phone { position:absolute; top:758px; left:50%; transform:translateX(-50%); width:1010px; height:2100px; background:#0A0A0A; border-radius:150px; padding:22px; box-shadow: 0 60px 140px -30px rgba(0,0,0,0.35); }
+  .phone-screen { position:relative; width:100%; height:100%; border-radius:132px; overflow:hidden; background:#F4F3ED; }
+  .notch { position:absolute; top:22px; left:50%; transform:translateX(-50%); width:230px; height:44px; background:#0A0A0A; border-radius:30px; z-index:5; }
+  .statusbar { display:flex; align-items:center; justify-content:space-between; padding:38px 56px 0 64px; color:#131711; font-weight:700; font-size:30px; }
+  .statusbar .icons { display:flex; align-items:center; gap:14px; }
+  .chathead { display:flex; align-items:center; justify-content:space-between; padding:34px 56px 0 56px; }
+  .backbtn { width:76px; height:76px; border-radius:999px; background:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 20px -6px rgba(0,0,0,0.12); }
+  .inbadge { display:flex; align-items:center; gap:10px; background:#C8F14F; color:#1E3323; font-weight:800; font-size:26px; padding:16px 28px; border-radius:999px; }
+  .inbadge .dot { width:10px; height:10px; border-radius:999px; background:#1E3323; }
+  .huddletitle { padding:44px 56px 0 56px; font-weight:800; font-size:70px; color:#131711; line-height:1.05; }
+  .hostrow { padding:26px 56px 0 56px; display:flex; align-items:center; gap:16px; color:#79826F; font-weight:600; font-size:30px; }
+  .avatar { width:56px; height:56px; border-radius:999px; background:#C8F14F; display:flex; align-items:center; justify-content:center; font-weight:800; color:#1E3323; font-size:26px; flex-shrink:0; }
+  .hostrow b { color:#131711; }
+  .metarow { padding:32px 56px 0 56px; display:flex; gap:20px; }
+  .meta { display:flex; align-items:center; gap:10px; background:#fff; padding:16px 28px; border-radius:999px; font-weight:700; font-size:28px; color:#131711; box-shadow:0 6px 16px -4px rgba(0,0,0,0.08); }
+  .whosin-label { padding:44px 56px 0 56px; color:#79826F; font-weight:800; font-size:24px; letter-spacing:3px; }
+  .whosin { padding:22px 56px 0 56px; display:flex; gap:16px; }
+  .person { background:#fff; border-radius:999px; padding:12px 24px 12px 12px; display:flex; align-items:center; gap:14px; box-shadow:0 6px 16px -4px rgba(0,0,0,0.08); }
+  .person .av { width:52px; height:52px; border-radius:999px; background:#C8F14F; display:flex; align-items:center; justify-content:center; font-weight:800; color:#1E3323; font-size:24px; }
+  .person .av.y { background:#F0D27A; }
+  .person .av.m { background:#9FC4E8; }
+  .person div span { display:block; }
+  .person .nm { font-weight:800; font-size:26px; color:#131711; }
+  .person .rl { font-weight:700; font-size:20px; color:#A3A396; letter-spacing:1px; }
+  .invitebtn { margin:34px 56px 0 56px; border:2px solid rgba(19,23,17,0.15); border-radius:999px; text-align:center; padding:28px 0; font-weight:700; font-size:28px; color:#131711; }
+  .huddlelabel { padding:44px 56px 0 56px; color:#79826F; font-weight:800; font-size:24px; letter-spacing:3px; }
+  .msgs { padding:24px 56px 0 56px; display:flex; flex-direction:column; gap:20px; }
+  .msg { background:#fff; border-radius:30px 30px 30px 10px; padding:22px 30px; max-width:72%; box-shadow:0 6px 16px -4px rgba(0,0,0,0.06); }
+  .msg .nm { color:#131711; font-weight:700; font-size:24px; margin-bottom:4px; }
+  .msg .tx { color:#131711; font-weight:500; font-size:30px; }
+  .msg.mine { align-self:flex-end; background:#1E3323; border-radius:30px 30px 10px 30px; }
+  .msg.mine .tx { color:#fff; }
+  .toast2 { position:absolute; right:40px; bottom:54px; width:600px; background:#1E3323; border-radius:40px; padding:26px 34px; display:flex; align-items:center; gap:22px; box-shadow:0 30px 60px -10px rgba(0,0,0,0.4); }
+  .toast2 .ic { width:66px; height:66px; border-radius:999px; background:#C8F14F; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .toast2 b { font-size:30px; color:#fff; display:block; }
+  .toast2 span { font-size:24px; color:rgba(255,255,255,0.6); font-weight:500; }
+</style>
+</head>
+<body>
+  <div class="pill">STEP 3</div>
+  <div class="headline">Plan it in<br>the <span class="accent">Huddle</span></div>
+  <div class="sub">One quick group chat per Blitz.<br>Gone after the meetup.</div>
+
+  <div class="phone">
+    <div class="phone-screen">
+      <div class="notch"></div>
+      <div class="statusbar">
+        <span>9:41</span>
+        <div class="icons">
+          <svg width="34" height="24" viewBox="0 0 34 24" fill="#131711"><rect x="0" y="16" width="6" height="8" rx="1"/><rect x="9" y="11" width="6" height="13" rx="1"/><rect x="18" y="6" width="6" height="18" rx="1"/><rect x="27" y="0" width="6" height="24" rx="1"/></svg>
+          <svg width="30" height="22" viewBox="0 0 30 22" fill="none" stroke="#131711" stroke-width="2.4"><path d="M2 8c7-7 19-7 26 0M6 13c5-4.5 13-4.5 18 0M10.5 17.5c2.7-2.3 6.3-2.3 9 0"/><circle cx="15" cy="20.5" r="1.4" fill="#131711" stroke="none"/></svg>
+          <svg width="48" height="24" viewBox="0 0 48 24"><rect x="1" y="1" width="40" height="22" rx="6" stroke="#131711" stroke-width="2" fill="none"/><rect x="4" y="4" width="32" height="16" rx="3" fill="#131711"/><rect x="43" y="8" width="3" height="8" rx="1.5" fill="#131711"/></svg>
+        </div>
+      </div>
+      <div class="chathead">
+        <div class="backbtn"><svg width="30" height="30" viewBox="0 0 24 24" stroke="#1E3323" stroke-width="2.4" fill="none"><path d="M15 18l-6-6 6-6"/></svg></div>
+        <div class="inbadge"><span class="dot"></span>3 IN</div>
+      </div>
+      <div class="huddletitle">Grab a coffee ☕?</div>
+      <div class="hostrow"><div class="avatar">L</div><span><b>Lena</b> is hosting</span></div>
+      <div class="metarow">
+        <div class="meta"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E3323" stroke-width="2"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>58:35</div>
+        <div class="meta"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E3323" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/></svg>3</div>
+      </div>
+      <div class="whosin-label">WHO'S IN</div>
+      <div class="whosin">
+        <div class="person"><div class="av">L</div><div><span class="nm">Lena</span><span class="rl">HOST</span></div></div>
+        <div class="person"><div class="av y">Y</div><div><span class="nm">You</span><span class="rl">IN</span></div></div>
+        <div class="person"><div class="av m">MK</div><div><span class="nm">Mara</span><span class="rl">IN</span></div></div>
+      </div>
+      <div class="invitebtn">+ Invite more friends</div>
+      <div class="huddlelabel">THE HUDDLE</div>
+      <div class="msgs">
+        <div class="msg"><div class="nm">Lena</div><div class="tx">Where should we meet?</div></div>
+        <div class="msg mine"><div class="tx">Café Central in 15? ☕</div></div>
+        <div class="msg"><div class="nm">Mara</div><div class="tx">I'm in! 🙌</div></div>
+      </div>
+      <div class="toast2">
+        <div class="ic"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#1E3323" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+        <div><b>Chat disappears</b><span>when the Blitz ends</span></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

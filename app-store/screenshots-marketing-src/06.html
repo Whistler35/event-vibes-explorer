@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; }
+  html,body { width:1290px; height:2796px; overflow:hidden; }
+  body { background:#F4F3ED; position:relative; }
+  .pill { position:absolute; top:168px; left:50%; transform:translateX(-50%); padding:20px 34px; border-radius:999px; background:#E7E4DA; font-weight:800; font-size:23px; letter-spacing:3.5px; color:#4A4A40; text-transform:uppercase; white-space:nowrap; }
+  .headline { position:absolute; top:272px; left:0; right:0; text-align:center; font-weight:800; font-size:96px; line-height:1.04; letter-spacing:-2px; color:#131711; }
+  .headline .accent { background:#C8F14F; padding:0 6px; }
+  .sub { position:absolute; top:520px; left:50%; transform:translateX(-50%); width:940px; text-align:center; font-weight:500; font-size:40px; line-height:1.45; color:#79826F; }
+  .phone { position:absolute; top:758px; left:50%; transform:translateX(-50%); width:1010px; height:2100px; background:#0A0A0A; border-radius:150px; padding:22px; box-shadow: 0 60px 140px -30px rgba(0,0,0,0.35); }
+  .phone-screen { position:relative; width:100%; height:100%; border-radius:132px; overflow:hidden; background:#1E3323; }
+  .notch { position:absolute; top:22px; left:50%; transform:translateX(-50%); width:230px; height:44px; background:#0A0A0A; border-radius:30px; z-index:5; }
+  .statusbar { display:flex; align-items:center; justify-content:space-between; padding:38px 56px 0 64px; color:#fff; font-weight:700; font-size:30px; }
+  .statusbar .icons { display:flex; align-items:center; gap:14px; }
+  .fhead { padding:34px 56px 0 56px; display:flex; align-items:center; justify-content:space-between; }
+  .fhead h1 { font-weight:800; font-size:56px; color:#fff; }
+  .addbtn { width:84px; height:84px; border-radius:999px; background:#C8F14F; display:flex; align-items:center; justify-content:center; }
+  .seclabel { padding:50px 56px 0 56px; display:flex; align-items:center; justify-content:space-between; color:rgba(255,255,255,0.45); font-weight:800; font-size:24px; letter-spacing:3px; }
+  .seclabel .new { color:#C8F14F; letter-spacing:0; text-transform:none; font-weight:700; }
+  .grouprow { margin:24px 56px 0 56px; background:rgba(255,255,255,0.06); border-radius:34px; padding:26px 32px; display:flex; align-items:center; gap:22px; }
+  .groupicon { width:72px; height:72px; border-radius:999px; background:rgba(200,241,79,0.15); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .grouprow .nm { color:#fff; font-weight:700; font-size:32px; }
+  .grouprow .ct { color:rgba(255,255,255,0.45); font-weight:500; font-size:24px; margin-top:2px; }
+  .grouprow .chev { margin-left:auto; }
+  .friendrow { margin:0 56px 0 56px; padding:22px 0; display:flex; align-items:center; gap:24px; border-top:1px solid rgba(255,255,255,0.08); }
+  .friendrow:first-of-type { border-top:none; }
+  .favatar { width:84px; height:84px; border-radius:999px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:32px; color:#1E3323; flex-shrink:0; }
+  .friendrow .nm { color:#fff; font-weight:700; font-size:34px; }
+  .bottomnote { position:absolute; bottom:40px; left:56px; right:56px; display:flex; justify-content:space-between; }
+  .note { display:flex; align-items:center; gap:10px; color:rgba(255,255,255,0.4); font-weight:600; font-size:19px; }
+</style>
+</head>
+<body>
+  <div class="pill">FRIENDS &amp; GROUPS</div>
+  <div class="headline">Your crew,<br><span class="accent">one tap away</span></div>
+  <div class="sub">Send a Blitz to everyone nearby,<br>just friends or a group.</div>
+
+  <div class="phone">
+    <div class="phone-screen">
+      <div class="notch"></div>
+      <div class="statusbar">
+        <span>9:41</span>
+        <div class="icons">
+          <svg width="34" height="24" viewBox="0 0 34 24" fill="#fff"><rect x="0" y="16" width="6" height="8" rx="1"/><rect x="9" y="11" width="6" height="13" rx="1"/><rect x="18" y="6" width="6" height="18" rx="1"/><rect x="27" y="0" width="6" height="24" rx="1"/></svg>
+          <svg width="30" height="22" viewBox="0 0 30 22" fill="none" stroke="#fff" stroke-width="2.4"><path d="M2 8c7-7 19-7 26 0M6 13c5-4.5 13-4.5 18 0M10.5 17.5c2.7-2.3 6.3-2.3 9 0"/><circle cx="15" cy="20.5" r="1.4" fill="#fff" stroke="none"/></svg>
+          <svg width="48" height="24" viewBox="0 0 48 24"><rect x="1" y="1" width="40" height="22" rx="6" stroke="#fff" stroke-width="2" fill="none"/><rect x="4" y="4" width="32" height="16" rx="3" fill="#fff"/><rect x="43" y="8" width="3" height="8" rx="1.5" fill="#fff"/></svg>
+        </div>
+      </div>
+      <div class="fhead">
+        <h1>Friends</h1>
+        <div class="addbtn"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#1E3323" stroke-width="2.2"><circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/><path d="M18 8v6M15 11h6"/></svg></div>
+      </div>
+      <div class="seclabel"><span>GROUPS</span><span class="new">+ New</span></div>
+      <div class="grouprow">
+        <div class="groupicon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#C8F14F" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M2 19c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M15 13.3c2.3.4 4 2.3 4 4.7"/></svg></div>
+        <div><div class="nm">The usual suspects</div><div class="ct">6 members</div></div>
+        <svg class="chev" width="26" height="26" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.3)" stroke-width="2.4" fill="none"><path d="M9 6l6 6-6 6"/></svg>
+      </div>
+      <div class="grouprow" style="margin-top:20px;">
+        <div class="groupicon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#C8F14F" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M2 19c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M15 13.3c2.3.4 4 2.3 4 4.7"/></svg></div>
+        <div><div class="nm">Volleyball crew</div><div class="ct">8 members</div></div>
+        <svg class="chev" width="26" height="26" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.3)" stroke-width="2.4" fill="none"><path d="M9 6l6 6-6 6"/></svg>
+      </div>
+      <div class="seclabel" style="margin-top:50px;"><span>YOUR FRIENDS (24)</span></div>
+      <div style="padding:0 56px; margin-top:14px;">
+        <div class="friendrow"><div class="favatar" style="background:#C8F14F;">VR</div><div class="nm">Valentina Rossi</div></div>
+        <div class="friendrow"><div class="favatar" style="background:#E8A87C;">JB</div><div class="nm">Jonas Berger</div></div>
+        <div class="friendrow"><div class="favatar" style="background:#9FC4E8;">EL</div><div class="nm">Emma Laurent</div></div>
+        <div class="friendrow"><div class="favatar" style="background:#F0D27A;">NF</div><div class="nm">Noah Fischer</div></div>
+        <div class="friendrow"><div class="favatar" style="background:#C9A6E0;">SM</div><div class="nm">Sofia Marques</div></div>
+      </div>
+      <div class="bottomnote">
+        <div class="note"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/></svg>No ads</div>
+        <div class="note"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 118 0v4"/></svg>No data selling</div>
+        <div class="note"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.2"/></svg>Approx. distance only</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

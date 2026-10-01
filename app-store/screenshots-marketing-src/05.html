@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; }
+  html,body { width:1290px; height:2796px; overflow:hidden; }
+  body { background: radial-gradient(ellipse 900px 700px at 50% 20%, #24392A 0%, #15241A 55%, #0E1A12 100%); position:relative; }
+  .pill { position:absolute; top:168px; left:50%; transform:translateX(-50%); padding:20px 34px; border-radius:999px; border:1.5px solid rgba(200,241,79,0.45); background:rgba(200,241,79,0.07); color:#C8F14F; font-weight:800; font-size:23px; letter-spacing:3.5px; text-transform:uppercase; white-space:nowrap; }
+  .headline { position:absolute; top:258px; left:0; right:0; text-align:center; font-weight:800; font-size:96px; line-height:1.04; letter-spacing:-2px; color:#fff; }
+  .headline .accent { color:#C8F14F; }
+  .sub { position:absolute; top:520px; left:50%; transform:translateX(-50%); width:940px; text-align:center; font-weight:500; font-size:40px; line-height:1.45; color:rgba(255,255,255,0.68); }
+  .phone { position:absolute; top:758px; left:50%; transform:translateX(-50%); width:1010px; height:2100px; background:#0A0A0A; border-radius:150px; padding:22px; box-shadow: 0 60px 140px -30px rgba(0,0,0,0.6); }
+  .phone-screen { position:relative; width:100%; height:100%; border-radius:132px; overflow:hidden; background:#F4F3ED; }
+  .notch { position:absolute; top:22px; left:50%; transform:translateX(-50%); width:230px; height:44px; background:#0A0A0A; border-radius:30px; z-index:5; }
+  .statusbar { display:flex; align-items:center; justify-content:space-between; padding:38px 56px 0 64px; color:#131711; font-weight:700; font-size:30px; }
+  .statusbar .icons { display:flex; align-items:center; gap:14px; }
+  .feedhead { padding:30px 56px 0 56px; display:flex; align-items:center; justify-content:space-between; }
+  .feedhead h1 { font-weight:800; font-size:48px; color:#131711; }
+  .feedhead p { font-weight:500; font-size:24px; color:#79826F; margin-top:4px; }
+  .feedicons { display:flex; align-items:center; gap:20px; }
+  .circlebtn { width:76px; height:76px; border-radius:999px; background:#1E3323; display:flex; align-items:center; justify-content:center; }
+  .circlebtn.bell { background:transparent; }
+  .postcard { margin:36px 48px 0 48px; background:#fff; border-radius:50px; overflow:hidden; box-shadow:0 20px 50px -14px rgba(0,0,0,0.12); }
+  .postrow { display:flex; align-items:center; gap:18px; padding:30px 34px 20px 34px; }
+  .postrow .av { width:64px; height:64px; border-radius:999px; background:#9FC4E8; display:flex; align-items:center; justify-content:center; font-weight:800; color:#1E3323; font-size:26px; }
+  .postrow .nm { font-weight:800; font-size:30px; color:#131711; }
+  .postrow .nm span { font-weight:500; color:#79826F; }
+  .postrow .tag { display:inline-flex; align-items:center; gap:8px; background:#EAF7C8; color:#4D6B1F; font-weight:800; font-size:22px; padding:8px 18px; border-radius:999px; margin-top:8px; }
+  .photo { width:100%; height:980px; background: linear-gradient(180deg,#8FB8D8 0%,#AFC9A8 45%,#5B8A5E 70%,#2F4A35 100%); position:relative; }
+  .photo::after { content:""; position:absolute; inset:0; background: linear-gradient(0deg, rgba(0,0,0,0.15), transparent 40%); }
+  .postfoot { padding:26px 34px 34px 34px; }
+  .reactrow { display:flex; align-items:center; gap:28px; }
+  .likes { margin-top:18px; font-weight:800; font-size:28px; color:#131711; }
+  .caption { margin-top:10px; font-weight:500; font-size:28px; color:#131711; }
+  .caption b { font-weight:800; }
+  .toastF { position:absolute; left:36px; top:1240px; width:620px; background:#fff; border-radius:40px; padding:24px 30px; display:flex; align-items:center; gap:20px; box-shadow:0 30px 60px -10px rgba(0,0,0,0.3); }
+  .toastF .heart { width:68px; height:68px; border-radius:999px; background:#FBE2E4; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .toastF b { font-size:28px; color:#131711; display:block; }
+  .toastF span { font-size:22px; color:#79826F; font-weight:500; }
+</style>
+</head>
+<body>
+  <div class="pill">STEP 4</div>
+  <div class="headline">Phones away.<br><span class="accent">Real life on.</span></div>
+  <div class="sub">Meet up, then share the moment<br>with your crew.</div>
+
+  <div class="phone">
+    <div class="phone-screen">
+      <div class="notch"></div>
+      <div class="statusbar">
+        <span>9:41</span>
+        <div class="icons">
+          <svg width="34" height="24" viewBox="0 0 34 24" fill="#131711"><rect x="0" y="16" width="6" height="8" rx="1"/><rect x="9" y="11" width="6" height="13" rx="1"/><rect x="18" y="6" width="6" height="18" rx="1"/><rect x="27" y="0" width="6" height="24" rx="1"/></svg>
+          <svg width="30" height="22" viewBox="0 0 30 22" fill="none" stroke="#131711" stroke-width="2.4"><path d="M2 8c7-7 19-7 26 0M6 13c5-4.5 13-4.5 18 0M10.5 17.5c2.7-2.3 6.3-2.3 9 0"/><circle cx="15" cy="20.5" r="1.4" fill="#131711" stroke="none"/></svg>
+          <svg width="48" height="24" viewBox="0 0 48 24"><rect x="1" y="1" width="40" height="22" rx="6" stroke="#131711" stroke-width="2" fill="none"/><rect x="4" y="4" width="32" height="16" rx="3" fill="#131711"/><rect x="43" y="8" width="3" height="8" rx="1.5" fill="#131711"/></svg>
+        </div>
+      </div>
+      <div class="feedhead">
+        <div><h1>Feed</h1><p>What your Blitzes got up to</p></div>
+        <div class="feedicons">
+          <div class="circlebtn"><svg width="30" height="30" viewBox="0 0 24 24" stroke="#fff" stroke-width="2.4" fill="none"><path d="M12 5v14M5 12h14"/></svg></div>
+          <div class="circlebtn bell"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#131711" stroke-width="2"><path d="M12 2a6 6 0 00-6 6v3.6c0 .7-.3 1.4-.8 1.9L4 15h16l-1.2-1.5c-.5-.5-.8-1.2-.8-1.9V8a6 6 0 00-6-6z"/></svg></div>
+        </div>
+      </div>
+      <div class="postcard">
+        <div class="postrow">
+          <div class="av">MK</div>
+          <div><div class="nm">Mara <span>with Tobi</span></div><div class="tag">⚡ PLAY TENNIS ?</div></div>
+        </div>
+        <div class="photo"></div>
+        <div class="postfoot">
+          <div class="reactrow">
+            <svg width="38" height="38" viewBox="0 0 24 24" fill="#E8435A" stroke="#E8435A"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.2 2.4 4.5 6 4a5 5 0 016 3 5 5 0 016-3c3.6.5 5.6 4.2 4 7.7C19.5 16.4 12 21 12 21z"/></svg>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#131711" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 01-8.9 8.4 8.6 8.6 0 01-3.8-.9L3 20l1.3-4.3a8.4 8.4 0 01-.8-3.6A8.4 8.4 0 0112 3.5a8.4 8.4 0 019 8z"/></svg>
+          </div>
+          <div class="likes">3 Likes</div>
+          <div class="caption"><b>Mara</b> USI open ☀️</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="toastF">
+    <div class="heart"><svg width="32" height="32" viewBox="0 0 24 24" fill="#E8435A"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.2 2.4 4.5 6 4a5 5 0 016 3 5 5 0 016-3c3.6.5 5.6 4.2 4 7.7C19.5 16.4 12 21 12 21z"/></svg></div>
+    <div><b>Lena liked your moment</b><span>Play tennis? · today</span></div>
+  </div>
+</body>
+</html>
