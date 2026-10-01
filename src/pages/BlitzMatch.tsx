@@ -17,8 +17,7 @@ import ExtendHuddleSheet from "@/components/blitz/ExtendHuddleSheet";
 import { useMessageReactions } from "@/hooks/useMessageReactions";
 import { uploadChatPhoto, PHOTO_PLACEHOLDER } from "@/lib/chatPhoto";
 import KeyboardDebugHUD from "@/components/debug/KeyboardDebugHUD";
-import { useCollapsibleHeader } from "@/hooks/useCollapsibleHeader";
-import { ChevronDown } from "lucide-react";
+import { useKeyboardOpen } from "@/hooks/useKeyboardOpen";
 
 interface Match {
   id: string;
@@ -67,7 +66,7 @@ const BlitzMatch = () => {
   const [previewPhoto, setPreviewPhoto] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const { expanded: headerExpanded, scrollRef, onScroll, expand: expandHeader } = useCollapsibleHeader();
+  const keyboardOpen = useKeyboardOpen();
   const { reactions, toggleHeart } = useMessageReactions(
     "blitz_chat_message_reactions",
     "match_id",
@@ -243,9 +242,12 @@ const BlitzMatch = () => {
     };
   }, [matchId]);
 
+  // Same scroll-to-bottom on a new message, now also on the keyboard
+  // opening — exactly like any normal chat app, the view just follows you
+  // down to the input instead of anything collapsing/jumping.
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages.length]);
+  }, [messages.length, keyboardOpen]);
 
   if (!match || !user) {
     return (
@@ -418,28 +420,14 @@ const BlitzMatch = () => {
         </div>
       </div>
 
-      {/* Compact stand-in for the title/host/who's-in block once it's been
-          scrolled past — tapping it (or scrolling back to top) brings the
-          full header back. */}
-      {!headerExpanded && (
-        <button
-          onClick={expandHeader}
-          className="shrink-0 w-full flex items-center gap-2 px-5 py-2.5 border-b border-black/5 bg-background text-left"
-        >
-          <span className="font-display text-base font-bold tracking-tight text-foreground truncate flex-1">
-            {asBlitzQuestion(headerTitle)}
-          </span>
-          <span className="shrink-0 text-xs font-semibold text-muted-foreground">{participantIds.length} dabei</span>
-          <ChevronDown className="w-4 h-4 shrink-0 text-muted-foreground" />
-        </button>
-      )}
-
       {/* Title + host + who's in + messages, all as one scrollable region —
           when the keyboard shrinks the available height, this is what gives
           up space first so the input form (outside this div, shrink-0)
-          always stays visible right above the keyboard. Scrolling past the
-          header/who's-in block also drives the collapse above. */}
-      <div ref={scrollRef} onScroll={onScroll} className="flex-1 min-h-0 overflow-y-auto">
+          always stays visible right above the keyboard. The scroll-to-
+          bottom effect above keeps this behaving like a normal chat: no
+          separate collapsing header, just the same view-follows-you-down
+          behavior as a new message arriving. */}
+      <div className="flex-1 min-h-0 overflow-y-auto">
         <div className="px-5 pt-2 pb-4">
           <h1 className="font-display text-4xl font-bold tracking-tight text-foreground leading-tight">
             {asBlitzQuestion(headerTitle)}
