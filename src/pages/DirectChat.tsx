@@ -40,6 +40,7 @@ const DirectChat = () => {
   const [previewPhoto, setPreviewPhoto] = useState<string | null>(null);
   const [burstId, setBurstId] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
   const { reactions, toggleHeart } = useMessageReactions(
     "direct_message_reactions",
     "conversation_id",
@@ -171,10 +172,15 @@ const DirectChat = () => {
     };
   }, [conversationId, user?.id]);
 
-  // Same scroll-to-bottom on a new message, now also on the keyboard
-  // opening — normal chat behavior, nothing collapses/jumps.
+  // Scroll-to-bottom on a new message and on the keyboard opening — normal
+  // chat behavior, nothing collapses/jumps. A bottom sentinel + scrollIntoView
+  // (rather than reading scrollHeight directly) lands on the true end even
+  // when the container's height is still settling (e.g. right after the
+  // keyboard resizes it, or on first load before images/avatars finish
+  // laying out) — scrollHeight read at the wrong instant was landing short,
+  // which is why entering a long chat didn't actually show the last message.
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages.length, keyboardOpen]);
 
   const handleSend = async (e?: React.FormEvent) => {
@@ -435,6 +441,7 @@ const DirectChat = () => {
             </div>
           );
         })}
+        <div ref={bottomRef} />
       </div>
       </div>
 

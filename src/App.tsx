@@ -31,6 +31,15 @@ import { usePushNotifications } from "./hooks/usePushNotifications";
 import { getNotificationRoute } from "./lib/notificationRouting";
 import { trackEvent } from "./lib/analytics";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { useKeyboardOpen } from "./hooks/useKeyboardOpen";
+
+// Mounted once, app-wide — keeps the --keyboard-height CSS variable (used by
+// position:fixed bottom sheets, see sheet.tsx) current regardless of which
+// page/sheet happens to be open.
+function KeyboardHeightTracker() {
+  useKeyboardOpen();
+  return null;
+}
 
 // staleTime keeps the last-known data on screen instantly when a screen
 // remounts (no more blank/loading flash switching tabs) — refetchOnMount
@@ -164,6 +173,7 @@ const App = () => (
           <BrowserRouter>
             <Suspense fallback={<div className="min-h-screen bg-[hsl(var(--blitz-forest))]" />}>
               <PushSetup />
+              <KeyboardHeightTracker />
               <Routes>
                 <Route path="/" element={<RootRoute />} />
                 <Route path="/onboarding" element={<Onboarding />} />

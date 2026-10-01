@@ -13,7 +13,6 @@ import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { trackEvent } from "@/lib/analytics";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
-import KeyboardDebugHUD from "@/components/debug/KeyboardDebugHUD";
 
 interface Props {
   open: boolean;
@@ -230,14 +229,13 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="rounded-t-3xl max-h-[88%] overflow-y-auto">
+      <SheetContent side="bottom" className="rounded-t-3xl max-h-[88vh] overflow-y-auto">
         <SheetHeader className="text-left">
           <SheetTitle>{namingCustomBlitz ? "Blitz benennen" : showPicker ? "Welcher Blitz?" : "Foto teilen"}</SheetTitle>
         </SheetHeader>
 
         {namingCustomBlitz ? (
           <div className="py-4 space-y-4">
-            <KeyboardDebugHUD />
             <p className="text-sm text-muted-foreground">
               Als Admin kannst du einen Feed-Post ohne echten Huddle dazu posten — gib einfach an, worum es ging.
             </p>
@@ -317,7 +315,6 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
           </div>
         ) : (
           <div className="py-4 space-y-4">
-            <KeyboardDebugHUD />
             {activity && (
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[hsl(var(--bolt))]/20 text-[hsl(var(--blitz-forest))] text-xs font-black uppercase tracking-wide">
                 <Zap className="w-3 h-3 fill-current" /> {activity}

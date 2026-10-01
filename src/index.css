@@ -198,10 +198,6 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
-    /* Containing block for any `position: absolute` descendant (see sheet.tsx)
-       so it tracks this element's real, Capacitor-shrunk box instead of the
-       untouched viewport that `position: fixed` would resolve against. */
-    position: relative;
     overscroll-behavior-y: none;
     -webkit-overflow-scrolling: touch;
     font-family: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;

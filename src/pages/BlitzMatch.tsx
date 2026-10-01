@@ -16,7 +16,6 @@ import ParticipantOptionsSheet from "@/components/blitz/ParticipantOptionsSheet"
 import ExtendHuddleSheet from "@/components/blitz/ExtendHuddleSheet";
 import { useMessageReactions } from "@/hooks/useMessageReactions";
 import { uploadChatPhoto, PHOTO_PLACEHOLDER } from "@/lib/chatPhoto";
-import KeyboardDebugHUD from "@/components/debug/KeyboardDebugHUD";
 import { useKeyboardOpen } from "@/hooks/useKeyboardOpen";
 import { useCollapsibleHeader } from "@/hooks/useCollapsibleHeader";
 import { ChevronDown } from "lucide-react";
@@ -401,7 +400,6 @@ const BlitzMatch = () => {
       className="h-full bg-background text-foreground flex flex-col overflow-hidden"
       style={{ paddingTop: 'env(safe-area-inset-top)' }}
     >
-      <KeyboardDebugHUD />
       {/* Header */}
       <div className="flex items-center justify-between px-4 pt-3 pb-2 shrink-0 gap-3">
         <button

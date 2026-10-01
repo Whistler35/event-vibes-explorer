@@ -29,18 +29,24 @@ const SheetOverlay = React.forwardRef<
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName
 
 const sheetVariants = cva(
-  // `absolute` (not `fixed`) so this resolves against `body`'s own box (see
-  // `position: relative` on body in index.css) — Capacitor's Keyboard plugin
-  // (resize: 'body') shrinks that box's real height when the keyboard opens,
-  // which `position: fixed` (anchored to the untouched viewport) ignores,
-  // leaving the sheet's input pinned behind the keyboard.
-  "absolute z-50 gap-4 bg-background p-6 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500",
+  // `fixed` (viewport-relative) so this stays put regardless of whether the
+  // underlying page is itself scrolled — `position: absolute` was tried here
+  // once to dodge the keyboard (see bottom's --keyboard-height below) but
+  // broke on any page taller than one screen (Feed, etc.): absolute anchors
+  // to the *document*, not the viewport, so a sheet opened after scrolling
+  // down rendered off-screen above the current scroll position.
+  "fixed z-50 gap-4 bg-background p-6 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500",
   {
     variants: {
       side: {
         top: "inset-x-0 top-0 border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top",
+        // bottom tracks --keyboard-height (set by useKeyboardOpen from
+        // Capacitor's Keyboard plugin) instead of a bare 0, so the sheet
+        // lifts above the keyboard instead of being hidden behind it —
+        // resize:'body' only shrinks document.body's own box, which a
+        // fixed/viewport-anchored element never sees on its own.
         bottom:
-          "inset-x-0 bottom-0 border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
+          "inset-x-0 bottom-[var(--keyboard-height,0px)] border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
         left: "inset-y-0 left-0 h-full w-3/4 border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:max-w-sm",
         right:
           "inset-y-0 right-0 h-full w-3/4  border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm",
