@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Nutzungsbedingungen – EVENDLE</title>
+<title>Nutzungsbedingungen | EVENDLE</title>
 <meta name="robots" content="index,follow" />
 <style>
   :root { --bg:#F4F3ED; --ink:#131711; --forest:#1E3323; --lime:#C8F14F; --muted:#5b6157; --border:#d9d7cc; }
@@ -14,18 +14,24 @@
   header { border-bottom:3px solid var(--forest); padding-bottom:16px; margin-bottom:32px; }
   .brand { font-weight:700; letter-spacing:.12em; font-size:14px; color:var(--forest); text-transform:uppercase; }
   h1 { font-family:"Space Grotesk",-apple-system,sans-serif; font-size:30px; margin:8px 0 4px; }
-  h2 { font-family:"Space Grotesk",-apple-system,sans-serif; font-size:20px; margin:40px 0 10px; }
+  h2 { font-family:"Space Grotesk",-apple-system,sans-serif; font-size:20px; margin:40px 0 10px; scroll-margin-top:16px; }
+  h3 { font-family:"Space Grotesk",-apple-system,sans-serif; font-size:17px; margin:24px 0 6px; }
   p,li { font-size:16px; }
   a { color:var(--forest); }
-  ul { padding-left:22px; }
+  ul, ol { padding-left:22px; }
+  li { margin-bottom:4px; }
   .updated { color:var(--muted); font-size:14px; }
-  .fill { background:var(--lime); color:var(--forest); padding:1px 6px; border-radius:4px; font-weight:600; font-size:.9em; }
   .note { background:#fff; border:1px solid var(--border); border-left:4px solid var(--lime); padding:12px 16px;
-    border-radius:8px; font-size:14px; color:var(--muted); margin:24px 0; }
+    border-radius:8px; font-size:15px; margin:24px 0; }
   .warn { background:#fff; border:1px solid var(--border); border-left:4px solid var(--forest); padding:14px 18px;
     border-radius:8px; font-size:15px; margin:18px 0; }
   .warn strong { color:var(--forest); }
+  .toc { background:#fff; border:1px solid var(--border); border-radius:8px; padding:14px 18px; margin:24px 0; font-size:15px; }
+  .toc ol { margin:6px 0 0; columns:2; column-gap:28px; }
+  .toc li { font-size:15px; break-inside:avoid; }
+  .form { background:#fff; border:1px dashed var(--border); border-radius:8px; padding:14px 18px; font-size:15px; margin:14px 0; }
   footer { margin-top:64px; padding-top:16px; border-top:1px solid var(--border); color:var(--muted); font-size:13px; }
+  @media (max-width:560px) { .toc ol { columns:1; } }
 </style>
 </head>
 <body>
@@ -33,89 +39,391 @@
 <header>
   <div class="brand">EVENDLE</div>
   <h1>Nutzungsbedingungen</h1>
-  <p class="updated">Stand: 29. September 2026</p>
+  <p class="updated">Stand: 2. Oktober 2026</p>
 </header>
 
 <div class="note">
-  <strong>Hinweis:</strong> Diese Fassung erfüllt insbesondere Apples Anforderung an eine EULA mit „null Toleranz" für anstößige
-  Inhalte (App Review Guideline 1.2). Sie ersetzt keine anwaltliche Prüfung.
+  <strong>Das Wichtigste in Kürze:</strong> EVENDLE ist kostenlos und ab 18 Jahren. Wir prüfen die Identität von
+  Nutzer:innen nicht. Bei EVENDLE gilt null Toleranz für anstößige Inhalte und missbräuchliches Verhalten.
+  Treffen mit anderen Nutzer:innen vereinbarst du selbst und eigenverantwortlich, wir sind daran nicht beteiligt.
+  Du kannst Inhalte melden, Personen blockieren und dein Konto jederzeit löschen. Diese Kurzfassung dient nur dem
+  Überblick, maßgeblich ist der vollständige Text.
 </div>
 
-<h2>1. Geltungsbereich</h2>
-<p>Diese Nutzungsbedingungen regeln die Nutzung der App und Website EVENDLE, angeboten von
-Benjamin Maxwald, Dr. Langerstraße 14, 4694 Ohlsdorf, Österreich („wir", „EVENDLE"). Mit der Registrierung stimmst du diesen Bedingungen zu.</p>
+<nav class="toc" aria-label="Inhalt">
+  <strong>Inhalt</strong>
+  <ol>
+    <li><a href="#s1">Anbieter und Geltungsbereich</a></li>
+    <li><a href="#s2">Leistungen von EVENDLE</a></li>
+    <li><a href="#s3">Registrierung und Mindestalter</a></li>
+    <li><a href="#s4">Dein Konto</a></li>
+    <li><a href="#s5">Keine Identitätsprüfung</a></li>
+    <li><a href="#s6">Verhaltensregeln</a></li>
+    <li><a href="#s7">Melden, Blockieren, Notfälle</a></li>
+    <li><a href="#s8">Moderation und Maßnahmen</a></li>
+    <li><a href="#s9">Beschwerden</a></li>
+    <li><a href="#s10">Deine Inhalte</a></li>
+    <li><a href="#s11">Rechte an EVENDLE</a></li>
+    <li><a href="#s12">Events und Angebote Dritter</a></li>
+    <li><a href="#s13">Treffen mit anderen Nutzer:innen</a></li>
+    <li><a href="#s14">Gewährleistung und Haftung</a></li>
+    <li><a href="#s15">Freistellung</a></li>
+    <li><a href="#s16">Laufzeit, Kündigung, Sperrung</a></li>
+    <li><a href="#s17">Rücktrittsrecht</a></li>
+    <li><a href="#s18">Datenschutz</a></li>
+    <li><a href="#s19">Änderungen dieser Bedingungen</a></li>
+    <li><a href="#s20">App Stores</a></li>
+    <li><a href="#s21">Schlussbestimmungen</a></li>
+  </ol>
+</nav>
 
-<h2>2. Konto und Profil</h2>
+<h2 id="s1">1. Anbieter und Geltungsbereich</h2>
+<p>1.1 Diese Nutzungsbedingungen regeln die Nutzung der App und der Website EVENDLE (gemeinsam „EVENDLE“).
+Anbieter und dein Vertragspartner ist:</p>
+<p>Benjamin Maxwald<br />
+Dr. Langerstraße 14, 4694 Ohlsdorf, Österreich<br />
+E-Mail: <a href="mailto:benjamin@evendle.com">benjamin@evendle.com</a><br />
+(im Folgenden „wir“ oder „uns“)</p>
+<p>1.2 Diese E-Mail-Adresse ist zugleich unsere zentrale Kontaktstelle für Nutzer:innen sowie für Behörden und die
+Europäische Kommission nach dem Digital Services Act (Verordnung (EU) 2022/2065). Du kannst uns auf Deutsch oder
+Englisch schreiben.</p>
+<p>1.3 Abweichende Bedingungen von Nutzer:innen gelten nicht. Weitere Angaben zum Anbieter findest du im
+<a href="/impressum">Impressum</a>.</p>
+
+<h2 id="s2">2. Leistungen von EVENDLE</h2>
+<p>2.1 EVENDLE ist eine Plattform, über die du Veranstaltungen entdecken, ein Profil anlegen, mit anderen
+Nutzer:innen in Kontakt treten und über die Funktion „Blitz“ spontane Treffen mit anderen Nutzer:innen vereinbaren
+kannst.</p>
+<p>2.2 Die Nutzung von EVENDLE ist kostenlos. Kostenpflichtige Funktionen bieten wir derzeit nicht an. Sollten wir
+solche einführen, gelten dafür gesonderte Bedingungen, denen du vor einem Kauf ausdrücklich zustimmst. Kosten deines
+Mobilfunk- oder Internetanbieters trägst du selbst.</p>
+<p>2.3 Wir vermitteln Kontakte. Wir schulden keinen bestimmten Erfolg, insbesondere nicht, dass du passende
+Personen findest, dass Treffen zustande kommen oder dass Veranstaltungen wie angekündigt stattfinden.</p>
+<p>2.4 Wir bemühen uns um einen störungsfreien Betrieb. Kurzzeitige Unterbrechungen, etwa durch Wartung,
+Sicherheitsupdates oder Störungen bei Dritten (z. B. Hosting- oder Netzanbietern), können vorkommen.</p>
+<p>2.5 Wir dürfen EVENDLE weiterentwickeln und ändern, wenn dafür ein triftiger Grund besteht, etwa technische
+Weiterentwicklungen, neue oder geänderte Funktionen, Sicherheit, geänderte rechtliche Vorgaben oder Vorgaben der
+App Stores. Dir entstehen dadurch keine Kosten, und wir informieren dich in klarer Form über die Änderung. Beeinträchtigt
+eine Änderung deinen Zugang zu EVENDLE oder dessen Nutzung mehr als nur geringfügig, informieren wir dich rechtzeitig
+vorher per E-Mail über Merkmale und Zeitpunkt der Änderung. Du kannst den Vertrag in diesem Fall innerhalb von
+30 Tagen ab der Information oder ab der Änderung, je nachdem, was später eintritt, kostenlos auflösen, z. B. indem du
+dein Konto löschst.</p>
+<p>2.6 Für die Nutzung brauchst du ein Smartphone mit einer aktuellen, vom Hersteller unterstützten iOS- oder
+Android-Version oder einen aktuellen Webbrowser sowie eine Internetverbindung. Standortbezogene Funktionen wie Blitz
+funktionieren nur, wenn du die Standortfreigabe deines Geräts aktivierst.</p>
+
+<h2 id="s3">3. Registrierung, Vertragsschluss und Mindestalter</h2>
+<p>3.1 Für die Nutzung brauchst du ein Konto. Bei der Registrierung gibst du die abgefragten Daten ein. Bis zum
+Abschluss der Registrierung kannst du deine Eingaben jederzeit prüfen und korrigieren oder den Vorgang abbrechen.
+Der Vertrag über die Nutzung von EVENDLE kommt zustande, wenn du die Registrierung abschließt und dabei diesen
+Nutzungsbedingungen zustimmst.</p>
+<p>3.2 Die jeweils gültige Fassung dieser Nutzungsbedingungen kannst du jederzeit unter
+<a href="/agb">evendle.com/agb</a> abrufen, speichern und ausdrucken. Nach der Registrierung erhältst du eine
+Bestätigung per E-Mail mit diesen Nutzungsbedingungen. Vertragssprache ist Deutsch.</p>
+<p>3.3 <strong>Die Nutzung von EVENDLE ist nur Personen ab 18 Jahren erlaubt.</strong> Erfahren wir, dass eine Person
+jünger ist, sperren und löschen wir das Konto.</p>
+<p>3.4 EVENDLE ist für die private Nutzung bestimmt. Eine gewerbliche Nutzung, z. B. Werbung für eigene Angebote oder
+Veranstaltungen, ist nur mit unserer vorherigen Zustimmung oder über dafür ausdrücklich vorgesehene Funktionen
+erlaubt.</p>
+<p>3.5 Du darfst EVENDLE nicht nutzen, solange dein Konto gesperrt ist oder wenn wir dich zuvor wegen eines
+Verstoßes dauerhaft gesperrt haben.</p>
+
+<h2 id="s4">4. Dein Konto</h2>
 <ul>
-  <li>Du musst mindestens 16 Jahre alt sein.</li>
-  <li>Deine Angaben müssen zutreffend sein. Ein Konto pro Person.</li>
-  <li>Du bist für die Aktivitäten unter deinem Konto verantwortlich.</li>
+  <li>Deine Angaben müssen wahr und aktuell sein. Fotos müssen dich selbst zeigen.</li>
+  <li>Du darfst nur ein Konto haben. Konten sind persönlich und nicht übertragbar.</li>
+  <li>Halte deine Zugangsdaten geheim. Du bist für Aktivitäten unter deinem Konto verantwortlich, soweit du sie zu
+    vertreten hast.</li>
+  <li>Hast du den Verdacht, dass jemand dein Konto missbraucht, informiere uns bitte umgehend.</li>
 </ul>
-<p>Wir überprüfen die Identität, das Alter, die Fotos oder sonstige Angaben von Nutzer:innen <strong>nicht</strong> und
-führen keine Hintergrundprüfungen durch. Wir übernehmen keine Gewähr dafür, dass ein Profil echt ist, dass die dort
-gemachten Angaben zutreffen oder dass eine Person tatsächlich diejenige ist, als die sie sich ausgibt. Sei entsprechend
-umsichtig im Umgang mit anderen Nutzer:innen.</p>
 
-<h2>3. Verhaltensregeln – null Toleranz für anstößige Inhalte</h2>
-<p>Bei der Nutzung von EVENDLE (Profile, Nachrichten, „Blitz", Fotos) ist untersagt:</p>
+<h2 id="s5">5. Keine Identitätsprüfung</h2>
+<p>Wir überprüfen die Identität, das Alter, die Fotos oder sonstige Angaben von Nutzer:innen <strong>nicht</strong>
+und führen keine Hintergrundprüfungen durch. Wir können daher nicht zusichern, dass ein Profil echt ist, dass die
+dort gemachten Angaben stimmen oder dass eine Person tatsächlich diejenige ist, als die sie sich ausgibt. Jede
+Person ist für ihre eigenen Angaben selbst verantwortlich. Sei entsprechend umsichtig im Umgang mit anderen
+Nutzer:innen.</p>
+
+<h2 id="s6">6. Verhaltensregeln: null Toleranz für anstößige Inhalte</h2>
+<p>6.1 Bei der Nutzung von EVENDLE (Profile, Fotos, Nachrichten, Blitz und alle sonstigen Inhalte) ist insbesondere
+untersagt:</p>
 <ul>
-  <li>Belästigung, Bedrohung, Mobbing, Hassrede oder Diskriminierung</li>
-  <li>sexuell explizite, gewaltverherrlichende oder anderweitig anstößige Inhalte</li>
-  <li>Nacktdarstellungen, Inhalte mit Minderjährigen, Darstellung illegaler Handlungen</li>
-  <li>Spam, Betrug, Identitätsvortäuschung, Weitergabe fremder personenbezogener Daten</li>
-  <li>Inhalte, die Rechte Dritter (Urheber-, Marken-, Persönlichkeitsrechte) verletzen</li>
+  <li>Belästigung, Bedrohung, Einschüchterung, Stalking, Mobbing, Hassrede oder Diskriminierung</li>
+  <li>sexuell explizite oder pornografische Inhalte, Nacktdarstellungen sowie unerwünschte sexuelle Annäherungen</li>
+  <li>gewaltverherrlichende, grausame oder ekelerregende Darstellungen sowie Inhalte, die andere erkennbar herabwürdigen,
+    verhöhnen oder verstören sollen</li>
+  <li>jegliche Inhalte, die Minderjährige sexualisieren oder gefährden</li>
+  <li>das Anbieten oder Anbahnen sexueller Dienstleistungen gegen Entgelt</li>
+  <li>Darstellung, Verherrlichung oder Anbahnung illegaler Handlungen, etwa der Handel mit Drogen oder Waffen</li>
+  <li>Spam, Betrug, Phishing, „Romance Scams“, Schneeballsysteme oder Geldforderungen an andere Nutzer:innen</li>
+  <li>die Vortäuschung einer fremden Identität sowie falsche Angaben zu Alter oder Person</li>
+  <li>die Veröffentlichung oder Weitergabe personenbezogener Daten anderer ohne deren Einwilligung, etwa Adressen,
+    Telefonnummern oder Bildschirmfotos von Chats; erlaubt bleibt die Weitergabe an uns im Rahmen einer Meldung, an
+    Behörden oder zur Verfolgung eigener Rechte</li>
+  <li>Inhalte, die Rechte Dritter verletzen, insbesondere Urheber-, Marken- und Persönlichkeitsrechte</li>
+  <li>das Umgehen von Blockierungen oder Sperren, auch über neue Konten</li>
+  <li>automatisierte Zugriffe (Bots, Scraper), das Auslesen von Daten, Eingriffe in die Technik von EVENDLE sowie die
+    Verbreitung von Schadsoftware</li>
 </ul>
-<p><strong>Wir dulden keinerlei anstößige Inhalte oder missbräuchliches Verhalten.</strong> Nutzer, die dagegen
-verstoßen, können ohne Vorankündigung gesperrt werden.</p>
+<p>6.2 <strong>Wir dulden keinerlei anstößige Inhalte oder missbräuchliches Verhalten.</strong> Verstöße können
+zu den in Abschnitt 8 beschriebenen Maßnahmen führen, bei schweren Verstößen auch zur sofortigen Sperre.</p>
+<p>6.3 Die Verhaltensregeln gelten auch für persönliche Treffen, die über EVENDLE vereinbart wurden. Melden
+Nutzer:innen uns Fehlverhalten bei einem Treffen, können wir daraus Maßnahmen für das Konto ableiten.</p>
 
-<h2>4. Melden und Blockieren</h2>
-<p>In der App kannst du andere Nutzer <strong>blockieren</strong> und Inhalte oder Nutzer <strong>melden</strong>.
-Gemeldete Inhalte prüfen wir so schnell wie möglich, in der Regel innerhalb weniger Tage – und
-entfernen Verstöße bzw. sperren verantwortliche Konten. Missbrauchsmeldungen kannst du auch per E-Mail an <a href="mailto:benjamin@evendle.com">benjamin@evendle.com</a> senden.</p>
-
-<h2>5. Deine Inhalte</h2>
-<p>Du behältst die Rechte an deinen Inhalten. Du räumst uns ein einfaches, weltweites, widerrufliches Recht ein,
-deine Inhalte ausschließlich zum Betrieb und zur Bereitstellung der App zu speichern und anzuzeigen. Du sicherst
-zu, dass du zur Veröffentlichung deiner Inhalte berechtigt bist.</p>
-
-<h2>6. Treffen mit anderen Nutzer:innen</h2>
-<p>EVENDLE ist eine Plattform, die spontane Treffen zwischen Nutzer:innen erleichtert („Blitz"). Ob, wann, wo und mit
-wem du dich triffst, entscheidest du eigenverantwortlich. <strong>EVENDLE ist an diesen Treffen nicht beteiligt</strong>,
-organisiert sie nicht und überwacht sie nicht. Wir haben keinen Einfluss auf das Verhalten anderer Nutzer:innen –
-weder in der App noch bei einem persönlichen Treffen.</p>
+<h2 id="s7">7. Melden, Blockieren und Notfälle</h2>
+<p>7.1 In der App kannst du andere Nutzer:innen <strong>blockieren</strong> sowie Inhalte und Nutzer:innen
+<strong>melden</strong>. Meldungen kannst du auch per E-Mail an
+<a href="mailto:benjamin@evendle.com">benjamin@evendle.com</a> schicken. Jede Person kann uns Inhalte melden, die sie
+für rechtswidrig hält, auch ohne eigenes Konto.</p>
+<p>7.2 Damit wir eine Meldung schnell bearbeiten können, sollte sie enthalten: eine Begründung, warum der Inhalt
+rechtswidrig ist oder gegen diese Bedingungen verstößt, möglichst genaue Angaben zum Inhalt oder Profil (z. B.
+Profilname, Zeitpunkt, Bildschirmfoto), deinen Namen und deine E-Mail-Adresse sowie die Erklärung, dass deine
+Angaben nach bestem Wissen richtig und vollständig sind. Bei Meldungen zu Straftaten gegen die sexuelle
+Selbstbestimmung oder zum Schutz von Kindern musst du deinen Namen nicht angeben.</p>
+<p>7.3 Wir bestätigen den Eingang einer Meldung, sofern du uns eine Kontaktmöglichkeit nennst, prüfen sie zeitnah,
+sorgfältig und objektiv und teilen dir unsere Entscheidung mit. Offensichtlich schwere Verstöße behandeln wir
+vorrangig.</p>
+<p>7.4 Wer wiederholt offensichtlich unbegründete Meldungen einreicht, dessen Meldungen können wir nach vorheriger
+Warnung für eine angemessene Zeit nicht mehr bearbeiten.</p>
 <div class="warn">
-  <strong>Triff die üblichen Vorsichtsmaßnahmen:</strong> Verabrede dich zunächst an öffentlichen Orten, sag einer
-  Vertrauensperson, wo und mit wem du dich triffst, organisiere deine eigene An- und Abreise, und verlasse dich
-  auf dein eigenes Urteilsvermögen. Gib keine sensiblen persönlichen Daten (z. B. deine Wohnadresse oder
-  Finanzinformationen) an Personen weiter, die du über die App kennengelernt hast, solange du ihnen nicht vertraust.
+  <strong>Im Notfall:</strong> EVENDLE ist kein Notdienst und wir können nicht in Echtzeit eingreifen. Wenn du in
+  Gefahr bist oder eine Straftat beobachtest, wende dich sofort an die Polizei (Österreich: <strong>133</strong>) oder
+  den Euro-Notruf <strong>112</strong>. Melde den Vorfall danach bitte zusätzlich bei uns.
 </div>
-<p>Die Teilnahme an einem Blitz oder einem darüber vereinbarten Treffen erfolgt auf eigenes Risiko. Für Vorfälle,
-Schäden, Verletzungen oder sonstige Nachteile, die im Zusammenhang mit einem über EVENDLE vereinbarten Treffen
-zwischen Nutzer:innen entstehen – einschließlich des Verhaltens, der Angaben oder der Identität der jeweils anderen
-Person – übernehmen wir keine Haftung, soweit gesetzlich zulässig. Dies gilt unabhängig davon, ob das Treffen online
-oder offline stattfindet.</p>
 
-<h2>7. Sperrung und Kündigung</h2>
-<p>Du kannst dein Konto jederzeit in der App unter <em>Profil → Einstellungen → Konto löschen</em> beenden.
-Wir können Konten bei Verstößen gegen diese Bedingungen einschränken, sperren oder löschen.</p>
+<h2 id="s8">8. Moderation und Maßnahmen</h2>
+<p>8.1 Wir überwachen Inhalte nicht allgemein und laufend. Wir prüfen Inhalte insbesondere, wenn sie uns gemeldet
+werden oder wir auf andere Weise von einem möglichen Verstoß erfahren. Dabei können wir technische Hilfsmittel
+einsetzen, etwa zur Erkennung von Spam. Entscheidungen über die Sperre oder Löschung eines Kontos treffen wir nicht
+ausschließlich automatisiert.</p>
+<p>8.2 Bei einem Verstoß gegen diese Bedingungen oder bei rechtswidrigen Inhalten können wir, abhängig von Schwere,
+Häufigkeit und Folgen des Verstoßes, insbesondere:</p>
+<ul>
+  <li>Inhalte entfernen, sperren oder ihre Sichtbarkeit einschränken,</li>
+  <li>dich verwarnen,</li>
+  <li>einzelne Funktionen einschränken (z. B. Nachrichten oder Blitz),</li>
+  <li>dein Konto vorübergehend sperren oder</li>
+  <li>dein Konto dauerhaft sperren und löschen.</li>
+</ul>
+<p>8.3 Bei schweren Verstößen, etwa Drohungen, Gewalt, sexueller Belästigung, Inhalten zum Nachteil von
+Minderjährigen, Betrug oder Identitätstäuschung, können wir ohne vorherige Warnung und mit sofortiger Wirkung
+handeln. Dabei berücksichtigen wir deine berechtigten Interessen, die Interessen anderer Nutzer:innen und die
+Grundrechte aller Beteiligten.</p>
+<p>8.4 Vor einer dauerhaften Sperre informieren wir dich und geben dir Gelegenheit zur Stellungnahme. Bei Gefahr für
+andere oder bei offensichtlich schweren Verstößen können wir das Konto vorläufig sperren und holen deine Anhörung
+unverzüglich nach.</p>
+<p>8.5 Schränken wir deine Inhalte oder dein Konto ein, teilen wir dir dies mit einer klaren Begründung mit. Die
+Begründung enthält die Maßnahme samt Dauer und Reichweite, die zugrunde liegenden Tatsachen, ob automatisierte
+Mittel eingesetzt wurden, ob wir den Inhalt für rechtswidrig halten (mit der betroffenen Rechtsvorschrift) oder für
+unvereinbar mit diesen Bedingungen (mit der betroffenen Regel) sowie deine Möglichkeiten nach Abschnitt 9 und den
+Rechtsweg. Das gilt nicht, wenn eine Behörde uns die Mitteilung untersagt.</p>
+<p>8.6 Erhalten wir Kenntnis von Informationen, die den Verdacht einer Straftat begründen, die eine Gefahr für das
+Leben oder die Sicherheit einer Person darstellt, informieren wir die zuständigen Behörden, wie gesetzlich
+vorgeschrieben.</p>
 
-<h2>8. Keine Gewähr / Haftung</h2>
-<p>EVENDLE wird „wie besehen" und „wie verfügbar" bereitgestellt, ohne Gewähr für ständige Verfügbarkeit,
-Fehlerfreiheit oder Eignung für einen bestimmten Zweck. Wir übernehmen insbesondere keine Gewähr für die Richtigkeit
-von Nutzerangaben, die Echtheit von Profilen oder das Verhalten anderer Nutzer:innen (siehe Abschnitt 2 und 6).</p>
-<p>Unsere Haftung richtet sich im Übrigen nach den gesetzlichen Bestimmungen; für leichte Fahrlässigkeit haften wir
-nur bei Verletzung wesentlicher Vertragspflichten und begrenzt auf den vertragstypischen, vorhersehbaren Schaden.
-Für Schäden aus der Verletzung des Lebens, des Körpers oder der Gesundheit sowie für Vorsatz und grobe Fahrlässigkeit
-haften wir unbeschränkt nach den gesetzlichen Vorschriften.</p>
+<h2 id="s9">9. Beschwerden gegen unsere Entscheidungen</h2>
+<p>9.1 Bist du mit einer Entscheidung über eine Meldung oder über eine Maßnahme nach Abschnitt 8 nicht
+einverstanden, kannst du innerhalb von sechs Monaten nach der Entscheidung kostenlos Beschwerde per E-Mail an
+<a href="mailto:benjamin@evendle.com">benjamin@evendle.com</a> einlegen. Nenne bitte dein Konto und warum du die
+Entscheidung für falsch hältst.</p>
+<p>9.2 Ein Mensch prüft deine Beschwerde zeitnah, sorgfältig und objektiv. Erweist sie sich als berechtigt, heben wir
+die Maßnahme unverzüglich auf. Wir teilen dir das Ergebnis mit Begründung mit.</p>
+<p>9.3 Dein Recht, die Gerichte anzurufen, bleibt davon unberührt.</p>
 
-<h2>9. Änderungen</h2>
-<p>Wir können diese Bedingungen anpassen. Über wesentliche Änderungen informieren wir in der App oder per E-Mail.</p>
+<h2 id="s10">10. Deine Inhalte</h2>
+<p>10.1 Du behältst alle Rechte an den Inhalten, die du in EVENDLE einstellst (z. B. Fotos, Texte, Nachrichten).</p>
+<p>10.2 Damit wir EVENDLE betreiben können, räumst du uns an diesen Inhalten ein einfaches, unentgeltliches,
+weltweites und nicht übertragbares Recht ein, sie zu speichern, zu vervielfältigen, technisch anzupassen (z. B.
+Bildgröße oder Format) und anderen Nutzer:innen innerhalb von EVENDLE entsprechend deinen Einstellungen anzuzeigen.
+Wir dürfen dieses Recht an Dienstleister weitergeben, die wir für den Betrieb einsetzen (z. B. Hosting), soweit das
+dafür nötig ist. Wir nutzen deine Inhalte nicht für Werbung außerhalb von EVENDLE, ohne dich vorher um Erlaubnis zu
+fragen.</p>
+<p>10.3 Das Recht endet, wenn du einen Inhalt oder dein Konto löschst. Wir dürfen Inhalte danach nur noch so lange
+speichern, wie es für Sicherungskopien für eine kurze technisch bedingte Zeit, zur Erfüllung gesetzlicher Pflichten,
+zur Aufklärung von Verstößen oder zur Verteidigung gegen Rechtsansprüche nötig ist. Nachrichten, die du anderen
+Nutzer:innen geschickt hast, können bei diesen sichtbar bleiben.</p>
+<p>10.4 Du darfst nur Inhalte einstellen, zu deren Veröffentlichung du berechtigt bist, die keine Rechte Dritter
+verletzen und bei denen abgebildete Personen mit der Veröffentlichung einverstanden sind.</p>
+<p>10.5 Ein Anspruch darauf, dass wir bestimmte Inhalte veröffentlichen oder dauerhaft speichern, besteht nicht.
+Bewahre wichtige Inhalte bitte selbst auf.</p>
 
-<h2>10. Schlussbestimmungen</h2>
-<p>Es gilt österreichisches Recht unter Ausschluss des UN-Kaufrechts.
-Zwingende Verbraucherschutzvorschriften deines Wohnsitzlandes bleiben unberührt.</p>
+<h2 id="s11">11. Rechte an EVENDLE</h2>
+<p>11.1 Die App, die Website, Name und Logo „EVENDLE“, Designs, Texte und Software sind rechtlich geschützt. Wir
+räumen dir ein einfaches, nicht übertragbares Recht ein, EVENDLE für private Zwecke im Rahmen dieser Bedingungen zu
+nutzen. Dieses Recht endet mit dem Ende des Vertrags (Abschnitt 16).</p>
+<p>11.2 Du darfst EVENDLE nicht kopieren, verändern, verbreiten, zurückentwickeln oder dekompilieren, soweit das
+Gesetz dir dies nicht ausdrücklich erlaubt.</p>
 
-<footer>EVENDLE · Nutzungsbedingungen · Eine anwaltliche Prüfung wird empfohlen.</footer>
+<h2 id="s12">12. Events und Angebote Dritter</h2>
+<p>12.1 Informationen zu Veranstaltungen stammen häufig von Veranstalter:innen oder anderen Dritten. Wir prüfen
+diese Angaben nicht im Einzelnen und machen sie uns nicht zu eigen. Für Ort, Zeit, Preis, Ablauf und Durchführung
+einer Veranstaltung ist allein die jeweilige Veranstalterin bzw. der jeweilige Veranstalter verantwortlich.</p>
+<p>12.2 Kaufst du Tickets oder nimmst du Leistungen Dritter in Anspruch, kommt der Vertrag ausschließlich mit diesem
+Dritten zustande. Es gelten dessen Bedingungen. Wir sind nicht Vertragspartei.</p>
+<p>12.3 Links zu Websites Dritter stellen wir nur als Hinweis bereit. Für deren Inhalte sind die jeweiligen
+Betreiber verantwortlich. Erfahren wir von rechtswidrigen Inhalten, entfernen wir den Link.</p>
+
+<h2 id="s13">13. Treffen mit anderen Nutzer:innen (Blitz)</h2>
+<p>13.1 EVENDLE erleichtert es, sich spontan mit anderen Nutzer:innen zu treffen. Ob, wann, wo und mit wem du dich
+triffst, entscheidest du allein und eigenverantwortlich. <strong>Wir sind an diesen Treffen nicht beteiligt</strong>,
+organisieren sie nicht, begleiten sie nicht und überwachen sie nicht. Eine Vereinbarung über ein Treffen kommt
+ausschließlich zwischen den beteiligten Nutzer:innen zustande.</p>
+<p>13.2 Andere Nutzer:innen handeln nicht in unserem Auftrag und sind nicht unsere Gehilf:innen. Für ihr Verhalten,
+ihre Angaben und ihre Identität sind sie selbst verantwortlich, in der App ebenso wie bei einem persönlichen Treffen.
+Wir haben darauf keinen Einfluss. Unsere eigene Haftung, etwa wenn wir trotz Kenntnis eines gemeldeten Verstoßes
+nicht angemessen handeln, richtet sich nach Abschnitt 14.</p>
+<p>13.3 Teilst du über Blitz deinen Standort oder einen Treffpunkt, können andere Nutzer:innen diese Angaben sehen.
+Überlege dir gut, welche Informationen du teilst.</p>
+<div class="warn">
+  <strong>Triff die üblichen Vorsichtsmaßnahmen:</strong> Triff dich zunächst an belebten, öffentlichen Orten. Sag einer
+  Vertrauensperson, wo und mit wem du dich triffst. Organisiere deine eigene An- und Abreise und behalte dein Getränk
+  im Blick. Gib keine sensiblen Daten wie deine Wohnadresse oder Bankdaten an Personen weiter, die du nicht gut kennst,
+  und schicke niemandem Geld. Wenn sich etwas falsch anfühlt, geh. Vertrau deinem Urteilsvermögen und melde
+  verdächtiges Verhalten bei uns.
+</div>
+
+<h2 id="s14">14. Gewährleistung und Haftung</h2>
+<p>14.1 Es gelten die gesetzlichen Gewährleistungsrechte, insbesondere nach dem Verbrauchergewährleistungsgesetz
+(VGG). Wir stellen dir die Aktualisierungen (Updates) bereit, die nötig sind, damit EVENDLE vertragsgemäß bleibt,
+und informieren dich darüber. Installierst du ein solches Update nicht innerhalb angemessener Frist, haften wir
+nicht für Mängel, die allein darauf beruhen, sofern wir dich über das Update und die Folgen seiner
+Nichtinstallation informiert haben und die Nichtinstallation nicht auf einer mangelhaften Installationsanleitung
+beruht.</p>
+<p>14.2 Wir haften unbeschränkt für Schäden, die wir oder unsere Gehilf:innen vorsätzlich oder grob fahrlässig
+verursachen, sowie für Schäden an Leben, Körper und Gesundheit (Personenschäden), unabhängig vom Grad des
+Verschuldens. Die Haftung nach dem Produkthaftungsgesetz und die Haftung für ausdrücklich übernommene Garantien
+bleiben unberührt.</p>
+<p>14.3 Für sonstige Schäden, die wir oder unsere Gehilf:innen nur leicht fahrlässig verursachen, haften wir nicht.
+Ansprüche nach Art. 82 der Datenschutz-Grundverordnung (DSGVO) bleiben davon unberührt.</p>
+<p>14.4 Hast du als Verbraucher:in deinen gewöhnlichen Aufenthalt in Deutschland, gilt anstelle von Abschnitt 14.3:
+Bei leichter Fahrlässigkeit haften wir nur für die Verletzung wesentlicher Vertragspflichten, also von Pflichten,
+deren Erfüllung die ordnungsgemäße Durchführung des Vertrags überhaupt erst ermöglicht und auf deren Einhaltung du
+regelmäßig vertrauen darfst. In diesem Fall ist unsere Haftung auf den bei Vertragsschluss vorhersehbaren,
+vertragstypischen Schaden begrenzt.</p>
+<p>14.5 Inhalte und Verhalten anderer Nutzer:innen oder sonstiger Dritter (siehe Abschnitte 5, 12 und 13) sind
+nicht unsere eigenen Leistungen. Dafür haften wir nur, soweit uns selbst eine Pflichtverletzung zur Last fällt; es
+gelten dann die Abschnitte 14.2 bis 14.4. Für fremde Inhalte, die wir lediglich speichern, sind wir erst
+verantwortlich, wenn wir von ihrer Rechtswidrigkeit Kenntnis erlangen und sie dann nicht zügig entfernen oder
+sperren.</p>
+
+<h2 id="s15">15. Freistellung</h2>
+<p>Verletzt du schuldhaft diese Nutzungsbedingungen oder Rechte Dritter, insbesondere durch deine Inhalte, und
+nehmen Dritte uns deshalb in Anspruch, hältst du uns schad- und klaglos, soweit die Inanspruchnahme auf deinem
+Verstoß beruht. Das umfasst auch die angemessenen Kosten unserer Rechtsverteidigung. Ausgenommen sind Ansprüche und
+Geldbußen, die auf unserem eigenen Verschulden oder eigenen Pflichtverletzungen beruhen; ein Mitverschulden
+unsererseits mindert deine Pflicht entsprechend. Wir informieren dich unverzüglich über eine solche
+Inanspruchnahme und geben dir Gelegenheit zur Stellungnahme.</p>
+
+<h2 id="s16">16. Laufzeit, Kündigung und Sperrung</h2>
+<p>16.1 Der Vertrag läuft auf unbestimmte Zeit.</p>
+<p>16.2 Du kannst den Vertrag jederzeit ohne Frist und kostenlos beenden, indem du dein Konto in der App unter
+<em>Profil → Einstellungen → Konto löschen</em> löschst oder uns eine E-Mail schickst.</p>
+<p>16.3 Wir können den Vertrag mit einer Frist von vier Wochen kündigen, etwa wenn wir EVENDLE einstellen. Wir
+informieren dich per E-Mail oder in der App.</p>
+<p>16.4 Das Recht beider Seiten, den Vertrag aus wichtigem Grund ohne Frist zu kündigen, bleibt unberührt. Ein
+wichtiger Grund liegt für uns insbesondere bei schweren oder wiederholten Verstößen gegen diese Bedingungen vor
+(siehe Abschnitte 6 und 8, Abschnitt 8.4 gilt) oder wenn du jünger als 18 Jahre bist.</p>
+<p>16.5 Konten, die 24 Monate lang nicht genutzt wurden, können wir löschen. Wir kündigen dies vorher mit einer
+Frist von mindestens vier Wochen per E-Mail an. Meldest du dich in dieser Zeit an, bleibt dein Konto bestehen.</p>
+<p>16.6 Mit Vertragsende löschen wir deine Daten gemäß unserer <a href="/datenschutz">Datenschutzerklärung</a>,
+vorbehaltlich Abschnitt 10.3.</p>
+
+<h2 id="s17">17. Rücktrittsrecht für Verbraucher:innen</h2>
+<h3>Rücktrittsbelehrung</h3>
+<p>Du hast das Recht, binnen vierzehn Tagen ohne Angabe von Gründen von diesem Vertrag zurückzutreten. Die
+Rücktrittsfrist beträgt vierzehn Tage ab dem Tag des Vertragsabschlusses, also ab Abschluss deiner Registrierung.</p>
+<p>Um dein Rücktrittsrecht auszuüben, musst du uns (Benjamin Maxwald, Dr. Langerstraße 14, 4694 Ohlsdorf,
+Österreich, E-Mail: <a href="mailto:benjamin@evendle.com">benjamin@evendle.com</a>) mittels einer eindeutigen
+Erklärung (z. B. ein mit der Post versandter Brief oder eine E-Mail) über deinen Entschluss informieren, von diesem
+Vertrag zurückzutreten. Du kannst dafür das unten stehende Muster-Rücktrittsformular verwenden, das jedoch nicht
+vorgeschrieben ist. Auch das Löschen deines Kontos innerhalb der Frist gilt als Rücktritt. Zur Wahrung der
+Rücktrittsfrist reicht es aus, dass du die Mitteilung über die Ausübung des Rücktrittsrechts vor Ablauf der
+Rücktrittsfrist absendest.</p>
+<h3>Folgen des Rücktritts</h3>
+<p>Wenn du von diesem Vertrag zurücktrittst, beenden wir das Vertragsverhältnis und löschen dein Konto. Da die
+Nutzung kostenlos ist, entstehen dir durch den Rücktritt keine Kosten, und es sind keine Zahlungen zu erstatten.
+Deine Inhalte und Daten behandeln wir wie bei einer Kündigung (Abschnitte 10.3 und 16.6).</p>
+<h3>Muster-Rücktrittsformular</h3>
+<div class="form">
+  (Wenn du vom Vertrag zurücktreten willst, fülle bitte dieses Formular aus und sende es zurück.)<br /><br />
+  An Benjamin Maxwald, Dr. Langerstraße 14, 4694 Ohlsdorf, Österreich, E-Mail: benjamin@evendle.com:<br /><br />
+  Hiermit trete(n) ich/wir (*) von dem von mir/uns (*) abgeschlossenen Vertrag über die Erbringung der folgenden
+  Dienstleistung zurück: Nutzung von EVENDLE<br />
+  Abgeschlossen am (*): ……………<br />
+  Name des/der Verbraucher(s): ……………<br />
+  Anschrift des/der Verbraucher(s): ……………<br />
+  E-Mail-Adresse bzw. Nutzername des Kontos: ……………<br />
+  Unterschrift des/der Verbraucher(s) (nur bei Mitteilung auf Papier): ……………<br />
+  Datum: ……………<br /><br />
+  (*) Unzutreffendes streichen.
+</div>
+
+<h2 id="s18">18. Datenschutz</h2>
+<p>Wie wir deine personenbezogenen Daten verarbeiten, etwa bei der Standortfreigabe für Blitz, erklären wir in
+unserer <a href="/datenschutz">Datenschutzerklärung</a>. Die Datenschutzerklärung ist kein Bestandteil dieser
+Nutzungsbedingungen. Einwilligungen, die du uns erteilst, kannst du jederzeit widerrufen.</p>
+
+<h2 id="s19">19. Änderungen dieser Bedingungen</h2>
+<p>19.1 Änderungen dieser Nutzungsbedingungen werden nur mit deiner Zustimmung wirksam. Wir teilen dir eine
+geplante Änderung mindestens sechs Wochen vor ihrem Inkrafttreten per E-Mail mit, heben die Änderungen dabei hervor
+und stellen dir die neue Fassung zur Verfügung. In der Regel bitten wir dich zusätzlich in der App um deine
+ausdrückliche Zustimmung.</p>
+<p>19.2 Deine Zustimmung gilt als erteilt, wenn du bis zum Inkrafttreten nicht widersprichst. Das gilt nur für
+Änderungen, die dich nicht oder nur geringfügig benachteiligen und die wegen geänderter Rechtslage oder
+Rechtsprechung, wegen Vorgaben von Behörden oder App Stores, zur Verbesserung der Sicherheit oder zur Anpassung an
+neue Funktionen nötig sind. Auf diese Folge, dein Widerspruchsrecht und die Frist weisen wir dich in der Mitteilung
+ausdrücklich hin. Hast du deinen gewöhnlichen Aufenthalt in Deutschland, gilt eine Änderung nur bei ausdrücklicher
+Zustimmung.</p>
+<p>19.3 Änderungen, die wesentliche Rechte oder Pflichten zu deinem Nachteil verändern, sowie die Einführung von
+Entgelten werden nur mit deiner ausdrücklichen Zustimmung wirksam.</p>
+<p>19.4 Widersprichst du oder stimmst du einer Änderung, die deine ausdrückliche Zustimmung erfordert, nicht zu,
+gelten für dich die bisherigen Bedingungen weiter. Du kannst den Vertrag bis zum Inkrafttreten jederzeit kostenlos
+beenden.</p>
+
+<h2 id="s20">20. Bezug über App Stores</h2>
+<p>20.1 Lädst du die App über den Apple App Store oder Google Play herunter, gelten zusätzlich deren
+Nutzungsbedingungen. Der Vertrag über EVENDLE besteht ausschließlich zwischen dir und uns, nicht mit Apple oder
+Google. Wir allein sind für die App und ihre Inhalte verantwortlich.</p>
+<p>20.2 Für die über den Apple App Store bezogene App gilt außerdem:</p>
+<ul>
+  <li>Du darfst die App auf Apple-Geräten nutzen, die dir gehören oder deiner Kontrolle unterliegen, im Rahmen der
+    Nutzungsregeln der Apple Media Services Bedingungen.</li>
+  <li>Apple ist nicht verpflichtet, Wartungs- oder Supportleistungen für die App zu erbringen. Fragen und
+    Beschwerden richtest du an uns (Abschnitt 1).</li>
+  <li>Entspricht die App nicht einer anwendbaren Gewährleistung, kannst du Apple informieren. Apple erstattet dir
+    dann einen etwaigen Kaufpreis. Darüber hinaus hat Apple, soweit gesetzlich zulässig, keine Gewährleistungspflicht
+    in Bezug auf die App.</li>
+  <li>Für Ansprüche im Zusammenhang mit der App, etwa Produkthaftungsansprüche, Ansprüche wegen Nichteinhaltung
+    gesetzlicher oder regulatorischer Vorgaben und Verbraucherschutzansprüche, sind im Verhältnis zu Apple
+    ausschließlich wir verantwortlich, nicht Apple.</li>
+  <li>Macht ein Dritter geltend, dass die App oder deren Nutzung seine Rechte am geistigen Eigentum verletzt, sind
+    ausschließlich wir, nicht Apple, für die Untersuchung, Abwehr, Beilegung und Erledigung dieses Anspruchs
+    verantwortlich.</li>
+  <li>Du darfst die App nicht nutzen, wenn du dich in einem Land befindest, gegen das die USA ein Embargo verhängt
+    haben oder das von der US-Regierung als Terror unterstützendes Land eingestuft ist, oder wenn du auf einer Liste
+    verbotener oder eingeschränkter Parteien der US-Regierung stehst.</li>
+  <li>Bei der Nutzung der App musst du die anwendbaren Bedingungen Dritter einhalten, etwa die deines
+    Mobilfunkanbieters.</li>
+  <li>Apple und die Tochtergesellschaften von Apple sind Drittbegünstigte dieser Bedingungen und können sie nach
+    deiner Zustimmung dir gegenüber durchsetzen.</li>
+</ul>
+
+<h2 id="s21">21. Schlussbestimmungen</h2>
+<p>21.1 Es gilt österreichisches Recht unter Ausschluss des UN-Kaufrechts und der Verweisungsnormen des
+internationalen Privatrechts. Bist du Verbraucher:in, gilt diese Rechtswahl nur, soweit dir dadurch nicht der Schutz
+der zwingenden Bestimmungen des Rechts des Staates entzogen wird, in dem du deinen gewöhnlichen Aufenthalt hast.</p>
+<p>21.2 Bist du Verbraucher:in, gelten für den Gerichtsstand die gesetzlichen Bestimmungen. Für Unternehmer:innen
+ist das sachlich zuständige Gericht am Sitz des Anbieters ausschließlich zuständig.</p>
+<p>21.3 Übernimmt ein anderer Betreiber, etwa eine von den Gründern von EVENDLE gegründete Gesellschaft, den
+Betrieb von EVENDLE, geht dein Vertrag nur mit deiner Zustimmung auf diesen über. Wir informieren dich darüber
+rechtzeitig per E-Mail. Stimmst du nicht zu, bleibt der Vertrag mit uns bestehen, bis er nach Abschnitt 16 endet.</p>
+<p>21.4 Sollte eine Bestimmung dieser Bedingungen unwirksam sein, bleiben die übrigen Bestimmungen wirksam.</p>
+<p>21.5 Maßgeblich ist die deutsche Fassung dieser Nutzungsbedingungen.</p>
+<p>21.6 Diese Fassung gilt ab dem oben genannten Stand für alle neuen Registrierungen. Für bestehende Konten gilt sie
+nach Maßgabe von Abschnitt 19.</p>
+
+<footer>EVENDLE · Nutzungsbedingungen · Stand: 2. Oktober 2026 ·
+  <a href="/impressum">Impressum</a> · <a href="/datenschutz">Datenschutz</a></footer>
 </div>
 </body>
 </html>
