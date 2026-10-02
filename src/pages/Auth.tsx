@@ -145,6 +145,14 @@ const Auth = () => {
   const [socialLoading, setSocialLoading] = useState(false);
   const [signupSuccessEmail, setSignupSuccessEmail] = useState<string | null>(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  // Toasts are switched off app-wide, so every error here was invisible
+  // (e.g. a signup silently going nowhere because the terms weren't ticked).
+  const [formError, setFormError] = useState<string | null>(null);
+  const formErrorRef = useRef<HTMLDivElement>(null);
+  const fail = (message: string) => {
+    setFormError(message);
+    requestAnimationFrame(() => formErrorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+  };
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { signIn, user } = useAuth();
@@ -160,11 +168,11 @@ const Auth = () => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        toast.error(t('auth.errors.imgTooLarge'));
+        fail(t('auth.errors.imgTooLarge'));
         return;
       }
       if (!file.type.startsWith('image/')) {
-        toast.error(t('auth.errors.notImage'));
+        fail(t('auth.errors.notImage'));
         return;
       }
       setAvatarFile(file);
@@ -185,37 +193,38 @@ const Auth = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
     setLoading(true);
 
     try {
       if (isLogin) {
         const { error } = await signIn(email, password);
         if (error) {
-          toast.error(error.message);
+          fail(error.message);
         } else {
           toast.success(t('auth.success.signedIn'), { duration: 1200 });
           navigate('/');
         }
       } else {
         if (!name || !birthday || !country) {
-          toast.error(t('auth.errors.fillRequired'));
+          fail(t('auth.errors.fillRequired'));
           setLoading(false);
           return;
         }
 
         if (!termsAccepted) {
-          toast.error(t('auth.errors.termsRequired'));
+          fail(t('auth.errors.termsRequired'));
           setLoading(false);
           return;
         }
 
         if (password !== confirmPassword) {
-          toast.error(t('auth.errors.passwordMismatch'));
+          fail(t('auth.errors.passwordMismatch'));
           setLoading(false);
           return;
         }
         if (password.length < 6) {
-          toast.error(t('auth.errors.passwordShort'));
+          fail(t('auth.errors.passwordShort'));
           setLoading(false);
           return;
         }
@@ -240,7 +249,7 @@ const Auth = () => {
         });
 
         if (signUpError) {
-          toast.error(signUpError.message);
+          fail(signUpError.message);
           setLoading(false);
           return;
         }
@@ -252,7 +261,7 @@ const Auth = () => {
         // the same "check your inbox" success screen as a real signup, even
         // though no account was created and no email was sent.
         if (data.user && data.user.identities && data.user.identities.length === 0) {
-          toast.error(t('auth.errors.emailAlreadyRegistered'));
+          fail(t('auth.errors.emailAlreadyRegistered'));
           setIsLogin(true);
           setLoading(false);
           return;
@@ -271,7 +280,7 @@ const Auth = () => {
         setSignupSuccessEmail(email);
       }
     } catch (error: any) {
-      toast.error(t('auth.errors.generic'));
+      fail(t('auth.errors.generic'));
     }
     setLoading(false);
   };
@@ -323,13 +332,13 @@ const Auth = () => {
   if (isForgotPassword) {
     const handleResetSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
-      if (!email) { toast.error(t('auth.errors.enterEmail')); return; }
+      if (!email) { fail(t('auth.errors.enterEmail')); return; }
       setResetLoading(true);
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${emailLinkOrigin()}/reset-password`,
       });
       setResetLoading(false);
-      if (error) toast.error(error.message);
+      if (error) fail(error.message);
       else { toast.success(t('auth.success.resetSent')); setIsForgotPassword(false); }
     };
 
@@ -471,7 +480,7 @@ const Auth = () => {
                   <Checkbox
                     id="terms"
                     checked={termsAccepted}
-                    onCheckedChange={(c) => setTermsAccepted(c === true)}
+                    onCheckedChange={(c) => { setTermsAccepted(c === true); if (c === true) setFormError(null); }}
                     className="mt-0.5 border-white/40 data-[state=checked]:bg-[hsl(var(--bolt))] data-[state=checked]:text-[hsl(var(--blitz-forest))] data-[state=checked]:border-[hsl(var(--bolt))]"
                   />
                   <Label htmlFor="terms" className="text-sm font-normal text-white/60 leading-snug cursor-pointer">
@@ -490,7 +499,13 @@ const Auth = () => {
             )}
           </div>
 
-          <Button type="submit" disabled={loading || (!isLogin && !termsAccepted)} className="w-full bg-[hsl(var(--bolt))] hover:bg-[hsl(var(--bolt))]/90 text-[hsl(var(--blitz-forest))] font-bold">
+          {formError && (
+            <div ref={formErrorRef} role="alert" className="rounded-xl border border-red-400/50 bg-red-500/15 px-4 py-3 text-sm font-medium text-red-200">
+              {formError}
+            </div>
+          )}
+
+          <Button type="submit" disabled={loading} className="w-full bg-[hsl(var(--bolt))] hover:bg-[hsl(var(--bolt))]/90 text-[hsl(var(--blitz-forest))] font-bold">
             {loading ? t('common.loading') : isLogin ? t('auth.loginCta') : t('auth.registerCta')}
           </Button>
 
@@ -505,7 +520,7 @@ const Auth = () => {
             <Button type="button" variant="outline" disabled={socialLoading || loading} className="w-full bg-white text-[hsl(var(--ink))] border-white hover:bg-white/90"
               onClick={async () => {
                 if (!isLogin && !termsAccepted) {
-                  toast.error(t('auth.errors.termsRequired'));
+                  fail(t('auth.errors.termsRequired'));
                   return;
                 }
                 setSocialLoading(true);
@@ -519,7 +534,7 @@ const Auth = () => {
                     provider: 'google',
                     options: { redirectTo: `${window.location.origin}/auth/callback` },
                   });
-                  if (error) { toast.error(t('auth.errors.googleFailed')); console.error(error); setSocialLoading(false); }
+                  if (error) { fail(t('auth.errors.googleFailed')); console.error(error); setSocialLoading(false); }
                   return; // browser is redirecting away
                 }
                 setSocialLoading(false);
@@ -537,20 +552,20 @@ const Auth = () => {
               <Button type="button" variant="outline" disabled={socialLoading || loading} className="w-full bg-black text-white border-black hover:bg-black/90"
                 onClick={async () => {
                   if (!isLogin && !termsAccepted) {
-                    toast.error(t('auth.errors.termsRequired'));
+                    fail(t('auth.errors.termsRequired'));
                     return;
                   }
                   setSocialLoading(true);
                   if (Capacitor.isNativePlatform()) {
                     const err = await nativeAppleSignIn();
-                    if (err) { toast.error(t('auth.errors.appleFailed')); console.error(err); }
+                    if (err) { fail(t('auth.errors.appleFailed')); console.error(err); }
                   } else {
                     // Web: go straight through Supabase (see Google button above).
                     const { error } = await supabase.auth.signInWithOAuth({
                       provider: 'apple',
                       options: { redirectTo: `${window.location.origin}/auth/callback` },
                     });
-                    if (error) { toast.error(t('auth.errors.appleFailed')); console.error(error); setSocialLoading(false); }
+                    if (error) { fail(t('auth.errors.appleFailed')); console.error(error); setSocialLoading(false); }
                     return; // browser is redirecting away
                   }
                   setSocialLoading(false);
@@ -564,7 +579,7 @@ const Auth = () => {
           </div>
 
           <div className="text-center">
-            <button type="button" onClick={() => setIsLogin(!isLogin)} className="text-[hsl(var(--bolt))] hover:underline">
+            <button type="button" onClick={() => { setIsLogin(!isLogin); setFormError(null); }} className="text-[hsl(var(--bolt))] hover:underline">
               {isLogin ? t('auth.switchToRegister') : t('auth.switchToLogin')}
             </button>
           </div>

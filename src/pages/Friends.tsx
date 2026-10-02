@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { SHEET_MAX_H_80 } from "@/lib/sheetClasses";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -145,7 +146,7 @@ const Friends = () => {
 
       {/* Add friend sheet */}
       <Sheet open={showAddFriend} onOpenChange={setShowAddFriend}>
-        <SheetContent side="bottom" className="h-[80vh] rounded-t-3xl overflow-y-auto">
+        <SheetContent side="bottom" className={`h-[80vh] ${SHEET_MAX_H_80} rounded-t-3xl overflow-y-auto`}>
           <SheetHeader>
             <SheetTitle>Freunde finden</SheetTitle>
           </SheetHeader>

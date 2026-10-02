@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { SHEET_MAX_H_75 } from "@/lib/sheetClasses";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -31,7 +32,7 @@ const TagPeopleSheet = ({ open, onOpenChange, matchId, currentUserId, initialSel
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="rounded-t-3xl max-h-[75vh] overflow-y-auto">
+      <SheetContent side="bottom" className={`rounded-t-3xl ${SHEET_MAX_H_75} overflow-y-auto`}>
         <SheetHeader className="text-left">
           <SheetTitle>Personen markieren</SheetTitle>
         </SheetHeader>

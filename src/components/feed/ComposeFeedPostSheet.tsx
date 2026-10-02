@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { SHEET_MAX_H_88 } from "@/lib/sheetClasses";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -229,7 +230,7 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="rounded-t-3xl max-h-[88vh] overflow-y-auto">
+      <SheetContent side="bottom" className={`rounded-t-3xl ${SHEET_MAX_H_88} overflow-y-auto`}>
         <SheetHeader className="text-left">
           <SheetTitle>{namingCustomBlitz ? "Blitz benennen" : showPicker ? "Welcher Blitz?" : "Foto teilen"}</SheetTitle>
         </SheetHeader>

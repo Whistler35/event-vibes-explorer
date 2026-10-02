@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { SHEET_MAX_H_80 } from "@/lib/sheetClasses";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { de } from "date-fns/locale";
@@ -188,7 +189,7 @@ const FeedCommentsSheet = ({ open, onOpenChange, postId, userId }: Props) => {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="rounded-t-3xl h-[80vh] flex flex-col p-0">
+      <SheetContent side="bottom" className={`rounded-t-3xl h-[80vh] ${SHEET_MAX_H_80} flex flex-col p-0`}>
         <SheetHeader className="text-left px-6 pt-6 pb-2 shrink-0">
           <SheetTitle>Kommentare</SheetTitle>
         </SheetHeader>
