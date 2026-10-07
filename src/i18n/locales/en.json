@@ -242,7 +242,9 @@
     "someone": "Someone",
     "tapForPhoto": "Tap for photo",
     "tapToFlipBack": "Tap to flip back",
-    "noBlitzesTitle": "No Blitzes"
+    "noBlitzesTitle": "No Blitzes",
+    "friendsIn_one": "{{name}} is already in",
+    "friendsIn_other": "{{count}} friends are already in"
   },
   "events": {
     "searchPlaceholder": "Search events...",

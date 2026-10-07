@@ -23,6 +23,7 @@ const formatRemaining = (ms: number) => {
   const totalMinutes = Math.max(0, Math.floor(ms / 60000));
   const h = Math.floor(totalMinutes / 60);
   const m = totalMinutes % 60;
+  if (h >= 48) return `${Math.floor(h / 24)}d ${h % 24}h`;
   if (h > 0) return `${h}h ${m}m`;
   return `${m}m`;
 };

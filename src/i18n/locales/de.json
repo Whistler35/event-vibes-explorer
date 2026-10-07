@@ -242,7 +242,9 @@
     "someone": "Jemand",
     "tapForPhoto": "Tippen für Foto",
     "tapToFlipBack": "Tippen zum Zurückdrehen",
-    "noBlitzesTitle": "Keine Blitzes"
+    "noBlitzesTitle": "Keine Blitzes",
+    "friendsIn_one": "{{name}} ist schon dabei",
+    "friendsIn_other": "{{count}} Freunde sind schon dabei"
   },
   "events": {
     "searchPlaceholder": "Event suchen...",

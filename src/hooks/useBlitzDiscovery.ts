@@ -22,6 +22,8 @@ export interface DiscoveryBlitz {
   /** True when an admin sent this under a free-form name (no link to a profile). */
   is_freifeld: boolean;
   image_url: string | null;
+  /** The viewer's friends who are already in this Blitz's Huddle (host excluded). */
+  friends_in: { user_id: string; name: string | null; avatar_url: string | null }[];
   distance_km: number;
 }
 
@@ -115,6 +117,25 @@ export function useBlitzDiscovery(_city?: string | null) {
       .in("user_id", hostIds);
     const byUser = new Map((profiles ?? []).map((p) => [p.user_id, p]));
 
+    // Friends of mine already in each Blitz ("2 Freunde sind schon dabei").
+    // Best-effort: if the lookup fails the cards simply show no such line.
+    const friendsByRequest = new Map<string, DiscoveryBlitz["friends_in"]>();
+    try {
+      const { data: friendRows } = await (supabase as any).rpc("get_friends_in_blitzes", {
+        p_request_ids: withDistance.map((r) => r.id),
+      });
+      for (const row of (friendRows ?? []) as Array<{
+        blitz_request_id: string;
+        user_id: string;
+        name: string | null;
+        avatar_url: string | null;
+      }>) {
+        const list = friendsByRequest.get(row.blitz_request_id) ?? [];
+        list.push({ user_id: row.user_id, name: row.name, avatar_url: row.avatar_url });
+        friendsByRequest.set(row.blitz_request_id, list);
+      }
+    } catch {}
+
     setItems(
       withDistance.map((r) => {
         const { display_name, display_avatar_url, ...rest } = r;
@@ -122,6 +143,7 @@ export function useBlitzDiscovery(_city?: string | null) {
         return {
           ...rest,
           image_url: r.image_url ?? null,
+          friends_in: friendsByRequest.get(r.id) ?? [],
           is_freifeld: isFreifeld,
           host_name: isFreifeld ? display_name : byUser.get(r.host_id)?.name ?? null,
           host_avatar: isFreifeld ? display_avatar_url ?? null : byUser.get(r.host_id)?.avatar_url ?? null,

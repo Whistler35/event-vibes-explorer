@@ -266,11 +266,32 @@ const SwipeCard = ({ item, onSwipe, onAdminDelete, isTop, isAdmin }: CardProps) 
             </h2>
           </div>
 
+          {item.friends_in.length > 0 && (
+            <div className="shrink-0 mt-5 flex items-center gap-2 px-3 py-1.5 rounded-full bg-[hsl(var(--bolt))]/15 border border-[hsl(var(--bolt))]/30 max-w-full">
+              <div className="flex -space-x-2 shrink-0">
+                {item.friends_in.slice(0, 3).map((f) => (
+                  <Avatar key={f.user_id} className="w-6 h-6 border-2 border-[hsl(var(--blitz-forest))]">
+                    <AvatarImage src={f.avatar_url ?? undefined} loading="lazy" />
+                    <AvatarFallback className="bg-[hsl(var(--blitz-forest-deep))] text-white text-[9px] font-black">
+                      {f.name?.[0] ?? "?"}
+                    </AvatarFallback>
+                  </Avatar>
+                ))}
+              </div>
+              <span className="text-xs font-bold text-[hsl(var(--bolt))] truncate">
+                {t("blitz.friendsIn", {
+                  count: item.friends_in.length,
+                  name: item.friends_in[0].name?.split(" ")[0] ?? "",
+                })}
+              </span>
+            </div>
+          )}
+
           <button
             type="button"
             data-no-drag
             onClick={handleProfile}
-            className="shrink-0 mt-8 flex items-center gap-2 text-white/85"
+            className="shrink-0 mt-5 flex items-center gap-2 text-white/85"
             aria-label={`Profil von ${item.host_name ?? "Host"} öffnen`}
           >
             <Avatar className="w-8 h-8 border border-white/20">
