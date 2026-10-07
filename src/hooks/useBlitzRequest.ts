@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { coarsenCoordinate } from "@/lib/coarseLocation";
 
 export type BlitzAudience = "public" | "friends" | "selected";
 
@@ -96,8 +97,9 @@ export async function createBlitzRequest(params: {
       activity: params.activity.trim(),
       duration_minutes: params.durationMinutes,
       city: params.city ?? null,
-      latitude: params.latitude,
-      longitude: params.longitude,
+      // Never store an exact GPS fix — see coarseLocation.ts.
+      latitude: coarsenCoordinate(params.latitude),
+      longitude: coarsenCoordinate(params.longitude),
       radius_km: params.radiusKm,
       expires_at: expiresAt,
       audience: params.audience ?? "public",

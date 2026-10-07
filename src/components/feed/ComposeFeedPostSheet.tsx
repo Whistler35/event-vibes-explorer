@@ -11,6 +11,7 @@ import { Camera, Loader2, Zap, Globe2, Users, Check, Search, X, Trash2 } from "l
 import { useEligibleRecaps } from "@/hooks/useEligibleRecaps";
 import { useMatchParticipants } from "@/hooks/useMatchParticipants";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { coarsenCoordinate } from "@/lib/coarseLocation";
 import { trackEvent } from "@/lib/analytics";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
@@ -133,8 +134,8 @@ const ComposeFeedPostSheet = ({ open, onOpenChange, userId, preselectedMatchId }
         activity: activityName.trim(),
         duration_minutes: 15,
         city: null,
-        latitude: coords.lat,
-        longitude: coords.lng,
+        latitude: coarsenCoordinate(coords.lat),
+        longitude: coarsenCoordinate(coords.lng),
         radius_km: 1,
         expires_at: now,
         status: "cancelled",
