@@ -95,11 +95,14 @@ GRANT EXECUTE ON FUNCTION public.get_public_blitz_preview(uuid) TO anon, authent
 -- ---------------------------------------------------------------------------
 -- Notifications: when an admin sends a Blitz as a "Freifeld", every
 -- notification that would name the host shows the Freifeld name instead of the
--- admin's real name. (Only the three functions that put the host's name
--- into text are touched; their other behaviour is unchanged.)
+-- admin's real name — in the "you're in" notification and in Huddle chat
+-- pushes. (Pushes for a newly created Blitz stay anonymous.)
 -- ---------------------------------------------------------------------------
 
--- 1) Nearby / invited / friends push on creation
+-- 1) Push when a new Blitz is created: deliberately NOT changed. These stay
+--    anonymous ("Ein Freund blitzt", "Jemand …") even for a Freifeld Blitz.
+--    This is the existing function, restated unchanged so the result is the
+--    same no matter whether an earlier draft of this migration was run.
 CREATE OR REPLACE FUNCTION public.notify_blitz_nearby()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -109,7 +112,6 @@ AS $$
 DECLARE
   v_audience text := NEW.audience::text;
   v_rec      record;
-  v_free     text := NULLIF(trim(NEW.display_name), '');
 BEGIN
   IF NEW.latitude IS NULL OR NEW.longitude IS NULL THEN RETURN NEW; END IF;
   IF NEW.expires_at IS NOT NULL AND NEW.expires_at <= now() THEN RETURN NEW; END IF;
@@ -128,10 +130,8 @@ BEGIN
       END IF;
       PERFORM public.call_push_notification(
         v_rec.user_id,
-        CASE WHEN v_free IS NOT NULL THEN '⚡ ' || v_free || ' blitzt gerade'
-             ELSE '⚡ Neuer Blitz in deiner Nähe' END,
-        CASE WHEN v_free IS NOT NULL THEN v_free || ' blitzt gerade – schau vorbei!'
-             ELSE 'Ein Freund blitzt gerade – schau vorbei!' END,
+        '⚡ Neuer Blitz in deiner Nähe',
+        'Ein Freund blitzt gerade – schau vorbei!',
         'new_blitz_nearby',
         jsonb_build_object('blitz_id', NEW.id)
       );
@@ -149,15 +149,15 @@ BEGIN
       PERFORM public.call_push_notification(
         v_rec.user_id,
         '⚡ Du wurdest zu einem Blitz eingeladen',
-        COALESCE(v_free, 'Jemand') || ' lädt dich zu einem spontanen Blitz ein!',
+        'Jemand lädt dich zu einem spontanen Blitz ein!',
         'new_blitz_nearby',
         jsonb_build_object('blitz_id', NEW.id)
       );
     END LOOP;
 
   ELSE
-    -- public (or any unknown audience) → nearby broadcast within the radius
-    -- the host chose when creating the Blitz.
+    -- public (or any unknown audience) → nearby broadcast, no details,
+    -- limited to the radius the host chose when creating the Blitz.
     FOR v_rec IN
       SELECT DISTINCT user_id
       FROM public.push_subscriptions
@@ -173,7 +173,7 @@ BEGIN
       PERFORM public.call_push_notification(
         v_rec.user_id,
         '⚡ Neuer Blitz in der Nähe',
-        COALESCE(v_free, 'Jemand in deiner Nähe') || ' blitzt gerade – schau vorbei!',
+        'Jemand in deiner Nähe blitzt gerade – schau vorbei!',
         'new_blitz_nearby',
         jsonb_build_object('blitz_id', NEW.id)
       );
