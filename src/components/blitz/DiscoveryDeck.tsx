@@ -189,18 +189,10 @@ const SwipeCard = ({ item, onSwipe, onAdminDelete, isTop, isAdmin }: CardProps) 
         <TimeProgressBar expiresAt={item.expires_at} durationMinutes={item.duration_minutes} />
 
         {(item.audience === "friends" || item.audience === "selected") && (
-          <div className="absolute top-16 left-5 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[hsl(var(--bolt))] text-[hsl(var(--blitz-forest))] text-[10px] font-black uppercase tracking-[0.15em]">
+          <div className="absolute top-5 left-5 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[hsl(var(--bolt))] text-[hsl(var(--blitz-forest))] text-[10px] font-black uppercase tracking-[0.15em]">
             <Users className="w-3 h-3" /> Freund
           </div>
         )}
-
-        {/* Distance pill top-left */}
-        <div className="absolute top-5 left-5 z-20 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/8 border border-white/15 text-[hsl(var(--bolt))] text-xs font-black">
-          <MapPin className="w-3.5 h-3.5" />
-          {item.distance_km < 1
-            ? `${Math.round(item.distance_km * 1000)} m`
-            : `${item.distance_km.toFixed(1)} km`}
-        </div>
 
         {/* Time-left pill top-right */}
         <div className="absolute top-5 right-5 z-20 inline-flex items-center px-3 py-1.5 rounded-full bg-[hsl(var(--bolt))] text-[hsl(var(--blitz-forest))] text-xs font-black tabular-nums">
