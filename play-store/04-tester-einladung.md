@@ -14,5 +14,5 @@ Danke dir!
 ## Für mich (Benjamin)
 - Mindestens 12 Tester, 14 Tage am Stück (Zahlen in der Play Console prüfen).
 - Testerliste: Play Console → Test → Geschlossener Test → Tester → Liste anlegen (Gmail-Adressen).
-- Aktuelle AAB: `play-store/release/evendle-1.4-versionCode4.aab` (versionName 1.4, versionCode 4).
+- Aktuelle AAB: `play-store/release/evendle-1.5-versionCode5.aab` (versionName 1.5, versionCode 5).
 - Nach jedem neuen Upload muss versionCode höher sein als beim vorherigen.
