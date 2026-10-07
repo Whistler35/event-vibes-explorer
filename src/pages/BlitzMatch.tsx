@@ -58,6 +58,8 @@ const BlitzMatch = () => {
   const [showExtendSheet, setShowExtendSheet] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [profilesMap, setProfilesMap] = useState<Map<string, Profile>>(new Map());
+  // Set when an admin sent this Blitz as a "Freifeld" (own name/logo).
+  const [freifeldName, setFreifeldName] = useState<string | null>(null);
   const [input, setInput] = useState("");
   const [now, setNow] = useState(Date.now());
   const [showMatchSplash, setShowMatchSplash] = useState(true);
@@ -116,12 +118,29 @@ const BlitzMatch = () => {
       setRoleLabels(new Map((parts ?? []).map((p: any) => [p.user_id, p.role_label ?? null])));
 
       const [{ data: req }, { data: profs }] = await Promise.all([
-        supabase.from("blitz_requests").select("activity, city").eq("id", m.blitz_request_id).maybeSingle(),
+        supabase
+          .from("blitz_requests")
+          .select("activity, city, display_name, display_avatar_url")
+          .eq("id", m.blitz_request_id)
+          .maybeSingle(),
         supabase.from("profiles").select("user_id, name, avatar_url").in("user_id", ids),
       ]);
       setActivity(req?.activity ?? "");
       setCity((req as any)?.city ?? "");
-      setProfilesMap(new Map((profs ?? []).map((p) => [p.user_id, p])));
+      const map = new Map((profs ?? []).map((p) => [p.user_id, p]));
+      // "Freifeld": an admin sent this Blitz under another name/logo, so the
+      // host appears that way for everyone in the huddle (chips, messages…).
+      const freiName = (req as any)?.display_name as string | null | undefined;
+      setFreifeldName(freiName || null);
+      if (freiName) {
+        const hostProf = map.get(m.host_id);
+        map.set(m.host_id, {
+          ...(hostProf ?? { user_id: m.host_id }),
+          name: freiName,
+          avatar_url: (req as any)?.display_avatar_url ?? null,
+        } as any);
+      }
+      setProfilesMap(map);
     })();
   }, [matchId, user, navigate]);
 
@@ -456,7 +475,7 @@ const BlitzMatch = () => {
             </Avatar>
             <p className="text-sm text-muted-foreground">
               <span className="text-foreground font-black">
-                {iAmHost ? "Du" : hostProfile?.name?.split(" ")[0] ?? "Host"}
+                {iAmHost && !freifeldName ? "Du" : hostProfile?.name?.split(" ")[0] ?? "Host"}
               </span>{" "}
               is hosting
             </p>

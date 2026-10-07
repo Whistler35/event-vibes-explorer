@@ -355,10 +355,13 @@ export type Database = {
           audience: Database["public"]["Enums"]["blitz_audience"]
           city: string | null
           created_at: string
+          display_avatar_url: string | null
+          display_name: string | null
           duration_minutes: number
           expires_at: string
           host_id: string
           id: string
+          image_url: string | null
           latitude: number | null
           longitude: number | null
           radius_km: number
@@ -371,10 +374,13 @@ export type Database = {
           audience?: Database["public"]["Enums"]["blitz_audience"]
           city?: string | null
           created_at?: string
+          display_avatar_url?: string | null
+          display_name?: string | null
           duration_minutes?: number
           expires_at: string
           host_id: string
           id?: string
+          image_url?: string | null
           latitude?: number | null
           longitude?: number | null
           radius_km?: number
@@ -387,10 +393,13 @@ export type Database = {
           audience?: Database["public"]["Enums"]["blitz_audience"]
           city?: string | null
           created_at?: string
+          display_avatar_url?: string | null
+          display_name?: string | null
           duration_minutes?: number
           expires_at?: string
           host_id?: string
           id?: string
+          image_url?: string | null
           latitude?: number | null
           longitude?: number | null
           radius_km?: number

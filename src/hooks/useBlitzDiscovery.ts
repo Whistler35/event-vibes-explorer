@@ -16,8 +16,12 @@ export interface DiscoveryBlitz {
   expires_at: string;
   created_at: string;
   audience: "public" | "friends" | "selected";
+  /** Name/avatar shown on the card: the Freifeld identity if the host set one, else the host profile. */
   host_name: string | null;
   host_avatar: string | null;
+  /** True when an admin sent this under a free-form name (no link to a profile). */
+  is_freifeld: boolean;
+  image_url: string | null;
   distance_km: number;
 }
 
@@ -73,7 +77,7 @@ export function useBlitzDiscovery(_city?: string | null) {
     const { data: requests } = await supabase
       .from("blitz_requests")
       .select(
-        "id, host_id, activity, duration_minutes, city, latitude, longitude, radius_km, expires_at, created_at, audience"
+        "id, host_id, activity, duration_minutes, city, latitude, longitude, radius_km, expires_at, created_at, audience, image_url, display_name, display_avatar_url"
       )
       .eq("status", "active")
       .gt("expires_at", new Date().toISOString())
@@ -112,11 +116,17 @@ export function useBlitzDiscovery(_city?: string | null) {
     const byUser = new Map((profiles ?? []).map((p) => [p.user_id, p]));
 
     setItems(
-      withDistance.map((r) => ({
-        ...r,
-        host_name: byUser.get(r.host_id)?.name ?? null,
-        host_avatar: byUser.get(r.host_id)?.avatar_url ?? null,
-      }))
+      withDistance.map((r) => {
+        const { display_name, display_avatar_url, ...rest } = r;
+        const isFreifeld = !!display_name;
+        return {
+          ...rest,
+          image_url: r.image_url ?? null,
+          is_freifeld: isFreifeld,
+          host_name: isFreifeld ? display_name : byUser.get(r.host_id)?.name ?? null,
+          host_avatar: isFreifeld ? display_avatar_url ?? null : byUser.get(r.host_id)?.avatar_url ?? null,
+        };
+      })
     );
     setLoading(false);
   }, [user, viewerCoords]);

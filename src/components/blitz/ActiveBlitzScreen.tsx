@@ -15,6 +15,8 @@ import { getActivityFontClass } from "@/lib/blitzText";
 interface ActiveBlitzScreenProps {
   request: BlitzRequest;
   onEnded: () => void;
+  /** Shorter card, used when an admin has several Blitzes stacked on one screen. */
+  compact?: boolean;
 }
 
 const formatRemaining = (ms: number) => {
@@ -25,7 +27,7 @@ const formatRemaining = (ms: number) => {
   return `${m}m`;
 };
 
-const ActiveBlitzScreen = ({ request, onEnded }: ActiveBlitzScreenProps) => {
+const ActiveBlitzScreen = ({ request, onEnded, compact = false }: ActiveBlitzScreenProps) => {
   const [now, setNow] = useState(Date.now());
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -101,14 +103,17 @@ const ActiveBlitzScreen = ({ request, onEnded }: ActiveBlitzScreenProps) => {
     }
   };
 
-  const firstName = me?.name?.split(" ")[0] ?? "Du";
+  // An admin can send as a "Freifeld" (own name/logo) — show that identity.
+  const isFreifeld = !!request.display_name;
+  const firstName = isFreifeld ? request.display_name! : me?.name?.split(" ")[0] ?? "Du";
+  const avatarSrc = isFreifeld ? request.display_avatar_url : me?.avatar_url;
 
   return (
     <div className="relative">
       <button
         type="button"
         onClick={openHuddle}
-        className="w-full text-left relative overflow-hidden rounded-[28px] bg-[hsl(var(--blitz-forest))] text-white p-8 min-h-[62vh] flex flex-col items-center justify-between active:scale-[0.99] transition"
+        className={`w-full text-left relative overflow-hidden rounded-[28px] bg-[hsl(var(--blitz-forest))] text-white p-8 ${compact ? "min-h-[360px]" : "min-h-[62vh]"} flex flex-col items-center justify-between active:scale-[0.99] transition`}
       >
         <button
           onClick={handleShare}
@@ -140,6 +145,13 @@ const ActiveBlitzScreen = ({ request, onEnded }: ActiveBlitzScreenProps) => {
           >
             {request.activity}
           </h1>
+          {request.image_url && (
+            <img
+              src={request.image_url}
+              alt=""
+              className="mx-auto h-20 w-20 rounded-2xl object-cover border border-white/15"
+            />
+          )}
           <p className="text-white/65 text-[15px]">
             You are hosting · ends in {remainingLabel}
           </p>
@@ -148,7 +160,7 @@ const ActiveBlitzScreen = ({ request, onEnded }: ActiveBlitzScreenProps) => {
         <div className="flex flex-col items-center gap-3">
           <div className="flex items-center gap-3">
             <Avatar className="w-10 h-10 border-2 border-white">
-              <AvatarImage src={me?.avatar_url ?? undefined} />
+              <AvatarImage src={avatarSrc ?? undefined} />
               <AvatarFallback className="bg-[hsl(var(--blitz-forest-deep))] text-white text-xs font-black">
                 {firstName[0]?.toUpperCase() ?? "?"}
               </AvatarFallback>

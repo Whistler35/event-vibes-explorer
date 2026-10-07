@@ -216,7 +216,7 @@ const Messenger = () => {
             .select("match_id, message, created_at, sender_id")
             .in("match_id", matchIds)
             .order("created_at", { ascending: false }),
-          supabase.from("blitz_requests").select("id, activity").in("id", requestIds),
+          supabase.from("blitz_requests").select("id, activity, display_name, display_avatar_url").in("id", requestIds),
         ]);
 
         const otherIds = Array.from(
@@ -237,7 +237,10 @@ const Messenger = () => {
             .filter((id: string) => id !== user.id);
           const firstOther = blitzProfiles?.find((p: any) => p.user_id === otherIdsForMatch[0]);
           const lastMsg = blitzMsgs?.find((msg: any) => msg.match_id === m.id);
-          const activity = blitzReqs?.find((r: any) => r.id === m.blitz_request_id)?.activity;
+          const blitzReq = blitzReqs?.find((r: any) => r.id === m.blitz_request_id);
+          const activity = blitzReq?.activity;
+          // Freifeld Blitz (admin sending as e.g. a brand): show its logo.
+          const freiAvatar = blitzReq?.display_name ? blitzReq.display_avatar_url : null;
           const lastAt = lastMsg?.created_at || m.updated_at;
           const myRead = myReadMap.get(m.id);
           const hiddenAt = myRead?.hidden_at;
@@ -262,7 +265,7 @@ const Messenger = () => {
             matchId: m.id,
             other_user_id: otherIdsForMatch[0] ?? "",
             other_name: title,
-            other_avatar: firstOther?.avatar_url || null,
+            other_avatar: freiAvatar || firstOther?.avatar_url || null,
             last_message: lastMsg?.message || `⚡ ${activity || t('messenger.match')}`,
             last_message_at: lastAt,
             isUnread: unread,

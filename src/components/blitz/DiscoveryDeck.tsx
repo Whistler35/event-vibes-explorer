@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Zap, X, Check, MapPin, Loader2, Trash2, Users, Share2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { Zap, X, Check, MapPin, Loader2, Trash2, Users, Share2, ImageIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useBlitzDiscovery, swipeBlitz, undoSwipe, DiscoveryBlitz } from "@/hooks/useBlitzDiscovery";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -64,8 +65,15 @@ const TimeProgressBar = ({
   );
 };
 
+const TAP_MOVE_LIMIT = 8;
+const FACE_HIDDEN: React.CSSProperties = { backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" };
+
 const SwipeCard = ({ item, onSwipe, onAdminDelete, isTop, isAdmin }: CardProps) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+  // A Blitz with a picture can be flipped by tapping it (not by swiping).
+  const [flipped, setFlipped] = useState(false);
+  const hasImage = !!item.image_url;
   // `drag` only drives the release animation (snap-back / fly-out) — a single
   // React update per gesture, not per pixel. While a finger is actually
   // moving, position is written straight to the DOM via refs below, bypassing
@@ -94,6 +102,7 @@ const SwipeCard = ({ item, onSwipe, onAdminDelete, isTop, isAdmin }: CardProps) 
     if (!isTop || animating) return;
     if (isOnNoDrag(target)) return;
     isDownRef.current = true;
+    dragPosRef.current = { x: 0, y: 0 };
     startRef.current = { x: clientX, y: clientY };
     if (cardRef.current) cardRef.current.style.transition = "none";
   };
@@ -104,11 +113,15 @@ const SwipeCard = ({ item, onSwipe, onAdminDelete, isTop, isAdmin }: CardProps) 
     dragPosRef.current = { x, y };
     applyTransform(x, y);
   };
-  const handleEnd = () => {
+  const handleEnd = (allowTap = true) => {
     if (!isDownRef.current) return;
     isDownRef.current = false;
     const { x, y } = dragPosRef.current;
     if (cardRef.current) cardRef.current.style.transition = "transform 0.25s ease-out";
+    // Barely moved = a tap, not a swipe → flip the card to show its picture.
+    if (allowTap && hasImage && Math.hypot(x, y) < TAP_MOVE_LIMIT) {
+      setFlipped((f) => !f);
+    }
     if (Math.abs(x) > SWIPE_THRESHOLD) {
       const dir = x > 0 ? "right" : "left";
       const flyX = x > 0 ? 1000 : -1000;
@@ -125,7 +138,8 @@ const SwipeCard = ({ item, onSwipe, onAdminDelete, isTop, isAdmin }: CardProps) 
   const fontClass = getActivityFontClass(item.activity);
 
   const handleProfile = () => {
-    if (item.host_id) navigate(`/user/${item.host_id}`);
+    // A Freifeld sender (e.g. a brand) has no profile of its own to open.
+    if (item.host_id && !item.is_freifeld) navigate(`/user/${item.host_id}`);
   };
 
   const handleDelete = () => {
@@ -157,13 +171,21 @@ const SwipeCard = ({ item, onSwipe, onAdminDelete, isTop, isAdmin }: CardProps) 
       }}
       onMouseDown={(e) => handleStart(e.clientX, e.clientY, e.target)}
       onMouseMove={(e) => handleMove(e.clientX, e.clientY)}
-      onMouseUp={handleEnd}
-      onMouseLeave={handleEnd}
+      onMouseUp={() => handleEnd()}
+      onMouseLeave={() => handleEnd(false)}
       onTouchStart={(e) => handleStart(e.touches[0].clientX, e.touches[0].clientY, e.target)}
       onTouchMove={(e) => handleMove(e.touches[0].clientX, e.touches[0].clientY)}
-      onTouchEnd={handleEnd}
+      onTouchEnd={() => handleEnd()}
     >
-      <div className="relative w-full h-full overflow-hidden rounded-[28px] bg-[hsl(var(--blitz-forest))] text-white shadow-[0_20px_50px_-20px_rgba(0,0,0,0.35)]">
+      <div className="w-full h-full" style={{ perspective: "1400px" }}>
+      <div
+        className="relative w-full h-full transition-transform duration-500 ease-out"
+        style={{ transformStyle: "preserve-3d", transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)" }}
+      >
+      <div
+        className="relative w-full h-full overflow-hidden rounded-[28px] bg-[hsl(var(--blitz-forest))] text-white shadow-[0_20px_50px_-20px_rgba(0,0,0,0.35)]"
+        style={FACE_HIDDEN}
+      >
         <TimeProgressBar expiresAt={item.expires_at} durationMinutes={item.duration_minutes} />
 
         {(item.audience === "friends" || item.audience === "selected") && (
@@ -267,6 +289,37 @@ const SwipeCard = ({ item, onSwipe, onAdminDelete, isTop, isAdmin }: CardProps) 
             <p className="shrink-0 mt-2 text-white/60 text-sm">{item.city}</p>
           )}
         </div>
+
+        {hasImage && isTop && (
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 border border-white/15 text-white/80 text-[11px] font-bold whitespace-nowrap pointer-events-none">
+            <ImageIcon className="w-3.5 h-3.5" /> {t("blitz.tapForPhoto")}
+          </div>
+        )}
+      </div>
+
+      {/* Back of the card: the Blitz's picture */}
+      {hasImage && (
+        <div
+          className="absolute inset-0 overflow-hidden rounded-[28px] bg-[hsl(var(--blitz-forest))] text-white shadow-[0_20px_50px_-20px_rgba(0,0,0,0.35)]"
+          style={{ ...FACE_HIDDEN, transform: "rotateY(180deg)" }}
+        >
+          <img
+            src={item.image_url ?? undefined}
+            alt={item.activity}
+            loading="lazy"
+            draggable={false}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 z-10 p-6 text-center pointer-events-none">
+            <p className="text-lg font-black leading-tight break-words [overflow-wrap:anywhere]">{item.activity}</p>
+            <p className="mt-2 text-white/70 text-[11px] font-bold uppercase tracking-widest">
+              {t("blitz.tapToFlipBack")}
+            </p>
+          </div>
+        </div>
+      )}
+      </div>
       </div>
     </div>
   );
@@ -280,6 +333,7 @@ interface DiscoveryDeckProps {
 
 const DiscoveryDeck = ({ city, onStartOwn }: DiscoveryDeckProps) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { items, loading, reload, locError, hasLocation } = useBlitzDiscovery(city);
   const { isAdmin } = useIsAdmin();
   const [index, setIndex] = useState(0);
@@ -382,9 +436,12 @@ const DiscoveryDeck = ({ city, onStartOwn }: DiscoveryDeckProps) => {
 
   if (remaining.length === 0) {
     return (
-      <div className="h-full min-h-[380px] rounded-3xl bg-[hsl(var(--blitz-forest))] text-white flex flex-col items-center justify-center text-center p-8 gap-4">
-        <Zap className="w-16 h-16 text-[hsl(var(--blitz-pink))] fill-[hsl(var(--blitz-pink))] opacity-60" />
-        <h2 className="text-3xl font-black uppercase">Keine Blitzes</h2>
+      // min-h (not h): on small/high-DPI phones this card is taller than the
+      // scroll area, and a fixed height made the title and buttons spill out
+      // past both ends where they were clipped and couldn't be scrolled to.
+      <div className="min-h-[max(100%,380px)] rounded-3xl bg-[hsl(var(--blitz-forest))] text-white flex flex-col items-center justify-center text-center px-8 py-10 gap-4">
+        <Zap className="w-16 h-16 shrink-0 text-[hsl(var(--blitz-pink))] fill-[hsl(var(--blitz-pink))] opacity-60" />
+        <h2 className="text-3xl font-black uppercase">{t("blitz.noBlitzesTitle")}</h2>
         <p className="text-white/70 max-w-xs">
           Aktuell ist hier in der Nähe nichts los. Sei der Erste und starte deinen eigenen Blitz — oder hol dir
           mehr Leute in deine Gegend.

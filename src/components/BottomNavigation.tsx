@@ -22,11 +22,11 @@ const BottomNavigation = () => {
       style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 12px)" }}
     >
       <div className="mx-auto max-w-md px-5">
-        <div className="pointer-events-auto relative bg-white rounded-full shadow-[0_10px_30px_-8px_rgba(15,20,16,0.18)] flex items-center justify-between px-5 py-2.5">
+        <div className="pointer-events-auto relative bg-white rounded-full shadow-[0_10px_30px_-8px_rgba(15,20,16,0.18)] flex items-center justify-between px-3 py-2.5">
           {/* Feed */}
           <button
             onClick={() => navigate("/feed")}
-            className="flex flex-col items-center gap-0.5 py-1.5 min-w-[52px]"
+            className="flex flex-col items-center gap-0.5 py-1.5 flex-1 min-w-0"
             aria-label={t("nav.feed")}
           >
             <Camera
@@ -36,7 +36,7 @@ const BottomNavigation = () => {
                 isActive("/feed") ? "text-[hsl(var(--blitz-forest))]" : "text-[hsl(var(--blitz-forest))]/80"
               }
             />
-            <span className="text-[11px] font-semibold text-[hsl(var(--blitz-forest))]">
+            <span className="text-[10px] font-semibold whitespace-nowrap tracking-tight text-[hsl(var(--blitz-forest))]">
               {t("nav.feed")}
             </span>
           </button>
@@ -44,7 +44,7 @@ const BottomNavigation = () => {
           {/* Chat */}
           <button
             onClick={() => navigate("/messenger")}
-            className="flex flex-col items-center gap-0.5 py-1.5 min-w-[52px]"
+            className="flex flex-col items-center gap-0.5 py-1.5 flex-1 min-w-0"
             aria-label={t("nav.chat")}
           >
             <div className="relative">
@@ -63,18 +63,18 @@ const BottomNavigation = () => {
                 </span>
               )}
             </div>
-            <span className="text-[11px] font-semibold text-[hsl(var(--blitz-forest))]">
+            <span className="text-[10px] font-semibold whitespace-nowrap tracking-tight text-[hsl(var(--blitz-forest))]">
               {t("nav.chat")}
             </span>
           </button>
 
           {/* Spacer reserving room for the floating Blitz button below */}
-          <div className="w-12" aria-hidden="true" />
+          <div className="w-16 shrink-0" aria-hidden="true" />
 
           {/* Friends */}
           <button
             onClick={() => navigate("/friends")}
-            className="flex flex-col items-center gap-0.5 py-1.5 min-w-[52px]"
+            className="flex flex-col items-center gap-0.5 py-1.5 flex-1 min-w-0"
             aria-label={t("nav.friends")}
           >
             <Users
@@ -84,7 +84,7 @@ const BottomNavigation = () => {
                 isActive("/friends") ? "text-[hsl(var(--blitz-forest))]" : "text-[hsl(var(--blitz-forest))]/80"
               }
             />
-            <span className="text-[11px] font-semibold text-[hsl(var(--blitz-forest))]">
+            <span className="text-[10px] font-semibold whitespace-nowrap tracking-tight text-[hsl(var(--blitz-forest))]">
               {t("nav.friends")}
             </span>
           </button>
@@ -92,7 +92,7 @@ const BottomNavigation = () => {
           {/* Profile */}
           <button
             onClick={() => navigate("/profile")}
-            className="flex flex-col items-center gap-0.5 py-1.5 min-w-[52px]"
+            className="flex flex-col items-center gap-0.5 py-1.5 flex-1 min-w-0"
             aria-label={t("nav.profile")}
           >
             <User
@@ -104,7 +104,7 @@ const BottomNavigation = () => {
                   : "text-[hsl(var(--blitz-forest))]/80"
               }
             />
-            <span className="text-[11px] font-semibold text-[hsl(var(--blitz-forest))]">
+            <span className="text-[10px] font-semibold whitespace-nowrap tracking-tight text-[hsl(var(--blitz-forest))]">
               {t("nav.profile")}
             </span>
           </button>

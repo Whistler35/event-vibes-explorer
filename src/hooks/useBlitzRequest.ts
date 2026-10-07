@@ -17,16 +17,21 @@ export interface BlitzRequest {
   expires_at: string;
   radius_km: number;
   audience: BlitzAudience;
+  /** Optional picture shown on the back of the Blitz card. */
+  image_url?: string | null;
+  /** "Freifeld": admins can send a Blitz under another name/logo. */
+  display_name?: string | null;
+  display_avatar_url?: string | null;
 }
 
 export function useActiveBlitzRequest() {
   const { user } = useAuth();
-  const [request, setRequest] = useState<BlitzRequest | null>(null);
+  const [requests, setRequests] = useState<BlitzRequest[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
     if (!user) {
-      setRequest(null);
+      setRequests([]);
       setLoading(false);
       return;
     }
@@ -36,10 +41,8 @@ export function useActiveBlitzRequest() {
       .eq("host_id", user.id)
       .eq("status", "active")
       .gt("expires_at", new Date().toISOString())
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    setRequest((data as BlitzRequest) ?? null);
+      .order("created_at", { ascending: false });
+    setRequests((data as BlitzRequest[]) ?? []);
     setLoading(false);
   };
 
@@ -60,7 +63,9 @@ export function useActiveBlitzRequest() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  return { request, loading, reload: load };
+  // `request` stays the newest active Blitz (what regular users have — one at
+  // a time); `requests` is the full list, which only admins can have >1 of.
+  return { request: requests[0] ?? null, requests, loading, reload: load };
 }
 
 export async function createBlitzRequest(params: {
@@ -72,6 +77,10 @@ export async function createBlitzRequest(params: {
   radiusKm: number;
   audience?: BlitzAudience;
   targetUserIds?: string[];
+  imageUrl?: string | null;
+  /** Admin-only "Freifeld" (the DB trigger drops these for non-admins). */
+  displayName?: string | null;
+  displayAvatarUrl?: string | null;
 }) {
   const {
     data: { user },
@@ -96,6 +105,9 @@ export async function createBlitzRequest(params: {
         params.audience === "selected" && params.targetUserIds?.length
           ? params.targetUserIds
           : null,
+      image_url: params.imageUrl ?? null,
+      display_name: params.displayName?.trim() || null,
+      display_avatar_url: params.displayName?.trim() ? params.displayAvatarUrl ?? null : null,
     })
     .select()
     .single();

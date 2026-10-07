@@ -44,7 +44,7 @@ export function useMyPendingSwipes() {
     const reqIds = Array.from(new Set(list.map((s) => s.blitz_request_id)));
     const { data: reqs } = await supabase
       .from("blitz_requests")
-      .select("id, activity, host_id, expires_at, status")
+      .select("id, activity, host_id, expires_at, status, display_name, display_avatar_url")
       .in("id", reqIds);
 
     const validReqs = (reqs ?? []).filter(
@@ -71,8 +71,11 @@ export function useMyPendingSwipes() {
             created_at: s.created_at,
             activity: r.activity,
             host_id: r.host_id,
-            host_name: profMap.get(r.host_id)?.name ?? null,
-            host_avatar: profMap.get(r.host_id)?.avatar_url ?? null,
+            // A Freifeld Blitz (admin sending as e.g. a brand) shows that name/logo.
+            host_name: r.display_name ?? profMap.get(r.host_id)?.name ?? null,
+            host_avatar: r.display_name
+              ? r.display_avatar_url ?? null
+              : profMap.get(r.host_id)?.avatar_url ?? null,
             expires_at: r.expires_at,
           };
         })

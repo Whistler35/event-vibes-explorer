@@ -5,6 +5,7 @@ import { Zap, Flame } from "lucide-react";
 import BottomNavigation from "@/components/BottomNavigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useActiveBlitzRequest } from "@/hooks/useBlitzRequest";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { useMyBlitzMatches, type BlitzMatch } from "@/hooks/useBlitzMatching";
 import { useBlitzStreak } from "@/hooks/useBlitzStreak";
 import CreateBlitzModal from "@/components/blitz/CreateBlitzModal";
@@ -24,7 +25,8 @@ const Blitz = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, loading: authLoading } = useAuth();
-  const { request, loading, reload } = useActiveBlitzRequest();
+  const { request, requests, loading, reload } = useActiveBlitzRequest();
+  const { isAdmin } = useIsAdmin();
   const [createOpen, setCreateOpen] = useState(false);
   // Default = Discovery mode (users open the app straight into discovering
   // blitzes), unless a notification tap requested a specific tab.
@@ -182,6 +184,24 @@ const Blitz = () => {
         {tab === "request" ? (
           loading ? (
             <div className="h-full min-h-[380px] rounded-[28px] bg-muted animate-pulse" />
+          ) : request && isAdmin ? (
+            // Admins can run any number of Blitzes at once — list them all and
+            // keep a "new Blitz" button on top.
+            <div className="space-y-6">
+              <button
+                onClick={() => setCreateOpen(true)}
+                className="w-full py-4 rounded-full bg-[hsl(var(--bolt))] text-[hsl(var(--blitz-forest))] font-black text-sm uppercase tracking-[0.15em] flex items-center justify-center gap-2 active:scale-[0.99] transition"
+              >
+                <Zap className="w-4 h-4 fill-[hsl(var(--blitz-forest))]" />
+                {t('blitz.createNew')}
+              </button>
+              {requests.map((r) => (
+                <div key={r.id} className="space-y-4">
+                  <IncomingRequestsList blitzRequestId={r.id} />
+                  <ActiveBlitzScreen request={r} onEnded={reload} compact={requests.length > 1} />
+                </div>
+              ))}
+            </div>
           ) : request ? (
             <div className="space-y-4">
               <IncomingRequestsList blitzRequestId={request.id} />
